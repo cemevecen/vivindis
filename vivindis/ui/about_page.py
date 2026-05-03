@@ -17,7 +17,7 @@ ABOUT_BODY: dict[str, str] = {
     <div class="about-kpi"><span>çıktılar</span><strong>dashboard · yorum kartları · csv/excel/pdf</strong></div>
   </div>
   <p>
-    Bu platform, binlerce uygulama yorumunu tek ekranda toplar ve kullanıcıların aslında ne hissettiğini anlaşılır bir özete çevirir.
+    <strong>Vivindis</strong>, binlerce uygulama yorumunu tek ekranda toplar ve kullanıcıların aslında ne hissettiğini anlaşılır bir özete çevirir.
     Hızlı mod basit kurallarla çalışır; yorumları saniyeler içinde olumlu, olumsuz ve nötr olarak ayırıp genel tabloyu gösterir.
     Zengin mod bir yapay zekâ modeli kullanır; cümlenin tonunu, bağlamını ve ince ayrıntılarını daha iyi yorumlar.
     Genel eğilimi tek bakışta görebilir, istediğin yorumu tek tek açıp hangi cümlenin hangi sonucu ürettiğini kontrol edebilirsin.
@@ -55,7 +55,7 @@ ABOUT_BODY: dict[str, str] = {
     <div class="about-kpi"><span>outputs</span><strong>dashboard · review cards · csv/excel/pdf</strong></div>
   </div>
   <p>
-    This platform reads thousands of app reviews in one place and turns them into a clear picture of what users actually feel.
+    <strong>Vivindis</strong> reads thousands of app reviews in one place and turns them into a clear picture of what users actually feel.
     Fast mode gives a quick and consistent sentiment read using simple rules; Rich mode uses an AI model to better understand tone, context and nuance.
     You can follow the overall trend and still open each individual review to see the exact words behind every number.
   </p>
