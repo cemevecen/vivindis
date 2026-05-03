@@ -1,0 +1,1 @@
+"""Vivindis FastAPI uygulama paketi."""

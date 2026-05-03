@@ -1,0 +1,32 @@
+# Vivindis — Cursor Kuralları
+
+Bu projeyi inşa ederken önce **`VIVINDIS_SPEC.md`** dosyasını oku; ürün kapsamı, tech stack ve oturum sırası orada.
+
+## Genel
+
+- Monorepo: `backend/` (FastAPI), `frontend/` (Next.js App Router).
+- Gizli değer veya ortam özelinde **kod içinde varsayılan secret kullanma**; üretimde her şey ortam değişkeninden.
+- TypeScript: **strict**; `any` **yasak** (eslint `no-explicit-any`).
+
+## Backend (Python)
+
+- Python **3.12**, FastAPI, Pydantic **v2**, SQLAlchemy **2.0 async**, Alembic, Celery **5**, Redis broker.
+- Pydantic: `ConfigDict`, `model_validate` — `from_orm` kullanma.
+- SQLAlchemy: async engine/session pattern; 1.x sync legacy yazma.
+
+## Frontend (Next.js)
+
+- **App Router** (`src/app/`); Pages Router kullanma.
+- Veri: **TanStack Query v5**; doğrudan `useEffect`+`fetch` ile veri çekme yok (istisna: Clerk vb. SDK dokümantasyonu gerektirirse minimal).
+- API: merkezi **`src/lib/api.ts`** (base URL env).
+- UI: **shadcn/ui** + Tailwind; toast **Sonner**.
+- `'use client'` yalnızca gerektiğinde; Server Component öncelikli.
+
+## Docker
+
+- `docker compose up` ile Postgres, Redis, backend, worker, flower, frontend birlikte kalkmalı.
+- Worker/Flower: `celery -A app.core.celery:celery_app` (proje içi yol oturum 4’te netleşir).
+
+## Oturum Disiplini
+
+Her oturumda **yalnızca o oturumun kapsamı**; sonraki oturum işini önceden taşıma. Şartnamedeki sırayı takip et.
