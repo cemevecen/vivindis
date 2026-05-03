@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,13 +14,25 @@ from app.core.logging import get_logger
 from app.db.session import get_async_session
 from app.models.analysis import Analysis
 from app.models.app import App
-from app.models.enums import AnalysisStatus
+from app.models.enums import AnalysisStatus, AnalysisType, FetchStatus
 from app.models.review_fetch import ReviewFetch
 from app.models.user import User
 from app.schemas.analysis import AnalysisListResponse, AnalysisResponse, AnalysisStartRequest
 
 router = APIRouter(tags=["analysis"])
 log = get_logger(__name__)
+
+
+def _enqueue_heuristic_analysis(analysis_id: str) -> None:
+    from app.workers.heuristic import heuristic_analysis_task
+
+    heuristic_analysis_task.apply_async(args=[analysis_id], queue="analysis")
+
+
+def _enqueue_ai_analysis(analysis_id: str) -> None:
+    from app.workers.ai import ai_analysis_task
+
+    ai_analysis_task.apply_async(args=[analysis_id], queue="analysis")
 
 
 async def _require_fetch_for_user(
@@ -55,8 +67,14 @@ async def start_analyze(
     body: AnalysisStartRequest,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     current_user: Annotated[User, Depends(get_current_user)],
+    background_tasks: BackgroundTasks,
 ) -> list[Analysis]:
     fetch = await _require_fetch_for_user(fetch_id, session, current_user)
+    if fetch.status != FetchStatus.COMPLETED:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Analiz yalnızca yorum çekimi tamamlandıktan sonra başlatılabilir.",
+        )
 
     created: list[Analysis] = []
     for atype in body.types:
@@ -86,7 +104,11 @@ async def start_analyze(
         session.add(row)
         await session.flush()
         created.append(row)
-        log.info("analysis_enqueued_stub", analysis_id=str(row.id), analysis_type=atype.value)
+        if atype == AnalysisType.HEURISTIC:
+            background_tasks.add_task(_enqueue_heuristic_analysis, str(row.id))
+        elif atype == AnalysisType.AI:
+            background_tasks.add_task(_enqueue_ai_analysis, str(row.id))
+        log.info("analysis_enqueued", analysis_id=str(row.id), analysis_type=atype.value)
 
     return created
 

@@ -1,0 +1,33 @@
+/** `/api/v1/apps` yanıtları — backend `AppResponse` ile uyumlu. */
+
+export type AppPlatform = "google_play" | "app_store" | "both";
+
+export type FetchStatus = "pending" | "running" | "completed" | "failed";
+
+export type AppDto = {
+  id: string;
+  user_id: string;
+  platform: AppPlatform;
+  package_name: string;
+  bundle_id: string | null;
+  name: string;
+  icon_url: string | null;
+  developer: string | null;
+  category: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReviewFetchDto = {
+  id: string;
+  app_id: string;
+  status: FetchStatus;
+  from_date: string;
+  to_date: string;
+  review_count: number;
+  error_message: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  created_at: string;
+};

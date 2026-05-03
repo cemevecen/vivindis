@@ -1,0 +1,41 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
+import { AppCard } from "@/components/apps/app-card";
+import type { AppDto } from "@/types/app";
+import { buttonVariants } from "@/components/ui/button";
+import { Link } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
+
+type Props = {
+  apps: AppDto[];
+};
+
+export function AppList({ apps }: Props) {
+  const t = useTranslations("apps");
+
+  if (apps.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 rounded-lg border border-dashed border-border bg-muted/20 py-16 text-center">
+        <div className="space-y-1">
+          <p className="font-medium">{t("emptyTitle")}</p>
+          <p className="max-w-sm text-sm text-muted-foreground">{t("emptyDescription")}</p>
+        </div>
+        <Link href="/apps/new" className={cn(buttonVariants())}>
+          {t("createFirst")}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {apps.map((app) => (
+        <li key={app.id}>
+          <AppCard app={app} />
+        </li>
+      ))}
+    </ul>
+  );
+}

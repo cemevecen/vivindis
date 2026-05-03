@@ -78,6 +78,7 @@ services:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     volumes:
@@ -90,7 +91,7 @@ services:
         condition: service_healthy
     command: >
       sh -c "pip install -q -e . &&
-             celery -A app.core.celery:celery_app worker --loglevel=info"
+             celery -A app.core.celery:celery_app worker -Q scraper,analysis --loglevel=info"
 
   flower:
     build:

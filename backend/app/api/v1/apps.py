@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -20,9 +20,14 @@ from app.models.user import User
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse
+from app.workers.scraper import review_fetch_task
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 log = get_logger(__name__)
+
+
+def _enqueue_review_fetch(fetch_id: str) -> None:
+    review_fetch_task.apply_async(args=[fetch_id], queue="scraper")
 
 
 @router.get("", response_model=list[AppResponse])
@@ -97,6 +102,7 @@ async def create_fetch(
     body: ReviewFetchCreate,
     app: Annotated[App, Depends(require_app_owned)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
+    background_tasks: BackgroundTasks,
 ) -> ReviewFetch:
     fetch = ReviewFetch(
         app_id=app.id,
@@ -108,6 +114,7 @@ async def create_fetch(
     session.add(fetch)
     await session.flush()
     log.info("review_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
+    background_tasks.add_task(_enqueue_review_fetch, str(fetch.id))
     return fetch
 
 
@@ -122,6 +129,24 @@ async def list_fetches(
         .order_by(ReviewFetch.created_at.desc()),
     )
     return list(result.scalars().all())
+
+
+@router.get("/{app_id}/fetches/{fetch_id}", response_model=ReviewFetchResponse)
+async def get_fetch(
+    fetch_id: uuid.UUID,
+    app: Annotated[App, Depends(require_app_owned)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> ReviewFetch:
+    result = await session.execute(
+        select(ReviewFetch).where(
+            ReviewFetch.id == fetch_id,
+            ReviewFetch.app_id == app.id,
+        ),
+    )
+    row = result.scalar_one_or_none()
+    if row is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Fetch bulunamadı.")
+    return row
 
 
 @router.get("/{app_id}/reviews", response_model=ReviewListResponse)

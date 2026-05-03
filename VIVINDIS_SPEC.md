@@ -22,11 +22,11 @@ Temel akış:
 5. Heuristic + AI analizi  
 6. Dashboard’da sonuçlar  
 
-**Gelecek (mimariye hazır):** karşılaştırma, rakip takibi, haftalık PDF, embed widget, API key, React Native (Expo), çoklu dil (TR, EN, DE, IT, JA, ZH-CN, PT, FR), webhook.
+**Gelecek (mimariye hazır):** karşılaştırma, rakip takibi, haftalık PDF, embed widget, API key, React Native (Expo), webhook. **Çoklu dil:** `next-intl` + locale prefix (tr varsayılan; tr, en, de, fr, it, es, pt, ja, zh, sw, ar, ru).
 
 ---
 
-## Mevcut Durum — Oturum 1–3 (iskelet + veritabanı + REST API)
+## Mevcut Durum — Oturum 1–8 (API + worker’lar + i18n + uygulama + analiz grafikleri + polish)
 
 ### Neyin yazıldığını iyi anla — üzerine yaz, tekrar kurma
 
@@ -34,29 +34,33 @@ Temel akış:
 
 - `app/main.py` — CORS, **`GET /health`**, **`/api/v1`** altında tüm router’lar
 - `app/core/config.py` — pydantic-settings: DB, Redis, Celery, JWT alanları, `LOG_LEVEL`, `DATABASE_ECHO`, Clerk, AI anahtarları
-- `app/core/celery.py` — Celery instance, broker/result Redis’ten, **`include=[]`** (task yok)
+- `app/core/celery.py` — Celery instance; `include`: scraper / heuristic / ai; `task_routes`: `scraper` ve `analysis` kuyrukları
 - `app/db/session.py` — async engine + `get_async_session` (istek sonunda commit / hata rollback)
 - `app/models/*` — `User`, `App`, `ReviewFetch`, `Review`, `Analysis` + enum’lar; ilişkiler ve kısıtlar (rating 1–5, `platform`+`store_review_id` unique)
 - `alembic/` + `alembic.ini` — async env; ilk migration: **`4a66a17abb57_initial_schema`**
-- `pyproject.toml` — FastAPI, Pydantic v2, SQLAlchemy async, asyncpg, Alembic, Celery+redis, httpx, google-play-scraper, app-store-scraper, **flower**
+- `pyproject.toml` — FastAPI, Pydantic v2, SQLAlchemy async, asyncpg, Alembic, Celery+redis, httpx, google-play-scraper, app-store-scraper, google-generativeai, langdetect, **flower**
 - `app/api/v1/` — `auth`, `apps`, `reviews` (fetch tekil), `analysis`; `deps.py` (`get_current_user`, `require_app_owned`)
 - `app/schemas/` — Pydantic v2 Create/Update/Response şemaları
 - `app/core/security.py` — Clerk oturum JWT (PyJWT + JWKS); `app/core/logging.py` — structlog
-- `workers/` — Oturum 4 (Celery task’lar)
+- `app/workers/` — `review_fetch_task` (scraper), `heuristic_analysis_task`, `ai_analysis_task` (analysis); `app/services/gemini.py` batch + merge
 
 **Frontend — var olanlar**
 
 - Next.js 14 **App Router**, TypeScript **strict** (`noUncheckedIndexedAccess` dahil)
 - ESLint: **`@typescript-eslint/no-explicit-any`: error**
-- `src/lib/api.ts` — merkezi API client; base URL **`NEXT_PUBLIC_API_URL`**
+- `src/lib/api.ts` — merkezi API client; base URL **`NEXT_PUBLIC_API_URL`**; isteğe bağlı **`getToken`** → `Authorization: Bearer` (Clerk)
 - TanStack Query v5 + DevTools, Zustand, react-hook-form, Zod, Sonner, Recharts
-- Provider’lar: Query client + Sonner; **Clerk** — publishable key yoksa provider atlanır (boş `.env` ile dev kalksın diye)
-- `globals.css` + Tailwind: shadcn/ui (base-nova); Google Geist font kaldırıldı, yerel font dosyaları
+- Provider’lar: Query client + Sonner; **Clerk** — publishable key yoksa provider ve middleware koruması atlanır
+- **`next-intl`** — `src/i18n/routing.ts`, `src/i18n/request.ts`, `src/messages/*.json`, URL **`/{locale}/...`** (varsayılan **tr**), `src/middleware.ts` (Clerk + locale)
+- **Oturum 6 — dashboard & uygulamalar:** TanStack Query ile `GET /api/v1/apps`, `POST /apps`, uygulama detayı `GET/POST .../apps/{id}/fetch`; **react-hook-form + zod** (`apps/new`); `AppCard` / liste / skeleton / boş durum; Clerk yoksa bilgilendirici panel
+- **Oturum 7 — analiz:** `apps/[id]/analysis?fetchId=…`, **`GET /api/v1/apps/{app_id}/fetches/{fetch_id}`** (tekil fetch), fetch + analiz satırları için **~3 sn `refetchInterval`**; **Recharts** (duygu pasta, puan bar, konu bar); `POST /api/v1/fetches/{id}/analyze`
+- **Oturum 8 — polish:** dashboard **mobil drawer** (`DashboardShellClient`, backdrop, `md:` masaüstü); **`EmptyState`** + **`/compare`** placeholder (CTA → `/apps`); **Sonner** (`closeButton`, süre, toast sınıfları); **`compare.*` / `navigation.sidebarNav` / `common.toastNetwork`** 12 dilde
+- `globals.css` + Tailwind: shadcn/ui (base-nova); yerel Geist fontları
 - `npm run build` ve `npm run lint` temiz geçmeli
 
 **Docker Compose — servisler ve port kararları**
 
-- Servisler: PostgreSQL, Redis, backend, worker, flower, frontend
+- Servisler: PostgreSQL, Redis, backend, worker (`-Q scraper,analysis`), flower, frontend
 - **`5433:5432`** — host PostgreSQL (makinede 5432 çakışması için)
 - **`8001:8000`** — host API (makinede 8000 çakışması için)
 - Konteyner ağında: **`postgres:5432`**, backend **`0.0.0.0:8000`**
@@ -74,11 +78,11 @@ Temel akış:
 |--------|--------|
 | **2** | Veritabanı: async session, modeller, Alembic, ilk migration ✅ |
 | **3** | REST API, Pydantic şemalar, `deps`, router’lar, `main` ✅ |
-| **4** | Celery: scraper, heuristic, AI, kuyruk, retry, rate limit |
-| **5** | Clerk middleware, `(auth)` / `(dashboard)` layout |
-| **6** | Dashboard, uygulama listesi, formlar |
-| **7** | Analiz sayfası, Recharts, fetch polling (~3 sn) |
-| **8** | Polish, hata UX, empty state, responsive, uçtan uca test |
+| **4** | Celery: scraper, heuristic, AI, kuyruk, retry, rate limit ✅ |
+| **5** | Clerk + `next-intl`, middleware, `(auth)` / `(dashboard)`, Header dil seçici ✅ |
+| **6** | Dashboard, uygulama listesi, formlar ✅ |
+| **7** | Analiz sayfası, Recharts, fetch polling (~3 sn) ✅ |
+| **8** | Polish, hata UX, empty state, responsive, uçtan uca test ✅ |
 
 ---
 
@@ -166,7 +170,7 @@ vivindis/
 │       │   └── v1/               ✅ Oturum 3 (auth, apps, reviews, analysis, router)
 │       ├── core/
 │       │   ├── config.py         ✅ Oturum 2–3
-│       │   ├── celery.py         ✅ instance; task yok
+│       │   ├── celery.py         ✅ kuyruk yönlendirme + task include
 │       │   ├── security.py       ✅ Oturum 3
 │       │   └── logging.py        ✅ Oturum 3
 │       ├── db/
@@ -174,25 +178,39 @@ vivindis/
 │       │   └── …                 (Alembic: `backend/alembic/`, `backend/alembic.ini`)
 │       ├── models/               ✅ Oturum 2
 │       ├── schemas/              ✅ Oturum 3
-│       └── workers/              ⏳ Oturum 4
+│       ├── workers/              ✅ Oturum 4 (scraper, heuristic, ai)
+│       └── services/             ✅ gemini batch/merge
 │
 └── frontend/
-    ├── next.config.mjs
+    ├── next.config.mjs           ✅ `next-intl` plugin
     ├── tailwind.config.ts
     ├── components.json
     └── src/
+        ├── middleware.ts         ✅ Clerk + next-intl
+        ├── i18n/                 ✅ routing, request
+        ├── messages/             ✅ tr, en, de, … (12 dil)
         ├── app/
-        │   ├── layout.tsx        ✅ provider’lar
-        │   ├── page.tsx          ✅ placeholder
-        │   ├── (auth)/           ⏳ Oturum 5
-        │   └── (dashboard)/      ⏳ Oturum 5+
+        │   ├── layout.tsx        ✅ kök html + provider’lar
+        │   └── [locale]/
+        │       ├── layout.tsx    ✅ NextIntlClientProvider
+        │       ├── page.tsx      ✅ açılış
+        │       ├── (auth)/       ✅ sign-in / sign-up (Clerk)
+        │       └── (dashboard)/ ✅ shell (mobil drawer), Sidebar, Header; `apps`, `apps/new`, `apps/[id]`, `apps/[id]/analysis`, `dashboard`, `compare`
         ├── components/
-        │   ├── ui/               ✅ shadcn
-        │   └── providers/        ✅ Query, Clerk koşullu
+        │   ├── ui/               ✅ shadcn (+ Input, Label, SelectNative)
+        │   ├── providers/        ✅ Query, Clerk koşullu
+        │   ├── layout/           ✅ shell-client, sidebar, header, mobile-nav, language-switcher
+        │   ├── apps/             ✅ liste, kart, formlar, detay
+        │   ├── analysis/       ✅ grafikler + polling sayfası
+        │   ├── dashboard/        ✅ panel özeti
+        │   └── i18n/             ✅ `LocaleHtmlAttributes` (lang/dir)
         ├── lib/
-        │   ├── api.ts            ✅ merkezi client
+        │   ├── api.ts            ✅ Bearer `getToken`
+        │   ├── query-keys.ts     ✅ TanStack Query anahtarları
         │   └── utils.ts          ✅
-        ├── hooks/                ⏳ Oturum 6+
+        ├── schemas/              ✅ Zod (app / fetch)
+        ├── types/                ✅ API DTO tipleri
+        ├── hooks/                ⏳ (isteğe bağlı soyutlama)
         └── …                     ⏳ store/types ihtiyaç halinde
 ```
 

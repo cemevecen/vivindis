@@ -24,6 +24,12 @@ export class ApiError extends Error {
 
 type Json = Record<string, unknown> | unknown[] | string | number | boolean | null;
 
+export type ApiFetchInit = Omit<RequestInit, "body"> & {
+  body?: Json;
+  /** Clerk `getToken()` vb. — varsa `Authorization: Bearer` eklenir. */
+  getToken?: () => Promise<string | null>;
+};
+
 function buildUrl(path: string): string {
   const base = getBaseUrl().replace(/\/$/, "");
   const p = path.startsWith("/") ? path : `/${path}`;
@@ -33,19 +39,23 @@ function buildUrl(path: string): string {
   return `${base}${p}`;
 }
 
-export async function apiFetch<T>(
-  path: string,
-  init?: Omit<RequestInit, "body"> & { body?: Json },
-): Promise<T> {
-  const headers = new Headers(init?.headers);
-  if (!headers.has("Content-Type") && init?.body !== undefined) {
+export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T> {
+  const { getToken, body, ...restInit } = init ?? {};
+  const headers = new Headers(restInit.headers);
+  if (getToken) {
+    const token = await getToken();
+    if (token) {
+      headers.set("Authorization", `Bearer ${token}`);
+    }
+  }
+  if (!headers.has("Content-Type") && body !== undefined) {
     headers.set("Content-Type", "application/json");
   }
 
   const res = await fetch(buildUrl(path), {
-    ...init,
+    ...restInit,
     headers,
-    body: init?.body === undefined ? undefined : JSON.stringify(init.body),
+    body: body === undefined ? undefined : JSON.stringify(body),
   });
 
   const text = await res.text();

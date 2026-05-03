@@ -1,0 +1,1 @@
+"""Harici sağlayıcı entegrasyonları."""

@@ -49,6 +49,13 @@ class Settings(BaseSettings):
     api_host: str = Field(default="0.0.0.0", validation_alias="API_HOST")
     api_port: int = Field(default=8000, validation_alias="API_PORT")
 
+    scrape_play_lang: str = Field(default="en", validation_alias="SCRAPE_PLAY_LANG")
+    scrape_play_country: str = Field(default="us", validation_alias="SCRAPE_PLAY_COUNTRY")
+    scrape_app_store_country: str = Field(default="tr", validation_alias="SCRAPE_APP_STORE_COUNTRY")
+    scrape_play_sleep_seconds: float = Field(default=1.5, validation_alias="SCRAPE_PLAY_SLEEP_SECONDS")
+    scrape_app_store_sleep_seconds: int = Field(default=2, validation_alias="SCRAPE_APP_STORE_SLEEP_SECONDS")
+    scrape_max_reviews: int = Field(default=5000, validation_alias="SCRAPE_MAX_REVIEWS")
+
     @field_validator("access_token_expire_minutes", mode="before")
     @classmethod
     def empty_expire_to_default(cls, v: object) -> object:

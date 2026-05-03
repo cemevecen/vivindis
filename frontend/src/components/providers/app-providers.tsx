@@ -22,7 +22,17 @@ export function AppProviders({ children }: { children: ReactNode }) {
     <QueryClientProvider client={queryClient}>
       {children}
       <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
-      <Toaster richColors position="top-center" />
+      <Toaster
+        richColors
+        position="top-center"
+        closeButton
+        duration={5000}
+        toastOptions={{
+          classNames: {
+            description: "text-muted-foreground",
+          },
+        }}
+      />
     </QueryClientProvider>
   );
 }

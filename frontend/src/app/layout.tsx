@@ -25,13 +25,16 @@ export const metadata: Metadata = {
     "Google Play ve App Store yorumlarını toplu çekip analiz eden SaaS platformu.",
 };
 
+/**
+ * Kök düzen: `lang` / `dir` varsayılanı; gerçek locale için `LocaleHtmlAttributes` (Oturum 5).
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="tr">
+    <html lang="tr" suppressHydrationWarning>
       <body
         className={cn(
           geistSans.variable,

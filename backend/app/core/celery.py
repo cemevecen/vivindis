@@ -1,4 +1,4 @@
-"""Celery uygulaması — görevler Oturum 4'te eklenecek."""
+"""Celery uygulaması — scraper ve analysis kuyrukları."""
 
 from __future__ import annotations
 
@@ -14,7 +14,11 @@ celery_app = Celery(
     "vivindis",
     broker=_broker,
     backend=_backend,
-    include=[],
+    include=[
+        "app.workers.scraper",
+        "app.workers.heuristic",
+        "app.workers.ai",
+    ],
 )
 
 celery_app.conf.update(
@@ -23,4 +27,12 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="UTC",
     enable_utc=True,
+    task_routes={
+        "app.workers.scraper.review_fetch_task": {"queue": "scraper"},
+        "app.workers.heuristic.heuristic_analysis_task": {"queue": "analysis"},
+        "app.workers.ai.ai_analysis_task": {"queue": "analysis"},
+    },
+    task_default_queue="celery",
+    task_acks_late=True,
+    worker_prefetch_multiplier=1,
 )
