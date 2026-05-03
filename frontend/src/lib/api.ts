@@ -2,7 +2,7 @@
  * Tüm backend çağrıları bu modülden yapılacak (Oturum 3+).
  * Base URL: `NEXT_PUBLIC_API_URL` (köksüz; sonunda `/api/v1` **yok** — path zaten `/api/v1/...`).
  * `NEXT_PUBLIC_USE_API_REWRITE=1` ise taban boş kalır; `next.config` içindeki rewrite aynı origin’den API’ye proxylanır.
- * Cross-origin isteklerde `credentials: 'include'` kullanılır (FastAPI CORS `allow_credentials=True` ile uyum).
+ * API kimliği Bearer ile; çerez taşınmaz — `credentials: 'omit'` CORS ve tarayıcı kısıtlarında daha sorunsuz.
  */
 
 const API_V1_PREFIX = "/api/v1";
@@ -128,18 +128,6 @@ function buildUrl(path: string): string {
   return dedupeApiV1Segments(`${base}${p}`);
 }
 
-/** Sunucu `Access-Control-Allow-Credentials: true` gönderiyorsa (FastAPI `allow_credentials=True`), cross-origin `fetch` varsayılan `same-origin` ile CORS kontrolünde düşer. */
-function credentialsForApiUrl(url: string, explicit?: RequestCredentials): RequestCredentials {
-  if (explicit !== undefined) return explicit;
-  if (typeof window === "undefined") return "same-origin";
-  if (!url.startsWith("http://") && !url.startsWith("https://")) return "same-origin";
-  try {
-    return new URL(url).origin !== window.location.origin ? "include" : "same-origin";
-  } catch {
-    return "same-origin";
-  }
-}
-
 export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T> {
   const { getToken, body, ...restInit } = init ?? {};
   const headers = new Headers(restInit.headers);
@@ -154,7 +142,7 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
   }
 
   const url = buildUrl(path);
-  const credentials = credentialsForApiUrl(url, restInit.credentials);
+  const credentials: RequestCredentials = restInit.credentials ?? "omit";
   const res = await fetch(url, {
     ...restInit,
     credentials,

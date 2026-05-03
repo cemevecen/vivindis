@@ -49,7 +49,7 @@
     "textActionSoon": "Yapıştırılan metni analiz et (yakında)",
     "compareIntro": "Birden fazla kayıtlı uygulama için yan yana karşılaştırma burada; grafikler tek uygulama analitiğiyle aynı API’yi kullanacak.",
     "searchFailed": "Mağaza araması başarısız.",
-    "searchNetworkHint": "Çoğunlukla API’ye hiç cevap gelmediği anlamına gelir (Railway servisi kapalı, yanlış adres, doğrudan API’ye istekte CORS engeli veya karışık http/https). Çözüm: Vercel’de BACKEND_ORIGIN + boş NEXT_PUBLIC_API_URL ile aynı-origin proxy kullanın; veya Railway’de CORS_ORIGINS’e bu sitenin tam URL’sini (https://…) ekleyin. Railway’de son deploy’un healthy olduğunu doğrulayın. `/health` çalışıp mağaza araması NetworkError ise: API `Access-Control-Allow-Credentials: true` gönderirken tarayıcı `fetch` için `credentials: 'include'` gerekir — güncel `api.ts` bunu otomatik yapar; Vercel’i bu sürümle yeniden deploy edin.",
+    "searchNetworkHint": "Çoğunlukla API’ye hiç cevap gelmediği anlamına gelir (Railway servisi kapalı, yanlış adres, doğrudan API’ye istekte CORS engeli veya karışık http/https). Çözüm: Vercel’de BACKEND_ORIGIN + boş NEXT_PUBLIC_API_URL ile aynı-origin proxy kullanın; veya Railway’de CORS_ORIGINS’e bu sitenin tam URL’sini (https://…) ekleyin. Railway’de son deploy’un healthy olduğunu doğrulayın. Hâlâ NetworkError: tarayıcıda F12 → Ağ’da kırmızı isteğin URL’si ve konsoldaki CORS satırını kontrol edin.",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL tanımlı değil. İstekler bu siteye gidiyor; FastAPI için dağıtımda (ör. Vercel) ortam değişkenini ayarlayın veya /api/v1 için bir yönlendirme ekleyin."
   },
   "compare": {

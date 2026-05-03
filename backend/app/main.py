@@ -37,7 +37,8 @@ def create_app() -> FastAPI:
     application.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
-        allow_credentials=True,
+        # Bearer JWT yeterli; True iken tarayıcı `fetch`+`include` / çerez politikalarıyla sık NetworkError.
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
