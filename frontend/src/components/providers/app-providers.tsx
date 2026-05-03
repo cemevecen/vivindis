@@ -21,9 +21,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       {children}
-      {process.env.NODE_ENV === "development" ? (
-        <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
-      ) : null}
+      <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
       <Toaster
         richColors
         position="top-center"

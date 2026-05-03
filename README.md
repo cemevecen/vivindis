@@ -24,12 +24,6 @@ docker compose up --build
 
 **Frontend tek başına:** `cd frontend && npm install && npm run lint && npm run build`
 
-## Vercel (frontend)
-
-Kök [vercel.json](./vercel.json) şu an **v2 `builds`**: `frontend/package.json` kaynağı ile `@vercel/next` (klasik monorepo girişi). Vercel sürümüne göre uyarı veya kısıtlama çıkarsa, alternatif olarak proje ayarında **Root Directory = `frontend`** + Framework **Next.js** kullanın; o durumda [frontend/vercel.json](./frontend/vercel.json) içindeki `npm ci` kilit dosyasıyla uyumludur.
-
-Ortam değişkenleri (Production): en azından `NEXT_PUBLIC_API_URL`; Clerk kullanıyorsanız `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` ve `CLERK_SECRET_KEY`.
-
 ## Railway (API / `backend/Dockerfile`)
 
 Build context **repo kökü** olmalı; `backend/Dockerfile` içindeki `COPY` yolları `backend/...` ile başlar. Serviste **Root Directory** alanını boş bırakın (veya `/`), Dockerfile yolu `backend/Dockerfile` olsun. Kökteki [railway.json](./railway.json) DOCKERFILE + bu yolu sabitler.
