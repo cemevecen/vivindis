@@ -38,6 +38,8 @@ class Settings(BaseSettings):
 
     clerk_secret_key: str = Field(default="", validation_alias="CLERK_SECRET_KEY")
     clerk_webhook_secret: str = Field(default="", validation_alias="CLERK_WEBHOOK_SECRET")
+    clerk_jwks_url: str = Field(default="", validation_alias="CLERK_JWKS_URL")
+    clerk_jwt_issuer: str = Field(default="", validation_alias="CLERK_JWT_ISSUER")
 
     gemini_api_key: str = Field(default="", validation_alias="GEMINI_API_KEY")
     gemini_model: str = Field(default="", validation_alias="GEMINI_MODEL")

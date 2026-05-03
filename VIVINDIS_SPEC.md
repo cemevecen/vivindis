@@ -26,20 +26,23 @@ Temel akış:
 
 ---
 
-## Mevcut Durum — Oturum 1–2 (iskelet + veritabanı)
+## Mevcut Durum — Oturum 1–3 (iskelet + veritabanı + REST API)
 
 ### Neyin yazıldığını iyi anla — üzerine yaz, tekrar kurma
 
 **Backend — var olanlar**
 
-- `app/main.py` — FastAPI giriş, CORS (env’den; fallback `localhost:3000` + `127.0.0.1:3000`), yalnızca **`GET /health`**
+- `app/main.py` — CORS, **`GET /health`**, **`/api/v1`** altında tüm router’lar
 - `app/core/config.py` — pydantic-settings: DB, Redis, Celery, JWT alanları, `LOG_LEVEL`, `DATABASE_ECHO`, Clerk, AI anahtarları
 - `app/core/celery.py` — Celery instance, broker/result Redis’ten, **`include=[]`** (task yok)
 - `app/db/session.py` — async engine + `get_async_session` (istek sonunda commit / hata rollback)
 - `app/models/*` — `User`, `App`, `ReviewFetch`, `Review`, `Analysis` + enum’lar; ilişkiler ve kısıtlar (rating 1–5, `platform`+`store_review_id` unique)
 - `alembic/` + `alembic.ini` — async env; ilk migration: **`4a66a17abb57_initial_schema`**
 - `pyproject.toml` — FastAPI, Pydantic v2, SQLAlchemy async, asyncpg, Alembic, Celery+redis, httpx, google-play-scraper, app-store-scraper, **flower**
-- `api/`, `schemas/`, `workers/` — Oturum 3–4’e kadar iskelet
+- `app/api/v1/` — `auth`, `apps`, `reviews` (fetch tekil), `analysis`; `deps.py` (`get_current_user`, `require_app_owned`)
+- `app/schemas/` — Pydantic v2 Create/Update/Response şemaları
+- `app/core/security.py` — Clerk oturum JWT (PyJWT + JWKS); `app/core/logging.py` — structlog
+- `workers/` — Oturum 4 (Celery task’lar)
 
 **Frontend — var olanlar**
 
@@ -70,7 +73,7 @@ Temel akış:
 | Oturum | Kapsam |
 |--------|--------|
 | **2** | Veritabanı: async session, modeller, Alembic, ilk migration ✅ |
-| **3** | REST API, Pydantic şemalar, `deps`, router’lar, `main` |
+| **3** | REST API, Pydantic şemalar, `deps`, router’lar, `main` ✅ |
 | **4** | Celery: scraper, heuristic, AI, kuyruk, retry, rate limit |
 | **5** | Clerk middleware, `(auth)` / `(dashboard)` layout |
 | **6** | Dashboard, uygulama listesi, formlar |
@@ -159,19 +162,18 @@ vivindis/
 │   └── app/
 │       ├── main.py                 ✅ mevcut
 │       ├── api/
-│       │   ├── __init__.py       ✅ boş paket
-│       │   ├── deps.py           ⏳ Oturum 3
-│       │   └── v1/               ⏳ Oturum 3 (auth, apps, reviews, analysis)
+│       │   ├── deps.py           ✅ Oturum 3
+│       │   └── v1/               ✅ Oturum 3 (auth, apps, reviews, analysis, router)
 │       ├── core/
-│       │   ├── config.py         ✅ iskelet
+│       │   ├── config.py         ✅ Oturum 2–3
 │       │   ├── celery.py         ✅ instance; task yok
-│       │   ├── security.py       ⏳ Oturum 3
-│       │   └── logging.py        ⏳ Oturum 3
+│       │   ├── security.py       ✅ Oturum 3
+│       │   └── logging.py        ✅ Oturum 3
 │       ├── db/
 │       │   ├── session.py        ✅ Oturum 2
 │       │   └── …                 (Alembic: `backend/alembic/`, `backend/alembic.ini`)
 │       ├── models/               ✅ Oturum 2
-│       ├── schemas/              ⏳ Oturum 3
+│       ├── schemas/              ✅ Oturum 3
 │       └── workers/              ⏳ Oturum 4
 │
 └── frontend/

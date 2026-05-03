@@ -1,15 +1,19 @@
-"""FastAPI giriş — Oturum 1: sağlık ve CORS iskeleti; router yok."""
+"""FastAPI giriş — CORS, sağlık, `/api/v1` router."""
 
 from __future__ import annotations
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.v1.router import api_router
 from app.core.config import get_settings
+from app.core.logging import configure_logging
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    configure_logging(settings.log_level)
+
     application = FastAPI(
         title="Vivindis API",
         version="0.1.0",
@@ -18,7 +22,10 @@ def create_app() -> FastAPI:
 
     origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
     if not origins:
-        origins = ["http://localhost:3000"]
+        origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+        ]
 
     application.add_middleware(
         CORSMiddleware,
@@ -27,6 +34,8 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    application.include_router(api_router, prefix="/api/v1")
 
     @application.get("/health")
     def health() -> dict[str, str]:
