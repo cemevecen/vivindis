@@ -89,11 +89,21 @@ export type ApiFetchInit = Omit<RequestInit, "body"> & {
   getToken?: () => Promise<string | null>;
 };
 
+/** Ardışık `/api/v1/api/v1` parçalarını tek `/api/v1` yapar (env + path hataları). */
+function dedupeApiV1Segments(url: string): string {
+  const dup = "/api/v1/api/v1";
+  let u = url;
+  while (u.includes(dup)) {
+    u = u.replace(dup, "/api/v1");
+  }
+  return u;
+}
+
 function buildUrl(path: string): string {
   const base = getBaseUrl().replace(/\/$/, "");
   let p = path.startsWith("/") ? path : `/${path}`;
   if (!base) {
-    return p;
+    return dedupeApiV1Segments(p);
   }
   // Yaygın hata: NEXT_PUBLIC_API_URL=https://api…/api/v1 iken path de /api/v1/... → 404
   if (p.startsWith(API_V1_PREFIX) && /\/api\/v1$/i.test(base)) {
@@ -102,7 +112,7 @@ function buildUrl(path: string): string {
       p = `/${p}`;
     }
   }
-  return `${base}${p}`;
+  return dedupeApiV1Segments(`${base}${p}`);
 }
 
 export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T> {
@@ -118,7 +128,8 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
     headers.set("Content-Type", "application/json");
   }
 
-  const res = await fetch(buildUrl(path), {
+  const url = buildUrl(path);
+  const res = await fetch(url, {
     ...restInit,
     headers,
     body: body === undefined ? undefined : JSON.stringify(body),
@@ -137,9 +148,12 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
   if (!res.ok) {
     let msg = errorBodyToMessage(parsed, res.status, res.statusText);
     if (res.status === 404 && msg === "Not Found") {
-      msg =
-        `${msg} — API adresi: NEXT_PUBLIC_API_URL yalnızca kök olmalı (örn. https://api…), sonuna /api/v1 eklemeyin. ` +
-        "Aynı site üzerinden proxy için BACKEND_ORIGIN kullanıp NEXT_PUBLIC_API_URL’ü boş bırakın (README).";
+      const hint =
+        "NEXT_PUBLIC_API_URL yalnızca kök olmalı (örn. https://api…), sonuna /api/v1 eklemeyin. " +
+        "Aynı site proxy: Vercel’de BACKEND_ORIGIN + boş NEXT_PUBLIC_API_URL (README). " +
+        "Yol doğruysa Railway’de backend’i güncel kodla yeniden deploy edin.";
+      const shown = url.length > 280 ? `${url.slice(0, 280)}…` : url;
+      msg = `${msg} — ${hint} İstek: ${shown}`;
     }
     throw new ApiError(msg, res.status, parsed);
   }
