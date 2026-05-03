@@ -1,5 +1,0 @@
-# Önerilen kurulum (tek kaynak pyproject.toml):
-#   pip install -e ".[api]"
-#
-# Bu dosya yalnızca alışkanlık / eski CI için:
--e .[api]
