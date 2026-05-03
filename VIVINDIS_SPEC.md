@@ -26,17 +26,20 @@ Temel akış:
 
 ---
 
-## Mevcut Durum — Oturum 1 Tamamlandı
+## Mevcut Durum — Oturum 1–2 (iskelet + veritabanı)
 
 ### Neyin yazıldığını iyi anla — üzerine yaz, tekrar kurma
 
 **Backend — var olanlar**
 
 - `app/main.py` — FastAPI giriş, CORS (env’den; fallback `localhost:3000` + `127.0.0.1:3000`), yalnızca **`GET /health`**
-- `app/core/config.py` — pydantic-settings iskelet (alanlar var, iş mantığı yok)
+- `app/core/config.py` — pydantic-settings: DB, Redis, Celery, JWT alanları, `LOG_LEVEL`, `DATABASE_ECHO`, Clerk, AI anahtarları
 - `app/core/celery.py` — Celery instance, broker/result Redis’ten, **`include=[]`** (task yok)
+- `app/db/session.py` — async engine + `get_async_session` (istek sonunda commit / hata rollback)
+- `app/models/*` — `User`, `App`, `ReviewFetch`, `Review`, `Analysis` + enum’lar; ilişkiler ve kısıtlar (rating 1–5, `platform`+`store_review_id` unique)
+- `alembic/` + `alembic.ini` — async env; ilk migration: **`4a66a17abb57_initial_schema`**
 - `pyproject.toml` — FastAPI, Pydantic v2, SQLAlchemy async, asyncpg, Alembic, Celery+redis, httpx, google-play-scraper, app-store-scraper, **flower**
-- Klasörler `api/`, `db/`, `models/`, `schemas/`, `workers/` — boş paket / iskelet
+- `api/`, `schemas/`, `workers/` — Oturum 3–4’e kadar iskelet
 
 **Frontend — var olanlar**
 
@@ -66,7 +69,7 @@ Temel akış:
 
 | Oturum | Kapsam |
 |--------|--------|
-| **2** | Veritabanı: async session, modeller, Alembic, ilk migration |
+| **2** | Veritabanı: async session, modeller, Alembic, ilk migration ✅ |
 | **3** | REST API, Pydantic şemalar, `deps`, router’lar, `main` |
 | **4** | Celery: scraper, heuristic, AI, kuyruk, retry, rate limit |
 | **5** | Clerk middleware, `(auth)` / `(dashboard)` layout |
@@ -165,9 +168,9 @@ vivindis/
 │       │   ├── security.py       ⏳ Oturum 3
 │       │   └── logging.py        ⏳ Oturum 3
 │       ├── db/
-│       │   ├── session.py        ⏳ Oturum 2
-│       │   └── migrations/       ⏳ Oturum 2 (Alembic; konum oturumda netlenir)
-│       ├── models/               ⏳ Oturum 2
+│       │   ├── session.py        ✅ Oturum 2
+│       │   └── …                 (Alembic: `backend/alembic/`, `backend/alembic.ini`)
+│       ├── models/               ✅ Oturum 2
 │       ├── schemas/              ⏳ Oturum 3
 │       └── workers/              ⏳ Oturum 4
 │
