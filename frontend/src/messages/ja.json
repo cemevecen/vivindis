@@ -139,6 +139,7 @@
     "textActionSoon": "Analyze pasted text (coming soon)",
     "compareIntro": "Side-by-side comparison for multiple saved apps lives here; full charts will reuse the same API as single-app analytics.",
     "searchFailed": "Store search failed.",
+    "searchNetworkHint": "Usually no response from the API (backend down, wrong URL, mixed HTTP/HTTPS, or browser blocked a cross-origin request). Use Vercel BACKEND_ORIGIN with an empty NEXT_PUBLIC_API_URL for same-origin proxy, or add this site's full URL to CORS_ORIGINS on Railway. Confirm the latest Railway deploy is healthy.",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL is not set. Requests go to this site instead of the FastAPI backend — set the URL in your deployment (e.g. Vercel env) or add a rewrite for /api/v1."
   }
 }

@@ -67,6 +67,18 @@ export function formatClientFetchError(error: unknown): string {
   return String(error);
 }
 
+/** Tarayıcı `fetch` ağ/CORS katmanında düştüğünde (HTTP gövdesi yok). */
+export function isLikelyFetchNetworkError(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  const m = error.message.toLowerCase();
+  return (
+    m.includes("networkerror") ||
+    m.includes("failed to fetch") ||
+    m.includes("load failed") ||
+    m.includes("network request failed")
+  );
+}
+
 export type ApiErrorBody = { detail?: string; message?: string };
 
 export class ApiError extends Error {

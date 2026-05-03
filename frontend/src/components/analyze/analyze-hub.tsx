@@ -11,7 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "@/i18n/routing";
-import { apiFetch, formatClientFetchError, isPublicApiBaseUrlConfigured } from "@/lib/api";
+import {
+  apiFetch,
+  formatClientFetchError,
+  isLikelyFetchNetworkError,
+  isPublicApiBaseUrlConfigured,
+} from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
@@ -262,6 +267,9 @@ function AnalyzeHubConnected() {
                   <p className="text-sm text-destructive/90 break-words">
                     {formatClientFetchError(searchQuery.error)}
                   </p>
+                  {isLikelyFetchNetworkError(searchQuery.error) ? (
+                    <p className="text-xs text-muted-foreground leading-relaxed">{t("searchNetworkHint")}</p>
+                  ) : null}
                   <Button type="button" variant="outline" size="sm" onClick={() => searchQuery.refetch()}>
                     {tCommon("retry")}
                   </Button>
