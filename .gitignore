@@ -10,10 +10,12 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
-.streamlit/secrets.toml
 vivindis/branding/branding.db
 vivindis/branding/branding.db-wal
 vivindis/branding/branding.db-shm
 *.egg-info/
 dist/
 build/
+node_modules/
+frontend/node_modules/
+frontend/dist/

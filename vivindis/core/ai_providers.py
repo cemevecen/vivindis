@@ -191,7 +191,7 @@ def resolve_api_keys(
     base_openai: Optional[str],
     secrets_get: Callable[[str], Any],
 ) -> tuple[Optional[str], Optional[str], Optional[str]]:
-    """Merge os.environ keys with optional Streamlit secrets."""
+    """Merge `Settings` / `base_*` ile `secrets_get(name)` dönen ek anahtarlar (ör. barındırıcı secret store)."""
 
     def pick(*names: str) -> Optional[str]:
         for n in names:

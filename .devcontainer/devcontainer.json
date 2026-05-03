@@ -1,33 +1,24 @@
 {
-  "name": "Python 3",
-  // Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+  "name": "Vivindis (FastAPI + Vite)",
   "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "22"
+    }
+  },
   "customizations": {
     "codespaces": {
-      "openFiles": [
-        "README.md",
-        "streamlit_app.py"
-      ]
+      "openFiles": ["README.md", "backend/app/main.py"]
     },
     "vscode": {
-      "settings": {},
-      "extensions": [
-        "ms-python.python",
-        "ms-python.vscode-pylance"
-      ]
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance", "bradlc.vscode-tailwindcss"]
     }
   },
-  "updateContentCommand": "[ -f packages.txt ] && sudo apt update && sudo apt upgrade -y && sudo xargs apt install -y <packages.txt; [ -f requirements.txt ] && pip3 install --user -r requirements.txt; pip3 install --user streamlit; echo '✅ Packages installed and Requirements met'",
-  "postAttachCommand": {
-    "server": "streamlit run streamlit_app.py --server.enableCORS false --server.enableXsrfProtection false"
-  },
+  "updateContentCommand": "pip3 install --user -r requirements.txt && cd frontend && npm install",
+  "postAttachCommand": "echo 'API: PYTHONPATH=$PWD .. && cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000  |  Web: cd frontend && npm run dev'",
   "portsAttributes": {
-    "8501": {
-      "label": "Application",
-      "onAutoForward": "openPreview"
-    }
+    "8000": { "label": "API", "onAutoForward": "notify" },
+    "5173": { "label": "Vite", "onAutoForward": "openPreview" }
   },
-  "forwardPorts": [
-    8501
-  ]
+  "forwardPorts": [8000, 5173]
 }

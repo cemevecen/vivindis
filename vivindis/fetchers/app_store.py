@@ -9,7 +9,7 @@ import requests
 from .lang_filter import filter_local_reviews
 
 
-def get_app_vivindiss(
+def get_app_store_reviews(
     app_id: str,
     _progress_callback: Optional[Callable[[float], None]] = None,
     _days_limit: int = 30,

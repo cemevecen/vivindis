@@ -1,8 +1,12 @@
-"""Hafif, bağımlılıksız i18n katmanı.
+"""Hafif i18n katmanı (Streamlit yok).
+
+Dil, `contextvars` ile istek başına tutulur. FastAPI içinde
+`with use_ui_lang(code):` veya `set_ui_lang` / `reset_ui_lang` kullanın.
 
 Kullanım:
-    from vivindis.config.i18n import t
-    st.button(t("common.fetch_reviews"))
+    from vivindis.config.i18n import t, use_ui_lang
+    with use_ui_lang("en"):
+        label = t("common.fetch_reviews")
 
 Bir anahtar mevcut dilde tanımlı değilse Türkçe (default) değere düşer; Türkçe
 de yoksa `default` argümanı veya anahtarın kendisi döner.
@@ -10,7 +14,11 @@ de yoksa `default` argümanı veya anahtarın kendisi döner.
 
 from __future__ import annotations
 
-import streamlit as st
+from contextlib import contextmanager
+from contextvars import ContextVar, Token
+from typing import Iterator
+
+_ui_lang_ctx: ContextVar[str | None] = ContextVar("ui_lang", default=None)
 
 LANGUAGES: list[tuple[str, str, str]] = [
     ("tr", "Türkçe", "🇹🇷"),
@@ -1189,41 +1197,41 @@ for _k, _ja in _JA_OVERLAY.items():
         STRINGS[_k]["ja"] = _ja
 
 
-def _sync_query_param(code: str) -> None:
-    """Query param yaz — hem `<a href>` navigasyonunda hem sayfa yenilenmesinde
-    seçilen dil korunur. `tr` default olduğundan URL'yi temiz tutmak için
-    bu durumda param silinir."""
-    try:
-        if code == DEFAULT_LANG:
-            if "lang" in st.query_params:
-                del st.query_params["lang"]
-        else:
-            if st.query_params.get("lang") != code:
-                st.query_params["lang"] = code
-    except Exception:
-        pass
-
-
 def get_lang() -> str:
-    v = st.session_state.get("app_lang")
+    v = _ui_lang_ctx.get()
     if isinstance(v, str) and v in _LANG_CODES:
         return v
-    # Session state boşsa query param ile senkronla (ör. başka sayfadan link ile
-    # gelinmişse).
-    try:
-        q = st.query_params.get("lang")
-        if isinstance(q, str) and q in _LANG_CODES:
-            st.session_state["app_lang"] = q
-            return q
-    except Exception:
-        pass
     return DEFAULT_LANG
 
 
+@contextmanager
+def use_ui_lang(code: str) -> Iterator[None]:
+    """İstek veya test bloğu için dil bağlamı."""
+    if code not in _LANG_CODES:
+        code = DEFAULT_LANG
+    token: Token = _ui_lang_ctx.set(code)
+    try:
+        yield
+    finally:
+        _ui_lang_ctx.reset(token)
+
+
+def set_ui_lang(code: str) -> Token | None:
+    """Elle bağlam ayarla; `reset_ui_lang(token)` ile geri al."""
+    if code not in _LANG_CODES:
+        return None
+    return _ui_lang_ctx.set(code)
+
+
+def reset_ui_lang(token: Token | None) -> None:
+    if token is not None:
+        _ui_lang_ctx.reset(token)
+
+
 def set_lang(code: str) -> None:
+    """Geriye dönük uyum: dil bağlamını günceller (Streamlit session yok)."""
     if code in _LANG_CODES:
-        st.session_state["app_lang"] = code
-        _sync_query_param(code)
+        _ui_lang_ctx.set(code)
 
 
 def lang_query_suffix(leading: str = "?") -> str:
