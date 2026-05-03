@@ -1,32 +1,38 @@
 # Vivindis — Cursor Kuralları
 
-Bu projeyi inşa ederken önce **`VIVINDIS_SPEC.md`** dosyasını oku; ürün kapsamı, tech stack ve oturum sırası orada.
+**Tek şartname:** `VIVINDIS_SPEC.md` — ürün kapsamı, mevcut durum (Oturum 1), DB/API şemaları, oturum promptları, kesin kurallar ve portlar orada. Kod yazmadan önce onu oku.
 
 ## Genel
 
 - Monorepo: `backend/` (FastAPI), `frontend/` (Next.js App Router).
-- Gizli değer veya ortam özelinde **kod içinde varsayılan secret kullanma**; üretimde her şey ortam değişkeninden.
-- TypeScript: **strict**; `any` **yasak** (eslint `no-explicit-any`).
+- Secret ve ortam değerleri **yalnızca env**; kodda hardcode yok.
+- TypeScript **strict**; **`any` yasak** (`@typescript-eslint/no-explicit-any`: error).
+- Production’da **`console.log` yasak**; backend’de **structlog** (veya şartnamede seçilen logger), frontend’de kontrollü hata/telemetri.
 
-## Backend (Python)
+## Clerk (kritik)
 
-- Python **3.12**, FastAPI, Pydantic **v2**, SQLAlchemy **2.0 async**, Alembic, Celery **5**, Redis broker.
-- Pydantic: `ConfigDict`, `model_validate` — `from_orm` kullanma.
-- SQLAlchemy: async engine/session pattern; 1.x sync legacy yazma.
+- **`@clerk/nextjs@5.7.5` sabit — sürümü yükseltme.** Clerk 7+ Next.js 15 ister; proje Next.js 14.
 
-## Frontend (Next.js)
+## Backend
 
-- **App Router** (`src/app/`); Pages Router kullanma.
-- Veri: **TanStack Query v5**; doğrudan `useEffect`+`fetch` ile veri çekme yok (istisna: Clerk vb. SDK dokümantasyonu gerektirirse minimal).
-- API: merkezi **`src/lib/api.ts`** (base URL env).
-- UI: **shadcn/ui** + Tailwind; toast **Sonner**.
-- `'use client'` yalnızca gerektiğinde; Server Component öncelikli.
+- Python **3.12**, FastAPI, Pydantic **v2**, SQLAlchemy **2.0 async**, Alembic, Celery **5**, Redis.
+- Pydantic: `ConfigDict`, `model_validate` — `from_orm` yok.
+- SQL: yalnızca ORM; raw string concatenation yok. DB değişikliği yalnızca **Alembic**.
+- Router’lar **`async def`**; async session **`async with`**.
+
+## Frontend
+
+- **App Router** (`src/app/`); Pages Router yok.
+- Veri: **TanStack Query v5**; `useEffect` + ham `fetch` ile veri çekme yok.
+- API: **`src/lib/api.ts`**; URL dağıtımı yok.
+- UI: shadcn/ui + Tailwind; toast: **Sonner**.
+- `'use client'` yalnızca gerektiğinde.
 
 ## Docker
 
-- `docker compose up` ile Postgres, Redis, backend, worker, flower, frontend birlikte kalkmalı.
-- Worker/Flower: `celery -A app.core.celery:celery_app` (proje içi yol oturum 4’te netleşir).
+- `docker compose up` — Postgres, Redis, backend, worker, flower, frontend.
+- Yerel host portları şartnamede: API **8001**, Postgres host **5433** (çakışma önlemi).
 
-## Oturum Disiplini
+## Oturum disiplini
 
-Her oturumda **yalnızca o oturumun kapsamı**; sonraki oturum işini önceden taşıma. Şartnamedeki sırayı takip et.
+Her oturumda **yalnızca o oturumun kapsamı**; `VIVINDIS_SPEC.md` içindeki sırayı ve promptları takip et. Var olan Oturum 1 iskeletini **tekrar kurma**, üzerine inşa et.

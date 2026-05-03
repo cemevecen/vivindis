@@ -1,91 +1,536 @@
-# Vivindis — Ürün ve Teknik Şartname
+# Vivindis — Proje Şartnamesi ve Cursor Kuralları
 
-Bu projeyi inşa ederken bağlam için **bu dosyayı oku**.
+**GitHub:** https://github.com/cemevecen/vivindis  
+**Kalıcı kısa kurallar:** [.cursorrules](./.cursorrules)
 
-**GitHub:** https://github.com/cemevecen/vivindis
+Cursor’da her yeni sohbet açtığında şu cümleyle başla:
 
-## Proje Tanımı
+> Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: **VIVINDIS_SPEC.md**
 
-Vivindis, uygulama geliştiricilerin ve uygulama sahiplerinin Google Play Store ve Apple App Store yorumlarını toplu olarak çekip analiz ettiği bir SaaS platformdur.
+---
 
-### Temel iş akışı
+## Proje Bağlamı
 
-1. Kullanıcı hesap açar (Clerk ile)
-2. Analiz etmek istediği uygulamayı ekler (package name, arama kelimesi veya App Store URL)
-3. Tarih aralığı seçer
-4. Sistem yorumları çeker (Celery worker)
-5. Hem heuristic (anlık, ücretsiz) hem AI (Gemini, GROQ, OpenAI) analizi yapılır
-6. Kullanıcı dashboard'da sonuçları görür: sentiment, konular, sorunlar, trend, puanlar
+**Vivindis** (vivindis.com), uygulama sahiplerinin ve geliştiricilerin **Google Play Store** ve **Apple App Store** yorumlarını toplu çekip analiz ettiği bir **SaaS** platformudur. Kullanıcılar uygulamalarını ekler, zaman aralığı seçer, yorumlar **Celery** ile çekilir; **heuristic** (anlık, ücretsiz tarzı) ve **AI** (Gemini; ileride GROQ/OpenAI) analizi yapılır; sonuçlar **dashboard**’da (sentiment, konular, sorunlar, trend, puanlar) sunulur.
 
-## Kesin Tech Stack
+Temel akış:
 
-| Katman | Teknoloji |
-|--------|-----------|
-| Frontend | Next.js 14+ App Router + TypeScript **strict** |
-| UI | shadcn/ui + Tailwind CSS |
-| Grafikler | Recharts |
-| Auth | Clerk |
-| State (server) | TanStack Query v5 |
-| State (client) | Zustand |
-| Form | react-hook-form + Zod |
-| Toast | Sonner |
-| Backend | FastAPI + Python 3.12 |
-| Validation | Pydantic v2 |
-| ORM | SQLAlchemy 2.0 **async** |
-| Migration | Alembic |
-| Queue | Celery 5.x |
-| Message Broker | Redis (Upstash production, local Redis dev) |
-| Veritabanı | PostgreSQL (Supabase production, local Docker dev) |
-| AI | Google Gemini API (gemini-1.5-flash) |
-| Scraping | google-play-scraper + app-store-scraper (Python) |
-| Deploy Frontend | Vercel |
-| Deploy Backend | Railway |
-| Container | Docker + Docker Compose |
+1. Clerk ile hesap  
+2. Uygulama ekle (package name, arama kelimesi veya App Store URL)  
+3. Tarih aralığı seç  
+4. Worker yorumları çeker  
+5. Heuristic + AI analizi  
+6. Dashboard’da sonuçlar  
 
-## Oturum Planı (Cursor)
+**Gelecek (mimariye hazır):** karşılaştırma, rakip takibi, haftalık PDF, embed widget, API key, React Native (Expo), çoklu dil (TR, EN, DE, IT, JA, ZH-CN, PT, FR), webhook.
 
-- **Oturum 1** — Monorepo, docker-compose, .env.example, backend pyproject, Next.js + shadcn iskeleti (iş mantığı yok)
-- **Oturum 2** — DB katmanı: config, async session, models, Alembic
-- **Oturum 3** — FastAPI API: schemas, deps, routers, main
-- **Oturum 4** — Celery workers: scraper, heuristic, AI, retry/rate limit
-- **Oturum 5** — Clerk, layout, lib/api.ts
-- **Oturum 6** — Dashboard, apps listesi, formlar
-- **Oturum 7** — Analiz sayfası, Recharts, polling
-- **Oturum 8** — Polish, toast, empty states, responsive, test
+---
 
-## Cursor — Dikkat Edilecek Hatalar
+## Mevcut Durum — Oturum 1 Tamamlandı
+
+### Neyin yazıldığını iyi anla — üzerine yaz, tekrar kurma
+
+**Backend — var olanlar**
+
+- `app/main.py` — FastAPI giriş, CORS (env’den; fallback `localhost:3000` + `127.0.0.1:3000`), yalnızca **`GET /health`**
+- `app/core/config.py` — pydantic-settings iskelet (alanlar var, iş mantığı yok)
+- `app/core/celery.py` — Celery instance, broker/result Redis’ten, **`include=[]`** (task yok)
+- `pyproject.toml` — FastAPI, Pydantic v2, SQLAlchemy async, asyncpg, Alembic, Celery+redis, httpx, google-play-scraper, app-store-scraper, **flower**
+- Klasörler `api/`, `db/`, `models/`, `schemas/`, `workers/` — boş paket / iskelet
+
+**Frontend — var olanlar**
+
+- Next.js 14 **App Router**, TypeScript **strict** (`noUncheckedIndexedAccess` dahil)
+- ESLint: **`@typescript-eslint/no-explicit-any`: error**
+- `src/lib/api.ts` — merkezi API client; base URL **`NEXT_PUBLIC_API_URL`**
+- TanStack Query v5 + DevTools, Zustand, react-hook-form, Zod, Sonner, Recharts
+- Provider’lar: Query client + Sonner; **Clerk** — publishable key yoksa provider atlanır (boş `.env` ile dev kalksın diye)
+- `globals.css` + Tailwind: shadcn/ui (base-nova); Google Geist font kaldırıldı, yerel font dosyaları
+- `npm run build` ve `npm run lint` temiz geçmeli
+
+**Docker Compose — servisler ve port kararları**
+
+- Servisler: PostgreSQL, Redis, backend, worker, flower, frontend
+- **`5433:5432`** — host PostgreSQL (makinede 5432 çakışması için)
+- **`8001:8000`** — host API (makinede 8000 çakışması için)
+- Konteyner ağında: **`postgres:5432`**, backend **`0.0.0.0:8000`**
+- **`NEXT_PUBLIC_API_URL`** varsayılanı (Compose): **`http://localhost:8001`**
+
+**Kritik sürüm kararı (değiştirme)**
+
+- **`@clerk/nextjs@5.7.5` sabit.** Clerk 7+ Next.js 15 istiyor; proje Next.js 14. Bu sürümü **bilinçli olarak sabitledik**; bağımlılığı **Next 14’e geçmeden güncelleme** (breaking risk ve peer uyumsuzluğu).
+
+---
+
+## Sıradaki Oturumlar (özet)
+
+| Oturum | Kapsam |
+|--------|--------|
+| **2** | Veritabanı: async session, modeller, Alembic, ilk migration |
+| **3** | REST API, Pydantic şemalar, `deps`, router’lar, `main` |
+| **4** | Celery: scraper, heuristic, AI, kuyruk, retry, rate limit |
+| **5** | Clerk middleware, `(auth)` / `(dashboard)` layout |
+| **6** | Dashboard, uygulama listesi, formlar |
+| **7** | Analiz sayfası, Recharts, fetch polling (~3 sn) |
+| **8** | Polish, hata UX, empty state, responsive, uçtan uca test |
+
+---
+
+## Kesin Kurallar — Asla İhlal Etme
+
+- TypeScript **strict**. **`any` yasak** (ESLint hata verir).
+- **`console.log` production kodunda yasak.** Yapılandırılmış **logger** kullan (backend için hedef: **structlog**; frontend’de anlamlı sarıcı veya yalnızca dev ortamı).
+- Tüm hassas ve ortam özelindeki değerler **`.env` / platform env** üzerinden; **kod içinde hardcode secret yasak**.
+- Her API endpoint’i **Pydantic v2** ile validate edilir.
+- Async işlemlerde **uygun hata yakalama** ve anlamlı HTTP cevapları zorunlu.
+- SQL **string birleştirme ile yazılmaz**; **SQLAlchemy ORM** (2.0 async).
+- Frontend’de ham API URL dağıtımı yok; **`src/lib/api.ts`** kullanılır.
+- Tüm şema değişiklikleri **Alembic migration** ile; prod’da “elle tablo oluşturma” yok.
+- Secret’lar (**API key, password, token**) **log’a yazılmaz**.
+- **`@clerk/nextjs` sürümünü değiştirme** — **5.7.5 sabit** (Next 14 stratejisi).
+
+### Backend — teknik detay
+
+- SQLAlchemy **1.x değil** — **2.0 async** (`async with session:`).
+- Pydantic **v1 değil** — **v2**: `model_config = ConfigDict(from_attributes=True)`, **`model_validate()`**; **`from_orm()` yok**.
+- Celery task varsayılan **sync**; async DB/API gerekiyorsa **`asyncio.run()`** veya önerilen pattern ile sınırlı kullanım.
+- Router handler’lar **`async def`**; DB **`async with session:`**.
+
+### Frontend — teknik detay
+
+- **`pages/` router yok** — yalnızca **`app/`** App Router.
+- **`useEffect` + ham `fetch` ile veri çekme yok** — **TanStack Query**.
+- Gereksiz **`'use client'`** yok; Server Component öncelikli.
+- Form: **react-hook-form + Zod**; hata bildirimi: **Sonner**; yükleme: **Suspense + skeleton** mümkün olduğunca.
+
+---
+
+## Tech Stack — Değiştirme
 
 ### Backend
 
-- SQLAlchemy **1.x** değil — **2.0 async** (`async with session`)
-- Pydantic **v1** değil — **v2** (`model_config = ConfigDict(...)`)
-- `from_orm()` yok — **`model_validate()`**
-- Celery task içinde gerektiğinde **`asyncio.run()`** (sync task varsayılan)
+- Python **3.12**
+- FastAPI
+- Pydantic **v2**
+- SQLAlchemy **2.0 async**
+- Alembic
+- Celery **5.x**
+- Redis
+- **httpx** (async HTTP)
+- google-play-scraper, app-store-scraper
 
 ### Frontend
 
-- `pages/` router yok — **`app/`** App Router
-- `useEffect` ile ham fetch yok — **TanStack Query**
-- Gereksiz **`use client`** yok
-- Ham `fetch` dağınık yok — **`src/lib/api.ts`** (veya belirlenen tek modül)
+- Next.js **14+** App Router (Pages router değil)
+- TypeScript strict
+- Tailwind CSS + shadcn/ui
+- Recharts
+- **`@clerk/nextjs@5.7.5` (sabit)**
+- TanStack Query v5
+- Zustand
+- react-hook-form + Zod
+- Sonner
 
-## Domain ve Portlar (Local)
+### Altyapı
+
+- Yerel: Docker Compose (Postgres, Redis, API, worker, flower, Next dev)
+- Prod hedefi: **Vercel** (web), **Railway** (API + worker), **Supabase** (Postgres), **Upstash** (Redis)
+
+---
+
+## Proje Yapısı (repoya göre güncel)
+
+> Not: Compose’ta frontend için ayrı `Dockerfile` yok; **`node:20-bookworm-slim`** imajı + volume kullanılıyor. `next.config.mjs` kullanılıyor (`.ts` değil).
+
+```
+vivindis/
+├── .cursorrules
+├── .env.example
+├── docker-compose.yml
+├── VIVINDIS_SPEC.md
+├── README.md
+│
+├── backend/
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   └── app/
+│       ├── main.py                 ✅ mevcut
+│       ├── api/
+│       │   ├── __init__.py       ✅ boş paket
+│       │   ├── deps.py           ⏳ Oturum 3
+│       │   └── v1/               ⏳ Oturum 3 (auth, apps, reviews, analysis)
+│       ├── core/
+│       │   ├── config.py         ✅ iskelet
+│       │   ├── celery.py         ✅ instance; task yok
+│       │   ├── security.py       ⏳ Oturum 3
+│       │   └── logging.py        ⏳ Oturum 3
+│       ├── db/
+│       │   ├── session.py        ⏳ Oturum 2
+│       │   └── migrations/       ⏳ Oturum 2 (Alembic; konum oturumda netlenir)
+│       ├── models/               ⏳ Oturum 2
+│       ├── schemas/              ⏳ Oturum 3
+│       └── workers/              ⏳ Oturum 4
+│
+└── frontend/
+    ├── next.config.mjs
+    ├── tailwind.config.ts
+    ├── components.json
+    └── src/
+        ├── app/
+        │   ├── layout.tsx        ✅ provider’lar
+        │   ├── page.tsx          ✅ placeholder
+        │   ├── (auth)/           ⏳ Oturum 5
+        │   └── (dashboard)/      ⏳ Oturum 5+
+        ├── components/
+        │   ├── ui/               ✅ shadcn
+        │   └── providers/        ✅ Query, Clerk koşullu
+        ├── lib/
+        │   ├── api.ts            ✅ merkezi client
+        │   └── utils.ts          ✅
+        ├── hooks/                ⏳ Oturum 6+
+        └── …                     ⏳ store/types ihtiyaç halinde
+```
+
+---
+
+## Veritabanı Modelleri (Oturum 2)
+
+### User
+
+- `id`: UUID (PK)  
+- `clerk_id`: str, **unique**  
+- `email`: str, **unique**  
+- `plan`: enum — `free`, `pro`, `enterprise`  
+- `created_at`, `updated_at`: datetime  
+
+### App
+
+- `id`: UUID (PK)  
+- `user_id`: UUID (FK → users)  
+- `platform`: enum — `google_play`, `app_store`, `both`  
+- `package_name`: str  
+- `bundle_id`: str, nullable (iOS)  
+- `name`: str  
+- `icon_url`, `developer`, `category`: nullable str  
+- `is_active`: bool, default True  
+- `created_at`, `updated_at`: datetime  
+
+### ReviewFetch
+
+- `id`: UUID (PK)  
+- `app_id`: UUID (FK → apps)  
+- `status`: enum — `pending`, `running`, `completed`, `failed`  
+- `from_date`, `to_date`: date  
+- `review_count`: int, default 0  
+- `error_message`: str, nullable  
+- `started_at`, `completed_at`: datetime, nullable  
+- `created_at`: datetime  
+
+### Review
+
+- `id`: UUID (PK)  
+- `app_id`: UUID (FK → apps)  
+- `fetch_id`: UUID (FK → review_fetches)  
+- `store_review_id`: str — **platform başına unique** (composite unique: `platform` + `store_review_id`)  
+- `platform`: enum  
+- `rating`: int (1–5)  
+- `title`: str, nullable  
+- `body`: text  
+- `author`: str, nullable  
+- `lang`: str (ISO 639-1)  
+- `date`: date  
+- `thumbs_up`: int, default 0  
+- `developer_reply`: text, nullable  
+- `reply_date`: date, nullable  
+- `created_at`: datetime  
+
+### Analysis
+
+- `id`: UUID (PK)  
+- `app_id`: UUID (FK → apps)  
+- `fetch_id`: UUID (FK → review_fetches)  
+- `type`: enum — `heuristic`, `ai`  
+- `status`: enum — `pending`, `running`, `completed`, `failed`  
+- `result`: JSONB, nullable  
+- `model_used`: str, nullable  
+- `tokens_used`: int, nullable  
+- `error_message`: str, nullable  
+- `created_at`: datetime  
+- `completed_at`: datetime, nullable  
+
+---
+
+## API Endpoints (hedef — Oturum 3)
+
+Prefix: **`/api/v1`**
+
+### Auth
+
+```
+POST /api/v1/auth/sync    # Clerk webhook
+GET  /api/v1/auth/me      # Mevcut kullanıcı
+```
+
+### Apps
+
+```
+GET    /api/v1/apps
+POST   /api/v1/apps
+GET    /api/v1/apps/{id}
+PUT    /api/v1/apps/{id}
+DELETE /api/v1/apps/{id}
+```
+
+### Reviews / fetch
+
+```
+POST /api/v1/apps/{id}/fetch
+GET  /api/v1/apps/{id}/fetches
+GET  /api/v1/fetches/{id}
+GET  /api/v1/apps/{id}/reviews
+```
+
+### Analysis
+
+```
+POST /api/v1/fetches/{id}/analyze
+GET  /api/v1/apps/{id}/analyses
+GET  /api/v1/analyses/{id}
+```
+
+---
+
+## Analysis Result JSON Şeması (AI / birleşik sonuç hedefi)
+
+```json
+{
+  "overall_score": 7.4,
+  "sentiment": {
+    "positive": 0.62,
+    "neutral": 0.18,
+    "negative": 0.20
+  },
+  "rating_distribution": {
+    "1": 45,
+    "2": 23,
+    "3": 67,
+    "4": 134,
+    "5": 289
+  },
+  "top_topics": [
+    { "topic": "performance", "count": 234, "sentiment": "negative" }
+  ],
+  "top_issues": [
+    { "issue": "app crashes on startup", "count": 67, "severity": "high" }
+  ],
+  "highlights": [
+    { "type": "positive", "text": "...", "review_id": "uuid" }
+  ],
+  "recommendations": ["..."],
+  "lang_distribution": { "tr": 0.45, "en": 0.35, "de": 0.20 }
+}
+```
+
+---
+
+## Ortam Değişkenleri
+
+`.env.example` dosyasındaki anahtarlar boş bırakılır; değerler dağıtım ortamında doldurulur.
+
+Örnek isimler:
+
+```bash
+# Backend
+DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/vivindis
+REDIS_URL=redis://redis:6379/0
+SECRET_KEY=
+ALGORITHM=
+ACCESS_TOKEN_EXPIRE_MINUTES=
+CLERK_SECRET_KEY=
+CLERK_WEBHOOK_SECRET=
+GEMINI_API_KEY=
+GEMINI_MODEL=
+GROQ_API_KEY=
+OPENAI_API_KEY=
+CORS_ORIGINS=
+ENVIRONMENT=
+LOG_LEVEL=
+
+# Celery (broker/result genelde REDIS ile aynı aile)
+CELERY_BROKER_URL=
+CELERY_RESULT_BACKEND=
+
+# Frontend
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+NEXT_PUBLIC_API_URL=http://localhost:8001
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+---
+
+## Celery Kuyrukları ve Akış (Oturum 4)
+
+```
+scraper  → ReviewFetchTask
+analysis → HeuristicTask
+analysis → AIAnalysisTask
+```
+
+Akış: fetch başlar → **ReviewFetchTask** → tamamlanınca **HeuristicTask** + **AIAnalysisTask** tetiklenir. Frontend fetch süresince yaklaşık **3 saniyede bir** `GET /api/v1/fetches/{id}` ile polling; status **`completed`** olunca analiz sonuç ekranına geçiş.
+
+---
+
+## Heuristic Analiz (Oturum 4)
+
+- Rating dağılımı  
+- Sentiment: TR + EN pozitif/negatif kelime listesi  
+- Keyword frequency: ilk iterasyonda basit sayım / Counter; ileride TF-IDF  
+- Dil tespiti: **langdetect** (veya eşdeğer, env’den konfigüre)  
+- Rating trendi: `from_date` → `to_date`  
+- Geliştirici yanıt oranı: `developer_reply` doluluk yüzdesi  
+
+## AI Analiz (Oturum 4)
+
+- Model: **gemini-1.5-flash** (env ile override edilebilir)  
+- Review’ları **50’lik batch**’lere böl  
+- `response_mime_type: application/json` (veya güncel API eşdeğeri)  
+- Batch sonuçlarını birleştir  
+- **Max 3 retry**; hata durumunda `failed` + mesaj  
+- Sonuç **Analysis** tablosuna yazılır  
+
+---
+
+## Erişim Noktaları (Local / Compose varsayılanı)
 
 | Adres | Servis |
 |--------|--------|
-| localhost:3000 | Next.js |
-| localhost:8001 | FastAPI (`/docs`) — Docker Compose varsayılanı (host 8000 çakışmasını önlemek için) |
-| localhost:5555 | Flower |
-| localhost:5433 | PostgreSQL (Docker host eşlemesi; konteyner ağında `postgres:5432`) |
+| http://localhost:3000 | Next.js |
+| http://localhost:8001/docs | FastAPI Swagger |
+| http://localhost:5555 | Flower |
+| localhost:5433 | PostgreSQL (host → konteyner 5432) |
 | localhost:6379 | Redis |
 
-## Production
+---
 
-- vivindis.com → Vercel (Next.js)
-- api.vivindis.com → Railway (FastAPI + Celery)
-- DB → Supabase
-- Redis → Upstash
+## Deploy Planı (hazır olduğunda)
 
-## Gelecek Özellikler (Mimariye Hazır)
+- **vivindis.com** → Vercel (Next.js)  
+- **api.vivindis.com** → Railway (FastAPI + Celery)  
+- **DB** → Supabase  
+- **Redis** → Upstash  
 
-Karşılaştırma, rakip takibi, haftalık PDF rapor, embed widget, kullanıcı API key, React Native (Expo), çoklu dil (TR, EN, DE, IT, JA, ZH-CN, PT, FR), webhook.
+---
+
+## Yardımcı Komutlar
+
+```bash
+docker compose up
+docker compose up backend worker
+docker compose exec backend alembic revision --autogenerate -m "add_users_table"
+docker compose exec backend alembic upgrade head
+docker compose logs -f worker
+docker compose down -v
+```
+
+---
+
+## Oturum Promptları (Cursor’a kopyala-yapıştır)
+
+### Oturum 2 — Veritabanı Katmanı
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 2: Veritabanı katmanını yaz.
+
+Yapılacaklar (sırayla):
+1. app/db/session.py — async SQLAlchemy engine ve session factory
+   - DATABASE_URL env'den (asyncpg)
+   - get_async_session dependency olarak export
+
+2. app/models/base.py — ortak taban (UUID PK, created_at, updated_at uygunsa)
+
+3. Modeller: user, app, review_fetch, review, analysis — bu dosyadaki şema ile birebir
+   - SQLAlchemy 2.0: Mapped[], mapped_column()
+   - Enum'lar Python enum.Enum
+   - İlişkiler relationship()
+
+4. app/models/__init__.py — tüm modelleri import et (Alembic metadata için)
+
+5. Alembic: async env.py, target_metadata = Base.metadata, DATABASE_URL env'den
+
+6. İlk migration: alembic revision --autogenerate -m "initial_schema"
+
+7. app/core/config.py — eksik env alanlarını tamamla
+
+Kurallar: SQLAlchemy 2.0 async; Pydantic v2; UUID server-side uuid4; migration'ı şema ile tutarlı tut.
+```
+
+### Oturum 3 — Backend API
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 3: REST API katmanını yaz.
+
+1. app/schemas/ — Pydantic v2 (Base, Create, Update, Response), ConfigDict(from_attributes=True)
+2. app/core/security.py — JWT (python-jose) veya Clerk doğrulama stratejisi şartnameyle uyumlu
+3. app/api/deps.py — get_db, get_current_user
+4. app/api/v1/auth.py, apps.py, reviews.py, analysis.py — bu dosyadaki endpoint listesi
+5. app/main.py — prefix /api/v1, router include
+
+Her endpoint: doğru HTTP kodları, HTTPException, kullanıcı yalnızca kendi verisi, response şeması.
+```
+
+### Oturum 4 — Celery Workers
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 4: Celery task'larını yaz.
+
+1. app/core/celery.py — include: workers.scraper, workers.heuristic, workers.ai
+2. workers/scraper.py — ReviewFetchTask (Play + App Store scraper, idempotent review insert, status, retry, rate limit)
+3. workers/heuristic.py — HeuristicTask → Analysis type=heuristic
+4. workers/ai.py — AIAnalysisTask → Gemini batch, merge, retry → Analysis type=ai
+
+Kuyruk: scraper → 'scraper'; analiz → 'analysis'.
+```
+
+### Oturum 5 — Frontend Auth ve Layout
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 5: @clerk/nextjs 5.7.5 API'si ile Clerk + middleware + (auth) ve (dashboard) layout,
+Sidebar/Header, lib/api.ts içinde Bearer token (Clerk session token).
+```
+
+### Oturum 6 — Dashboard ve Uygulamalar
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 6: dashboard, apps listesi, apps/new form (rhf+zod), AppCard/AppList, apps/[id] detay ve fetch başlatma.
+TanStack Query + skeleton + empty state.
+```
+
+### Oturum 7 — Analiz ve Grafikler
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 7: apps/[id]/analysis, Recharts bileşenleri, /fetches/{id} polling ~3s.
+```
+
+### Oturum 8 — Polish
+
+```
+Bu projeyi inşa ediyorum, bağlam için bu dosyayı oku: VIVINDIS_SPEC.md
+
+Oturum 8: Sonner ile hata UX, empty state'ler, responsive, docker compose tam test, /docs manuel test, README.
+```
+
+---
+
+*Bu dosya tek kaynak şartnamedir; çakışmada önce burayı güncelle, sonra kodu hizala.*
