@@ -148,11 +148,24 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
   if (!res.ok) {
     let msg = errorBodyToMessage(parsed, res.status, res.statusText);
     if (res.status === 404 && msg === "Not Found") {
-      const hint =
-        "NEXT_PUBLIC_API_URL yalnızca kök olmalı (örn. https://api…), sonuna /api/v1 eklemeyin. " +
-        "Aynı site proxy: Vercel’de BACKEND_ORIGIN + boş NEXT_PUBLIC_API_URL (README). " +
-        "Yol doğruysa Railway’de backend’i güncel kodla yeniden deploy edin.";
       const shown = url.length > 280 ? `${url.slice(0, 280)}…` : url;
+      const dup = url.includes("/api/v1/api/v1");
+      const storeSearch = url.includes("/store/search");
+      let hint: string;
+      if (dup) {
+        hint =
+          "NEXT_PUBLIC_API_URL sonunda /api/v1 olmamalı (çift yol oluşur). " +
+          "Proxy için README: BACKEND_ORIGIN + boş NEXT_PUBLIC_API_URL.";
+      } else if (storeSearch) {
+        hint =
+          "İstek adresi doğru görünüyorsa genelde API sunucusu eski sürümdür: Railway’de backend’i güncel `main` ile yeniden deploy edin " +
+          "(GET /api/v1/store/search). DNS’in doğru servise gittiğini doğrulayın.";
+      } else {
+        hint =
+          "NEXT_PUBLIC_API_URL yalnızca kök olmalı (örn. https://api…), sonuna /api/v1 eklemeyin. " +
+          "Aynı site proxy: Vercel’de BACKEND_ORIGIN + boş NEXT_PUBLIC_API_URL (README). " +
+          "Yol doğruysa backend’i güncel kodla yeniden deploy edin.";
+      }
       msg = `${msg} — ${hint} İstek: ${shown}`;
     }
     throw new ApiError(msg, res.status, parsed);
