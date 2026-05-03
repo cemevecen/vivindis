@@ -20,7 +20,14 @@ def create_app() -> FastAPI:
         description="Vivindis backend — şartname: /VIVINDIS_SPEC.md",
     )
 
-    origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()]
+    def _cors_origin(o: str) -> str:
+        o = o.strip()
+        # Tarayıcı Origin başlığında sondaki / yok; env’de https://site.com/ yazılırsa eşleşmez.
+        while len(o) > 1 and o.endswith("/"):
+            o = o[:-1]
+        return o
+
+    origins = [_cors_origin(o) for o in settings.cors_origins.split(",") if o.strip()]
     if not origins:
         origins = [
             "http://localhost:3000",
