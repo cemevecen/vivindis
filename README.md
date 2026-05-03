@@ -1,33 +1,79 @@
 # Vivindis
 
-SaaS: Play / App Store yorumlarını toplama ve analiz.
+SaaS: Google Play ve Apple App Store yorumlarını toplama, **heuristic** ve **AI (Gemini)** ile analiz; uygulama sahipleri ve geliştiriciler için dashboard.
 
 **Bağlam:** [VIVINDIS_SPEC.md](./VIVINDIS_SPEC.md)  
 **Kurallar:** [.cursorrules](./.cursorrules)  
 **Repo:** https://github.com/cemevecen/vivindis
 
+## Mevcut yığın (özet)
+
+| Katman | Teknoloji |
+|--------|-----------|
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind, shadcn/ui, TanStack Query, **next-intl** (12 dil, varsayılan `tr`), Clerk, Recharts, Sonner |
+| Backend | FastAPI, Pydantic v2, SQLAlchemy 2.0 async, Alembic, Celery, structlog |
+| Yerel | Docker Compose: Postgres, Redis, API, worker, Flower, Next dev |
+
 ## Yerel çalıştırma
 
 ```bash
 cp .env.example .env
-docker compose config   # YAML doğrulama (CI / ön kontrol)
+docker compose config   # YAML doğrulama
 docker compose up --build
 ```
 
-- Frontend: http://localhost:3000 (locale öneki: `/tr/...`, `/en/...`)  
-- API Swagger: http://localhost:8001/docs (Compose’ta host portu **8001**; konteyner içi **8000**)  
+- Frontend: http://localhost:3000 — URL’ler locale önekli: `/tr/...`, `/en/...`  
+- API Swagger: http://localhost:8001/docs (host **8001**; konteyner içi **8000**)  
 - Sağlık: http://localhost:8001/health  
 - Flower: http://localhost:5555  
-- PostgreSQL (host): `localhost:5433` → konteyner içi `postgres:5432`  
+- PostgreSQL (host): `localhost:5433` → konteyner `postgres:5432`  
 
-**Manuel kontrol (Oturum 8):** tarayıcıda `/docs` açılıyor mu; dashboard’da dar ekranda menü çekmecesi; `/tr/compare` veya `/en/compare` boş durum + CTA; form hatalarında Sonner toast’ları.
+**Manuel smoke:** `/docs`; dar ekranda dashboard menü çekmecesi; `/tr/compare` boş durum + CTA; formlarda Sonner.
 
-**Frontend tek başına:** `cd frontend && npm install && npm run lint && npm run build`
+**Sadece frontend:** `cd frontend && npm install && npm run lint && npm run build`
 
-## Railway (API / `backend/Dockerfile`)
+## Üretim mimarisi (özet)
 
-Build context **repo kökü** olmalı; `backend/Dockerfile` içindeki `COPY` yolları `backend/...` ile başlar. Serviste **Root Directory** alanını boş bırakın (veya `/`), Dockerfile yolu `backend/Dockerfile` olsun. Kökteki [railway.json](./railway.json) DOCKERFILE + bu yolu sabitler.
+Tipik kurulum:
 
-`COPY alembic` / `"/alembic": not found` hatası genelde (1) eski commit’in deploy edilmesi veya (2) yanlış build context’tir. **Deployments** üzerinden `main`’in en son commit’ini seçin; gerekirse **Clear build cache** ile yeniden derleyin.
+- **Site (Next.js):** [Vercel](https://vercel.com) — özel alan adı örn. `vivindis.com` / `www.vivindis.com`  
+- **API + worker:** [Railway](https://railway.app) — özel alan adı örn. `api.vivindis.com`  
+- **Veritabanı:** yönetilen PostgreSQL (ör. Supabase); `DATABASE_URL` içinde **`postgresql+asyncpg://`** kullanın  
+- **Redis:** yönetilen Redis (ör. Upstash); Celery için **`rediss://`** TCP URL  
+- **Kimlik:** [Clerk](https://clerk.com) — publishable + secret + JWKS + JWT issuer + webhook (`POST /api/v1/auth/sync`)
 
-Ayrıntılı mimari ve kurallar için [VIVINDIS_SPEC.md](./VIVINDIS_SPEC.md).
+Frontend, API’ye `NEXT_PUBLIC_API_URL` (örn. `https://api.vivindis.com`) ile ulaşır. DNS’te `api` genelde Railway’e **CNAME** ile gider; kök/`www` kayıtları Vercel dokümantasyonuna göre ayarlanır.
+
+### Vercel (frontend)
+
+1. Projeyi GitHub’dan import edin.  
+2. **Settings → General → Root Directory:** `frontend` (zorunlu; monorepo kökünde `package.json` yok).  
+3. **Framework:** Next.js (otomatik algılanır).  
+4. **Environment Variables (Production)** örnekleri:  
+   - `NEXT_PUBLIC_API_URL` — canlı API tabanı  
+   - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`  
+   - İsteğe bağlı: `NEXT_PUBLIC_APP_URL` — kendi sitenizin kök URL’si  
+
+Kökte **`vercel.json` kullanılmıyor**; monorepo için yeterli ayar Root Directory + env değişkenleridir.
+
+### Railway (backend)
+
+1. Aynı repoyu bağlayın; kökteki [railway.json](./railway.json) **DOCKERFILE** + `dockerfilePath: "backend/Dockerfile"` kullanır.  
+2. [backend/Dockerfile](./backend/Dockerfile) **build context’in repo kökü** olduğunu varsayar (`COPY backend/...`). Yerelde doğrulama:
+
+   `docker build -f backend/Dockerfile .`
+
+3. **Variables:** `.env.example` ile hizalı tutun (`DATABASE_URL`, `REDIS_URL`, `CELERY_*`, Clerk, `SECRET_KEY`, `CORS_ORIGINS`, `GEMINI_API_KEY`, …).  
+4. **Worker:** ayrı bir Railway servisi; aynı imaj/kaynak, start örneği:  
+   `celery -A app.core.celery:celery_app worker -Q scraper,analysis --loglevel=info`  
+5. İlk şema veya güncellemeler için konteyner/shell üzerinden: `alembic upgrade head`
+
+`COPY alembic` / **`"/alembic": not found`** hatası: imaj **kök dizinden** üretilmiyorsa oluşur. `main`’deki Dockerfile + yukarıdaki `docker build` komutu ile uyumlu olun; gerekirse **Clear build cache** ve yeniden deploy.
+
+### Kök `nixpacks.toml`
+
+[Railway Nixpacks](https://docs.railway.com/) ile kökten Python kurulumu için [nixpacks.toml](./nixpacks.toml) vardır. Servis **Dockerfile** kullanıyorsa (`railway.json`) Nixpacks devre dışı kalır; çakışma olursa Railway arayüzünde builder’ı kontrol edin.
+
+---
+
+Ayrıntılı oturum geçmişi, API listesi ve kod kuralları için [VIVINDIS_SPEC.md](./VIVINDIS_SPEC.md).
