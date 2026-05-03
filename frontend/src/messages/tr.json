@@ -34,6 +34,7 @@
     "resultsHeading": "{count, plural, =0 {Sonuç yok} one {# uygulama bulundu} other {# uygulama bulundu}}",
     "noResults": "Eşleşen uygulama yok. Başka anahtar kelime deneyin veya platformu değiştirin.",
     "ratingShort": "{score} / 5",
+    "reviewsCount": "yorum",
     "selectApp": "Seç",
     "appLinked": "Uygulama eklendi — içe aktarma ve analiz için uygulama sayfasını açın.",
     "storeFooter": "Uygulama seçtikten sonra uygulama sayfasında tarih aralığı seçip içe aktarma başlatın. Heuristic ve AI analizi Analitik ekranından çalışır.",

@@ -16,7 +16,7 @@ import { ApiError, apiFetch, formatClientFetchError, isPublicApiBaseUrlConfigure
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AppDto } from "@/types/app";
-import type { StoreSearchHit } from "@/types/store-search";
+import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
 type Mode = "store" | "file" | "text" | "compare";
 
@@ -41,7 +41,7 @@ function AnalyzeHubConnected() {
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform),
     queryFn: () =>
-      apiFetch<StoreSearchHit[]>(
+      apiFetch<StoreSearchResponse>(
         `/api/v1/store/search?q=${encodeURIComponent(activeQuery)}&platform=${platform}&lang=tr&country=tr`,
         { getToken },
       ),
@@ -49,15 +49,15 @@ function AnalyzeHubConnected() {
   });
 
   const createMutation = useMutation({
-    mutationFn: async (hit: StoreSearchHit) => {
+    mutationFn: async (hit: StoreSearchResultItem) => {
       const body = {
-        platform: hit.store,
-        package_name: hit.package_name,
-        bundle_id: hit.bundle_id?.trim() ? hit.bundle_id.trim() : null,
+        platform: hit.platform,
+        package_name: hit.platform === "google_play" ? hit.id : "",
+        bundle_id: hit.platform === "app_store" ? hit.id.trim() : null,
         name: hit.name,
         developer: hit.developer,
-        category: hit.category,
-        icon_url: hit.icon_url,
+        category: null,
+        icon_url: hit.icon,
         is_active: true,
       };
       return apiFetch<AppDto>("/api/v1/apps", { method: "POST", body, getToken });
@@ -173,7 +173,7 @@ function AnalyzeHubConnected() {
           {activeQuery.length >= 2 ? (
             <div className="space-y-3">
               <h3 className="text-sm font-medium text-muted-foreground">
-                {t("resultsHeading", { count: searchQuery.data?.length ?? 0 })}
+                {t("resultsHeading", { count: searchQuery.data?.results.length ?? 0 })}
               </h3>
               {searchQuery.isPending ? (
                 <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
@@ -187,19 +187,19 @@ function AnalyzeHubConnected() {
                     {tCommon("retry")}
                   </Button>
                 </div>
-              ) : !searchQuery.data?.length ? (
+              ) : !searchQuery.data?.results.length ? (
                 <p className="text-sm text-muted-foreground">{t("noResults")}</p>
               ) : (
                 <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
-                  {searchQuery.data.map((hit) => (
+                  {searchQuery.data.results.map((hit) => (
                     <li
-                      key={`${hit.store}-${hit.package_name || hit.bundle_id}-${hit.name}`}
+                      key={`${hit.platform}-${hit.id}-${hit.name}`}
                       className="flex gap-3 rounded-lg border border-border bg-card p-4 shadow-sm"
                     >
-                      {hit.icon_url ? (
+                      {hit.icon ? (
                         // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN; remotePatterns gerekmez
                         <img
-                          src={hit.icon_url}
+                          src={hit.icon}
                           alt=""
                           width={56}
                           height={56}
@@ -211,17 +211,19 @@ function AnalyzeHubConnected() {
                       <div className="min-w-0 flex-1 space-y-1">
                         <p className="truncate font-medium">{hit.name}</p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {hit.store === "google_play" ? hit.package_name : `id: ${hit.bundle_id ?? "—"}`}
+                          {hit.platform === "google_play" ? hit.id : `id: ${hit.id}`}
                         </p>
                         {hit.developer ? (
                           <p className="truncate text-xs text-muted-foreground">{hit.developer}</p>
                         ) : null}
-                        {hit.category ? (
-                          <p className="text-xs text-muted-foreground">{hit.category}</p>
-                        ) : null}
-                        {hit.score != null ? (
+                        {hit.rating != null ? (
                           <p className="text-xs font-medium text-foreground">
-                            {t("ratingShort", { score: hit.score.toFixed(1) })}
+                            {t("ratingShort", { score: hit.rating.toFixed(1) })}
+                          </p>
+                        ) : null}
+                        {hit.reviews != null ? (
+                          <p className="text-xs text-muted-foreground">
+                            {hit.reviews.toLocaleString()} {t("reviewsCount")}
                           </p>
                         ) : null}
                       </div>

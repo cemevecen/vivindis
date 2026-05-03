@@ -34,6 +34,7 @@
     "resultsHeading": "{count, plural, =0 {No matches} one {# app found} other {# apps found}}",
     "noResults": "No apps matched. Try another keyword or switch platform.",
     "ratingShort": "{score} / 5",
+    "reviewsCount": "reviews",
     "selectApp": "Select",
     "appLinked": "App added — open the app to run an import and analysis.",
     "storeFooter": "After you select an app, pick a date range on the app page and start an import. Heuristic and AI analysis run from the Analytics screen.",

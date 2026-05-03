@@ -1,4 +1,4 @@
-"""Mağaza arama sonuçları (Play / App Store arama API)."""
+"""Mağaza arama — birleşik JSON cevap (Play / App Store katalog)."""
 
 from __future__ import annotations
 
@@ -6,17 +6,20 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
-StorePlatform = Literal["google_play", "app_store"]
+StoreSearchPlatform = Literal["google_play", "app_store"]
 
 
-class StoreSearchHit(BaseModel):
-    """Tek bir arama sonucu — uygulama oluşturma formu ile uyumlu alanlar."""
+class StoreSearchResultItem(BaseModel):
+    """Tek arama satırı — frontend mağaza seçimi ile uyumlu."""
 
-    store: StorePlatform
-    package_name: str = Field(default="", max_length=255)
-    bundle_id: str | None = Field(default=None, max_length=255)
+    id: str = Field(..., max_length=255, description="Play: package name; App Store: sayısal trackId")
     name: str = Field(default="", max_length=512)
-    icon_url: str | None = Field(default=None, max_length=2048)
     developer: str | None = Field(default=None, max_length=512)
-    category: str | None = Field(default=None, max_length=255)
-    score: float | None = None
+    icon: str | None = Field(default=None, max_length=2048)
+    rating: float | None = Field(default=None, description="Ortalama puan (varsa)")
+    reviews: int | None = Field(default=None, description="Yorum sayısı (varsa; Play aramada genelde yok)")
+    platform: StoreSearchPlatform
+
+
+class StoreSearchResponse(BaseModel):
+    results: list[StoreSearchResultItem] = Field(default_factory=list)
