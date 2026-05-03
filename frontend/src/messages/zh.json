@@ -1,9 +1,10 @@
 {
   "navigation": {
-    "dashboard": "控制台",
-    "apps": "应用",
-    "compare": "对比",
-    "sidebarNav": "Main menu"
+    "dashboard": "Dashboard",
+    "apps": "Apps",
+    "compare": "Compare",
+    "sidebarNav": "Main menu",
+    "analyze": "Analyze"
   },
   "common": {
     "save": "保存",
@@ -104,5 +105,34 @@
     "emptyTitle": "Compare apps",
     "emptyDescription": "Side-by-side metrics for multiple apps will arrive in a future update. For now, manage apps and run imports from the Apps page.",
     "cta": "Go to apps"
+  },
+  "analyzeHub": {
+    "title": "Review analysis",
+    "subtitle": "Search the store, bring your own file or pasted reviews, then compare apps when you are ready.",
+    "noClerk": "Add NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY and sign in to use store search and imports.",
+    "tablistLabel": "Analysis source",
+    "tabStore": "Store",
+    "tabFile": "File",
+    "tabText": "Text",
+    "tabCompare": "Compare apps",
+    "searchLabel": "Search app or paste store link / id",
+    "searchPlaceholder": "e.g. döviz or com.example.app",
+    "searchAction": "Search",
+    "searchHint": "Press Enter or Search. Results come from Google Play or the App Store catalog.",
+    "platformAndroid": "Android",
+    "platformIos": "iOS",
+    "resultsHeading": "{count, plural, =0 {No matches} one {# app found} other {# apps found}}",
+    "noResults": "No apps matched. Try another keyword or switch platform.",
+    "ratingShort": "{score} / 5",
+    "selectApp": "Select",
+    "appLinked": "App added — open the app to run an import and analysis.",
+    "storeFooter": "After you select an app, pick a date range on the app page and start an import. Heuristic and AI analysis run from the Analytics screen.",
+    "fileBody": "Upload CSV or JSON exports from your review tools. Parsing and analysis pipelines will plug in here without changing the rest of the stack.",
+    "fileDropHint": "Drag and drop will appear in a follow-up release.",
+    "fileActionSoon": "Upload (coming soon)",
+    "textBody": "Paste raw review text (one review per line or a single block). A dedicated fast-analysis flow will attach to the same backend workers.",
+    "textPlaceholder": "Paste reviews here…",
+    "textActionSoon": "Analyze pasted text (coming soon)",
+    "compareIntro": "Side-by-side comparison for multiple saved apps lives here; full charts will reuse the same API as single-app analytics."
   }
 }

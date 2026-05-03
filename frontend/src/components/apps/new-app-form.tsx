@@ -4,7 +4,8 @@ import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -18,12 +19,15 @@ import { queryKeys } from "@/lib/query-keys";
 import { createAppCreateSchema, type AppCreateFormValues } from "@/schemas/app-create";
 import type { AppDto } from "@/types/app";
 
+const platforms = ["google_play", "app_store", "both"] as const;
+
 export function NewAppForm() {
   const t = useTranslations("apps");
   const tCommon = useTranslations("common");
   const { getToken } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const searchParams = useSearchParams();
 
   const schema = useMemo(() => createAppCreateSchema((key) => t(key)), [t]);
 
@@ -39,6 +43,30 @@ export function NewAppForm() {
       icon_url: "",
     },
   });
+
+  useEffect(() => {
+    const p = searchParams.get("platform");
+    const platform =
+      p && platforms.includes(p as (typeof platforms)[number]) ? (p as AppCreateFormValues["platform"]) : undefined;
+    const package_name = searchParams.get("package_name")?.trim() ?? "";
+    const bundle_id = searchParams.get("bundle_id")?.trim() ?? "";
+    const name = searchParams.get("name")?.trim() ?? "";
+    const developer = searchParams.get("developer")?.trim() ?? "";
+    const category = searchParams.get("category")?.trim() ?? "";
+    const icon_url = searchParams.get("icon_url")?.trim() ?? "";
+    if (!platform && !package_name && !bundle_id && !name && !developer && !category && !icon_url) {
+      return;
+    }
+    form.reset({
+      platform: platform ?? "google_play",
+      package_name,
+      bundle_id,
+      name,
+      developer,
+      category,
+      icon_url,
+    });
+  }, [form, searchParams]);
 
   const mutation = useMutation({
     mutationFn: async (values: AppCreateFormValues) => {

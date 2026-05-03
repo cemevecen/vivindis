@@ -1,6 +1,7 @@
 {
   "navigation": {
     "dashboard": "Panel",
+    "analyze": "Analiz",
     "apps": "Uygulamalar",
     "compare": "Karşılaştır",
     "sidebarNav": "Ana menü"
@@ -14,6 +15,35 @@
     "empty": "Henüz veri yok",
     "retry": "Yeniden dene",
     "toastNetwork": "Ağ hatası. Bağlantınızı ve API adresini kontrol edin."
+  },
+  "analyzeHub": {
+    "title": "Yorum analizi",
+    "subtitle": "Mağazadan arayın, dosya veya yapıştırılmış yorumlarla ilerleyin; hazır olunca uygulamaları karşılaştırın.",
+    "noClerk": "Mağaza araması ve içe aktarma için NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ekleyip oturum açın.",
+    "tablistLabel": "Analiz kaynağı",
+    "tabStore": "Mağaza",
+    "tabFile": "Dosya",
+    "tabText": "Metin",
+    "tabCompare": "Uygulama karşılaştır",
+    "searchLabel": "Uygulama ara veya mağaza linki / id yapıştır",
+    "searchPlaceholder": "ör. döviz veya com.ornek.app",
+    "searchAction": "Ara",
+    "searchHint": "Enter veya Ara. Sonuçlar Google Play veya App Store kataloğundan gelir.",
+    "platformAndroid": "Android",
+    "platformIos": "iOS",
+    "resultsHeading": "{count, plural, =0 {Sonuç yok} one {# uygulama bulundu} other {# uygulama bulundu}}",
+    "noResults": "Eşleşen uygulama yok. Başka anahtar kelime deneyin veya platformu değiştirin.",
+    "ratingShort": "{score} / 5",
+    "selectApp": "Seç",
+    "appLinked": "Uygulama eklendi — içe aktarma ve analiz için uygulama sayfasını açın.",
+    "storeFooter": "Uygulama seçtikten sonra uygulama sayfasında tarih aralığı seçip içe aktarma başlatın. Heuristic ve AI analizi Analitik ekranından çalışır.",
+    "fileBody": "Kendi yorum araçlarınızdan CSV veya JSON yükleyin. Ayrıştırma ve analiz hatları buraya bağlanacak; geri kalan mimari aynı kalır.",
+    "fileDropHint": "Sürükle-bırak bir sonraki sürümde eklenecek.",
+    "fileActionSoon": "Dosya yükle (yakında)",
+    "textBody": "Ham yorum metnini yapıştırın (satır satır veya tek blok). Hızlı analiz akışı aynı backend worker’larına bağlanacak.",
+    "textPlaceholder": "Yorumları buraya yapıştırın…",
+    "textActionSoon": "Yapıştırılan metni analiz et (yakında)",
+    "compareIntro": "Birden fazla kayıtlı uygulama için yan yana karşılaştırma burada; grafikler tek uygulama analitiğiyle aynı API’yi kullanacak."
   },
   "compare": {
     "emptyTitle": "Uygulamaları karşılaştır",
