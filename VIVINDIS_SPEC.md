@@ -74,9 +74,9 @@ Vivindis, uygulama geliştiricilerin ve uygulama sahiplerinin Google Play Store 
 | Adres | Servis |
 |--------|--------|
 | localhost:3000 | Next.js |
-| localhost:8000 | FastAPI (`/docs`) |
+| localhost:8001 | FastAPI (`/docs`) — Docker Compose varsayılanı (host 8000 çakışmasını önlemek için) |
 | localhost:5555 | Flower |
-| localhost:5432 | PostgreSQL |
+| localhost:5433 | PostgreSQL (Docker host eşlemesi; konteyner ağında `postgres:5432`) |
 | localhost:6379 | Redis |
 
 ## Production

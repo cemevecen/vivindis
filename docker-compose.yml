@@ -10,7 +10,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-vivindis}
       POSTGRES_DB: ${POSTGRES_DB:-vivindis}
     ports:
-      - "5432:5432"
+      # Yerelde 5432 doluysa çakışmayı önlemek için host tarafı 5433.
+      - "5433:5432"
     volumes:
       - vivindis_pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -40,13 +41,14 @@ services:
       CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
       CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
       SECRET_KEY: ${SECRET_KEY:-change-me-in-env}
-      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
       GEMINI_MODEL: ${GEMINI_MODEL:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
     ports:
-      - "8000:8000"
+      # Yerelde 8000 başka bir servise aitse Vivindis’e 8001 üzerinden erişin.
+      - "8001:8000"
     volumes:
       - ./backend:/app
     working_dir: /app
@@ -107,7 +109,7 @@ services:
     image: node:20-bookworm-slim
     working_dir: /app
     environment:
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8001}
       NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:-}
       CLERK_SECRET_KEY: ${CLERK_SECRET_KEY:-}
     ports:

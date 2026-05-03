@@ -16,5 +16,6 @@ docker compose up --build
 ```
 
 - Frontend: http://localhost:3000  
-- API: http://localhost:8000/docs  
+- API: http://localhost:8001/docs (Compose’ta host portu 8001; konteyner içi 8000)  
 - Flower: http://localhost:5555  
+- PostgreSQL (host): `localhost:5433` → konteyner `postgres:5432`  

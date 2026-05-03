@@ -1,6 +1,6 @@
 /**
  * Tüm backend çağrıları bu modülden yapılacak (Oturum 3+).
- * Base URL: `NEXT_PUBLIC_API_URL` (boşsa aynı origin — yerelde genelde http://localhost:8000).
+ * Base URL: `NEXT_PUBLIC_API_URL` (boşsa aynı origin; Docker Compose’ta genelde http://localhost:8001).
  */
 
 const getBaseUrl = (): string => {
