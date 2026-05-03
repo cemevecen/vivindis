@@ -1,0 +1,44 @@
+# Üretim API + site canlılığı (Railway / Vercel deploy sonrası doğrulama).
+# Store araması auth ister; route yoksa 404, route varsa 401 döner — 404’ü başarısız sayarız.
+name: Production smoke
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * *"
+
+concurrency:
+  group: production-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROD_API: https://api.vivindis.com
+  PROD_SITE: https://www.vivindis.com
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: GET /health
+        run: |
+          set -euo pipefail
+          curl -sfS "$PROD_API/health" | grep -q '"status"' || curl -sfS "$PROD_API/health" | grep -q ok
+
+      - name: OpenAPI şeması (route kaydı)
+        run: curl -sfS "$PROD_API/openapi.json" | grep -q '"openapi"'
+
+      - name: Store search route (404 = eski imaj / yanlış servis)
+        run: |
+          set -euo pipefail
+          code=$(curl -sS -o /dev/null -w "%{http_code}" \
+            "$PROD_API/api/v1/store/search?q=smoke12&platform=google_play&country=tr&lang=tr&num=1")
+          echo "HTTP $code (beklenen: 401 yetkisiz veya 200 — asla 404)"
+          test "$code" != "404"
+
+  site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ana site (TR)
+        run: curl -sfS -o /dev/null -w "HTTP %{http_code}\n" "$PROD_SITE/tr"

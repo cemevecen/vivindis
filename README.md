@@ -82,6 +82,13 @@ DNS’te `api` genelde Railway’e **CNAME** ile gider; kök/`www` kayıtları V
 
 [Railway Nixpacks](https://docs.railway.com/) ile kökten Python kurulumu için [nixpacks.toml](./nixpacks.toml) vardır. Servis **Dockerfile** kullanıyorsa (`railway.json`) Nixpacks devre dışı kalır; çakışma olursa Railway arayüzünde builder’ı kontrol edin.
 
+### Canlı tutma (Railway + Vercel)
+
+- **Vercel:** Production branch = `main`, Root Directory = `frontend`, Output Directory boş, `main` push’ta otomatik deploy açık olsun.  
+- **Railway:** Aynı repo + `main`, Dockerfile build; backend veya `railway.json` / `backend/Dockerfile` değişince API servisi yeniden deploy edilsin.  
+- **Yeni endpoint’ler:** Örn. `GET /api/v1/store/search` — deploy sonrası [OpenAPI](https://api.vivindis.com/docs) içinde görünmeli; yanıt **404** ise genelde **eski imaj** veya yanlış DNS.  
+- **Otomatik kontrol:** GitHub’da **Actions → Production smoke** (`main` push, günlük cron, elle tetikleme) — `/health`, `/openapi.json`, store route’un **404 olmaması**. Ayrıntı: [docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md).
+
 ---
 
 Ayrıntılı oturum geçmişi, API listesi ve kod kuralları için [VIVINDIS_SPEC.md](./VIVINDIS_SPEC.md).
