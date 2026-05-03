@@ -43,7 +43,9 @@
     "textBody": "Paste raw review text (one review per line or a single block). A dedicated fast-analysis flow will attach to the same backend workers.",
     "textPlaceholder": "Paste reviews here…",
     "textActionSoon": "Analyze pasted text (coming soon)",
-    "compareIntro": "Side-by-side comparison for multiple saved apps lives here; full charts will reuse the same API as single-app analytics."
+    "compareIntro": "Side-by-side comparison for multiple saved apps lives here; full charts will reuse the same API as single-app analytics.",
+    "searchFailed": "Store search failed.",
+    "apiUrlMissing": "NEXT_PUBLIC_API_URL is not set. Requests go to this site instead of the FastAPI backend — set the URL in your deployment (e.g. Vercel env) or add a rewrite for /api/v1."
   },
   "compare": {
     "emptyTitle": "Compare apps",

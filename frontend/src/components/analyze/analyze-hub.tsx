@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "@/i18n/routing";
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, formatClientFetchError, isPublicApiBaseUrlConfigured } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AppDto } from "@/types/app";
@@ -163,6 +163,11 @@ function AnalyzeHubConnected() {
               </Button>
             </div>
             <p className="text-xs text-muted-foreground">{t("searchHint")}</p>
+            {!isPublicApiBaseUrlConfigured() ? (
+              <p className="rounded-md border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:text-amber-100">
+                {t("apiUrlMissing")}
+              </p>
+            ) : null}
           </div>
 
           {activeQuery.length >= 2 ? (
@@ -173,7 +178,15 @@ function AnalyzeHubConnected() {
               {searchQuery.isPending ? (
                 <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
               ) : searchQuery.isError ? (
-                <p className="text-sm text-destructive">{tCommon("error")}</p>
+                <div className="space-y-2 rounded-md border border-destructive/30 bg-destructive/5 p-3">
+                  <p className="text-sm font-medium text-destructive">{t("searchFailed")}</p>
+                  <p className="text-sm text-destructive/90 break-words">
+                    {formatClientFetchError(searchQuery.error)}
+                  </p>
+                  <Button type="button" variant="outline" size="sm" onClick={() => searchQuery.refetch()}>
+                    {tCommon("retry")}
+                  </Button>
+                </div>
               ) : !searchQuery.data?.length ? (
                 <p className="text-sm text-muted-foreground">{t("noResults")}</p>
               ) : (

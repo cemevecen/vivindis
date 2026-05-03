@@ -8,6 +8,59 @@ const getBaseUrl = (): string => {
   return raw ?? "";
 };
 
+/** Client-side: true when `NEXT_PUBLIC_API_URL` was set at build time. */
+export function isPublicApiBaseUrlConfigured(): boolean {
+  return Boolean(process.env.NEXT_PUBLIC_API_URL?.trim());
+}
+
+function detailToMessage(parsed: unknown, statusText: string): string {
+  if (typeof parsed !== "object" || parsed === null) {
+    return statusText;
+  }
+  const o = parsed as Record<string, unknown>;
+  const detail = o.detail;
+  if (typeof detail === "string" && detail.length > 0) {
+    return detail;
+  }
+  if (Array.isArray(detail)) {
+    const parts = detail
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (typeof item === "object" && item !== null) {
+          const row = item as Record<string, unknown>;
+          if (typeof row.msg === "string") return row.msg;
+          if (typeof row.message === "string") return row.message;
+        }
+        return null;
+      })
+      .filter((x): x is string => Boolean(x));
+    if (parts.length > 0) return parts.join(" ");
+  }
+  if (typeof o.message === "string" && o.message.length > 0) {
+    return o.message;
+  }
+  return statusText;
+}
+
+function errorBodyToMessage(parsed: unknown, status: number, statusText: string): string {
+  if (typeof parsed === "string") {
+    const s = parsed.trim();
+    if (s.startsWith("<!DOCTYPE") || s.toLowerCase().startsWith("<html")) {
+      return `HTTP ${status}: Response was HTML (often a missing route or wrong host). Check NEXT_PUBLIC_API_URL.`;
+    }
+    if (s.length > 400) return `${s.slice(0, 400)}…`;
+    return s.length > 0 ? s : statusText;
+  }
+  return detailToMessage(parsed, statusText);
+}
+
+/** Human-readable message for thrown `ApiError` or network failures. */
+export function formatClientFetchError(error: unknown): string {
+  if (error instanceof ApiError) return error.message;
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 export type ApiErrorBody = { detail?: string; message?: string };
 
 export class ApiError extends Error {
@@ -69,10 +122,7 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
   }
 
   if (!res.ok) {
-    const msg =
-      typeof parsed === "object" && parsed !== null && "detail" in parsed
-        ? String((parsed as ApiErrorBody).detail ?? res.statusText)
-        : res.statusText;
+    const msg = errorBodyToMessage(parsed, res.status, res.statusText);
     throw new ApiError(msg, res.status, parsed);
   }
 
