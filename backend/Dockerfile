@@ -10,9 +10,11 @@ RUN apt-get update \
   && apt-get install -y --no-install-recommends build-essential libpq-dev \
   && rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml README.md alembic.ini ./
-COPY app ./app
-COPY alembic ./alembic
+# Build context must be the monorepo root (see docker-compose.yml).
+# Paths are prefixed with backend/ so Railway and `docker build -f backend/Dockerfile .` work.
+COPY backend/pyproject.toml backend/README.md backend/alembic.ini ./
+COPY backend/app ./app
+COPY backend/alembic ./alembic
 
 RUN pip install --upgrade pip setuptools wheel \
   && pip install --no-cache-dir -e .
