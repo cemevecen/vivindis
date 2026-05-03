@@ -1,18 +1,12 @@
-:root {
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  line-height: 1.5;
-  color: #0f172a;
-  background: #f1f5f9;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-a {
-  color: #0369a1;
+@layer base {
+  html {
+    @apply antialiased text-ink bg-slate-100;
+  }
+  code {
+    @apply rounded bg-slate-200 px-1 py-0.5 text-sm text-ink;
+  }
 }

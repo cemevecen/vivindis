@@ -1,40 +1,27 @@
 from __future__ import annotations
 
-import io
 from typing import Any
 
-import pandas as pd
-from fastapi import APIRouter, File, UploadFile
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends, File, UploadFile
 
-from vivindis.fetchers.file_loader import load_reviews_from_dataframe
-from vivindis.fetchers.paste_loader import parse_pasted_reviews
+from vivindis.web.dependencies import get_reviews_service
+from vivindis.web.schemas.reviews import PasteBody
+from vivindis.web.services.reviews_service import ReviewsService
 
 router = APIRouter(prefix="/reviews", tags=["reviews"])
 
 
-class PasteBody(BaseModel):
-    text: str
-
-
 @router.post("/upload")
-async def upload_reviews(file: UploadFile = File(...)) -> dict[str, Any]:
-    raw = await file.read()
-    name = (file.filename or "").lower()
-    try:
-        if name.endswith(".csv"):
-            df = pd.read_csv(io.BytesIO(raw))
-        elif name.endswith(".xlsx") or name.endswith(".xls"):
-            df = pd.read_excel(io.BytesIO(raw))
-        else:
-            return {"error": "unsupported_file_type", "reviews": []}
-        pool = load_reviews_from_dataframe(df)
-        return {"filename": file.filename, "count": len(pool), "reviews": pool}
-    except Exception as e:
-        return {"error": str(e), "reviews": []}
+async def upload_reviews(
+    file: UploadFile = File(...),
+    svc: ReviewsService = Depends(get_reviews_service),
+) -> dict[str, Any]:
+    return await svc.upload(file)
 
 
 @router.post("/paste")
-def paste_reviews(body: PasteBody) -> dict[str, Any]:
-    pool = parse_pasted_reviews(body.text or "")
-    return {"count": len(pool), "reviews": pool}
+def paste_reviews(
+    body: PasteBody,
+    svc: ReviewsService = Depends(get_reviews_service),
+) -> dict[str, Any]:
+    return svc.paste(body.text)

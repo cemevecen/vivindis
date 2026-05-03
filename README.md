@@ -30,11 +30,12 @@ Sadece API: `make api` veya `.venv/bin/vivindis-api --reload`
 
 | Bölüm | Rol |
 |-------|-----|
-| **`vivindis/`** | Kütüphane: `config`, `core`, `fetchers`, `utils`, `data`, `branding` |
-| **`vivindis/web/`** | FastAPI uygulaması: `main.py`, `routers/*` |
-| **`frontend/`** | SPA; geliştirmede Vite proxy ile `/api` → backend |
+| **`vivindis/`** | Çekirdek: `config`, `core`, `fetchers`, `utils`, `data`, `branding` |
+| **`vivindis/web/`** | `factory.py`, `routers/`, `schemas/`, `services/`, `dependencies.py` — Streamlit yok |
+| **`frontend/src/`** | `app/`, `pages/`, `widgets/`, `shared/` — Tailwind + React Router |
+| **`frontend/`** | Vite; geliştirmede `/api` → backend proxy |
 
-Bağımlılık kaynağı: **`pyproject.toml`** (tek doğruluk). `pip install -e ".[api]"` hem kütüphaneyi hem API eklerini kurar. `requirements.txt` yalnızca `-e .[api]` ile uyumluluk içindir.
+Bağımlılık: **`pyproject.toml`**. `pip install -e ".[api]"` · `requirements.txt` → `-e .[api]`.
 
 ---
 
