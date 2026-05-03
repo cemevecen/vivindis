@@ -54,13 +54,15 @@ DNS’te `api` genelde Railway’e **CNAME** ile gider; kök/`www` kayıtları V
 1. Projeyi GitHub’dan import edin.  
 2. **Settings → General → Root Directory:** `frontend` (zorunlu; monorepo kökünde `package.json` yok).  
 3. **Framework:** Next.js (otomatik algılanır).  
-4. **Environment Variables (Production)** örnekleri:  
+4. **Settings → Build & Development → Output Directory:** **boş bırakın.**  
+   Yanlışlıkla `public` veya `.next` yazılırsa build biter ama deploy **“No Output Directory named public”** ile düşer; Next çıktısı Vercel tarafından yönetilir.  
+5. **Environment Variables (Production)** örnekleri:  
    - `NEXT_PUBLIC_API_URL` — canlı API **kökü** (`https://api…`, `/api/v1` **yok**)  
    - **veya** (CORS’u baypas): `BACKEND_ORIGIN` aynı kök + `NEXT_PUBLIC_API_URL` boş → site üzerinden `/api/v1` proxy  
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`  
    - İsteğe bağlı: `NEXT_PUBLIC_APP_URL` — kendi sitenizin kök URL’si  
 
-Kökte **`vercel.json` kullanılmıyor**; monorepo için yeterli ayar Root Directory + env değişkenleridir.
+`frontend/vercel.json` framework’ü **nextjs** olarak sabitler; monorepo için asıl ayar yine **Root Directory = `frontend`** ve env değişkenleridir.
 
 ### Railway (backend)
 
