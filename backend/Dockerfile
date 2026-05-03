@@ -22,5 +22,6 @@ RUN pip install --upgrade pip setuptools wheel \
   && pip install --no-cache-dir -e . \
   && pip install --no-cache-dir --upgrade --no-deps "urllib3>=1.26.18,<2"
 
+# Railway (ve benzeri) çalışma zamanında PORT enjekte eder; sabit 8000 healthcheck’i düşürür.
 EXPOSE 8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

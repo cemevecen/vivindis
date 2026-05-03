@@ -18,6 +18,8 @@ Bu repoda panellere doğrudan erişim yok; **deploy ayarları** ve **GitHub Acti
 
 | Kontrol | Açıklama |
 |--------|-----------|
+| **Root Directory** | **Boş / monorepo kökü** — `backend/Dockerfile` yolu için gerekli; servis `backend` alt klasörüne kilitlenirse build “Dockerfile skipped” / yanlış context verebilir. |
+| **PORT** | Railway dinlemeyi **`$PORT`** üzerinden yapar. `railway.json` ve `backend/Dockerfile` **`${PORT:-8000}`** kullanır; sabit `--port 8000` healthcheck’te *service unavailable* üretir. |
 | **Kaynak** | Aynı GitHub repo, **`main`**. |
 | **Builder** | Kökteki [railway.json](../railway.json): **Dockerfile** `backend/Dockerfile`, context **repo kökü**. |
 | **Start** | `uvicorn app.main:app --host 0.0.0.0 --port 8000` |
