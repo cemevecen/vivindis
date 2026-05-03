@@ -6,8 +6,9 @@ export type StoreSearchResultItem = {
   developer: string | null;
   icon: string | null;
   rating: number | null;
-  reviews: number | null;
+  review_count: number | null;
   platform: StoreSearchPlatform;
+  store_url: string | null;
 };
 
 export type StoreSearchResponse = {

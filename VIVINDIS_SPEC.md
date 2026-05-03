@@ -39,7 +39,7 @@ Temel akış:
 - `app/models/*` — `User`, `App`, `ReviewFetch`, `Review`, `Analysis` + enum’lar; ilişkiler ve kısıtlar (rating 1–5, `platform`+`store_review_id` unique)
 - `alembic/` + `alembic.ini` — async env; ilk migration: **`4a66a17abb57_initial_schema`**
 - `pyproject.toml` — FastAPI, Pydantic v2, SQLAlchemy async, asyncpg, Alembic, Celery+redis, httpx, google-play-scraper, app-store-scraper, google-generativeai, langdetect, **flower**
-- `app/api/v1/` — `auth`, `apps`, `reviews` (fetch tekil), `analysis`, **`store`** (`GET /store/search` → `{ results: [...] }`); `deps.py` (`get_current_user`, `require_app_owned`)
+- `app/api/v1/` — `auth`, `apps`, `reviews` (fetch tekil), `analysis`, **`store`** (`GET /store/search?q=&platform=google_play|app_store|both&country=&lang=&num=20` → `{ results: [{ id, name, developer, icon, rating, review_count, platform, store_url }] }`); `deps.py` (`get_current_user`, `require_app_owned`)
 - `app/schemas/` — Pydantic v2 Create/Update/Response şemaları
 - `app/core/security.py` — Clerk oturum JWT (PyJWT + JWKS); `app/core/logging.py` — structlog
 - `app/workers/` — `review_fetch_task` (scraper), `heuristic_analysis_task`, `ai_analysis_task` (analysis); `app/services/gemini.py` batch + merge

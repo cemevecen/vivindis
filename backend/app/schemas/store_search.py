@@ -10,15 +10,16 @@ StoreSearchPlatform = Literal["google_play", "app_store"]
 
 
 class StoreSearchResultItem(BaseModel):
-    """Tek arama satırı — frontend mağaza seçimi ile uyumlu."""
+    """Tek arama satırı."""
 
-    id: str = Field(..., max_length=255, description="Play: package name; App Store: sayısal trackId")
+    id: str = Field(..., max_length=255, description="Play: package name; App Store: trackId")
     name: str = Field(default="", max_length=512)
     developer: str | None = Field(default=None, max_length=512)
     icon: str | None = Field(default=None, max_length=2048)
-    rating: float | None = Field(default=None, description="Ortalama puan (varsa)")
-    reviews: int | None = Field(default=None, description="Yorum sayısı (varsa; Play aramada genelde yok)")
+    rating: float | None = Field(default=None, description="Ortalama puan")
+    review_count: int | None = Field(default=None, description="Yorum sayısı (varsa)")
     platform: StoreSearchPlatform
+    store_url: str | None = Field(default=None, max_length=2048)
 
 
 class StoreSearchResponse(BaseModel):

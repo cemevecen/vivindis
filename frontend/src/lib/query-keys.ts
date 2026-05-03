@@ -1,6 +1,7 @@
 export const queryKeys = {
   store: {
-    search: (q: string, platform: string) => ["store", "search", q, platform] as const,
+    search: (q: string, platform: string, lang: string, country: string) =>
+      ["store", "search", q, platform, lang, country] as const,
   },
   apps: {
     all: ["apps"] as const,

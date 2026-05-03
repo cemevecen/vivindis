@@ -36,6 +36,7 @@ def create_app() -> FastAPI:
     )
 
     application.include_router(api_router, prefix="/api/v1")
+    # Mağaza araması: ``GET /api/v1/store/search`` — ``app.api.v1.store`` router’ı ``api_router`` ile dahil edilir.
 
     @application.get("/health")
     def health() -> dict[str, str]:
