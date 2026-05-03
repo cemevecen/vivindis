@@ -5,6 +5,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
+//
+
 export default async function LocaleHomePage() {
   const tNav = await getTranslations("navigation");
   const tAuth = await getTranslations("auth");
