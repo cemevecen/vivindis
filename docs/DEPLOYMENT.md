@@ -10,7 +10,7 @@ Bu repoda panellere doğrudan erişim yok; **deploy ayarları** ve **GitHub Acti
 | **Root Directory** | **`frontend`** |
 | **Output Directory** | **Boş** (Next için zorunlu). |
 | **Otomatik deploy** | Git entegrasyonu: `main` push → Production deploy. |
-| **Env** | `NEXT_PUBLIC_API_URL=https://api.vivindis.com` (köksüz) **veya** `BACKEND_ORIGIN` + boş `NEXT_PUBLIC_API_URL` (proxy). Clerk anahtarları güncel. |
+| **Env** | `NEXT_PUBLIC_API_URL=https://api.vivindis.com` (köksüz) **veya** `BACKEND_ORIGIN` + **boş / silinmiş** `NEXT_PUBLIC_API_URL` (aynı-origin proxy). İkinci modda istemci `/api/v1/*` çağırır; Vercel ya `next.config` **rewrites** (build’te `BACKEND_ORIGIN` varsa) ya da `frontend/src/app/api/v1/[...path]/route.ts` ile **runtime** `BACKEND_ORIGIN` kullanır. Clerk anahtarları güncel. |
 
 `frontend/vercel.json` framework’ü **nextjs** olarak sabitler.
 
