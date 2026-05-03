@@ -1,105 +1,81 @@
 # Vivindis
 
-**Vivindis** — Google Play ve App Store (ve dosya / yapıştırma) kaynaklı kullanıcı yorumlarını analiz eden ürün. **Arayüz: React (Vite) · API: FastAPI · Analiz motoru: Python `vivindis` paketi.** Streamlit kullanılmaz.
+Google Play ve App Store yorumlarını toplayıp duygu analizi yapan ürün. **Tek Python paketi** (`vivindis`): çekirdek mantık + **`vivindis.web`** HTTP API (FastAPI). **Arayüz:** `frontend/` (React + Vite).
 
-**Depo:** [github.com/cemevecen/vivindis](https://github.com/cemevecen/vivindis) · **Alan adı:** [vivindis.com](https://vivindis.com) — üretimde kendi sunucunda Nginx/Caddy arkasında `uvicorn` + statik `frontend/dist` yayınlanır.
+---
+
+## Hızlı başlangıç (yerel)
+
+```bash
+git clone https://github.com/cemevecen/vivindis.git && cd vivindis
+./scripts/bootstrap.sh    # venv + pip install -e ".[api]" + npm ci
+./scripts/dev.sh          # API :8000 + Vite :5173 (Ctrl+C kapatır)
+```
+
+Veya **Make**:
+
+```bash
+make install   # install-py + install-js
+make dev       # ./scripts/dev.sh ile aynı
+```
+
+- Arayüz: [http://127.0.0.1:5173](http://127.0.0.1:5173)  
+- API şeması: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+
+Sadece API: `make api` veya `.venv/bin/vivindis-api --reload`
 
 ---
 
 ## Mimari
 
-```text
-frontend/          # React + TypeScript (Vite)
-backend/app/       # FastAPI — /api/v1/…
-vivindis/          # Çekirdek: fetchers, analyzer, i18n, utils (Streamlit yok)
-```
+| Bölüm | Rol |
+|-------|-----|
+| **`vivindis/`** | Kütüphane: `config`, `core`, `fetchers`, `utils`, `data`, `branding` |
+| **`vivindis/web/`** | FastAPI uygulaması: `main.py`, `routers/*` |
+| **`frontend/`** | SPA; geliştirmede Vite proxy ile `/api` → backend |
 
-| Katman | Görev |
-|--------|--------|
-| **frontend** | Kullanıcı arayüzü; `/api` istekleri (geliştirmede Vite proxy, üretimde aynı origin veya CORS). |
-| **backend** | REST API, dosya yükleme, mağaza arama/çekme, analiz çağrıları. |
-| **vivindis** | Heuristik / LLM analizi, mağaza istemcileri, PDF/Excel yardımcıları. |
+Bağımlılık kaynağı: **`pyproject.toml`** (tek doğruluk). `pip install -e ".[api]"` hem kütüphaneyi hem API eklerini kurar. `requirements.txt` yalnızca `-e .[api]` ile uyumluluk içindir.
 
 ---
 
-## Yerel geliştirme
-
-**1) Python bağımlılıkları** (repo kökü):
+## Docker (isteğe bağlı)
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+docker compose up --build api
 ```
 
-**2) API** (repo kökünden):
-
-```bash
-./scripts/run_api.sh
-```
-
-Varsayılan: `http://127.0.0.1:8000` — OpenAPI şeması: `http://127.0.0.1:8000/docs`
-
-**3) Web arayüzü**
-
-```bash
-cd frontend && npm install && npm run dev
-```
-
-Tarayıcı: `http://127.0.0.1:5173` — Vite, `/api` isteklerini 8000 portuna yönlendirir.
-
-Zengin (LLM) analiz için repo kökünde `.env` (bkz. `.env.example`); anahtarlar yalnızca sunucu ortamında tutulur.
+API [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs). İstersen `docker-compose.yml` içine `GEMINI_API_KEY` vb. `environment` ekleyebilirsin.
 
 ---
 
-## Üretim (özet)
+## Üretim notu
 
-1. `cd frontend && npm run build` → `frontend/dist/`.
-2. Sunucuda `PYTHONPATH=<repo_kökü> uvicorn backend.app.main:app --host 127.0.0.1 --port 8000` (systemd veya benzeri).
-3. İsteğe bağlı: `SERVE_FRONTEND=1` ile FastAPI aynı süreçte `frontend/dist` sunar; çoğu kurulumda Nginx statik dosyayı servis eder, `/api`yi `uvicorn`a vekil eder.
-4. **HTTPS:** Let’s Encrypt (Certbot / Caddy).
-5. **GoDaddy DNS:** `@` ve `www` için sunucu **A** kaydı veya CDN ters vekili.
+1. `cd frontend && npm run build` → `frontend/dist/`.  
+2. `SERVE_FRONTEND=1` ile `vivindis.web.main` statik dosyayı aynı süreçte sunabilir; çoğu kurulumda Nginx/Caddy ile `/` → `dist`, `/api` → uvicorn tercih edilir.  
+3. HTTPS: Let’s Encrypt veya barındırıcı sertifikası.
 
 ---
 
-## API uçları (önek)
+## API özeti
 
-| Yöntem | Yol | Açıklama |
-|--------|-----|----------|
-| GET | `/api/v1/health` | Sağlık kontrolü |
-| GET | `/api/v1/i18n/bundle?lang=tr` | Çeviri paketi |
-| POST | `/api/v1/reviews/upload` | CSV / XLSX yükleme |
-| POST | `/api/v1/reviews/paste` | Yapıştırılmış metin |
-| POST | `/api/v1/analyze` | Heuristik veya LLM analizi |
-| POST | `/api/v1/apps/search` | Mağaza araması |
-| POST | `/api/v1/apps/resolve` | Link / ID çözümleme |
-| POST | `/api/v1/apps/fetch-reviews` | Seçilen uygulama yorumlarını çekme |
+| Yöntem | Yol |
+|--------|-----|
+| GET | `/api/v1/health` |
+| GET | `/api/v1/i18n/bundle?lang=tr` |
+| POST | `/api/v1/reviews/upload`, `/api/v1/reviews/paste` |
+| POST | `/api/v1/analyze` |
+| POST | `/api/v1/apps/search`, `/resolve`, `/fetch-reviews` |
 
-Dil: istek başlığı **`X-App-Lang: tr`** veya sorgu **`?lang=en`**.
-
----
-
-## Depo yapısı
-
-```text
-backend/app/main.py       # FastAPI giriş
-backend/app/routers/      # health, i18n, reviews, analyze, apps
-frontend/src/             # React uygulaması
-vivindis/config/          # i18n (contextvars), settings
-vivindis/core/            # analyzer, LLM sağlayıcıları
-vivindis/fetchers/        # Play, App Store, dosya, yapıştırma
-vivindis/utils/           # CSV/Excel/PDF, doğrulama
-scripts/run_api.sh        # Yerel API başlatıcı
-```
+Dil: başlık **`X-App-Lang`** veya **`?lang=`**.
 
 ---
 
 ## Gizlilik
 
-API anahtarlarını repoya koymayın. **Hızlı (heuristic)** modda yorum metni dışarı gönderilmez; **zengin** modda metin yapılandırdığınız LLM sağlayıcısına gider.
+API anahtarlarını repoya koymayın; `.env` (git dışı) veya barındırıcı secret store kullanın.
 
 ---
 
 ## English
 
-Ingest Play/App Store reviews (or file/paste), classify sentiment, export CSV/Excel/PDF. **No Streamlit** — SPA + FastAPI + shared Python library.
+Monorepo: **editable Python package** + **FastAPI** in `vivindis.web` + **Vite/React** frontend. Install with `./scripts/bootstrap.sh` or `make install`, run with `./scripts/dev.sh` or `make dev`.

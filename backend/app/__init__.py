@@ -1,1 +1,0 @@
-"""Vivindis HTTP API (FastAPI)."""

@@ -1,4 +1,4 @@
-"""Hafif i18n katmanı (Streamlit yok).
+"""Hafif i18n katmanı.
 
 Dil, `contextvars` ile istek başına tutulur. FastAPI içinde
 `with use_ui_lang(code):` veya `set_ui_lang` / `reset_ui_lang` kullanın.
@@ -649,15 +649,16 @@ STRINGS: dict[str, dict[str, str]] = {
         "pt": "App {i}: entrada não resolvida.",
     },
     "compare.err_rich_api": {
-        "tr": "Zengin analiz için en az bir API anahtarı gerekir (.env veya Streamlit secrets).",
-        "en": "Rich analysis needs at least one API key (.env or Streamlit secrets).",
-        "es": "El análisis avanzado requiere al menos una clave API (.env o Streamlit secrets).",
-        "de": "Ausführliche Analyse benötigt mindestens einen API-Key (.env oder Streamlit-Secrets).",
-        "fr": "L'analyse enrichie nécessite au moins une clé API (.env ou Streamlit secrets).",
-        "ar": "يحتاج التحليل الغني إلى مفتاح API واحد على الأقل (.env أو Streamlit secrets).",
-        "zh": "丰富分析至少需要一个 API 密钥（.env 或 Streamlit secrets）。",
-        "ru": "Для расширенного анализа нужен хотя бы один API-ключ (.env или Streamlit secrets).",
-        "pt": "Análise avançada requer ao menos uma chave de API (.env ou Streamlit secrets).",
+        "tr": "Zengin analiz için en az bir API anahtarı gerekir (.env veya sunucu ortam değişkenleri).",
+        "en": "Rich analysis needs at least one API key (environment variables or your host secret store).",
+        "es": "El análisis avanzado requiere al menos una clave API (variables de entorno o almacén de secretos).",
+        "de": "Ausführliche Analyse benötigt mindestens einen API-Key (Umgebungsvariablen oder Secret-Store).",
+        "fr": "L'analyse enrichie nécessite au moins une clé API (variables d'environnement ou coffre de secrets).",
+        "ar": "يحتاج التحليل الغني إلى مفتاح API واحد على الأقل (متغيرات البيئة أو مخزن الأسرار).",
+        "zh": "丰富分析至少需要一个 API 密钥（环境变量或密钥托管）。",
+        "ru": "Для расширенного анализа нужен хотя бы один API-ключ (переменные среды или хранилище секретов).",
+        "pt": "Análise avançada requer ao menos uma chave de API (variáveis de ambiente ou armazenamento de segredos).",
+        "ja": "詳細分析には API キーが少なくとも1つ必要です（環境変数またはシークレットストア）。",
     },
     # --------- Downloads ---------
     "download.raw_section": {
@@ -1229,7 +1230,7 @@ def reset_ui_lang(token: Token | None) -> None:
 
 
 def set_lang(code: str) -> None:
-    """Geriye dönük uyum: dil bağlamını günceller (Streamlit session yok)."""
+    """Dil bağlamını günceller (`contextvars`)."""
     if code in _LANG_CODES:
         _ui_lang_ctx.set(code)
 

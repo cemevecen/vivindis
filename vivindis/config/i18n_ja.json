@@ -80,7 +80,7 @@
   "compare.warn_need_pools": "先に両方のアプリのレビュープールを準備してください。",
   "compare.err_unresolvable_long": "アプリ {i}: 入力を解決できません（`{raw}…`）",
   "compare.err_unresolvable": "アプリ {i}: 入力を解決できません。",
-  "compare.err_rich_api": "詳細分析には API キーが少なくとも1つ必要です（.env または Streamlit secrets）。",
+  "compare.err_rich_api": "詳細分析には API キーが少なくとも1つ必要です（環境変数またはシークレットストア）。",
   "download.raw_section": "生データをダウンロード（分析前）",
   "download.csv": "CSV をダウンロード",
   "download.excel": "Excel をダウンロード",

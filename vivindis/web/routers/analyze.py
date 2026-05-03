@@ -6,10 +6,10 @@ from typing import Any
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
+from vivindis.config.i18n import get_lang
 from vivindis.config.settings import Settings
 from vivindis.core.ai_providers import DEFAULT_MODELS, RichAnalyzer, resolve_api_keys
 from vivindis.core.analyzer import analyze_batch, dedupe_reviews
-from vivindis.config.i18n import get_lang
 from vivindis.utils.validators import is_valid_comment
 
 router = APIRouter(prefix="/analyze", tags=["analyze"])

@@ -9,7 +9,7 @@ from fastapi.staticfiles import StaticFiles
 
 from vivindis.config.i18n import DEFAULT_LANG, LANGUAGES, use_ui_lang
 
-from .routers import analyze, apps, health, i18n_api, reviews
+from vivindis.web.routers import analyze, apps, health, i18n_api, reviews
 
 _LANG_CODES = {code for code, _, _ in LANGUAGES}
 
@@ -43,6 +43,7 @@ app.include_router(reviews.router, prefix=API_PREFIX)
 app.include_router(analyze.router, prefix=API_PREFIX)
 app.include_router(apps.router, prefix=API_PREFIX)
 
-_dist = Path(__file__).resolve().parents[2] / "frontend" / "dist"
+_repo_root = Path(__file__).resolve().parents[2]
+_dist = _repo_root / "frontend" / "dist"
 if _dist.is_dir() and os.environ.get("SERVE_FRONTEND") == "1":
     app.mount("/", StaticFiles(directory=str(_dist), html=True), name="frontend")

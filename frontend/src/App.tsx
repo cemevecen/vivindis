@@ -58,7 +58,7 @@ export function App() {
       <header style={{ marginBottom: "1.5rem" }}>
         <h1 style={{ margin: 0, letterSpacing: "-0.02em" }}>Vivindis</h1>
         <p style={{ margin: "0.35rem 0 0", color: "#475569" }}>
-          Mağaza yorumu analizi — React arayüz + FastAPI backend (Streamlit yok).
+          Mağaza yorumu analizi — React (Vite) arayüz, FastAPI (`vivindis.web`) backend.
         </p>
       </header>
 
@@ -142,8 +142,8 @@ export function App() {
       )}
 
       <p style={{ marginTop: "2rem", fontSize: "0.85rem", color: "#64748b" }}>
-        Geliştirme: terminal 1 → <code>./scripts/run_api.sh</code> · terminal 2 →{" "}
-        <code>cd frontend && npm install && npm run dev</code>
+        Kurulum: <code>./scripts/bootstrap.sh</code> · Geliştirme: <code>./scripts/dev.sh</code> veya{" "}
+        <code>make dev</code>
       </p>
     </div>
   );

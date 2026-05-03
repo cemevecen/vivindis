@@ -3,8 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter
 
 from vivindis.config.i18n import DEFAULT_LANG, LANGUAGES, STRINGS, lang_meta
-
-from ..deps import normalize_lang
+from vivindis.web.deps import normalize_lang
 
 router = APIRouter(prefix="/i18n", tags=["i18n"])
 
@@ -16,7 +15,7 @@ def list_languages() -> list[dict[str, str]]:
 
 @router.get("/bundle")
 def translation_bundle(lang: str | None = None) -> dict[str, str | dict[str, str]]:
-    """Seçilen dil için tüm anahtar → metin (ince ayar için frontend cache)."""
+    """Seçilen dil için tüm anahtar → metin (frontend önbelleği)."""
     code = normalize_lang(lang)
     out: dict[str, str] = {}
     for key, variants in STRINGS.items():

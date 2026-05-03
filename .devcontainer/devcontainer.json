@@ -1,24 +1,19 @@
 {
-  "name": "Vivindis (FastAPI + Vite)",
-  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bookworm",
+  "name": "Vivindis",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.12-bookworm",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
-    }
+    "ghcr.io/devcontainers/features/node:1": { "version": "22" }
   },
+  "postCreateCommand": "pip3 install --user -e '.[api]' && cd frontend && npm ci",
   "customizations": {
-    "codespaces": {
-      "openFiles": ["README.md", "backend/app/main.py"]
-    },
     "vscode": {
-      "extensions": ["ms-python.python", "ms-python.vscode-pylance", "bradlc.vscode-tailwindcss"]
-    }
+      "extensions": ["ms-python.python", "ms-python.vscode-pylance", "esbenp.prettier-vscode"]
+    },
+    "codespaces": { "openFiles": ["README.md", "vivindis/web/main.py"] }
   },
-  "updateContentCommand": "pip3 install --user -r requirements.txt && cd frontend && npm install",
-  "postAttachCommand": "echo 'API: PYTHONPATH=$PWD .. && cd backend && uvicorn app.main:app --reload --host 0.0.0.0 --port 8000  |  Web: cd frontend && npm run dev'",
+  "forwardPorts": [8000, 5173],
   "portsAttributes": {
-    "8000": { "label": "API", "onAutoForward": "notify" },
-    "5173": { "label": "Vite", "onAutoForward": "openPreview" }
-  },
-  "forwardPorts": [8000, 5173]
+    "8000": { "label": "API" },
+    "5173": { "label": "Vite" }
+  }
 }

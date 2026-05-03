@@ -1,6 +1,6 @@
 """
 Mağaza uygulaması keşfi: Play arama (google-play-scraper) + App Store iTunes Search API.
-Doğrudan paket / ID / ürün URL çözümleme (eski streamlit_app mantığından sadeleştirilmiş).
+Doğrudan paket / ID / ürün URL çözümleme ve mağaza araması.
 """
 
 from __future__ import annotations
