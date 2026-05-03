@@ -1,15 +1,21 @@
 /**
  * Tüm backend çağrıları bu modülden yapılacak (Oturum 3+).
- * Base URL: `NEXT_PUBLIC_API_URL` (boşsa aynı origin; Docker Compose’ta genelde http://localhost:8001).
+ * Base URL: `NEXT_PUBLIC_API_URL` (köksüz; sonunda `/api/v1` **yok** — path zaten `/api/v1/...`).
+ * `NEXT_PUBLIC_USE_API_REWRITE=1` ise taban boş kalır; `next.config` içindeki rewrite aynı origin’den API’ye proxylanır.
  */
+
+const API_V1_PREFIX = "/api/v1";
 
 const getBaseUrl = (): string => {
   const raw = process.env.NEXT_PUBLIC_API_URL?.trim();
-  return raw ?? "";
+  if (raw) return raw;
+  if (process.env.NEXT_PUBLIC_USE_API_REWRITE === "1") return "";
+  return "";
 };
 
-/** Client-side: true when `NEXT_PUBLIC_API_URL` was set at build time. */
+/** İstemcinin API’ye gidebileceği bir yapılandırma var mı (doğrudan URL veya Next rewrite). */
 export function isPublicApiBaseUrlConfigured(): boolean {
+  if (process.env.NEXT_PUBLIC_USE_API_REWRITE === "1") return true;
   return Boolean(process.env.NEXT_PUBLIC_API_URL?.trim());
 }
 
@@ -85,9 +91,16 @@ export type ApiFetchInit = Omit<RequestInit, "body"> & {
 
 function buildUrl(path: string): string {
   const base = getBaseUrl().replace(/\/$/, "");
-  const p = path.startsWith("/") ? path : `/${path}`;
+  let p = path.startsWith("/") ? path : `/${path}`;
   if (!base) {
     return p;
+  }
+  // Yaygın hata: NEXT_PUBLIC_API_URL=https://api…/api/v1 iken path de /api/v1/... → 404
+  if (p.startsWith(API_V1_PREFIX) && /\/api\/v1$/i.test(base)) {
+    p = p.slice(API_V1_PREFIX.length);
+    if (!p.startsWith("/")) {
+      p = `/${p}`;
+    }
   }
   return `${base}${p}`;
 }
@@ -122,7 +135,12 @@ export async function apiFetch<T>(path: string, init?: ApiFetchInit): Promise<T>
   }
 
   if (!res.ok) {
-    const msg = errorBodyToMessage(parsed, res.status, res.statusText);
+    let msg = errorBodyToMessage(parsed, res.status, res.statusText);
+    if (res.status === 404 && msg === "Not Found") {
+      msg =
+        `${msg} — API adresi: NEXT_PUBLIC_API_URL yalnızca kök olmalı (örn. https://api…), sonuna /api/v1 eklemeyin. ` +
+        "Aynı site üzerinden proxy için BACKEND_ORIGIN kullanıp NEXT_PUBLIC_API_URL’ü boş bırakın (README).";
+    }
     throw new ApiError(msg, res.status, parsed);
   }
 

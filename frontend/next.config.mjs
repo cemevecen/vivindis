@@ -10,6 +10,10 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, "package.json"), "utf8"));
 
+const backendOrigin = process.env.BACKEND_ORIGIN?.trim();
+const explicitPublicApi = process.env.NEXT_PUBLIC_API_URL?.trim();
+const useApiRewrite = Boolean(backendOrigin && !explicitPublicApi);
+
 function shortBuildSha() {
   const fromCi =
     process.env.VERCEL_GIT_COMMIT_SHA ||
@@ -34,6 +38,14 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: pkg.version ?? "0.0.0",
     NEXT_PUBLIC_BUILD_SHA: shortBuildSha(),
+    ...(useApiRewrite ? { NEXT_PUBLIC_USE_API_REWRITE: "1" } : {}),
+  },
+  async rewrites() {
+    if (!useApiRewrite || !backendOrigin) {
+      return [];
+    }
+    const origin = backendOrigin.replace(/\/$/, "").replace(/\/api\/v1$/i, "");
+    return [{ source: "/api/v1/:path*", destination: `${origin}/api/v1/:path*` }];
   },
 };
 

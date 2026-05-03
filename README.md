@@ -43,7 +43,11 @@ Tipik kurulum:
 - **Redis:** yönetilen Redis (ör. Upstash); Celery için **`rediss://`** TCP URL  
 - **Kimlik:** [Clerk](https://clerk.com) — publishable + secret + JWKS + JWT issuer + webhook (`POST /api/v1/auth/sync`)
 
-Frontend, API’ye `NEXT_PUBLIC_API_URL` (örn. `https://api.vivindis.com`) ile ulaşır. DNS’te `api` genelde Railway’e **CNAME** ile gider; kök/`www` kayıtları Vercel dokümantasyonuna göre ayarlanır.
+Frontend, API’ye `NEXT_PUBLIC_API_URL` ile ulaşır — değer **yalnızca kök origin** olmalıdır (örn. `https://api.vivindis.com`). Sonuna **`/api/v1` eklemeyin**; istemci yolları zaten `/api/v1/...` ile başlar; aksi halde istek `/api/v1/api/v1/...` olur ve **404 Not Found** görürsünüz.
+
+**CORS’suz alternatif:** Vercel’de `NEXT_PUBLIC_API_URL`’ü boş bırakıp yalnızca `BACKEND_ORIGIN` verin (örn. `https://api.vivindis.com`). Next.js, aynı site üzerinden `/api/v1/*` isteklerini bu köke proxylar (`frontend/next.config.mjs`).
+
+DNS’te `api` genelde Railway’e **CNAME** ile gider; kök/`www` kayıtları Vercel dokümantasyonuna göre ayarlanır.
 
 ### Vercel (frontend)
 
@@ -51,7 +55,8 @@ Frontend, API’ye `NEXT_PUBLIC_API_URL` (örn. `https://api.vivindis.com`) ile 
 2. **Settings → General → Root Directory:** `frontend` (zorunlu; monorepo kökünde `package.json` yok).  
 3. **Framework:** Next.js (otomatik algılanır).  
 4. **Environment Variables (Production)** örnekleri:  
-   - `NEXT_PUBLIC_API_URL` — canlı API tabanı  
+   - `NEXT_PUBLIC_API_URL` — canlı API **kökü** (`https://api…`, `/api/v1` **yok**)  
+   - **veya** (CORS’u baypas): `BACKEND_ORIGIN` aynı kök + `NEXT_PUBLIC_API_URL` boş → site üzerinden `/api/v1` proxy  
    - `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`  
    - İsteğe bağlı: `NEXT_PUBLIC_APP_URL` — kendi sitenizin kök URL’si  
 
