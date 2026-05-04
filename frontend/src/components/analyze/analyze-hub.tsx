@@ -92,7 +92,10 @@ function AnalyzeHubConnected() {
   const [selectedStoreHit, setSelectedStoreHit] = useState<StoreSearchResultItem | null>(null);
   const [sessionApp, setSessionApp] = useState<AppDto | null>(null);
   const [storeFetchId, setStoreFetchId] = useState<string | null>(null);
+  const [isPinningStore, setIsPinningStore] = useState(false);
   const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
+  const pinRequestRef = useRef(0);
+  const sessionAppRef = useRef<AppDto | null>(null);
 
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
@@ -128,6 +131,10 @@ function AnalyzeHubConnected() {
     queryKey: queryKeys.apps.all,
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
   });
+
+  useEffect(() => {
+    sessionAppRef.current = sessionApp;
+  }, [sessionApp]);
 
   useEffect(() => {
     if (sessionApp) {
@@ -204,14 +211,27 @@ function AnalyzeHubConnected() {
     [getToken, queryClient, router, runAnalysisTypes, t],
   );
 
+  const dismissStorePinCard = useCallback(() => {
+    pinRequestRef.current += 1;
+    setSelectedStoreHit(null);
+    setStoreFetchId(null);
+    setIsPinningStore(false);
+  }, []);
+
   const clearStorePin = useCallback(() => {
+    pinRequestRef.current += 1;
+    const app = sessionAppRef.current;
+    setTargetAppId((tid) => (app && tid === app.id ? "" : tid));
     setSelectedStoreHit(null);
     setSessionApp(null);
     setStoreFetchId(null);
+    setIsPinningStore(false);
   }, []);
 
   const pinStoreHit = useCallback(
     async (hit: StoreSearchResultItem) => {
+      const token = ++pinRequestRef.current;
+      setIsPinningStore(true);
       setSelectedStoreHit(hit);
       setStoreFetchId(null);
       try {
@@ -220,14 +240,24 @@ function AnalyzeHubConnected() {
           body: appBodyFromHit(hit),
           getToken,
         });
+        if (token !== pinRequestRef.current) {
+          return;
+        }
         setSessionApp(app);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("storeAppPinned"));
       } catch (e) {
+        if (token !== pinRequestRef.current) {
+          return;
+        }
         setSelectedStoreHit(null);
         setSessionApp(null);
         const msg = e instanceof ApiError ? e.message : tCommon("error");
         toast.error(msg);
+      } finally {
+        if (token === pinRequestRef.current) {
+          setIsPinningStore(false);
+        }
       }
     },
     [getToken, queryClient, t, tCommon],
@@ -342,7 +372,13 @@ function AnalyzeHubConnected() {
     [t],
   );
 
-  const apps = appsQuery.data ?? [];
+  const appChoices = useMemo(() => {
+    const list = appsQuery.data ?? [];
+    if (sessionApp && !list.some((a) => a.id === sessionApp.id)) {
+      return [sessionApp, ...list];
+    }
+    return list;
+  }, [appsQuery.data, sessionApp]);
 
   const processFile = async (file: File | null) => {
     setFileLabel("");
@@ -486,7 +522,7 @@ function AnalyzeHubConnected() {
               </p>
             ) : null}
 
-            {activeQuery.length >= 2 ? (
+            {activeQuery.length >= 2 && !selectedStoreHit ? (
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-slate-600">
                   {t("resultsHeading", { count: results.length })}
@@ -516,8 +552,9 @@ function AnalyzeHubConnected() {
                             <StoreResultCard
                               key={`gp-${hit.id}-${hit.name}`}
                               hit={hit}
-                              onSelect={() => void pinStoreHit(hit)}
+                              onPin={(h) => void pinStoreHit(h)}
                               selectLabel={t("selectAppPin")}
+                              pinDisabled={isPinningStore}
                             />
                           ))}
                         </ul>
@@ -533,8 +570,9 @@ function AnalyzeHubConnected() {
                             <StoreResultCard
                               key={`ios-${hit.id}-${hit.name}`}
                               hit={hit}
-                              onSelect={() => void pinStoreHit(hit)}
+                              onPin={(h) => void pinStoreHit(h)}
                               selectLabel={t("selectAppPin")}
+                              pinDisabled={isPinningStore}
                             />
                           ))}
                         </ul>
@@ -549,8 +587,9 @@ function AnalyzeHubConnected() {
                       <StoreResultCard
                         key={`${hit.platform}-${hit.id}-${hit.name}`}
                         hit={hit}
-                        onSelect={() => void pinStoreHit(hit)}
+                        onPin={(h) => void pinStoreHit(h)}
                         selectLabel={t("selectAppPin")}
+                        pinDisabled={isPinningStore}
                       />
                     ))}
                   </ul>
@@ -558,9 +597,15 @@ function AnalyzeHubConnected() {
               </div>
             ) : null}
 
-            {selectedStoreHit && sessionApp ? (
+            {selectedStoreHit && (sessionApp || isPinningStore) ? (
               <div className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 sm:p-5">
-                <PinnedStoreAppCard hit={selectedStoreHit} app={sessionApp} onClear={clearStorePin} />
+                <PinnedStoreAppCard
+                  hit={selectedStoreHit}
+                  app={sessionApp}
+                  isResolving={isPinningStore && !sessionApp}
+                  onClear={clearStorePin}
+                  onSearchAnother={dismissStorePinCard}
+                />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="store-fetch-date-preset" className="text-slate-800">
@@ -571,6 +616,7 @@ function AnalyzeHubConnected() {
                       value={datePreset}
                       onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
                       className="rounded-xl"
+                      disabled={!sessionApp}
                     >
                       <option value="7d">{t("datePresetLast7")}</option>
                       <option value="30d">{t("datePresetLast30")}</option>
@@ -594,6 +640,7 @@ function AnalyzeHubConnected() {
                   className="h-12 w-full rounded-xl bg-gradient-to-b from-slate-800 to-slate-950 text-base font-semibold text-white shadow-md hover:from-slate-700 hover:to-slate-900 disabled:opacity-50"
                   onClick={() => void handlePullStoreReviews()}
                   disabled={
+                    !sessionApp ||
                     storePullMutation.isPending ||
                     fetchRowQuery.data?.status === "pending" ||
                     fetchRowQuery.data?.status === "running"
@@ -605,7 +652,8 @@ function AnalyzeHubConnected() {
                       ? t("fetchRunningShort")
                       : t("pullStoreReviewsCta")}
                 </Button>
-                {fetchRowQuery.data?.status === "pending" || fetchRowQuery.data?.status === "running" ? (
+                {sessionApp &&
+                (fetchRowQuery.data?.status === "pending" || fetchRowQuery.data?.status === "running") ? (
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
                     <div
@@ -624,10 +672,10 @@ function AnalyzeHubConnected() {
                     <p className="text-xs text-slate-600">{t("estimatedTimeHint")}</p>
                   </div>
                 ) : null}
-                {fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
+                {sessionApp && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
                   <p className="text-sm text-red-700">{fetchRowQuery.data.error_message}</p>
                 ) : null}
-                {fetchRowQuery.data?.status === "completed" ? (
+                {sessionApp && fetchRowQuery.data?.status === "completed" ? (
                   <p className="text-sm font-medium text-emerald-800">
                     {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
                   </p>
@@ -653,7 +701,7 @@ function AnalyzeHubConnected() {
                 className="rounded-xl"
               >
                 <option value="">{t("targetAppPlaceholder")}</option>
-                {apps.map((a) => (
+                {appChoices.map((a) => (
                   <option key={a.id} value={a.id}>
                     {a.name} — {a.package_name || a.bundle_id || a.id.slice(0, 8)}
                   </option>
@@ -663,7 +711,7 @@ function AnalyzeHubConnected() {
                 <p className="text-xs text-slate-500">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
               ) : null}
               {appsQuery.isError ? <p className="text-xs text-red-600">{t("appsLoadError")}</p> : null}
-              {!appsQuery.isPending && apps.length === 0 && !sessionApp ? (
+              {!appsQuery.isPending && appChoices.length === 0 ? (
                 <p className="text-sm text-slate-600">
                   {t("noAppsYet")}{" "}
                   <button
@@ -780,7 +828,7 @@ function AnalyzeHubConnected() {
                       <StoreResultCard
                         key={`ca-${hit.platform}-${hit.id}`}
                         hit={hit}
-                        onSelect={() => setCompareHitA(hit)}
+                        onPin={() => setCompareHitA(hit)}
                         selectLabel={t("comparePickSlotA")}
                       />
                     ))}
@@ -812,7 +860,7 @@ function AnalyzeHubConnected() {
                       <StoreResultCard
                         key={`cb-${hit.platform}-${hit.id}`}
                         hit={hit}
-                        onSelect={() => setCompareHitB(hit)}
+                        onPin={() => setCompareHitB(hit)}
                         selectLabel={t("comparePickSlotB")}
                       />
                     ))}

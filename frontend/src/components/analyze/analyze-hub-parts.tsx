@@ -58,59 +58,72 @@ export function SegmentedTwo({
 export function PinnedStoreAppCard({
   hit,
   app,
+  isResolving,
   onClear,
+  onSearchAnother,
 }: {
   hit: StoreSearchResultItem;
-  app: AppDto;
+  app: AppDto | null;
+  isResolving: boolean;
   onClear: () => void;
+  onSearchAnother: () => void;
 }) {
   const t = useTranslations("analyzeHub");
+  const title = app?.name ?? hit.name;
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50/90 to-amber-50/50 p-4 shadow-sm">
-      <div className="flex min-w-0 flex-1 gap-3">
-        {hit.icon ? (
-          // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
-          <img
-            src={hit.icon}
-            alt=""
-            width={48}
-            height={48}
-            className="size-12 shrink-0 rounded-xl border border-orange-100 bg-white object-cover"
-          />
-        ) : (
-          <div className="size-12 shrink-0 rounded-xl border border-dashed border-orange-200 bg-white/80" />
-        )}
-        <div className="min-w-0 space-y-1">
-          <p className="text-xs font-semibold uppercase tracking-wide text-orange-800/90">{t("pinnedCardLabel")}</p>
-          <p className="truncate text-base font-semibold text-slate-900">{app.name}</p>
-          <p className="truncate font-mono text-xs text-slate-600">{hit.platform === "google_play" ? hit.id : `id ${hit.id}`}</p>
+    <div className="rounded-2xl border-2 border-orange-300/80 bg-gradient-to-br from-orange-50/95 to-amber-50/60 p-5 shadow-md sm:p-6">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 gap-4">
+          {hit.icon ? (
+            // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
+            <img
+              src={hit.icon}
+              alt=""
+              width={64}
+              height={64}
+              className="size-16 shrink-0 rounded-2xl border border-orange-100 bg-white object-cover sm:size-20"
+            />
+          ) : (
+            <div className="size-16 shrink-0 rounded-2xl border border-dashed border-orange-200 bg-white/80 sm:size-20" />
+          )}
+          <div className="min-w-0 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-orange-800/90">{t("activeAppCardLabel")}</p>
+            <p className="truncate text-xl font-bold tracking-tight text-slate-900">{title}</p>
+            <p className="truncate font-mono text-sm text-slate-600">{hit.platform === "google_play" ? hit.id : `id ${hit.id}`}</p>
+            {isResolving ? (
+              <p className="text-sm font-medium text-orange-800">{t("storePinResolving")}</p>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button type="button" variant="outline" size="sm" onClick={onSearchAnother}>
+            {t("searchAnotherApp")}
+          </Button>
+          <Button type="button" variant="outline" size="sm" className="gap-1" onClick={onClear}>
+            <X className="size-3.5" aria-hidden />
+            {t("clearPinnedSelection")}
+          </Button>
         </div>
       </div>
-      <Button type="button" variant="outline" size="sm" className="shrink-0 gap-1" onClick={onClear}>
-        <X className="size-3.5" aria-hidden />
-        {t("clearPinnedSelection")}
-      </Button>
     </div>
   );
 }
 
 export function StoreResultCard({
   hit,
-  onSelect,
+  onPin,
   selectLabel,
+  pinDisabled,
 }: {
   hit: StoreSearchResultItem;
-  onSelect: (hit: StoreSearchResultItem) => void;
+  onPin: (hit: StoreSearchResultItem) => void;
   selectLabel: string;
+  pinDisabled?: boolean;
 }) {
   const t = useTranslations("analyzeHub");
   return (
-    <li>
-      <button
-        type="button"
-        onClick={() => onSelect(hit)}
-        className="flex w-full gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60"
-      >
+    <li className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-colors hover:border-slate-300">
+      <div className="flex gap-3 p-4">
         {hit.icon ? (
           // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
           <img
@@ -143,15 +156,23 @@ export function StoreResultCard({
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 text-xs text-sky-700 underline-offset-4 hover:underline"
-              onClick={(e) => e.stopPropagation()}
             >
               {t("openStoreLink")}
               <ExternalLink className="size-3 shrink-0" aria-hidden />
             </a>
           ) : null}
-          <p className="text-xs font-medium text-orange-700">{selectLabel}</p>
         </div>
-      </button>
+      </div>
+      <div className="border-t border-slate-100 bg-slate-50/80 px-3 py-3">
+        <Button
+          type="button"
+          className="h-10 w-full rounded-lg bg-slate-900 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+          disabled={pinDisabled}
+          onClick={() => onPin(hit)}
+        >
+          {selectLabel}
+        </Button>
+      </div>
     </li>
   );
 }
