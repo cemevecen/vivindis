@@ -28,6 +28,11 @@
 - UI: shadcn/ui + Tailwind; toast: **Sonner**.
 - `'use client'` yalnızca gerektiğinde.
 
+## Dağıtım (canlı odak)
+
+- Hedef: **vivindis.com** (Vercel + Railway, GitHub üzerinden). Anlamlı iş bitince **her zaman** commit + `git push` — yarım bırakma.
+- Kullanıcı açıkça istemedikçe **localhost** (ör. `http://localhost:3010`) üzerinde uygulama kaldırma / o URL’de doğrulama yok. Ayrıntı: `.cursor/rules/deployment-workflow.mdc`.
+
 ## Docker
 
 - `docker compose up` — Postgres, Redis, backend, worker, flower, frontend.

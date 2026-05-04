@@ -1,0 +1,12 @@
+---
+description: Canlı (vivindis.com) odaklı geliştirme, Git zorunluluğu, localhost sınırı
+alwaysApply: true
+---
+
+# Dağıtım ve doğrulama (Vivindis)
+
+- **Hedef ortam:** Geliştirme ve kullanıcı beklentisi **canlı site** [https://vivindis.com](https://vivindis.com) (ör. `/tr/...`). Yapılan işler bu ortama gidecek şekilde tasarlanır.
+- **Localhost:** Kullanıcı açıkça *“localhost’u da güncelle”* veya eşdeğerini söylemedikçe **yerel dev sunucusuna (ör. `http://localhost:3010`) karşı çalıştırma, o URL’de doğrulama veya o ortama özel adım önerme yok.**
+- **Kapatma kriteri:** Anlamlı bir kod/iş değişikliği bittiğinde iş **mutlaka** `git commit` + `git push` (ör. `main`) ile GitHub’a aktarılır. İşi “bitti” sayma: push yapılmadıysa yarım kalmıştır. Kullanıcı yarım kalan önceki işlerden bahsediyorsa, önce onları tamamla ve aynı şekilde commit + push ile kapat.
+- **Dağıtım zinciri:** GitHub güncellemesi → Vercel (frontend) / Railway (backend) deploy beklentisi. Canlıyı güncelleyen bu akıştır; IDE yerel diski tek başına canlıya taşımaz.
+- **Tarayıcı / MCP doğrulama:** Gerekirse üretim veya staging URL kullan; kullanıcı localhost istemedikçe `localhost:3010` veya benzeri ile doğrulama yapma.
