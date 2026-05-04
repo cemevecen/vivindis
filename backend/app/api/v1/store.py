@@ -14,10 +14,12 @@ import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 
 from app.api.deps import get_current_user
+from app.core.logging import get_logger
 from app.models.user import User
 from app.schemas.store_search import StoreSearchResponse, StoreSearchResultItem
 from app.services import app_store_catalog
 
+log = get_logger(__name__)
 router = APIRouter(prefix="/store", tags=["store"])
 
 
@@ -32,29 +34,71 @@ def _app_store_url(country: str, track_id: str, fallback: str | None) -> str:
     return f"https://apps.apple.com/{cc}/app/id{track_id}"
 
 
-def _google_play_search_sync(query: str, lang: str, country: str, num: int) -> list[StoreSearchResultItem]:
+def _google_play_fetch_raw(query: str, lang: str, country: str, num: int) -> list[dict[str, Any]]:
+    """google_play_scraper.search — boş liste veya satır listesi; None olmaz."""
     from google_play_scraper import search as gp_search
 
     raw = gp_search(query, n_hits=num, lang=lang, country=country)
+    if raw is None:
+        return []
+    return raw
+
+
+def _google_play_rows_from_raw(raw: list[dict[str, Any]]) -> list[StoreSearchResultItem]:
+    """Satır bazlı try/except: Google HTML değişince tek kötü satır tüm aramayı düşürmez."""
     out: list[StoreSearchResultItem] = []
     for row in raw:
-        app_id = str(row.get("appId") or "").strip()
-        if not app_id:
+        if not isinstance(row, dict):
             continue
-        score = row.get("score")
-        out.append(
-            StoreSearchResultItem(
-                id=app_id,
-                name=str(row.get("title") or app_id).strip() or app_id,
-                developer=(str(row["developer"]).strip() if row.get("developer") else None),
-                icon=(str(row["icon"]).strip() if row.get("icon") else None),
-                rating=float(score) if isinstance(score, (int, float)) else None,
-                review_count=None,
-                platform="google_play",
-                store_url=_play_store_url(app_id),
-            ),
-        )
+        try:
+            app_id = str(row.get("appId") or "").strip()
+            if not app_id:
+                continue
+            score = row.get("score")
+            out.append(
+                StoreSearchResultItem(
+                    id=app_id,
+                    name=str(row.get("title") or app_id).strip() or app_id,
+                    developer=(str(row["developer"]).strip() if row.get("developer") else None),
+                    icon=(str(row["icon"]).strip() if row.get("icon") else None),
+                    rating=float(score) if isinstance(score, (int, float)) else None,
+                    review_count=None,
+                    platform="google_play",
+                    store_url=_play_store_url(app_id),
+                ),
+            )
+        except Exception as exc:  # noqa: BLE001
+            log.warning("google_play_row_parse_failed", error=repr(exc))
     return out
+
+
+def _google_play_search_sync(query: str, lang: str, country: str, num: int) -> list[StoreSearchResultItem]:
+    """Önce istenen dil/ülke; hata veya parse edilemeyen yanıtta en/us (Play şablonu / IP farkları)."""
+    attempts: list[tuple[str, str]] = [(lang, country)]
+    if (lang, country) != ("en", "us"):
+        attempts.append(("en", "us"))
+
+    last_exc: BaseException | None = None
+    for attempt_lang, attempt_country in attempts:
+        try:
+            raw = _google_play_fetch_raw(query, attempt_lang, attempt_country, num)
+        except Exception as exc:  # noqa: BLE001
+            last_exc = exc
+            log.warning(
+                "google_play_search_failed",
+                query=query[:80],
+                lang=attempt_lang,
+                country=attempt_country,
+                error=repr(exc),
+            )
+            continue
+        items = _google_play_rows_from_raw(raw)
+        if items or not raw:
+            return items
+
+    if last_exc is not None:
+        raise last_exc
+    return []
 
 
 def _itunes_row_to_item(row: dict[str, Any], country: str) -> StoreSearchResultItem | None:
