@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import uuid
 from datetime import UTC, date, datetime, time as dt_time
 from typing import Any
@@ -70,6 +71,30 @@ def _in_range(at: datetime | None, lo: date, hi: date) -> bool:
     return lo <= ad <= hi
 
 
+def _calendar_span_days(lo: date, hi: date) -> int:
+    """Tarih penceresinin takvim günü genişliği (uçlar dahil, `hi - lo`)."""
+    return max(0, (hi - lo).days)
+
+
+def _play_batch_sleep_for_window(base: float, lo: date, hi: date) -> float:
+    """Kısa pencerelerde partiler arası bekleme süresini düşür (kullanıcı algısı + gereksiz gecikme)."""
+    if base <= 0:
+        return 0.0
+    if _calendar_span_days(lo, hi) > 45:
+        return float(base)
+    scaled = min(float(base), float(base) * 0.35)
+    return max(0.22, scaled)
+
+
+def _app_store_sleep_for_window(base: int, lo: date, hi: date) -> int:
+    if base <= 0:
+        return 0
+    if _calendar_span_days(lo, hi) > 45:
+        return int(base)
+    scaled = min(float(base), float(base) * 0.45)
+    return max(1, int(round(scaled)))
+
+
 async def _upsert_review(
     session: Any,
     *,
@@ -131,6 +156,7 @@ async def _scrape_google_play(
     continuation = None
     total_seen = 0
     lo, hi = fetch.from_date, fetch.to_date
+    batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
 
     while total_seen < max_total:
         batch, continuation = gp_reviews(
@@ -189,10 +215,8 @@ async def _scrape_google_play(
 
         if stop_all or continuation is None or continuation.token is None:
             break
-        if sleep_s > 0:
-            import time as _t
-
-            _t.sleep(sleep_s)
+        if batch_sleep > 0:
+            await asyncio.sleep(batch_sleep)
 
     return inserted
 
@@ -220,10 +244,11 @@ async def _scrape_app_store(
     store = VivindisAppStore(country=country, app_name=slug, app_id=int(numeric_id))
     after_dt = _dmin(fetch.from_date)
 
-    store.review(how_many=max_total, after=after_dt, sleep=sleep_s if sleep_s > 0 else None)
+    lo, hi = fetch.from_date, fetch.to_date
+    effective_sleep = _app_store_sleep_for_window(sleep_s, lo, hi)
+    store.review(how_many=max_total, after=after_dt, sleep=effective_sleep if effective_sleep > 0 else None)
 
     inserted = 0
-    lo, hi = fetch.from_date, fetch.to_date
     for rev in store.reviews:
         rid = str(rev.get("_vivindis_review_id") or "").strip()
         if not rid:

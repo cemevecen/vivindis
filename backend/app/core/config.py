@@ -8,6 +8,7 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.database_url import normalize_database_url
+from app.core.redis_url import normalize_rediss_url
 
 
 class Settings(BaseSettings):
@@ -29,7 +30,11 @@ class Settings(BaseSettings):
     )
     database_echo: bool = Field(default=False, validation_alias="DATABASE_ECHO")
 
-    redis_url: str = Field(default="", validation_alias="REDIS_URL")
+    redis_url: str = Field(
+        default="",
+        validation_alias="REDIS_URL",
+        description="rediss:// için ssl_cert_reqs yoksa otomatik CERT_NONE eklenir.",
+    )
     celery_broker_url: str = Field(default="", validation_alias="CELERY_BROKER_URL")
     celery_result_backend: str = Field(default="", validation_alias="CELERY_RESULT_BACKEND")
 
@@ -68,6 +73,13 @@ class Settings(BaseSettings):
         if not isinstance(v, str) or not v.strip():
             return v
         return normalize_database_url(v)
+
+    @field_validator("redis_url", "celery_broker_url", "celery_result_backend", mode="before")
+    @classmethod
+    def normalize_rediss_url_fields(cls, v: object) -> object:
+        if not isinstance(v, str) or not v.strip():
+            return v
+        return normalize_rediss_url(v.strip())
 
     @field_validator("access_token_expire_minutes", mode="before")
     @classmethod
