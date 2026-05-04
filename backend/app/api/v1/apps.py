@@ -124,6 +124,9 @@ async def create_fetch(
     session.add(fetch)
     await session.flush()
     log.info("review_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
+    # Commit hemen: istemci polling GET'i yanıt dönmeden önce çalıştırabilir; ayrıca Celery worker
+    # ayrı bağlantıda kaydı görmeli (dependency sonundaki commit bazen yanıttan sonra kalır).
+    await session.commit()
     background_tasks.add_task(_enqueue_review_fetch, str(fetch.id))
     return fetch
 

@@ -190,6 +190,9 @@ function AnalyzeHubConnected() {
     queryFn: () =>
       apiFetch<ReviewFetchDto>(`/api/v1/apps/${sessionApp!.id}/fetches/${storeFetchId}`, { getToken }),
     enabled: Boolean(sessionApp && storeFetchId && storeFetchId.length > 0),
+    retry: (failureCount, err) =>
+      failureCount < 4 && err instanceof ApiError && err.status === 404,
+    retryDelay: (attempt) => 200 * (attempt + 1),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
       return s === "pending" || s === "running" ? 2000 : false;
@@ -358,6 +361,7 @@ function AnalyzeHubConnected() {
     if (!sessionApp) {
       return;
     }
+    setStoreFetchId(null);
     setPoolLines([]);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
