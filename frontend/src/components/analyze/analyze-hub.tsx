@@ -99,6 +99,7 @@ function AnalyzeHubConnected() {
   const pinnedPanelRef = useRef<HTMLDivElement>(null);
   const lastFetchHydratedToPoolRef = useRef<string | null>(null);
   const storeFetchFailedToastRef = useRef<string | null>(null);
+  const storeFetchPollErrorToastRef = useRef<string | null>(null);
 
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
@@ -257,6 +258,24 @@ function AnalyzeHubConnected() {
     toast.error(t("storeReviewsPullFailed"));
   }, [fetchRowQuery.data, storeFetchId, t]);
 
+  useEffect(() => {
+    if (fetchRowQuery.isSuccess) {
+      storeFetchPollErrorToastRef.current = null;
+    }
+  }, [fetchRowQuery.isSuccess]);
+
+  useEffect(() => {
+    if (!storeFetchId || !fetchRowQuery.isError) {
+      return;
+    }
+    const key = `${storeFetchId}:poll`;
+    if (storeFetchPollErrorToastRef.current === key) {
+      return;
+    }
+    storeFetchPollErrorToastRef.current = key;
+    toast.error(t("storeFetchPollFailed"));
+  }, [fetchRowQuery.isError, storeFetchId, t]);
+
   const runAnalysisTypes = useCallback((): AnalysisDto["type"][] => {
     return analysisMode === "fast" ? ["heuristic"] : ["ai"];
   }, [analysisMode]);
@@ -297,6 +316,7 @@ function AnalyzeHubConnected() {
     setIsPinningStore(false);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
+    storeFetchPollErrorToastRef.current = null;
   }, []);
 
   const pinStoreHit = useCallback(
@@ -341,6 +361,7 @@ function AnalyzeHubConnected() {
     setPoolLines([]);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
+    storeFetchPollErrorToastRef.current = null;
     storePullMutation.mutate(sessionApp.id);
   }, [sessionApp, storePullMutation]);
 
@@ -664,15 +685,27 @@ function AnalyzeHubConnected() {
                     !sessionApp ||
                     storePullMutation.isPending ||
                     fetchRowQuery.data?.status === "pending" ||
-                    fetchRowQuery.data?.status === "running"
+                    fetchRowQuery.data?.status === "running" ||
+                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
                   }
                 >
-                  {storePullMutation.isPending || fetchRowQuery.data?.status === "pending"
+                  {storePullMutation.isPending ||
+                  fetchRowQuery.data?.status === "pending" ||
+                  (Boolean(storeFetchId) && fetchRowQuery.isPending)
                     ? tCommon("loading")
                     : fetchRowQuery.data?.status === "running"
                       ? t("fetchRunningShort")
                       : t("pullStoreReviewsCta")}
                 </Button>
+                {sessionApp && storeFetchId && fetchRowQuery.isError ? (
+                  <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
+                    <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
+                    <p className="text-xs break-words text-red-800/90">{formatClientFetchError(fetchRowQuery.error)}</p>
+                    <Button type="button" variant="outline" size="sm" onClick={() => void fetchRowQuery.refetch()}>
+                      {tCommon("retry")}
+                    </Button>
+                  </div>
+                ) : null}
                 {sessionApp &&
                 (fetchRowQuery.data?.status === "pending" || fetchRowQuery.data?.status === "running") ? (
                   <div className="space-y-2">

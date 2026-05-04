@@ -13,11 +13,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import get_current_user, require_app_owned
 from app.core.logging import get_logger
 from app.db.session import get_async_session
+from app.models.analysis import Analysis
 from app.models.app import App
 from app.models.enums import AppPlatform, FetchStatus, StorePlatform
 from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.models.user import User
+from app.schemas.analysis import AnalysisListResponse, AnalysisResponse
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse
@@ -178,6 +180,21 @@ async def import_manual_reviews(
         count=len(body.items),
     )
     return ReviewImportResponse(fetch_id=fetch.id, review_count=len(body.items))
+
+
+@router.get("/{app_id}/analyses", response_model=AnalysisListResponse)
+async def list_analyses_for_app(
+    app: Annotated[App, Depends(require_app_owned)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> AnalysisListResponse:
+    """Uygulamaya ait tüm analiz kayıtları (polling bu uç üzerinden yapılır)."""
+    result = await session.execute(
+        select(Analysis)
+        .where(Analysis.app_id == app.id)
+        .order_by(Analysis.created_at.desc()),
+    )
+    rows = list(result.scalars().all())
+    return AnalysisListResponse(items=[AnalysisResponse.model_validate(r) for r in rows])
 
 
 @router.get("/{app_id}/fetches", response_model=list[ReviewFetchResponse])

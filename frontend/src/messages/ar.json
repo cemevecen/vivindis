@@ -216,6 +216,7 @@
     "analyzeNeedAppForTextPool": "Pooled reviews need a target app. Pick one above, or pin an app from the Store tab.",
     "storeReviewsPullFailed": "Could not start the store review pull (server error). Try again later.",
     "storeReviewsHydrateFailed": "Reviews could not be loaded into the pool: {detail}",
+    "storeFetchPollFailed": "Could not load import status from the server. Check your connection or try again.",
     "analyzeFooterNeedData": "Add reviews to the pool or finish a store pull before starting analysis.",
     "fileTextIntro": "Lines go into the shared pool. Use the bar at the bottom to run sentiment analysis on the pool (or after a completed store pull).",
     "sessionAppLinkedHint": "Store tab pinned app “{name}” is selected as target.",

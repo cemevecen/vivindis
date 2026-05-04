@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto } from "@/types/analysis";
@@ -117,7 +117,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     );
   }
 
-  if (fetchQuery.isPending || analysesQuery.isPending) {
+  if (fetchQuery.isPending) {
     return (
       <div className="space-y-4" aria-busy="true">
         <div className="h-10 w-56 animate-pulse rounded-md bg-muted" />
@@ -176,6 +176,19 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           <p className="text-sm text-muted-foreground">{t("pollHint")}</p>
         </div>
       </div>
+
+      {analysesQuery.isError ? (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">
+          <p className="font-medium text-destructive">{t("analysesLoadError")}</p>
+          <p className="mt-1 text-xs break-words text-destructive/90">{formatClientFetchError(analysesQuery.error)}</p>
+          <Button type="button" variant="outline" className="mt-3" onClick={() => void analysesQuery.refetch()}>
+            {tCommon("retry")}
+          </Button>
+        </div>
+      ) : null}
+      {analysesQuery.isPending && !analysesQuery.isError ? (
+        <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
+      ) : null}
 
       <section className="rounded-lg border border-border bg-muted/20 p-4">
         <div className="flex flex-wrap items-center justify-between gap-3">

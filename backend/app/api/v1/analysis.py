@@ -9,7 +9,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.deps import get_current_user, require_app_owned
+from app.api.deps import get_current_user
 from app.core.logging import get_logger
 from app.db.session import get_async_session
 from app.models.analysis import Analysis
@@ -17,7 +17,7 @@ from app.models.app import App
 from app.models.enums import AnalysisStatus, AnalysisType, FetchStatus
 from app.models.review_fetch import ReviewFetch
 from app.models.user import User
-from app.schemas.analysis import AnalysisListResponse, AnalysisResponse, AnalysisStartRequest
+from app.schemas.analysis import AnalysisResponse, AnalysisStartRequest
 
 router = APIRouter(tags=["analysis"])
 log = get_logger(__name__)
@@ -111,20 +111,6 @@ async def start_analyze(
         log.info("analysis_enqueued", analysis_id=str(row.id), analysis_type=atype.value)
 
     return created
-
-
-@router.get("/apps/{app_id}/analyses", response_model=AnalysisListResponse)
-async def list_analyses(
-    app: Annotated[App, Depends(require_app_owned)],
-    session: Annotated[AsyncSession, Depends(get_async_session)],
-) -> AnalysisListResponse:
-    result = await session.execute(
-        select(Analysis)
-        .where(Analysis.app_id == app.id)
-        .order_by(Analysis.created_at.desc()),
-    )
-    rows = list(result.scalars().all())
-    return AnalysisListResponse(items=[AnalysisResponse.model_validate(r) for r in rows])
 
 
 @router.get("/analyses/{analysis_id}", response_model=AnalysisResponse)

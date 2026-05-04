@@ -20,7 +20,11 @@ class Settings(BaseSettings):
     environment: str = Field(default="", validation_alias="ENVIRONMENT")
     log_level: str = Field(default="INFO", validation_alias="LOG_LEVEL")
 
-    database_url: str = Field(default="", validation_alias="DATABASE_URL")
+    database_url: str = Field(
+        default="",
+        validation_alias="DATABASE_URL",
+        description="Supabase + Railway: Transaction pooler (port 6543) önerilir; doğrudan 5432 IPv4 erişilemeyebilir.",
+    )
     database_echo: bool = Field(default=False, validation_alias="DATABASE_ECHO")
 
     redis_url: str = Field(default="", validation_alias="REDIS_URL")
