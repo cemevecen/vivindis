@@ -56,8 +56,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const queryClient = useQueryClient();
 
   const fetchQuery = useQuery({
-    queryKey: queryKeys.apps.fetchDetail(appId, fetchId ?? ""),
-    queryFn: () => apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetches/${fetchId}`, { getToken }),
+    queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
+    queryFn: () => apiFetch<ReviewFetchDto>(`/api/v1/fetches/${fetchId}`, { getToken }),
     enabled: Boolean(clerkEnabled && fetchId),
     refetchInterval: (q) => {
       const s = q.state.data?.status;

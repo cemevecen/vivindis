@@ -169,7 +169,7 @@ function AnalyzeHubConnected() {
       });
     },
     onSuccess: (row) => {
-      setStoreFetchId(row.id);
+      setStoreFetchId(String(row.id).trim());
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
     },
     onError: (err) => {
@@ -183,13 +183,9 @@ function AnalyzeHubConnected() {
   });
 
   const fetchRowQuery = useQuery({
-    queryKey:
-      sessionApp && storeFetchId
-        ? queryKeys.apps.fetchDetail(sessionApp.id, storeFetchId)
-        : ["analyzeHub", "fetch", "idle"],
-    queryFn: () =>
-      apiFetch<ReviewFetchDto>(`/api/v1/apps/${sessionApp!.id}/fetches/${storeFetchId}`, { getToken }),
-    enabled: Boolean(sessionApp && storeFetchId && storeFetchId.length > 0),
+    queryKey: storeFetchId ? queryKeys.reviews.fetchById(storeFetchId) : ["analyzeHub", "fetch", "idle"],
+    queryFn: () => apiFetch<ReviewFetchDto>(`/api/v1/fetches/${storeFetchId}`, { getToken }),
+    enabled: Boolean(storeFetchId && storeFetchId.length > 0),
     retry: (failureCount, err) =>
       failureCount < 4 && err instanceof ApiError && err.status === 404,
     retryDelay: (attempt) => 200 * (attempt + 1),

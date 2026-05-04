@@ -12,4 +12,8 @@ export const queryKeys = {
   analyses: {
     byApp: (appId: string) => ["analyses", "app", appId] as const,
   },
+  /** `GET /api/v1/fetches/{id}` — app_id path segmentine ihtiyaç yok (404 eşleşme riskini azaltır). */
+  reviews: {
+    fetchById: (fetchId: string) => ["reviews", "fetch", fetchId] as const,
+  },
 } as const;
