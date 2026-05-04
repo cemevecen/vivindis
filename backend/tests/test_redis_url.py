@@ -1,6 +1,10 @@
 """Redis TLS URL normalleştirme."""
 
-from app.core.redis_url import normalize_rediss_url
+import os
+
+import pytest
+
+from app.core.redis_url import normalize_rediss_url, patch_process_environ_rediss_urls
 
 
 def test_rediss_adds_ssl_cert_reqs() -> None:
@@ -30,3 +34,10 @@ def test_redis_scheme_unchanged() -> None:
 def test_empty() -> None:
     assert normalize_rediss_url("") == ""
     assert normalize_rediss_url("   ") == ""
+
+
+def test_patch_process_environ_rediss_urls(monkeypatch: pytest.MonkeyPatch) -> None:
+    raw = "rediss://default:secret@example.upstash.io:6379"
+    monkeypatch.setenv("CELERY_RESULT_BACKEND", raw)
+    patch_process_environ_rediss_urls()
+    assert "ssl_cert_reqs=CERT_NONE" in os.environ["CELERY_RESULT_BACKEND"]

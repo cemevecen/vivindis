@@ -8,7 +8,10 @@ from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.core.database_url import normalize_database_url
-from app.core.redis_url import normalize_rediss_url
+from app.core.redis_url import normalize_rediss_url, patch_process_environ_rediss_urls
+
+# Celery conf önce os.environ okur; Pydantic normalize etse bile Celery ham rediss görür.
+patch_process_environ_rediss_urls()
 
 
 class Settings(BaseSettings):

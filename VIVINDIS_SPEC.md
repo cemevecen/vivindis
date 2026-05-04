@@ -369,7 +369,8 @@ GET  /api/v1/analyses/{id}
 DATABASE_URL=postgresql+asyncpg://user:pass@host:5432/vivindis
 REDIS_URL=redis://redis:6379/0
 # TLS Redis (rediss://, ör. Railway/Upstash): Celery için ssl_cert_reqs gerekir;
-# env’de yoksa backend otomatik `?ssl_cert_reqs=CERT_NONE` ekler (özel CA için URL’de kendiniz verin).
+# env’de yoksa süreç ortamı + Pydantic yükünde `?ssl_cert_reqs=CERT_NONE` eklenir
+# (Celery önce os.environ okur; yalnızca Settings normalize etmek yetmez).
 SECRET_KEY=
 ALGORITHM=
 ACCESS_TOKEN_EXPIRE_MINUTES=

@@ -4,6 +4,11 @@ from __future__ import annotations
 
 from celery import Celery
 
+from app.core.redis_url import patch_process_environ_rediss_urls
+
+# Celery ``conf.result_backend`` önce ``CELERY_RESULT_BACKEND`` env okur; config'ten önce düzelt.
+patch_process_environ_rediss_urls()
+
 from app.core.config import get_settings
 
 _s = get_settings()
