@@ -7,6 +7,8 @@ from functools import lru_cache
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.database_url import normalize_database_url
+
 
 class Settings(BaseSettings):
     """Tüm backend yapılandırması env üzerinden."""
@@ -59,6 +61,13 @@ class Settings(BaseSettings):
     scrape_play_sleep_seconds: float = Field(default=1.5, validation_alias="SCRAPE_PLAY_SLEEP_SECONDS")
     scrape_app_store_sleep_seconds: int = Field(default=2, validation_alias="SCRAPE_APP_STORE_SLEEP_SECONDS")
     scrape_max_reviews: int = Field(default=5000, validation_alias="SCRAPE_MAX_REVIEWS")
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def normalize_database_url_field(cls, v: object) -> object:
+        if not isinstance(v, str) or not v.strip():
+            return v
+        return normalize_database_url(v)
 
     @field_validator("access_token_expire_minutes", mode="before")
     @classmethod
