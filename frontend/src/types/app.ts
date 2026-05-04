@@ -36,3 +36,14 @@ export type ReviewImportResponseDto = {
   fetch_id: string;
   review_count: number;
 };
+
+/** `GET /api/v1/apps/{id}/reviews` — yalnızca havuz doldurmak için kullanılan alanlar. */
+export type ReviewListItemDto = {
+  body: string;
+  title: string | null;
+};
+
+export type ReviewListResponseDto = {
+  items: ReviewListItemDto[];
+  total: number;
+};

@@ -36,7 +36,7 @@ import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
-import type { AppDto, ReviewFetchDto, ReviewImportResponseDto } from "@/types/app";
+import type { AppDto, ReviewFetchDto, ReviewImportResponseDto, ReviewListResponseDto } from "@/types/app";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
 type Props = {
@@ -96,6 +96,9 @@ function AnalyzeHubConnected() {
   const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
   const pinRequestRef = useRef(0);
   const sessionAppRef = useRef<AppDto | null>(null);
+  const pinnedPanelRef = useRef<HTMLDivElement>(null);
+  const lastFetchHydratedToPoolRef = useRef<string | null>(null);
+  const storeFetchFailedToastRef = useRef<string | null>(null);
 
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
@@ -169,6 +172,10 @@ function AnalyzeHubConnected() {
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
     },
     onError: (err) => {
+      if (err instanceof ApiError && err.status >= 500) {
+        toast.error(t("storeReviewsPullFailed"));
+        return;
+      }
       const msg = err instanceof ApiError ? err.message : tCommon("error");
       toast.error(msg);
     },
@@ -187,6 +194,68 @@ function AnalyzeHubConnected() {
       return s === "pending" || s === "running" ? 2000 : false;
     },
   });
+
+  useEffect(() => {
+    const row = fetchRowQuery.data;
+    if (!sessionApp || !storeFetchId || row?.id !== storeFetchId || row.status !== "completed") {
+      return;
+    }
+    let cancelled = false;
+    const appId = sessionApp.id;
+    void (async () => {
+      try {
+        const limit = 100;
+        let offset = 0;
+        const bodies: string[] = [];
+        let total = 0;
+        for (;;) {
+          const chunk = await apiFetch<ReviewListResponseDto>(
+            `/api/v1/apps/${appId}/reviews?limit=${limit}&offset=${offset}`,
+            { getToken },
+          );
+          total = chunk.total;
+          for (const it of chunk.items) {
+            const text = [it.title, it.body].filter(Boolean).join("\n").trim();
+            if (text.length > 0) {
+              bodies.push(text);
+            }
+          }
+          offset += chunk.items.length;
+          if (cancelled) {
+            return;
+          }
+          if (offset >= total || chunk.items.length === 0) {
+            break;
+          }
+        }
+        if (cancelled) {
+          return;
+        }
+        setPoolLines(bodies);
+        lastFetchHydratedToPoolRef.current = storeFetchId;
+      } catch (e) {
+        if (!cancelled) {
+          const detail = e instanceof ApiError ? e.message : tCommon("error");
+          toast.error(t("storeReviewsHydrateFailed", { detail }));
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionApp, storeFetchId, fetchRowQuery.data, getToken, t, tCommon]);
+
+  useEffect(() => {
+    const row = fetchRowQuery.data;
+    if (!storeFetchId || row?.id !== storeFetchId || row.status !== "failed") {
+      return;
+    }
+    if (storeFetchFailedToastRef.current === storeFetchId) {
+      return;
+    }
+    storeFetchFailedToastRef.current = storeFetchId;
+    toast.error(t("storeReviewsPullFailed"));
+  }, [fetchRowQuery.data, storeFetchId, t]);
 
   const runAnalysisTypes = useCallback((): AnalysisDto["type"][] => {
     return analysisMode === "fast" ? ["heuristic"] : ["ai"];
@@ -226,6 +295,8 @@ function AnalyzeHubConnected() {
     setSessionApp(null);
     setStoreFetchId(null);
     setIsPinningStore(false);
+    lastFetchHydratedToPoolRef.current = null;
+    storeFetchFailedToastRef.current = null;
   }, []);
 
   const pinStoreHit = useCallback(
@@ -268,14 +339,13 @@ function AnalyzeHubConnected() {
       return;
     }
     setPoolLines([]);
+    lastFetchHydratedToPoolRef.current = null;
+    storeFetchFailedToastRef.current = null;
     storePullMutation.mutate(sessionApp.id);
   }, [sessionApp, storePullMutation]);
 
-  const poolDisplayCount = useMemo(() => {
-    const row = fetchRowQuery.data;
-    const storeDone = row?.status === "completed" ? row.review_count : 0;
-    return storeDone + poolLines.length;
-  }, [fetchRowQuery.data, poolLines.length]);
+  /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
+  const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
 
   const fetchProgressPercent = useMemo(() => {
     const row = fetchRowQuery.data;
@@ -288,24 +358,31 @@ function AnalyzeHubConnected() {
     return 65;
   }, [fetchRowQuery.data]);
 
-  const canRunUnifiedAnalysis = useMemo(() => {
-    const appId = sessionApp?.id ?? targetAppId;
-    if (!appId) {
-      return false;
+  const effectiveAppId = useMemo(() => {
+    const fromSelect = targetAppId.trim();
+    if (fromSelect) {
+      return fromSelect;
     }
+    return sessionApp?.id ?? "";
+  }, [targetAppId, sessionApp?.id]);
+
+  const canRunUnifiedAnalysis = useMemo(() => {
     if (poolLines.length > 0) {
       return true;
     }
+    if (!effectiveAppId) {
+      return false;
+    }
     return fetchRowQuery.data?.status === "completed" && Boolean(storeFetchId);
-  }, [sessionApp?.id, targetAppId, poolLines.length, fetchRowQuery.data?.status, storeFetchId]);
+  }, [poolLines.length, effectiveAppId, fetchRowQuery.data?.status, storeFetchId]);
 
   const runUnifiedAnalysis = useCallback(async () => {
-    const appId = sessionApp?.id ?? targetAppId;
-    if (!appId) {
-      toast.error(t("analyzeFooterNeedApp"));
-      return;
-    }
+    const appId = effectiveAppId;
     if (poolLines.length > 0) {
+      if (!appId) {
+        toast.error(t("analyzeNeedAppForTextPool"));
+        return;
+      }
       setAnalysisKickoffBusy(true);
       try {
         const res = await importMutation.mutateAsync({
@@ -323,6 +400,10 @@ function AnalyzeHubConnected() {
       return;
     }
     if (fetchRowQuery.data?.status === "completed" && storeFetchId) {
+      if (!appId) {
+        toast.error(t("analyzeFooterNeedApp"));
+        return;
+      }
       setAnalysisKickoffBusy(true);
       try {
         await apiFetch<AnalysisDto[]>(`/api/v1/fetches/${storeFetchId}/analyze`, {
@@ -340,10 +421,13 @@ function AnalyzeHubConnected() {
       }
       return;
     }
+    if (!appId) {
+      toast.error(t("analyzeFooterNeedApp"));
+      return;
+    }
     toast.info(t("analyzeFooterNeedData"));
   }, [
-    sessionApp?.id,
-    targetAppId,
+    effectiveAppId,
     poolLines,
     importMutation,
     afterImport,
@@ -437,6 +521,15 @@ function AnalyzeHubConnected() {
     }
   };
 
+  const hideStoreResultGrid = Boolean(selectedStoreHit || isPinningStore);
+
+  useEffect(() => {
+    if (!selectedStoreHit || (!sessionApp && !isPinningStore)) {
+      return;
+    }
+    pinnedPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [selectedStoreHit, sessionApp, isPinningStore]);
+
   const shellBody = (
     <div className="min-h-[60vh] space-y-6 bg-gradient-to-b from-sky-100/80 via-sky-50/50 to-slate-50 px-3 py-6 sm:px-6">
       <div className="mx-auto max-w-[min(1240px,calc(100vw-1.5rem))] space-y-6 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-sm sm:p-8">
@@ -522,83 +615,11 @@ function AnalyzeHubConnected() {
               </p>
             ) : null}
 
-            {activeQuery.length >= 2 && !selectedStoreHit ? (
-              <div className="space-y-3">
-                <h3 className="text-sm font-medium text-slate-600">
-                  {t("resultsHeading", { count: results.length })}
-                </h3>
-                {searchQuery.isPending ? (
-                  <p className="text-sm text-slate-500">{tCommon("loading")}</p>
-                ) : searchQuery.isError ? (
-                  <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/50 p-3">
-                    <p className="text-sm font-medium text-red-800">{t("searchFailed")}</p>
-                    <p className="text-sm break-words text-red-800/90">{formatClientFetchError(searchQuery.error)}</p>
-                    {isLikelyFetchNetworkError(searchQuery.error) ? (
-                      <p className="text-xs leading-relaxed text-slate-600">{t("searchNetworkHint")}</p>
-                    ) : null}
-                    <Button type="button" variant="outline" size="sm" onClick={() => void searchQuery.refetch()}>
-                      {tCommon("retry")}
-                    </Button>
-                  </div>
-                ) : !results.length ? (
-                  <p className="text-sm text-slate-500">{t("noResults")}</p>
-                ) : platform === "both" ? (
-                  <div className="space-y-8">
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-slate-800">{t("platformAndroid")}</h4>
-                      {androidHits.length ? (
-                        <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
-                          {androidHits.map((hit) => (
-                            <StoreResultCard
-                              key={`gp-${hit.id}-${hit.name}`}
-                              hit={hit}
-                              onPin={(h) => void pinStoreHit(h)}
-                              selectLabel={t("selectAppPin")}
-                              pinDisabled={isPinningStore}
-                            />
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-slate-500">{t("noResultsGroup")}</p>
-                      )}
-                    </div>
-                    <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-slate-800">{t("platformIos")}</h4>
-                      {iosHits.length ? (
-                        <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
-                          {iosHits.map((hit) => (
-                            <StoreResultCard
-                              key={`ios-${hit.id}-${hit.name}`}
-                              hit={hit}
-                              onPin={(h) => void pinStoreHit(h)}
-                              selectLabel={t("selectAppPin")}
-                              pinDisabled={isPinningStore}
-                            />
-                          ))}
-                        </ul>
-                      ) : (
-                        <p className="text-sm text-slate-500">{t("noResultsGroup")}</p>
-                      )}
-                    </div>
-                  </div>
-                ) : (
-                  <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
-                    {results.map((hit) => (
-                      <StoreResultCard
-                        key={`${hit.platform}-${hit.id}-${hit.name}`}
-                        hit={hit}
-                        onPin={(h) => void pinStoreHit(h)}
-                        selectLabel={t("selectAppPin")}
-                        pinDisabled={isPinningStore}
-                      />
-                    ))}
-                  </ul>
-                )}
-              </div>
-            ) : null}
-
             {selectedStoreHit && (sessionApp || isPinningStore) ? (
-              <div className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 sm:p-5">
+              <div
+                ref={pinnedPanelRef}
+                className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 sm:p-5"
+              >
                 <PinnedStoreAppCard
                   hit={selectedStoreHit}
                   app={sessionApp}
@@ -680,6 +701,81 @@ function AnalyzeHubConnected() {
                     {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
                   </p>
                 ) : null}
+              </div>
+            ) : null}
+
+            {activeQuery.length >= 2 && !hideStoreResultGrid ? (
+              <div className="space-y-3">
+                <h3 className="text-sm font-medium text-slate-600">
+                  {t("resultsHeading", { count: results.length })}
+                </h3>
+                {searchQuery.isPending ? (
+                  <p className="text-sm text-slate-500">{tCommon("loading")}</p>
+                ) : searchQuery.isError ? (
+                  <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/50 p-3">
+                    <p className="text-sm font-medium text-red-800">{t("searchFailed")}</p>
+                    <p className="text-sm break-words text-red-800/90">{formatClientFetchError(searchQuery.error)}</p>
+                    {isLikelyFetchNetworkError(searchQuery.error) ? (
+                      <p className="text-xs leading-relaxed text-slate-600">{t("searchNetworkHint")}</p>
+                    ) : null}
+                    <Button type="button" variant="outline" size="sm" onClick={() => void searchQuery.refetch()}>
+                      {tCommon("retry")}
+                    </Button>
+                  </div>
+                ) : !results.length ? (
+                  <p className="text-sm text-slate-500">{t("noResults")}</p>
+                ) : platform === "both" ? (
+                  <div className="space-y-8">
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-slate-800">{t("platformAndroid")}</h4>
+                      {androidHits.length ? (
+                        <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
+                          {androidHits.map((hit) => (
+                            <StoreResultCard
+                              key={`gp-${hit.id}-${hit.name}`}
+                              hit={hit}
+                              onPin={(h) => void pinStoreHit(h)}
+                              selectLabel={t("selectAppPin")}
+                              pinDisabled={isPinningStore}
+                            />
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-slate-500">{t("noResultsGroup")}</p>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <h4 className="text-sm font-semibold text-slate-800">{t("platformIos")}</h4>
+                      {iosHits.length ? (
+                        <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
+                          {iosHits.map((hit) => (
+                            <StoreResultCard
+                              key={`ios-${hit.id}-${hit.name}`}
+                              hit={hit}
+                              onPin={(h) => void pinStoreHit(h)}
+                              selectLabel={t("selectAppPin")}
+                              pinDisabled={isPinningStore}
+                            />
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="text-sm text-slate-500">{t("noResultsGroup")}</p>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
+                    {results.map((hit) => (
+                      <StoreResultCard
+                        key={`${hit.platform}-${hit.id}-${hit.name}`}
+                        hit={hit}
+                        onPin={(h) => void pinStoreHit(h)}
+                        selectLabel={t("selectAppPin")}
+                        pinDisabled={isPinningStore}
+                      />
+                    ))}
+                  </ul>
+                )}
               </div>
             ) : null}
 
@@ -919,6 +1015,9 @@ function AnalyzeHubConnected() {
                 onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
               />
             </div>
+            {poolLines.length > 0 && !effectiveAppId ? (
+              <p className="text-center text-xs font-medium text-amber-900">{t("analyzeNeedAppForTextPool")}</p>
+            ) : null}
             <Button
               type="button"
               className="h-14 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-lg font-bold text-white shadow-md hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
