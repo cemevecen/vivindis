@@ -85,7 +85,15 @@ export function NewAppForm() {
     onSuccess: async (data) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
       toast.success(t("created"));
-      router.push(`/apps/${data.id}`);
+      const fd = searchParams.get("from_date")?.trim();
+      const td = searchParams.get("to_date")?.trim();
+      const pair = searchParams.get("pair_app_id")?.trim();
+      const q = new URLSearchParams();
+      if (fd) q.set("from_date", fd);
+      if (td) q.set("to_date", td);
+      if (pair) q.set("pair_app_id", pair);
+      const qs = q.toString();
+      router.push(`/apps/${data.id}${qs ? `?${qs}` : ""}`);
     },
     onError: (err) => {
       const msg = err instanceof ApiError ? err.message : tCommon("error");

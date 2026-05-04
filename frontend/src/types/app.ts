@@ -31,3 +31,8 @@ export type ReviewFetchDto = {
   completed_at: string | null;
   created_at: string;
 };
+
+export type ReviewImportResponseDto = {
+  fetch_id: string;
+  review_count: number;
+};

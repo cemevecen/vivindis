@@ -1,6 +1,6 @@
 "use client";
 
-import { GitCompare, LayoutDashboard, Search, Smartphone } from "lucide-react";
+import { GitCompare, Info, LayoutDashboard, Search, Smartphone } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Link, usePathname } from "@/i18n/routing";
@@ -19,6 +19,7 @@ export function DashboardSidebar({ onNavigate }: SidebarProps) {
     { href: "/analyze" as const, label: t("analyze"), Icon: Search },
     { href: "/apps" as const, label: t("apps"), Icon: Smartphone },
     { href: "/compare" as const, label: t("compare"), Icon: GitCompare },
+    { href: "/about" as const, label: t("about"), Icon: Info },
   ];
 
   return (

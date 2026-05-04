@@ -4,7 +4,8 @@ import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -34,6 +35,7 @@ export function StartFetchForm({ appId }: Props) {
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const locale = useLocale();
+  const searchParams = useSearchParams();
 
   const schema = useMemo(() => createFetchCreateSchema((key) => t(key)), [t]);
   const defaults = useMemo(() => defaultDateRange(), []);
@@ -42,6 +44,14 @@ export function StartFetchForm({ appId }: Props) {
     resolver: zodResolver(schema),
     defaultValues: defaults,
   });
+
+  useEffect(() => {
+    const fd = searchParams.get("from_date")?.trim();
+    const td = searchParams.get("to_date")?.trim();
+    if (fd && td) {
+      form.reset({ from_date: fd, to_date: td });
+    }
+  }, [searchParams, form, appId]);
 
   const mutation = useMutation({
     mutationFn: async (values: FetchCreateFormValues) => {

@@ -1,8 +1,9 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
 import { StartFetchForm } from "@/components/apps/start-fetch-form";
@@ -21,6 +22,9 @@ function parseApiDate(isoDate: string): Date {
   }
   return new Date(Date.UTC(y, m - 1, d));
 }
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 function statusClass(status: FetchStatus): string {
   switch (status) {
@@ -47,6 +51,15 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const { getToken } = useAuth();
+  const searchParams = useSearchParams();
+  const pairParam = searchParams.get("pair_app_id")?.trim() ?? "";
+  const pairValid = Boolean(pairParam && UUID_RE.test(pairParam) && pairParam !== appId);
+
+  const pairAppQuery = useQuery({
+    queryKey: queryKeys.apps.detail(pairParam),
+    queryFn: () => apiFetch<AppDto>(`/api/v1/apps/${pairParam}`, { getToken }),
+    enabled: clerkEnabled && pairValid,
+  });
 
   const dateFmt = useMemo(
     () =>
@@ -121,6 +134,32 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
 
   return (
     <div className="space-y-8">
+      {pairValid && pairAppQuery.data ? (
+        <div className="rounded-lg border border-sky-200 bg-sky-50/80 p-4 text-sm text-sky-950 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-100">
+          <p className="font-medium">{t("pairBannerTitle")}</p>
+          <p className="mt-1 text-muted-foreground dark:text-sky-200/90">
+            {t("pairBannerIntro", { name: pairAppQuery.data.name })}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Link
+              href={`/apps/${pairParam}`}
+              className={cn(buttonVariants({ variant: "default", size: "sm" }))}
+            >
+              {t("pairBannerOpenPartner")}
+            </Link>
+            <Link
+              href={`/compare?app_a=${appId}&app_b=${pairParam}`}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+            >
+              {t("pairBannerCompare")}
+            </Link>
+          </div>
+        </div>
+      ) : pairValid && pairAppQuery.isError ? (
+        <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950">
+          {tCommon("error")}
+        </div>
+      ) : null}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
           <Link href="/apps" className="text-sm text-muted-foreground hover:text-foreground">

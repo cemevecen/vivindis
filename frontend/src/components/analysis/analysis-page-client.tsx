@@ -9,6 +9,7 @@ import { AnalysisCharts } from "@/components/analysis/analysis-charts";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
+import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
 import { ApiError, apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
@@ -214,6 +215,56 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           <span className="text-sm text-muted-foreground">{t("fetchNotCompleted")}</span>
         ) : null}
       </div>
+
+      {((heuristic?.status === "completed" && heuristic.result) ||
+        (ai?.status === "completed" && ai.result)) &&
+      fetchId ? (
+        <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <h2 className="mb-3 text-sm font-semibold">{t("exportHeading")}</h2>
+          <div className="flex flex-wrap gap-2">
+            {heuristic?.status === "completed" && heuristic.result ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadAnalysisJson(fetchId, "heuristic", heuristic)}
+                >
+                  {t("exportJsonHeuristic")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadAnalysisCsvExport(fetchId, "heuristic", heuristic)}
+                >
+                  {t("exportCsvHeuristic")}
+                </Button>
+              </>
+            ) : null}
+            {ai?.status === "completed" && ai.result ? (
+              <>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadAnalysisJson(fetchId, "ai", ai)}
+                >
+                  {t("exportJsonAi")}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => downloadAnalysisCsvExport(fetchId, "ai", ai)}
+                >
+                  {t("exportCsvAi")}
+                </Button>
+              </>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
 
       <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} />
     </div>

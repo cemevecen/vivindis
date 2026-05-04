@@ -19,7 +19,12 @@ const localeLabels: Record<(typeof routing.locales)[number], string> = {
   ru: "Русский",
 };
 
-export function LanguageSwitcher() {
+type LanguageSwitcherProps = {
+  /** Örn. koyu masthead üzerinde kontrast için */
+  selectClassName?: string;
+};
+
+export function LanguageSwitcher({ selectClassName }: LanguageSwitcherProps) {
   const locale = useLocale() as (typeof routing.locales)[number];
   const pathname = usePathname();
   const router = useRouter();
@@ -28,7 +33,10 @@ export function LanguageSwitcher() {
     <label className="flex items-center gap-2 text-sm text-muted-foreground">
       <span className="sr-only">Language</span>
       <select
-        className="rounded-md border border-input bg-background px-2 py-1.5 text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className={
+          selectClassName ??
+          "rounded-md border border-input bg-background px-2 py-1.5 text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        }
         value={locale}
         onChange={(e) => {
           const next = e.target.value as (typeof routing.locales)[number];
