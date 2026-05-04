@@ -308,6 +308,7 @@ DELETE /api/v1/apps/{id}
 
 ```
 POST /api/v1/apps/{id}/fetch
+POST /api/v1/apps/{id}/import-reviews   # dosya / yapıştırma: tamamlanmış fetch + yorum satırları (worker yok)
 GET  /api/v1/apps/{id}/fetches
 GET  /api/v1/fetches/{id}
 GET  /api/v1/apps/{id}/reviews

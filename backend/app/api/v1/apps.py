@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import uuid
+from datetime import datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response, status
@@ -13,13 +14,14 @@ from app.api.deps import get_current_user, require_app_owned
 from app.core.logging import get_logger
 from app.db.session import get_async_session
 from app.models.app import App
-from app.models.enums import FetchStatus
+from app.models.enums import AppPlatform, FetchStatus, StorePlatform
 from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.models.user import User
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse
+from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
 from app.workers.scraper import review_fetch_task
 
 router = APIRouter(prefix="/apps", tags=["apps"])
@@ -28,6 +30,12 @@ log = get_logger(__name__)
 
 def _enqueue_review_fetch(fetch_id: str) -> None:
     review_fetch_task.apply_async(args=[fetch_id], queue="scraper")
+
+
+def _store_platform_for_app(app: App) -> StorePlatform:
+    if app.platform == AppPlatform.APP_STORE:
+        return StorePlatform.APP_STORE
+    return StorePlatform.GOOGLE_PLAY
 
 
 @router.get("", response_model=list[AppResponse])
@@ -116,6 +124,60 @@ async def create_fetch(
     log.info("review_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
     background_tasks.add_task(_enqueue_review_fetch, str(fetch.id))
     return fetch
+
+
+@router.post(
+    "/{app_id}/import-reviews",
+    response_model=ReviewImportResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def import_manual_reviews(
+    body: ReviewImportCreate,
+    app: Annotated[App, Depends(require_app_owned)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+) -> ReviewImportResponse:
+    """Dosya veya yapıştırılan metinden yorum satırları ekler; fetch tamamlanmış sayılır (worker yok)."""
+    now = datetime.now(timezone.utc)
+    store_platform = _store_platform_for_app(app)
+    fetch = ReviewFetch(
+        app_id=app.id,
+        status=FetchStatus.COMPLETED,
+        from_date=body.from_date,
+        to_date=body.to_date,
+        review_count=len(body.items),
+        started_at=now,
+        completed_at=now,
+    )
+    session.add(fetch)
+    await session.flush()
+
+    review_date = body.to_date
+    for item in body.items:
+        rid = uuid.uuid4()
+        row = Review(
+            app_id=app.id,
+            fetch_id=fetch.id,
+            store_review_id=f"import-{rid.hex}",
+            platform=store_platform,
+            rating=item.rating if item.rating is not None else 3,
+            title=None,
+            body=item.body.strip(),
+            author=None,
+            lang="und",
+            review_date=review_date,
+            thumbs_up=0,
+            developer_reply=None,
+            reply_date=None,
+        )
+        session.add(row)
+
+    log.info(
+        "manual_review_import",
+        fetch_id=str(fetch.id),
+        app_id=str(app.id),
+        count=len(body.items),
+    )
+    return ReviewImportResponse(fetch_id=fetch.id, review_count=len(body.items))
 
 
 @router.get("/{app_id}/fetches", response_model=list[ReviewFetchResponse])
