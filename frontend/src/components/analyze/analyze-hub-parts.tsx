@@ -1,9 +1,11 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { AppDto } from "@/types/app";
 import type { StoreSearchResultItem } from "@/types/store-search";
 
 export function SegmentedTwo({
@@ -49,6 +51,45 @@ export function SegmentedTwo({
       >
         {right}
       </button>
+    </div>
+  );
+}
+
+export function PinnedStoreAppCard({
+  hit,
+  app,
+  onClear,
+}: {
+  hit: StoreSearchResultItem;
+  app: AppDto;
+  onClear: () => void;
+}) {
+  const t = useTranslations("analyzeHub");
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3 rounded-2xl border border-orange-200/80 bg-gradient-to-br from-orange-50/90 to-amber-50/50 p-4 shadow-sm">
+      <div className="flex min-w-0 flex-1 gap-3">
+        {hit.icon ? (
+          // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
+          <img
+            src={hit.icon}
+            alt=""
+            width={48}
+            height={48}
+            className="size-12 shrink-0 rounded-xl border border-orange-100 bg-white object-cover"
+          />
+        ) : (
+          <div className="size-12 shrink-0 rounded-xl border border-dashed border-orange-200 bg-white/80" />
+        )}
+        <div className="min-w-0 space-y-1">
+          <p className="text-xs font-semibold uppercase tracking-wide text-orange-800/90">{t("pinnedCardLabel")}</p>
+          <p className="truncate text-base font-semibold text-slate-900">{app.name}</p>
+          <p className="truncate font-mono text-xs text-slate-600">{hit.platform === "google_play" ? hit.id : `id ${hit.id}`}</p>
+        </div>
+      </div>
+      <Button type="button" variant="outline" size="sm" className="shrink-0 gap-1" onClick={onClear}>
+        <X className="size-3.5" aria-hidden />
+        {t("clearPinnedSelection")}
+      </Button>
     </div>
   );
 }

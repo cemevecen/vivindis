@@ -4,10 +4,10 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, GitCompare, Search, Store, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import { SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
+import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,7 +24,6 @@ import {
 import {
   MASTHEAD_PLUS_PATTERN,
   appBodyFromHit,
-  buildNewAppQueryString,
   rangeFromPreset,
   type AnalysisMode,
   type AnalyzeHubMode,
@@ -37,7 +36,7 @@ import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
-import type { AppDto, ReviewImportResponseDto } from "@/types/app";
+import type { AppDto, ReviewFetchDto, ReviewImportResponseDto } from "@/types/app";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
 type Props = {
@@ -84,10 +83,16 @@ function AnalyzeHubConnected() {
 
   const [targetAppId, setTargetAppId] = useState<string>("");
   const [pastedText, setPastedText] = useState("");
-  const [parsedFileLines, setParsedFileLines] = useState<string[]>([]);
+  /** Havuz: dosya/metin satırları (mağaza çekimi tamamlanınca sayaç ayrıca fetch.review_count ile birleşir). */
+  const [poolLines, setPoolLines] = useState<string[]>([]);
   const [fileLabel, setFileLabel] = useState("");
   const [fileDragOver, setFileDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [selectedStoreHit, setSelectedStoreHit] = useState<StoreSearchResultItem | null>(null);
+  const [sessionApp, setSessionApp] = useState<AppDto | null>(null);
+  const [storeFetchId, setStoreFetchId] = useState<string | null>(null);
+  const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
 
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
@@ -124,12 +129,15 @@ function AnalyzeHubConnected() {
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
   });
 
+  useEffect(() => {
+    if (sessionApp) {
+      setTargetAppId(sessionApp.id);
+    }
+  }, [sessionApp]);
+
   const importMutation = useMutation({
-    mutationFn: async (payload: { items: { body: string; rating?: number }[] }) => {
-      if (!targetAppId) {
-        throw new Error("no_app");
-      }
-      return apiFetch<ReviewImportResponseDto>(`/api/v1/apps/${targetAppId}/import-reviews`, {
+    mutationFn: async (payload: { appId: string; items: { body: string; rating?: number }[] }) => {
+      return apiFetch<ReviewImportResponseDto>(`/api/v1/apps/${payload.appId}/import-reviews`, {
         method: "POST",
         body: {
           from_date: dateRange.from,
@@ -138,6 +146,38 @@ function AnalyzeHubConnected() {
         },
         getToken,
       });
+    },
+  });
+
+  const storePullMutation = useMutation({
+    mutationFn: async (appId: string) => {
+      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
+        method: "POST",
+        body: { from_date: dateRange.from, to_date: dateRange.to },
+        getToken,
+      });
+    },
+    onSuccess: (row) => {
+      setStoreFetchId(row.id);
+      void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
+    },
+    onError: (err) => {
+      const msg = err instanceof ApiError ? err.message : tCommon("error");
+      toast.error(msg);
+    },
+  });
+
+  const fetchRowQuery = useQuery({
+    queryKey:
+      sessionApp && storeFetchId
+        ? queryKeys.apps.fetchDetail(sessionApp.id, storeFetchId)
+        : ["analyzeHub", "fetch", "idle"],
+    queryFn: () =>
+      apiFetch<ReviewFetchDto>(`/api/v1/apps/${sessionApp!.id}/fetches/${storeFetchId}`, { getToken }),
+    enabled: Boolean(sessionApp && storeFetchId && storeFetchId.length > 0),
+    refetchInterval: (q) => {
+      const s = q.state.data?.status;
+      return s === "pending" || s === "running" ? 2000 : false;
     },
   });
 
@@ -164,9 +204,128 @@ function AnalyzeHubConnected() {
     [getToken, queryClient, router, runAnalysisTypes, t],
   );
 
-  const goToNewApp = (hit: StoreSearchResultItem) => {
-    router.push(`/apps/new?${buildNewAppQueryString(hit, dateRange)}`);
-  };
+  const clearStorePin = useCallback(() => {
+    setSelectedStoreHit(null);
+    setSessionApp(null);
+    setStoreFetchId(null);
+  }, []);
+
+  const pinStoreHit = useCallback(
+    async (hit: StoreSearchResultItem) => {
+      setSelectedStoreHit(hit);
+      setStoreFetchId(null);
+      try {
+        const app = await apiFetch<AppDto>("/api/v1/apps", {
+          method: "POST",
+          body: appBodyFromHit(hit),
+          getToken,
+        });
+        setSessionApp(app);
+        await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
+        toast.success(t("storeAppPinned"));
+      } catch (e) {
+        setSelectedStoreHit(null);
+        setSessionApp(null);
+        const msg = e instanceof ApiError ? e.message : tCommon("error");
+        toast.error(msg);
+      }
+    },
+    [getToken, queryClient, t, tCommon],
+  );
+
+  const handlePullStoreReviews = useCallback(() => {
+    if (!sessionApp) {
+      return;
+    }
+    setPoolLines([]);
+    storePullMutation.mutate(sessionApp.id);
+  }, [sessionApp, storePullMutation]);
+
+  const poolDisplayCount = useMemo(() => {
+    const row = fetchRowQuery.data;
+    const storeDone = row?.status === "completed" ? row.review_count : 0;
+    return storeDone + poolLines.length;
+  }, [fetchRowQuery.data, poolLines.length]);
+
+  const fetchProgressPercent = useMemo(() => {
+    const row = fetchRowQuery.data;
+    if (!row || (row.status !== "pending" && row.status !== "running")) {
+      return 0;
+    }
+    if (row.status === "pending") {
+      return 25;
+    }
+    return 65;
+  }, [fetchRowQuery.data]);
+
+  const canRunUnifiedAnalysis = useMemo(() => {
+    const appId = sessionApp?.id ?? targetAppId;
+    if (!appId) {
+      return false;
+    }
+    if (poolLines.length > 0) {
+      return true;
+    }
+    return fetchRowQuery.data?.status === "completed" && Boolean(storeFetchId);
+  }, [sessionApp?.id, targetAppId, poolLines.length, fetchRowQuery.data?.status, storeFetchId]);
+
+  const runUnifiedAnalysis = useCallback(async () => {
+    const appId = sessionApp?.id ?? targetAppId;
+    if (!appId) {
+      toast.error(t("analyzeFooterNeedApp"));
+      return;
+    }
+    if (poolLines.length > 0) {
+      setAnalysisKickoffBusy(true);
+      try {
+        const res = await importMutation.mutateAsync({
+          appId,
+          items: poolLines.map((body) => ({ body })),
+        });
+        setPoolLines([]);
+        await afterImport(res.fetch_id, appId);
+      } catch (e) {
+        const msg = e instanceof ApiError ? e.message : tCommon("error");
+        toast.error(msg);
+      } finally {
+        setAnalysisKickoffBusy(false);
+      }
+      return;
+    }
+    if (fetchRowQuery.data?.status === "completed" && storeFetchId) {
+      setAnalysisKickoffBusy(true);
+      try {
+        await apiFetch<AnalysisDto[]>(`/api/v1/fetches/${storeFetchId}/analyze`, {
+          method: "POST",
+          body: { types: runAnalysisTypes() },
+          getToken,
+        });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
+        router.push(`/apps/${appId}/analysis?fetchId=${storeFetchId}`);
+      } catch {
+        toast.error(t("analyzeKickoffFailed"));
+      } finally {
+        setAnalysisKickoffBusy(false);
+      }
+      return;
+    }
+    toast.info(t("analyzeFooterNeedData"));
+  }, [
+    sessionApp?.id,
+    targetAppId,
+    poolLines,
+    importMutation,
+    afterImport,
+    fetchRowQuery.data?.status,
+    storeFetchId,
+    getToken,
+    queryClient,
+    router,
+    runAnalysisTypes,
+    t,
+    tCommon,
+  ]);
 
   const results = useMemo(() => searchQuery.data?.results ?? [], [searchQuery.data?.results]);
   const androidHits = useMemo(() => results.filter((r) => r.platform === "google_play"), [results]);
@@ -186,7 +345,6 @@ function AnalyzeHubConnected() {
   const apps = appsQuery.data ?? [];
 
   const processFile = async (file: File | null) => {
-    setParsedFileLines([]);
     setFileLabel("");
     if (!file) {
       return;
@@ -195,49 +353,25 @@ function AnalyzeHubConnected() {
     const { lines, errorKey } = await parseReviewFile(file);
     if (errorKey === "parseFailed") {
       toast.error(t("fileParseFailed"));
-      setParsedFileLines([]);
       return;
     }
     if (errorKey === "parseEmpty" || lines.length === 0) {
       toast.error(t("fileParseEmpty"));
-      setParsedFileLines([]);
       return;
     }
-    setParsedFileLines(lines);
+    setPoolLines((prev) => [...prev, ...lines]);
+    toast.success(t("poolAppended", { count: lines.length }));
   };
 
-  const handleImportFile = async () => {
-    if (!targetAppId || parsedFileLines.length === 0) {
-      return;
-    }
-    try {
-      const res = await importMutation.mutateAsync({
-        items: parsedFileLines.map((body) => ({ body })),
-      });
-      await afterImport(res.fetch_id, targetAppId);
-    } catch (e) {
-      const msg = e instanceof ApiError ? e.message : tCommon("error");
-      if (e instanceof Error && e.message === "no_app") {
-        return;
-      }
-      toast.error(msg);
-    }
-  };
-
-  const handleImportPaste = async () => {
+  const handleLoadTextIntoPool = () => {
     const lines = parseReviewLinesFromPaste(pastedText);
-    if (!targetAppId || lines.length === 0) {
+    if (lines.length === 0) {
+      toast.info(t("textPoolEmpty"));
       return;
     }
-    try {
-      const res = await importMutation.mutateAsync({
-        items: lines.map((body) => ({ body })),
-      });
-      await afterImport(res.fetch_id, targetAppId);
-    } catch (e) {
-      const msg = e instanceof ApiError ? e.message : tCommon("error");
-      toast.error(msg);
-    }
+    setPoolLines((prev) => [...prev, ...lines]);
+    toast.success(t("poolAppended", { count: lines.length }));
+    setPastedText("");
   };
 
   const handleCompareStart = async () => {
@@ -295,35 +429,6 @@ function AnalyzeHubConnected() {
               />
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="date-preset" className="text-slate-800">
-                  {t("dateRangeLabel")}
-                </Label>
-                <SelectNative
-                  id="date-preset"
-                  value={datePreset}
-                  onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
-                  className="rounded-xl"
-                >
-                  <option value="7d">{t("datePresetLast7")}</option>
-                  <option value="30d">{t("datePresetLast30")}</option>
-                  <option value="90d">{t("datePresetLast90")}</option>
-                  <option value="365d">{t("datePresetLast365")}</option>
-                </SelectNative>
-              </div>
-              <div className="space-y-2">
-                <span className="block text-sm font-medium text-slate-800">{t("reviewScopeLabel")}</span>
-                <SegmentedTwo
-                  ariaLabel={t("reviewScopeLabel")}
-                  left={t("reviewScopeLocal")}
-                  right={t("reviewScopeGlobal")}
-                  value={reviewScope === "local" ? "left" : "right"}
-                  onChange={(v) => setReviewScope(v === "left" ? "local" : "global")}
-                />
-              </div>
-            </div>
-
             <div className="space-y-2">
               <span className="block text-sm font-medium text-slate-800">{t("platformRowLabel")}</span>
               <div className="flex flex-wrap gap-2">
@@ -372,19 +477,8 @@ function AnalyzeHubConnected() {
               onClick={() => setActiveQuery(draftQuery.trim())}
               disabled={draftQuery.trim().length < 2}
             >
-              {t("fetchReviewsCta")}
+              {t("searchCatalogCta")}
             </Button>
-
-            <div className="space-y-2">
-              <span className="block text-sm font-medium text-slate-800">{t("analysisModeLabel")}</span>
-              <SegmentedTwo
-                ariaLabel={t("analysisModeLabel")}
-                left={t("analysisModeFast")}
-                right={t("analysisModeRich")}
-                value={analysisMode === "fast" ? "left" : "right"}
-                onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
-              />
-            </div>
 
             {!isPublicApiBaseUrlConfigured() ? (
               <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-950">
@@ -422,8 +516,8 @@ function AnalyzeHubConnected() {
                             <StoreResultCard
                               key={`gp-${hit.id}-${hit.name}`}
                               hit={hit}
-                              onSelect={goToNewApp}
-                              selectLabel={t("selectAppContinue")}
+                              onSelect={() => void pinStoreHit(hit)}
+                              selectLabel={t("selectAppPin")}
                             />
                           ))}
                         </ul>
@@ -439,8 +533,8 @@ function AnalyzeHubConnected() {
                             <StoreResultCard
                               key={`ios-${hit.id}-${hit.name}`}
                               hit={hit}
-                              onSelect={goToNewApp}
-                              selectLabel={t("selectAppContinue")}
+                              onSelect={() => void pinStoreHit(hit)}
+                              selectLabel={t("selectAppPin")}
                             />
                           ))}
                         </ul>
@@ -455,12 +549,89 @@ function AnalyzeHubConnected() {
                       <StoreResultCard
                         key={`${hit.platform}-${hit.id}-${hit.name}`}
                         hit={hit}
-                        onSelect={goToNewApp}
-                        selectLabel={t("selectAppContinue")}
+                        onSelect={() => void pinStoreHit(hit)}
+                        selectLabel={t("selectAppPin")}
                       />
                     ))}
                   </ul>
                 )}
+              </div>
+            ) : null}
+
+            {selectedStoreHit && sessionApp ? (
+              <div className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 sm:p-5">
+                <PinnedStoreAppCard hit={selectedStoreHit} app={sessionApp} onClear={clearStorePin} />
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="store-fetch-date-preset" className="text-slate-800">
+                      {t("dateRangeLabel")}
+                    </Label>
+                    <SelectNative
+                      id="store-fetch-date-preset"
+                      value={datePreset}
+                      onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
+                      className="rounded-xl"
+                    >
+                      <option value="7d">{t("datePresetLast7")}</option>
+                      <option value="30d">{t("datePresetLast30")}</option>
+                      <option value="90d">{t("datePresetLast90")}</option>
+                      <option value="365d">{t("datePresetLast365")}</option>
+                    </SelectNative>
+                  </div>
+                  <div className="space-y-2">
+                    <span className="block text-sm font-medium text-slate-800">{t("reviewScopeLabel")}</span>
+                    <SegmentedTwo
+                      ariaLabel={t("reviewScopeLabel")}
+                      left={t("reviewScopeLocal")}
+                      right={t("reviewScopeGlobal")}
+                      value={reviewScope === "local" ? "left" : "right"}
+                      onChange={(v) => setReviewScope(v === "left" ? "local" : "global")}
+                    />
+                  </div>
+                </div>
+                <Button
+                  type="button"
+                  className="h-12 w-full rounded-xl bg-gradient-to-b from-slate-800 to-slate-950 text-base font-semibold text-white shadow-md hover:from-slate-700 hover:to-slate-900 disabled:opacity-50"
+                  onClick={() => void handlePullStoreReviews()}
+                  disabled={
+                    storePullMutation.isPending ||
+                    fetchRowQuery.data?.status === "pending" ||
+                    fetchRowQuery.data?.status === "running"
+                  }
+                >
+                  {storePullMutation.isPending || fetchRowQuery.data?.status === "pending"
+                    ? tCommon("loading")
+                    : fetchRowQuery.data?.status === "running"
+                      ? t("fetchRunningShort")
+                      : t("pullStoreReviewsCta")}
+                </Button>
+                {fetchRowQuery.data?.status === "pending" || fetchRowQuery.data?.status === "running" ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
+                    <div
+                      className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200"
+                      role="progressbar"
+                      aria-valuemin={0}
+                      aria-valuemax={100}
+                      aria-valuenow={fetchProgressPercent}
+                      aria-label={t("fetchProgressLabel")}
+                    >
+                      <div
+                        className="h-full rounded-full bg-orange-500 transition-[width] duration-700 ease-out"
+                        style={{ width: `${fetchProgressPercent}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-slate-600">{t("estimatedTimeHint")}</p>
+                  </div>
+                ) : null}
+                {fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
+                  <p className="text-sm text-red-700">{fetchRowQuery.data.error_message}</p>
+                ) : null}
+                {fetchRowQuery.data?.status === "completed" ? (
+                  <p className="text-sm font-medium text-emerald-800">
+                    {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
+                  </p>
+                ) : null}
               </div>
             ) : null}
 
@@ -470,6 +641,7 @@ function AnalyzeHubConnected() {
 
         {mode === "file" || mode === "text" ? (
           <section className="space-y-5">
+            <p className="text-sm text-slate-600">{t("fileTextIntro")}</p>
             <div className="space-y-2">
               <Label htmlFor="target-app" className="text-slate-800">
                 {t("targetAppLabel")}
@@ -487,8 +659,11 @@ function AnalyzeHubConnected() {
                   </option>
                 ))}
               </SelectNative>
+              {sessionApp ? (
+                <p className="text-xs text-slate-500">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
+              ) : null}
               {appsQuery.isError ? <p className="text-xs text-red-600">{t("appsLoadError")}</p> : null}
-              {!appsQuery.isPending && apps.length === 0 ? (
+              {!appsQuery.isPending && apps.length === 0 && !sessionApp ? (
                 <p className="text-sm text-slate-600">
                   {t("noAppsYet")}{" "}
                   <button
@@ -500,17 +675,6 @@ function AnalyzeHubConnected() {
                   </button>
                 </p>
               ) : null}
-            </div>
-
-            <div className="space-y-2">
-              <span className="block text-sm font-medium text-slate-800">{t("analysisModeLabel")}</span>
-              <SegmentedTwo
-                ariaLabel={t("analysisModeLabel")}
-                left={t("analysisModeFast")}
-                right={t("analysisModeRich")}
-                value={analysisMode === "fast" ? "left" : "right"}
-                onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
-              />
             </div>
 
             {mode === "file" ? (
@@ -554,23 +718,9 @@ function AnalyzeHubConnected() {
                     <p className="text-sm font-medium text-slate-800">{t("fileDropHint")}</p>
                     <p className="text-xs text-slate-600">{t("fileConstraints")}</p>
                   </div>
-                  {fileLabel ? (
-                    <p className="text-xs text-slate-500">
-                      {fileLabel}
-                      {parsedFileLines.length > 0
-                        ? ` · ${t("poolLineCount", { count: parsedFileLines.length })}`
-                        : null}
-                    </p>
-                  ) : null}
+                  {fileLabel ? <p className="text-xs text-slate-500">{fileLabel}</p> : null}
                 </div>
-                <Button
-                  type="button"
-                  disabled={!targetAppId || parsedFileLines.length === 0 || importMutation.isPending}
-                  className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-base font-semibold text-white shadow-md hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
-                  onClick={() => void handleImportFile()}
-                >
-                  {t("startSentimentCta")}
-                </Button>
+                <p className="text-xs text-slate-600">{t("filePoolFooterHint")}</p>
               </>
             ) : (
               <>
@@ -591,21 +741,11 @@ function AnalyzeHubConnected() {
                   variant="secondary"
                   className="h-11 w-full rounded-xl bg-slate-900 text-white hover:bg-slate-800"
                   disabled={!pastedText.trim()}
-                  onClick={() => {
-                    const n = parseReviewLinesFromPaste(pastedText).length;
-                    toast.info(t("poolLineCount", { count: n }));
-                  }}
+                  onClick={handleLoadTextIntoPool}
                 >
                   {t("loadTextToPool")}
                 </Button>
-                <Button
-                  type="button"
-                  disabled={!targetAppId || parseReviewLinesFromPaste(pastedText).length === 0 || importMutation.isPending}
-                  className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-base font-semibold text-white shadow-md hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
-                  onClick={() => void handleImportPaste()}
-                >
-                  {t("startSentimentCta")}
-                </Button>
+                <p className="text-xs text-slate-600">{t("textPoolFooterHint")}</p>
               </>
             )}
           </section>
@@ -696,16 +836,6 @@ function AnalyzeHubConnected() {
                 <option value="365d">{t("datePresetLast365")}</option>
               </SelectNative>
             </div>
-            <div className="space-y-2">
-              <span className="block text-sm font-medium text-slate-800">{t("analysisModeLabel")}</span>
-              <SegmentedTwo
-                ariaLabel={t("analysisModeLabel")}
-                left={t("analysisModeFast")}
-                right={t("analysisModeRich")}
-                value={analysisMode === "fast" ? "left" : "right"}
-                onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
-              />
-            </div>
             <Button
               type="button"
               className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-base font-semibold text-white shadow-md disabled:opacity-50"
@@ -716,6 +846,43 @@ function AnalyzeHubConnected() {
             </Button>
             <p className="text-xs text-slate-500">{tNav("compare")}</p>
           </section>
+        ) : null}
+
+        {mode !== "compare" ? (
+          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border-2 border-orange-200/80 bg-gradient-to-b from-white to-orange-50/40 p-4 shadow-xl sm:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-100 pb-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/80">{t("poolBadgeTitle")}</p>
+                <p className="text-3xl font-bold tabular-nums text-slate-900">{poolDisplayCount}</p>
+              </div>
+              {poolLines.length > 0 ? (
+                <Button type="button" variant="ghost" size="sm" className="text-slate-600" onClick={() => setPoolLines([])}>
+                  {t("clearManualPool")}
+                </Button>
+              ) : null}
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-slate-900">{t("analysisModeSectionTitle")}</p>
+              <SegmentedTwo
+                ariaLabel={t("analysisModeLabel")}
+                left={t("analysisModeFast")}
+                right={t("analysisModeRich")}
+                value={analysisMode === "fast" ? "left" : "right"}
+                onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
+              />
+            </div>
+            <Button
+              type="button"
+              className="h-14 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-lg font-bold text-white shadow-md hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
+              disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
+              onClick={() => void runUnifiedAnalysis()}
+            >
+              {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
+            </Button>
+            {!canRunUnifiedAnalysis ? (
+              <p className="text-center text-xs text-slate-600">{t("analyzeFooterDisabledHint")}</p>
+            ) : null}
+          </div>
         ) : null}
       </div>
     </div>
