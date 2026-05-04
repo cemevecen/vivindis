@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect } from "react";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { logClientErrorInDev } from "@/lib/dev-client-log";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -17,10 +18,7 @@ type Props = {
  */
 export default function AppError({ error, reset }: Props) {
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console -- yalnızca geliştirici hata ayıklama
-      console.error(error);
-    }
+    logClientErrorInDev(error);
   }, [error]);
 
   return (

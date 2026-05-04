@@ -4,6 +4,8 @@ import "./globals.css";
 
 import { useEffect } from "react";
 
+import { logClientErrorInDev } from "@/lib/dev-client-log";
+
 type Props = {
   error: Error & { digest?: string };
   reset: () => void;
@@ -14,10 +16,7 @@ type Props = {
  */
 export default function GlobalError({ error, reset }: Props) {
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console -- yalnızca geliştirici hata ayıklama
-      console.error(error);
-    }
+    logClientErrorInDev(error);
   }, [error]);
 
   return (

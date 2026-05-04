@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
-import { CompareAppsDashboard } from "@/components/compare/compare-apps-dashboard";
-import { ComparePageContent } from "@/components/compare/compare-page-content";
+import { CompareAppsDashboard, ComparePageContent } from "@/components/compare";
 
 type PageProps = {
   searchParams: Record<string, string | string[] | undefined>;

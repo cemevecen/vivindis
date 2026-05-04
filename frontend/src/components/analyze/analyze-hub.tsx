@@ -2,11 +2,12 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, FileText, GitCompare, Search, Store, Upload } from "lucide-react";
+import { FileText, GitCompare, Search, Store, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +21,17 @@ import {
   isLikelyFetchNetworkError,
   isPublicApiBaseUrlConfigured,
 } from "@/lib/api";
+import {
+  MASTHEAD_PLUS_PATTERN,
+  appBodyFromHit,
+  buildNewAppQueryString,
+  rangeFromPreset,
+  type AnalysisMode,
+  type AnalyzeHubMode,
+  type DatePresetId,
+  type ReviewScope,
+  type SearchPlatform,
+} from "@/lib/analyze-hub-utils";
 import { parseReviewFile } from "@/lib/parse-review-file";
 import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
@@ -28,172 +40,9 @@ import type { AnalysisDto } from "@/types/analysis";
 import type { AppDto, ReviewImportResponseDto } from "@/types/app";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
-const MASTHEAD_PLUS_PATTERN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z'/%3E%3C/svg%3E\")";
-
-type Mode = "store" | "file" | "text" | "compare";
-type SearchPlatform = "google_play" | "app_store" | "both";
-type DatePresetId = "7d" | "30d" | "90d" | "365d";
-type ReviewScope = "local" | "global";
-type AnalysisMode = "fast" | "rich";
-
 type Props = {
   clerkEnabled: boolean;
 };
-
-function isoDate(d: Date): string {
-  return d.toISOString().slice(0, 10);
-}
-
-function rangeFromPreset(preset: DatePresetId): { from: string; to: string } {
-  const to = new Date();
-  const from = new Date();
-  const days = preset === "7d" ? 7 : preset === "30d" ? 30 : preset === "90d" ? 90 : 365;
-  from.setDate(from.getDate() - days);
-  return { from: isoDate(from), to: isoDate(to) };
-}
-
-function buildNewAppQueryString(
-  hit: StoreSearchResultItem,
-  dates: { from: string; to: string },
-): string {
-  const p = new URLSearchParams();
-  p.set("platform", hit.platform);
-  if (hit.platform === "google_play") {
-    p.set("package_name", hit.id);
-  } else {
-    p.set("bundle_id", hit.id);
-  }
-  p.set("name", hit.name);
-  if (hit.developer) p.set("developer", hit.developer);
-  if (hit.icon) p.set("icon_url", hit.icon);
-  p.set("from_date", dates.from);
-  p.set("to_date", dates.to);
-  return p.toString();
-}
-
-function appBodyFromHit(hit: StoreSearchResultItem): Record<string, unknown> {
-  const plat = hit.platform === "app_store" ? "app_store" : "google_play";
-  return {
-    platform: plat,
-    package_name: hit.platform === "google_play" ? hit.id : "",
-    bundle_id: hit.platform === "app_store" ? hit.id : null,
-    name: hit.name,
-    developer: hit.developer ?? null,
-    category: null,
-    icon_url: hit.icon ?? null,
-    is_active: true,
-  };
-}
-
-function SegmentedTwo({
-  ariaLabel,
-  left,
-  right,
-  value,
-  onChange,
-}: {
-  ariaLabel: string;
-  left: string;
-  right: string;
-  value: "left" | "right";
-  onChange: (v: "left" | "right") => void;
-}) {
-  return (
-    <div
-      className="flex rounded-2xl border border-slate-200/90 bg-slate-100/90 p-1 shadow-inner"
-      role="group"
-      aria-label={ariaLabel}
-    >
-      <button
-        type="button"
-        className={cn(
-          "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-          value === "left"
-            ? "border border-orange-400 bg-orange-50 text-slate-900 shadow-sm"
-            : "text-slate-600 hover:bg-white/60",
-        )}
-        onClick={() => onChange("left")}
-      >
-        {left}
-      </button>
-      <button
-        type="button"
-        className={cn(
-          "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
-          value === "right"
-            ? "border border-orange-400 bg-orange-50 text-slate-900 shadow-sm"
-            : "text-slate-600 hover:bg-white/60",
-        )}
-        onClick={() => onChange("right")}
-      >
-        {right}
-      </button>
-    </div>
-  );
-}
-
-function StoreResultCard({
-  hit,
-  onSelect,
-  selectLabel,
-}: {
-  hit: StoreSearchResultItem;
-  onSelect: (hit: StoreSearchResultItem) => void;
-  selectLabel: string;
-}) {
-  const t = useTranslations("analyzeHub");
-  return (
-    <li>
-      <button
-        type="button"
-        onClick={() => onSelect(hit)}
-        className="flex w-full gap-3 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition-colors hover:border-slate-300 hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400/60"
-      >
-        {hit.icon ? (
-          // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
-          <img
-            src={hit.icon}
-            alt=""
-            width={56}
-            height={56}
-            className="size-14 shrink-0 rounded-xl border border-slate-200 bg-slate-100 object-cover"
-          />
-        ) : (
-          <div className="size-14 shrink-0 rounded-xl border border-dashed border-slate-200 bg-slate-100" />
-        )}
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate font-medium text-slate-900">{hit.name}</p>
-          <p className="truncate text-xs text-slate-500">
-            {hit.platform === "google_play" ? hit.id : `id: ${hit.id}`}
-          </p>
-          {hit.developer ? <p className="truncate text-xs text-slate-500">{hit.developer}</p> : null}
-          {hit.rating != null ? (
-            <p className="text-xs font-medium text-slate-800">{t("ratingShort", { score: hit.rating.toFixed(1) })}</p>
-          ) : null}
-          {hit.review_count != null ? (
-            <p className="text-xs text-slate-500">
-              {hit.review_count.toLocaleString()} {t("reviewsCount")}
-            </p>
-          ) : null}
-          {hit.store_url ? (
-            <a
-              href={hit.store_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-sky-700 underline-offset-4 hover:underline"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {t("openStoreLink")}
-              <ExternalLink className="size-3 shrink-0" aria-hidden />
-            </a>
-          ) : null}
-          <p className="text-xs font-medium text-orange-700">{selectLabel}</p>
-        </div>
-      </button>
-    </li>
-  );
-}
 
 function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
@@ -204,7 +53,7 @@ function AnalyzeHubConnected() {
   const locale = useLocale();
   const queryClient = useQueryClient();
 
-  const [mode, setMode] = useState<Mode>("store");
+  const [mode, setMode] = useState<AnalyzeHubMode>("store");
   const [datePreset, setDatePreset] = useState<DatePresetId>("30d");
   const [reviewScope, setReviewScope] = useState<ReviewScope>("global");
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
