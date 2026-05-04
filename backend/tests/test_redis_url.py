@@ -41,3 +41,17 @@ def test_patch_process_environ_rediss_urls(monkeypatch: pytest.MonkeyPatch) -> N
     monkeypatch.setenv("CELERY_RESULT_BACKEND", raw)
     patch_process_environ_rediss_urls()
     assert "ssl_cert_reqs=CERT_NONE" in os.environ["CELERY_RESULT_BACKEND"]
+
+
+def test_celery_conf_result_backend_reads_patched_environ(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Celery ``result_backend`` özelliği önce ``os.environ`` kullanır — patch sonrası geçerli URL."""
+    from celery import Celery
+
+    raw = "rediss://user:pass@redis.example.com:6379/0"
+    monkeypatch.setenv("CELERY_RESULT_BACKEND", raw)
+    patch_process_environ_rediss_urls()
+
+    isolated = Celery("test_rediss", broker=os.environ["CELERY_RESULT_BACKEND"], backend=os.environ["CELERY_RESULT_BACKEND"])
+    rb = isolated.conf.result_backend
+    assert rb is not None
+    assert "ssl_cert_reqs" in rb
