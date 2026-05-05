@@ -5,7 +5,7 @@ from __future__ import annotations
 import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,16 +23,29 @@ router = APIRouter(tags=["analysis"])
 log = get_logger(__name__)
 
 
+def _enqueue_heuristic_analysis(analysis_id: str) -> None:
+    from app.workers.heuristic import heuristic_analysis_task
+
+    heuristic_analysis_task.apply_async(args=[analysis_id], queue="analysis")
+
+
+def _enqueue_ai_analysis(analysis_id: str) -> None:
+    from app.workers.ai import ai_analysis_task
+
+    ai_analysis_task.apply_async(args=[analysis_id], queue="analysis")
+
+
 async def _require_fetch_for_user(
     fetch_id: uuid.UUID,
     session: AsyncSession,
     current_user: User,
 ) -> ReviewFetch:
-    _ = current_user
     result = await session.execute(
         select(ReviewFetch)
+        .join(App, ReviewFetch.app_id == App.id)
         .where(
             ReviewFetch.id == fetch_id,
+            App.user_id == current_user.id,
         ),
     )
     fetch = result.scalar_one_or_none()
@@ -54,10 +67,8 @@ async def start_analyze(
     body: AnalysisStartRequest,
     session: Annotated[AsyncSession, Depends(get_async_session)],
     current_user: Annotated[User, Depends(get_current_user)],
+    background_tasks: BackgroundTasks,
 ) -> list[Analysis]:
-    from app.workers.ai import _run_ai
-    from app.workers.heuristic import _run_heuristic
-
     fetch = await _require_fetch_for_user(fetch_id, session, current_user)
     if fetch.status != FetchStatus.COMPLETED:
         raise HTTPException(
@@ -92,12 +103,12 @@ async def start_analyze(
         )
         session.add(row)
         await session.flush()
-        if atype == AnalysisType.HEURISTIC:
-            await _run_heuristic(session, row.id)
-        elif atype == AnalysisType.AI:
-            await _run_ai(session, row.id)
         created.append(row)
-        log.info("analysis_completed_inline", analysis_id=str(row.id), analysis_type=atype.value)
+        if atype == AnalysisType.HEURISTIC:
+            background_tasks.add_task(_enqueue_heuristic_analysis, str(row.id))
+        elif atype == AnalysisType.AI:
+            background_tasks.add_task(_enqueue_ai_analysis, str(row.id))
+        log.info("analysis_enqueued", analysis_id=str(row.id), analysis_type=atype.value)
 
     return created
 
@@ -110,8 +121,10 @@ async def get_analysis(
 ) -> Analysis:
     result = await session.execute(
         select(Analysis)
+        .join(App, Analysis.app_id == App.id)
         .where(
             Analysis.id == analysis_id,
+            App.user_id == current_user.id,
         ),
     )
     row = result.scalar_one_or_none()

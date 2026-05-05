@@ -9,6 +9,7 @@ type PageProps = {
 export default async function ComparePage({ searchParams }: PageProps) {
   const t = await getTranslations("compare");
   const tNav = await getTranslations("navigation");
+  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
 
   const rawA = searchParams.app_a;
   const rawB = searchParams.app_b;
@@ -16,7 +17,7 @@ export default async function ComparePage({ searchParams }: PageProps) {
   const appB = typeof rawB === "string" ? rawB.trim() : "";
 
   if (appA && appB) {
-    return <CompareAppsDashboard appIdA={appA} appIdB={appB} clerkEnabled />;
+    return <CompareAppsDashboard appIdA={appA} appIdB={appB} clerkEnabled={clerkEnabled} />;
   }
 
   return (

@@ -1,4 +1,4 @@
-# Vivindis — yerel tam yığın
+# Vivindis — yerel tam yığın (Oturum 1 iskelet)
 # `cp .env.example .env` sonrası: docker compose up --build
 # Compose, boş .env ile bile yerel ağ için güvenli varsayılanlar uygular (yalnızca container içi).
 
@@ -20,6 +20,16 @@ services:
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   backend:
     build:
       context: .
@@ -27,6 +37,9 @@ services:
     environment:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://vivindis:vivindis@postgres:5432/vivindis}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
       SECRET_KEY: ${SECRET_KEY:-change-me-in-env}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
@@ -48,9 +61,56 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     command: >
       sh -c "pip install -q -e . &&
              uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+
+  worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: ${DATABASE_URL:-postgresql+asyncpg://vivindis:vivindis@postgres:5432/vivindis}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "pip install -q -e . &&
+             celery -A app.core.celery:celery_app worker -Q scraper,analysis --loglevel=info"
+
+  flower:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      CELERY_BROKER_URL: ${CELERY_BROKER_URL:-redis://redis:6379/0}
+      CELERY_RESULT_BACKEND: ${CELERY_RESULT_BACKEND:-redis://redis:6379/0}
+    ports:
+      - "5555:5555"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "pip install -q -e . &&
+             celery -A app.core.celery:celery_app flower --address=0.0.0.0 --port=5555"
 
   frontend:
     image: node:20-bookworm-slim

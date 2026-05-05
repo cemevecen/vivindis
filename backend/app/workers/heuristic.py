@@ -1,4 +1,4 @@
-"""Heuristic analiz."""
+"""Heuristic analiz — `analysis` kuyruğu."""
 
 from __future__ import annotations
 
@@ -10,10 +10,12 @@ from typing import Any
 
 from sqlalchemy import select
 
+from app.core.celery import celery_app
 from app.core.logging import get_logger
 from app.models.analysis import Analysis
 from app.models.enums import AnalysisStatus, AnalysisType
 from app.models.review import Review
+from app.workers.runtime import run_async_db
 
 log = get_logger(__name__)
 
@@ -244,4 +246,13 @@ async def _fail_heuristic(session: Any, analysis_id: uuid.UUID, message: str) ->
     row.completed_at = datetime.now(UTC)
 
 
+@celery_app.task(name="app.workers.heuristic.heuristic_analysis_task")
+def heuristic_analysis_task(analysis_id: str) -> None:
+    aid = uuid.UUID(analysis_id)
+    try:
+        run_async_db(_run_heuristic, aid)
+    except Exception as exc:
+        log.exception("heuristic_failed", analysis_id=analysis_id)
+        run_async_db(_fail_heuristic, aid, str(exc))
+        raise
 

@@ -27,4 +27,5 @@ Migration dosyaları: `alembic/versions/`.
 
 1. **Deploy:** `DATABASE_URL` değişince yeni build’in **Success / Active** olduğundan emin olun; bitmeden test etmeyin.
 2. **Şifre özel karakterleri:** `@`, `#`, `%` vb. DSN içinde yüzde kodlu olmalı. Backend, `DATABASE_URL` yüklenirken şifrede bu karakterleri **otomatik encode** etmeye çalışır (`app.core.database_url`); yine de Supabase panelinde verilen havuz linkini aynen kopyalamak en güvenlisidir.
-3. Bu sürümde arka plan kuyruğu yok; yorum çekme ve analiz API çağrısı içinde senkron çalışır.
+3. **Worker:** Celery worker ayrı bir Railway servisiyse **`DATABASE_URL`** (ve Redis) **API ile aynı** pooler DSN olmalı; yalnızca API’yi güncellemek yorum çekimi / arka plan görevlerinde kopukluğa yol açar. Yerel `docker-compose.yml` içinde `backend` ve `worker` aynı `${DATABASE_URL}` değişkenini kullanır.
+4. **Redis `rediss://`:** Celery sonuç backend’i `ssl_cert_reqs` olmadan hata verir; ayrıca `broker_url` / `result_backend` için **önce** `os.environ` okunur (ham Railway URL’si Pydantic’i bypass eder). Bu yüzden `app.core.config` ve `app.core.celery` importunda `ssl_cert_reqs=CERT_NONE` işlem ortamına enjekte edilir (`app.core.redis_url`); kurumsal CA için DSN’e kendiniz `ssl_cert_reqs=CERT_REQUIRED` yazın.

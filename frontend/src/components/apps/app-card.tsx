@@ -20,9 +20,6 @@ function platformLabel(app: AppDto, t: (key: string) => string) {
 
 export function AppCard({ app }: { app: AppDto }) {
   const t = useTranslations("apps");
-  const title = app.name?.trim() || t("detailTitle");
-  const iconUrl = app.icon_url?.trim() || "";
-  const fallbackLetter = title.slice(0, 1).toUpperCase() || "A";
 
   return (
     <Link
@@ -32,24 +29,9 @@ export function AppCard({ app }: { app: AppDto }) {
         "hover:border-primary/40 hover:bg-muted/30",
       )}
     >
-      <div className="space-y-2">
+      <div className="space-y-1">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex min-w-0 items-start gap-3">
-            {iconUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={iconUrl}
-                alt=""
-                className="mt-0.5 h-9 w-9 shrink-0 rounded-md border border-border object-cover"
-                loading="lazy"
-              />
-            ) : (
-              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-muted text-xs font-semibold text-muted-foreground">
-                {fallbackLetter}
-              </div>
-            )}
-            <h2 className="line-clamp-2 font-semibold leading-tight tracking-tight">{title}</h2>
-          </div>
+          <h2 className="font-semibold leading-tight tracking-tight">{app.name || t("detailTitle")}</h2>
           <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
         </div>
         <p className="text-xs text-muted-foreground">{platformLabel(app, t)}</p>

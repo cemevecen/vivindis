@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
@@ -7,7 +8,6 @@ import { AppList } from "@/components/apps/app-list";
 import { AppsSkeleton } from "@/components/apps/apps-skeleton";
 import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
-import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import type { AppDto } from "@/types/app";
 
@@ -16,7 +16,7 @@ type Props = {
 };
 
 function AppsConnectedList() {
-  const getToken = usePublicToken();
+  const { getToken } = useAuth();
   const tDash = useTranslations("dashboard");
   const tCommon = useTranslations("common");
 
@@ -46,6 +46,15 @@ function AppsConnectedList() {
 }
 
 export function AppsListPanel({ clerkEnabled }: Props) {
-  void clerkEnabled;
+  const tDash = useTranslations("dashboard");
+
+  if (!clerkEnabled) {
+    return (
+      <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
+        {tDash("noClerk")}
+      </div>
+    );
+  }
+
   return <AppsConnectedList />;
 }

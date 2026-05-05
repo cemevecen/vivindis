@@ -5,5 +5,6 @@ type PageProps = {
 };
 
 export default function AppDetailPage({ params }: PageProps) {
-  return <AppDetailView appId={params.id} clerkEnabled />;
+  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
+  return <AppDetailView appId={params.id} clerkEnabled={clerkEnabled} />;
 }

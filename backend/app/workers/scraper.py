@@ -13,10 +13,12 @@ from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import selectinload
 
+from app.core.celery import celery_app
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.models.app import App
 from app.models.enums import AnalysisStatus, AnalysisType, AppPlatform, FetchStatus, StorePlatform
+from app.models.analysis import Analysis
 from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.workers.runtime import run_async_db
@@ -30,12 +32,6 @@ class VivindisAppStoreImportError(ImportError):
 
 def _load_app_store_class() -> type:
     try:
-        import urllib3
-        import urllib3.util.ssl_
-
-        if not hasattr(urllib3.util.ssl_, "DEFAULT_CIPHERS"):
-            urllib3.util.ssl_.DEFAULT_CIPHERS = "DEFAULT"
-
         from app_store_scraper import AppStore as _AppStore
     except ImportError as exc:
         raise VivindisAppStoreImportError(
@@ -81,13 +77,22 @@ def _calendar_span_days(lo: date, hi: date) -> int:
 
 
 def _play_batch_sleep_for_window(base: float, lo: date, hi: date) -> float:
-    _ = (base, lo, hi)
-    return 0.0
+    """Kısa pencerelerde partiler arası bekleme süresini düşür (kullanıcı algısı + gereksiz gecikme)."""
+    if base <= 0:
+        return 0.0
+    if _calendar_span_days(lo, hi) > 45:
+        return float(base)
+    scaled = min(float(base), float(base) * 0.35)
+    return max(0.22, scaled)
 
 
 def _app_store_sleep_for_window(base: int, lo: date, hi: date) -> int:
-    _ = (base, lo, hi)
-    return 0
+    if base <= 0:
+        return 0
+    if _calendar_span_days(lo, hi) > 45:
+        return int(base)
+    scaled = min(float(base), float(base) * 0.45)
+    return max(1, int(round(scaled)))
 
 
 async def _upsert_review(
@@ -327,7 +332,30 @@ async def _execute_review_fetch(session: Any, fetch_id: uuid.UUID) -> tuple[list
         log.exception("fetch_failed", fetch_id=str(fetch_id))
         raise
 
-    return [], []
+    ar = await session.execute(select(Analysis).where(Analysis.fetch_id == fetch.id))
+    existing = list(ar.scalars().all())
+    if not existing:
+        for atype in (AnalysisType.HEURISTIC, AnalysisType.AI):
+            row = Analysis(
+                app_id=fetch.app_id,
+                fetch_id=fetch.id,
+                type=atype,
+                status=AnalysisStatus.PENDING,
+            )
+            session.add(row)
+        await session.flush()
+        ar2 = await session.execute(select(Analysis).where(Analysis.fetch_id == fetch.id))
+        existing = list(ar2.scalars().all())
+
+    heuristic_ids = [
+        str(r.id)
+        for r in existing
+        if r.type == AnalysisType.HEURISTIC and r.status == AnalysisStatus.PENDING
+    ]
+    ai_ids = [
+        str(r.id) for r in existing if r.type == AnalysisType.AI and r.status == AnalysisStatus.PENDING
+    ]
+    return heuristic_ids, ai_ids
 
 
 async def _mark_fetch_failed(session: Any, fetch_id: uuid.UUID, message: str) -> None:
@@ -340,16 +368,26 @@ async def _mark_fetch_failed(session: Any, fetch_id: uuid.UUID, message: str) ->
     fetch.completed_at = datetime.now(UTC)
 
 
-def run_fetch_now(fetch_id: str) -> None:
+@celery_app.task(name="app.workers.scraper.review_fetch_task")
+def review_fetch_task(fetch_id: str) -> None:
     fid = uuid.UUID(fetch_id)
     try:
-        run_async_db(_execute_review_fetch, fid)
+        heuristic_ids, ai_ids = run_async_db(_execute_review_fetch, fid)
     except VivindisAppStoreImportError as exc:
         run_async_db(_mark_fetch_failed, fid, str(exc))
         log.error("fetch_aborted_import", fetch_id=fetch_id)
+        return
     except Exception as exc:
         try:
             run_async_db(_mark_fetch_failed, fid, str(exc))
         except Exception:
             log.exception("fetch_failed_mark_error", fetch_id=fetch_id)
         raise
+
+    from app.workers.ai import ai_analysis_task
+    from app.workers.heuristic import heuristic_analysis_task
+
+    for aid in heuristic_ids:
+        heuristic_analysis_task.apply_async(args=[aid], queue="analysis")
+    for aid in ai_ids:
+        ai_analysis_task.apply_async(args=[aid], queue="analysis")

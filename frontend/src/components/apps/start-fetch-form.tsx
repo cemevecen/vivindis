@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
@@ -12,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError, apiFetch } from "@/lib/api";
-import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import { createFetchCreateSchema, type FetchCreateFormValues } from "@/schemas/fetch-create";
 import type { ReviewFetchDto } from "@/types/app";
@@ -32,7 +32,7 @@ type Props = {
 export function StartFetchForm({ appId }: Props) {
   const t = useTranslations("apps");
   const tCommon = useTranslations("common");
-  const getToken = usePublicToken();
+  const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const locale = useLocale();
   const searchParams = useSearchParams();

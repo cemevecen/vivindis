@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@clerk/nextjs";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
@@ -14,7 +15,6 @@ import { Label } from "@/components/ui/label";
 import { SelectNative } from "@/components/ui/select-native";
 import { useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch } from "@/lib/api";
-import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import { createAppCreateSchema, type AppCreateFormValues } from "@/schemas/app-create";
 import type { AppDto } from "@/types/app";
@@ -24,7 +24,7 @@ const platforms = ["google_play", "app_store", "both"] as const;
 export function NewAppForm() {
   const t = useTranslations("apps");
   const tCommon = useTranslations("common");
-  const getToken = usePublicToken();
+  const { getToken } = useAuth();
   const router = useRouter();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
