@@ -19,19 +19,7 @@ from app.workers.runtime import run_async_db
 
 log = get_logger(__name__)
 
-_BATCH = 50
-
-
-def _build_batches(reviews: list[Review]) -> list[str]:
-    chunks: list[str] = []
-    buf: list[str] = []
-    for i, r in enumerate(reviews):
-        line = f"{int(r.rating)}\t{(r.body or '').replace(chr(10), ' ')[:1500]}"
-        buf.append(line)
-        if len(buf) >= _BATCH or i == len(reviews) - 1:
-            chunks.append("\n".join(buf))
-            buf = []
-    return chunks
+_ONE_SHOT_LIMIT = 2000
 
 
 async def _run_ai(session: Any, analysis_id: uuid.UUID) -> None:
@@ -71,17 +59,15 @@ async def _run_ai(session: Any, analysis_id: uuid.UUID) -> None:
         row.model_used = gemini_svc.get_gemini_model_name()
         return
 
-    batches = _build_batches(revs)
-    parts: list[dict[str, Any]] = []
-    for idx, payload in enumerate(batches):
-        parts.append(gemini_svc.generate_review_batch_json(idx, payload))
-
-    merged = gemini_svc.merge_batch_results(parts)
-    row.result = merged
+    payload = "\n".join(
+        f"{int(r.rating)}\t{(r.body or '').replace(chr(10), ' ')[:1500]}"
+        for r in revs[:_ONE_SHOT_LIMIT]
+    )
+    row.result = gemini_svc.generate_reviews_one_shot_json(payload)
     row.status = AnalysisStatus.COMPLETED
     row.completed_at = datetime.now(UTC)
     row.model_used = gemini_svc.get_gemini_model_name()
-    log.info("ai_done", analysis_id=str(analysis_id), batches=len(batches))
+    log.info("ai_done", analysis_id=str(analysis_id), reviews=min(len(revs), _ONE_SHOT_LIMIT))
 
 
 async def _fail_ai(session: Any, analysis_id: uuid.UUID, message: str) -> None:

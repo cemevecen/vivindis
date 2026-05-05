@@ -32,6 +32,12 @@ class VivindisAppStoreImportError(ImportError):
 
 def _load_app_store_class() -> type:
     try:
+        import urllib3
+        import urllib3.util.ssl_
+
+        if not hasattr(urllib3.util.ssl_, "DEFAULT_CIPHERS"):
+            urllib3.util.ssl_.DEFAULT_CIPHERS = "DEFAULT"
+
         from app_store_scraper import AppStore as _AppStore
     except ImportError as exc:
         raise VivindisAppStoreImportError(
@@ -77,22 +83,13 @@ def _calendar_span_days(lo: date, hi: date) -> int:
 
 
 def _play_batch_sleep_for_window(base: float, lo: date, hi: date) -> float:
-    """Kısa pencerelerde partiler arası bekleme süresini düşür (kullanıcı algısı + gereksiz gecikme)."""
-    if base <= 0:
-        return 0.0
-    if _calendar_span_days(lo, hi) > 45:
-        return float(base)
-    scaled = min(float(base), float(base) * 0.35)
-    return max(0.22, scaled)
+    _ = (base, lo, hi)
+    return 0.0
 
 
 def _app_store_sleep_for_window(base: int, lo: date, hi: date) -> int:
-    if base <= 0:
-        return 0
-    if _calendar_span_days(lo, hi) > 45:
-        return int(base)
-    scaled = min(float(base), float(base) * 0.45)
-    return max(1, int(round(scaled)))
+    _ = (base, lo, hi)
+    return 0
 
 
 async def _upsert_review(

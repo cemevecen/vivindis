@@ -61,7 +61,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     enabled: Boolean(clerkEnabled && fetchId),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
-      return s === "pending" || s === "running" ? 3000 : false;
+      return s === "pending" || s === "running" ? 1000 : false;
     },
   });
 
@@ -74,7 +74,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         return false;
       }
       const items = analysesForFetch(q.state.data?.items ?? [], fetchId);
-      return items.some((a) => a.status === "pending" || a.status === "running") ? 3000 : false;
+      return items.some((a) => a.status === "pending" || a.status === "running") ? 1000 : false;
     },
   });
 
@@ -153,6 +153,14 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
   const heuristic = latestByType(items, "heuristic");
   const ai = latestByType(items, "ai");
+  const liveStatusHint =
+    fetch.status === "pending"
+      ? "Kuyruga alindi, scraper worker bekleniyor..."
+      : fetch.status === "running"
+        ? `Yorumlar hizli cekiliyor... (${fetch.review_count} toplandi)`
+        : busy
+          ? "Gemini yapay zekasi analiz ediyor..."
+          : "Analiz sonuclari hazir.";
 
   const chartLabels = {
     sentiment: t("chartSentiment"),
@@ -173,7 +181,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             ← {t("backToApp")}
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
-          <p className="text-sm text-muted-foreground">{t("pollHint")}</p>
+          <p className="text-sm text-muted-foreground">{liveStatusHint}</p>
         </div>
       </div>
 

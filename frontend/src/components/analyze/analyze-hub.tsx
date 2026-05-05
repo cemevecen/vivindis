@@ -191,7 +191,7 @@ function AnalyzeHubConnected() {
     retryDelay: (attempt) => 200 * (attempt + 1),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
-      return s === "pending" || s === "running" ? 2000 : false;
+      return s === "pending" || s === "running" ? 1000 : false;
     },
   });
 
@@ -378,6 +378,26 @@ function AnalyzeHubConnected() {
     }
     return 65;
   }, [fetchRowQuery.data]);
+
+  const fetchDynamicHint = useMemo(() => {
+    const row = fetchRowQuery.data;
+    if (!row || !storeFetchId) {
+      return "";
+    }
+    if (row.status === "pending") {
+      return "Kuyruga alindi, worker bekleniyor...";
+    }
+    if (row.status === "running") {
+      const count = row.review_count ?? 0;
+      return count > 0
+        ? `Magazadan yorumlar cekiliyor... (${count} yorum toplandi)`
+        : "Google Play ve App Store yorumlari cekiliyor...";
+    }
+    if (row.status === "completed") {
+      return `Yorum cekimi tamamlandi (${row.review_count} yorum). Simdi analiz baslatabilirsiniz.`;
+    }
+    return row.error_message ?? "";
+  }, [fetchRowQuery.data, storeFetchId]);
 
   const effectiveAppId = useMemo(() => {
     const fromSelect = targetAppId.trim();
@@ -723,7 +743,7 @@ function AnalyzeHubConnected() {
                         style={{ width: `${fetchProgressPercent}%` }}
                       />
                     </div>
-                    <p className="text-xs text-slate-600">{t("estimatedTimeHint")}</p>
+                    <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
                   </div>
                 ) : null}
                 {sessionApp && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
