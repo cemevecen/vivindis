@@ -7,6 +7,18 @@ from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
 T = TypeVar("T")
+_loop: asyncio.AbstractEventLoop | None = None
+
+
+def _get_persistent_loop() -> asyncio.AbstractEventLoop:
+    global _loop
+    if _loop is None or _loop.is_closed():
+        try:
+            _loop = asyncio.get_running_loop()
+        except RuntimeError:
+            _loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(_loop)
+    return _loop
 
 
 async def _session_wrapped(
@@ -32,10 +44,10 @@ def run_async_db(
     *args: object,
     **kwargs: object,
 ) -> T:
-    """Async fonksiyonu yeni event loop ile çalıştırır ve tek transaction commit eder."""
-    return asyncio.run(_session_wrapped(coro, *args, **kwargs))
+    """Async fonksiyonu kalıcı event loop ile çalıştırır ve tek transaction commit eder."""
+    return _get_persistent_loop().run_until_complete(_session_wrapped(coro, *args, **kwargs))
 
 
 def run_async(coro: Awaitable[T]) -> T:
-    """Düz coroutine (session dışı) için."""
-    return asyncio.run(coro)
+    """Düz coroutine (session dışı) için kalıcı loop."""
+    return _get_persistent_loop().run_until_complete(coro)

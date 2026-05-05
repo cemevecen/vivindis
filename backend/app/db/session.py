@@ -39,6 +39,9 @@ def get_async_engine() -> AsyncEngine:
         connect_args={"statement_cache_size": 0},
         pool_pre_ping=True,
         echo=get_settings().database_echo,
+        pool_size=5,
+        max_overflow=10,
+        pool_timeout=30,
     )
 
 
