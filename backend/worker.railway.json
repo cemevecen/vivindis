@@ -1,0 +1,12 @@
+{
+  "$schema": "https://railway.com/railway.schema.json",
+  "build": {
+    "builder": "DOCKERFILE",
+    "dockerfilePath": "backend/Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "celery -A app.core.celery:celery_app worker -Q scraper,analysis --loglevel=info",
+    "healthcheckPath": "",
+    "healthcheckTimeout": 300
+  }
+}
