@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -11,6 +10,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
+import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto } from "@/types/analysis";
@@ -49,33 +49,21 @@ type Props = {
 
 export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const t = useTranslations("analysis");
-  const tDash = useTranslations("dashboard");
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
-  const { getToken } = useAuth();
+  const getToken = usePublicToken();
   const queryClient = useQueryClient();
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
     queryFn: () => apiFetch<ReviewFetchDto>(`/api/v1/fetches/${fetchId}`, { getToken }),
-    enabled: Boolean(clerkEnabled && fetchId),
-    refetchInterval: (q) => {
-      const s = q.state.data?.status;
-      return s === "pending" || s === "running" ? 3000 : false;
-    },
+    enabled: Boolean(fetchId),
   });
 
   const analysesQuery = useQuery({
     queryKey: queryKeys.analyses.byApp(appId),
     queryFn: () => apiFetch<AnalysisListDto>(`/api/v1/apps/${appId}/analyses`, { getToken }),
-    enabled: Boolean(clerkEnabled && appId),
-    refetchInterval: (q) => {
-      if (!fetchId) {
-        return false;
-      }
-      const items = analysesForFetch(q.state.data?.items ?? [], fetchId);
-      return items.some((a) => a.status === "pending" || a.status === "running") ? 3000 : false;
-    },
+    enabled: Boolean(appId),
   });
 
   const startMutation = useMutation({
@@ -98,13 +86,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     },
   });
 
-  if (!clerkEnabled) {
-    return (
-      <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
-        {tDash("noClerk")}
-      </div>
-    );
-  }
+  void clerkEnabled;
 
   if (!fetchId) {
     return (

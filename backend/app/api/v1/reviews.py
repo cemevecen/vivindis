@@ -25,12 +25,11 @@ async def get_fetch(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> ReviewFetch:
+    _ = current_user
     result = await session.execute(
         select(ReviewFetch)
-        .join(App, ReviewFetch.app_id == App.id)
         .where(
             ReviewFetch.id == fetch_id,
-            App.user_id == current_user.id,
         ),
     )
     fetch = result.scalar_one_or_none()

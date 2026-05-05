@@ -3,7 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/app-providers";
-import { VivindisClerkProvider } from "@/components/providers/clerk-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -42,9 +41,7 @@ export default function RootLayout({
           "min-h-screen bg-background font-sans text-foreground antialiased",
         )}
       >
-        <VivindisClerkProvider>
-          <AppProviders>{children}</AppProviders>
-        </VivindisClerkProvider>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

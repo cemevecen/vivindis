@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -24,14 +24,10 @@ from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse
 from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
-from app.workers.scraper import review_fetch_task
+from app.workers.scraper import _execute_review_fetch
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 log = get_logger(__name__)
-
-
-def _enqueue_review_fetch(fetch_id: str) -> None:
-    review_fetch_task.apply_async(args=[fetch_id], queue="scraper")
 
 
 def _store_platform_for_app(app: App) -> StorePlatform:
@@ -45,8 +41,9 @@ async def list_apps(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     current_user: Annotated[User, Depends(get_current_user)],
 ) -> list[App]:
+    _ = current_user
     result = await session.execute(
-        select(App).where(App.user_id == current_user.id).order_by(App.created_at.desc()),
+        select(App).order_by(App.created_at.desc()),
     )
     return list(result.scalars().all())
 
@@ -112,7 +109,6 @@ async def create_fetch(
     body: ReviewFetchCreate,
     app: Annotated[App, Depends(require_app_owned)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    background_tasks: BackgroundTasks,
 ) -> ReviewFetch:
     fetch = ReviewFetch(
         app_id=app.id,
@@ -124,10 +120,7 @@ async def create_fetch(
     session.add(fetch)
     await session.flush()
     log.info("review_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
-    # Commit hemen: istemci polling GET'i yanıt dönmeden önce çalıştırabilir; ayrıca Celery worker
-    # ayrı bağlantıda kaydı görmeli (dependency sonundaki commit bazen yanıttan sonra kalır).
-    await session.commit()
-    background_tasks.add_task(_enqueue_review_fetch, str(fetch.id))
+    await _execute_review_fetch(session, fetch.id)
     return fetch
 
 

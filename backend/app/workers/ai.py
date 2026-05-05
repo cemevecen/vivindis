@@ -1,4 +1,4 @@
-"""Gemini tabanlı AI analiz — `analysis` kuyruğu."""
+"""Gemini tabanlı AI analiz."""
 
 from __future__ import annotations
 
@@ -8,30 +8,16 @@ from typing import Any
 
 from sqlalchemy import select
 
-from app.core.celery import celery_app
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.models.analysis import Analysis
 from app.models.enums import AnalysisStatus, AnalysisType
 from app.models.review import Review
 from app.services import gemini as gemini_svc
-from app.workers.runtime import run_async_db
 
 log = get_logger(__name__)
 
-_BATCH = 50
-
-
-def _build_batches(reviews: list[Review]) -> list[str]:
-    chunks: list[str] = []
-    buf: list[str] = []
-    for i, r in enumerate(reviews):
-        line = f"{int(r.rating)}\t{(r.body or '').replace(chr(10), ' ')[:1500]}"
-        buf.append(line)
-        if len(buf) >= _BATCH or i == len(reviews) - 1:
-            chunks.append("\n".join(buf))
-            buf = []
-    return chunks
+_MAX_ONE_SHOT_REVIEWS = 2000
 
 
 async def _run_ai(session: Any, analysis_id: uuid.UUID) -> None:
@@ -71,35 +57,13 @@ async def _run_ai(session: Any, analysis_id: uuid.UUID) -> None:
         row.model_used = gemini_svc.get_gemini_model_name()
         return
 
-    batches = _build_batches(revs)
-    parts: list[dict[str, Any]] = []
-    for idx, payload in enumerate(batches):
-        parts.append(gemini_svc.generate_review_batch_json(idx, payload))
-
-    merged = gemini_svc.merge_batch_results(parts)
-    row.result = merged
+    payload = "\n".join(
+        f"{int(r.rating)}\t{(r.body or '').replace(chr(10), ' ')[:1500]}"
+        for r in revs[:_MAX_ONE_SHOT_REVIEWS]
+    )
+    row.result = gemini_svc.generate_reviews_one_shot_json(payload)
     row.status = AnalysisStatus.COMPLETED
     row.completed_at = datetime.now(UTC)
     row.model_used = gemini_svc.get_gemini_model_name()
-    log.info("ai_done", analysis_id=str(analysis_id), batches=len(batches))
-
-
-async def _fail_ai(session: Any, analysis_id: uuid.UUID, message: str) -> None:
-    row = await session.get(Analysis, analysis_id)
-    if row is None:
-        return
-    row.status = AnalysisStatus.FAILED
-    row.error_message = message[:8000]
-    row.completed_at = datetime.now(UTC)
-
-
-@celery_app.task(name="app.workers.ai.ai_analysis_task")
-def ai_analysis_task(analysis_id: str) -> None:
-    aid = uuid.UUID(analysis_id)
-    try:
-        run_async_db(_run_ai, aid)
-    except Exception as exc:
-        log.exception("ai_failed", analysis_id=analysis_id)
-        run_async_db(_fail_ai, aid, str(exc))
-        raise
+    log.info("ai_done", analysis_id=str(analysis_id), reviews=min(len(revs), _MAX_ONE_SHOT_REVIEWS))
 

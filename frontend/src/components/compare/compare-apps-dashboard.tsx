@@ -1,12 +1,12 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useQueries } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { apiFetch } from "@/lib/api";
+import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisListDto } from "@/types/analysis";
@@ -30,13 +30,9 @@ type Props = {
  */
 export function CompareAppsDashboard({ appIdA, appIdB, clerkEnabled }: Props) {
   const t = useTranslations("compare");
-  const tDash = useTranslations("dashboard");
   const okA = validUuid(appIdA);
   const okB = validUuid(appIdB);
-
-  if (!clerkEnabled) {
-    return <p className="text-sm text-muted-foreground">{tDash("noClerk")}</p>;
-  }
+  void clerkEnabled;
 
   if (!okA || !okB) {
     return (
@@ -54,7 +50,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
   const ta = useTranslations("analysis");
-  const { getToken } = useAuth();
+  const getToken = usePublicToken();
 
   const queries = useQueries({
     queries: [

@@ -1,4 +1,4 @@
-import { SignUp } from "@clerk/nextjs";
+import { redirect } from "next/navigation";
 
 type Props = {
   params: { locale: string };
@@ -6,12 +6,5 @@ type Props = {
 
 export default function SignUpPage({ params }: Props) {
   const { locale } = params;
-  return (
-    <SignUp
-      routing="path"
-      path={`/${locale}/sign-up`}
-      signInUrl={`/${locale}/sign-in`}
-      afterSignUpUrl={`/${locale}/dashboard`}
-    />
-  );
+  redirect(`/${locale}/dashboard`);
 }

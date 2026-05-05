@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 
 export default async function AppsPage() {
   const t = await getTranslations("apps");
-  const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
 
   return (
     <div className="space-y-8">
@@ -16,13 +15,11 @@ export default async function AppsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
           <p className="mt-1 text-sm text-muted-foreground">{t("listSubtitle")}</p>
         </div>
-        {clerkEnabled ? (
-          <Link href="/apps/new" className={cn(buttonVariants())}>
-            {t("addNew")}
-          </Link>
-        ) : null}
+        <Link href="/apps/new" className={cn(buttonVariants())}>
+          {t("addNew")}
+        </Link>
       </div>
-      <AppsListPanel clerkEnabled={clerkEnabled} />
+      <AppsListPanel clerkEnabled />
     </div>
   );
 }

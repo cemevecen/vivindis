@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -11,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { apiFetch } from "@/lib/api";
+import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AppDto, FetchStatus, ReviewFetchDto } from "@/types/app";
@@ -47,10 +47,9 @@ type Props = {
 export function AppDetailView({ appId, clerkEnabled }: Props) {
   const t = useTranslations("apps");
   const ta = useTranslations("analysis");
-  const tDash = useTranslations("dashboard");
   const tCommon = useTranslations("common");
   const locale = useLocale();
-  const { getToken } = useAuth();
+  const getToken = usePublicToken();
   const searchParams = useSearchParams();
   const pairParam = searchParams.get("pair_app_id")?.trim() ?? "";
   const pairValid = Boolean(pairParam && UUID_RE.test(pairParam) && pairParam !== appId);
@@ -58,7 +57,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   const pairAppQuery = useQuery({
     queryKey: queryKeys.apps.detail(pairParam),
     queryFn: () => apiFetch<AppDto>(`/api/v1/apps/${pairParam}`, { getToken }),
-    enabled: clerkEnabled && pairValid,
+    enabled: pairValid,
   });
 
   const dateFmt = useMemo(
@@ -75,25 +74,19 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
       {
         queryKey: queryKeys.apps.detail(appId),
         queryFn: () => apiFetch<AppDto>(`/api/v1/apps/${appId}`, { getToken }),
-        enabled: clerkEnabled && Boolean(appId),
+        enabled: Boolean(appId),
       },
       {
         queryKey: queryKeys.apps.fetches(appId),
         queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${appId}/fetches`, { getToken }),
-        enabled: clerkEnabled && Boolean(appId),
+        enabled: Boolean(appId),
       },
     ],
   });
 
   const [appQuery, fetchQuery] = queries;
 
-  if (!clerkEnabled) {
-    return (
-      <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
-        {tDash("noClerk")}
-      </div>
-    );
-  }
+  void clerkEnabled;
 
   if (appQuery.isPending || fetchQuery.isPending) {
     return (

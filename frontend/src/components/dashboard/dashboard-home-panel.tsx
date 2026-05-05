@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 
@@ -9,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
 import { apiFetch } from "@/lib/api";
+import { usePublicToken } from "@/lib/auth";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AppDto } from "@/types/app";
@@ -21,7 +21,7 @@ function DashboardConnected() {
   const t = useTranslations("dashboard");
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
-  const { getToken } = useAuth();
+  const getToken = usePublicToken();
 
   const query = useQuery({
     queryKey: queryKeys.apps.all,
@@ -62,15 +62,6 @@ function DashboardConnected() {
 }
 
 export function DashboardHomePanel({ clerkEnabled }: Props) {
-  const t = useTranslations("dashboard");
-
-  if (!clerkEnabled) {
-    return (
-      <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-sm text-muted-foreground">
-        {t("noClerk")}
-      </div>
-    );
-  }
-
+  void clerkEnabled;
   return <DashboardConnected />;
 }

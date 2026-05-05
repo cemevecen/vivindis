@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { FileText, GitCompare, Search, Store, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -21,6 +20,7 @@ import {
   isLikelyFetchNetworkError,
   isPublicApiBaseUrlConfigured,
 } from "@/lib/api";
+import { usePublicToken } from "@/lib/auth";
 import {
   MASTHEAD_PLUS_PATTERN,
   appBodyFromHit,
@@ -47,7 +47,7 @@ function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
   const tNav = useTranslations("navigation");
   const tCommon = useTranslations("common");
-  const { getToken } = useAuth();
+  const getToken = usePublicToken();
   const router = useRouter();
   const locale = useLocale();
   const queryClient = useQueryClient();
@@ -189,10 +189,7 @@ function AnalyzeHubConnected() {
     retry: (failureCount, err) =>
       failureCount < 4 && err instanceof ApiError && err.status === 404,
     retryDelay: (attempt) => 200 * (attempt + 1),
-    refetchInterval: (q) => {
-      const s = q.state.data?.status;
-      return s === "pending" || s === "running" ? 2000 : false;
-    },
+    refetchInterval: false,
   });
 
   useEffect(() => {
@@ -1070,6 +1067,16 @@ function AnalyzeHubConnected() {
 
   return (
     <div className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6">
+      {analysisKickoffBusy || storePullMutation.isPending ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/65 px-6">
+          <div className="max-w-xl rounded-2xl border border-white/20 bg-white p-6 text-center shadow-2xl">
+            <p className="text-lg font-semibold text-slate-900">
+              Yorumlar Cekiliyor ve Analiz Ediliyor, lutfen bekleyin...
+            </p>
+            <p className="mt-2 text-sm text-slate-600">Bu islem tamamlanana kadar sayfadan ayrilmayin.</p>
+          </div>
+        </div>
+      ) : null}
       <div
         className="relative overflow-hidden rounded-b-[22px] border-b border-black/15 shadow-[0_10px_32px_rgba(48,8,16,0.28)]"
         style={{
@@ -1137,15 +1144,6 @@ function AnalyzeHubConnected() {
 }
 
 export function AnalyzeHub({ clerkEnabled }: Props) {
-  const t = useTranslations("analyzeHub");
-
-  if (!clerkEnabled) {
-    return (
-      <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
-        {t("noClerk")}
-      </div>
-    );
-  }
-
+  void clerkEnabled;
   return <AnalyzeHubConnected />;
 }

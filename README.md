@@ -10,9 +10,9 @@ SaaS: Google Play ve Apple App Store yorumlarını toplama, **heuristic** ve **A
 
 | Katman | Teknoloji |
 |--------|-----------|
-| Frontend | Next.js 14 (App Router), TypeScript, Tailwind, shadcn/ui, TanStack Query, **next-intl** (12 dil, varsayılan `tr`), Clerk, Recharts, Sonner |
-| Backend | FastAPI, Pydantic v2, SQLAlchemy 2.0 async, Alembic, Celery, structlog |
-| Yerel | Docker Compose: Postgres, Redis, API, worker, Flower, Next dev |
+| Frontend | Next.js 14 (App Router), TypeScript, Tailwind, shadcn/ui, TanStack Query, **next-intl** (12 dil, varsayılan `tr`), Recharts, Sonner |
+| Backend | FastAPI, Pydantic v2, SQLAlchemy 2.0 async, Alembic, structlog |
+| Yerel | Docker Compose: Postgres, API, Next dev |
 
 ## Yerel çalıştırma
 
@@ -26,7 +26,6 @@ docker compose up --build
 - Analiz merkezi: `/tr/analyze` (mağaza araması, dosya/metin için yer tutucu, karşılaştırma sekmesi)  
 - API Swagger: http://localhost:8001/docs (host **8001**; konteyner içi **8000**)  
 - Sağlık: http://localhost:8001/health  
-- Flower: http://localhost:5555  
 - PostgreSQL (host): `localhost:5433` → konteyner `postgres:5432`  
 
 **Manuel smoke:** `/docs`; dar ekranda dashboard menü çekmecesi; `/tr/compare` boş durum + CTA; formlarda Sonner.
@@ -38,10 +37,9 @@ docker compose up --build
 Tipik kurulum:
 
 - **Site (Next.js):** [Vercel](https://vercel.com) — özel alan adı örn. `vivindis.com` / `www.vivindis.com`  
-- **API + worker:** [Railway](https://railway.app) — özel alan adı örn. `api.vivindis.com`  
+- **API:** [Railway](https://railway.app) — özel alan adı örn. `api.vivindis.com`  
 - **Veritabanı:** yönetilen PostgreSQL (ör. Supabase); `DATABASE_URL` içinde **`postgresql+asyncpg://`** kullanın  
-- **Redis:** yönetilen Redis (ör. Upstash); Celery için **`rediss://`** TCP URL  
-- **Kimlik:** [Clerk](https://clerk.com) — publishable + secret + JWKS + JWT issuer + webhook (`POST /api/v1/auth/sync`)
+- **Kimlik:** Public erişim (login duvarı yok)
 
 Frontend, API’ye `NEXT_PUBLIC_API_URL` ile ulaşır — değer **yalnızca kök origin** olmalıdır (örn. `https://api.vivindis.com`). Sonuna **`/api/v1` eklemeyin**; istemci yolları zaten `/api/v1/...` ile başlar; aksi halde istek `/api/v1/api/v1/...` olur ve **404 Not Found** görürsünüz.
 
@@ -71,10 +69,8 @@ DNS’te `api` genelde Railway’e **CNAME** ile gider; kök/`www` kayıtları V
 
    `docker build -f backend/Dockerfile .`
 
-3. **Variables:** `.env.example` ile hizalı tutun (`DATABASE_URL`, `REDIS_URL`, `CELERY_*`, Clerk, `SECRET_KEY`, `CORS_ORIGINS`, `GEMINI_API_KEY`, …).  
-4. **Worker:** ayrı bir Railway servisi; aynı imaj/kaynak, start örneği:  
-   `celery -A app.core.celery:celery_app worker -Q scraper,analysis --loglevel=info`  
-5. İlk şema veya güncellemeler için konteyner/shell üzerinden: `alembic upgrade head`
+3. **Variables:** `.env.example` ile hizalı tutun (`DATABASE_URL`, `SECRET_KEY`, `CORS_ORIGINS`, `GEMINI_API_KEY`, …).  
+4. İlk şema veya güncellemeler için konteyner/shell üzerinden: `alembic upgrade head`
 
 `COPY alembic` / **`"/alembic": not found`** hatası: imaj **kök dizinden** üretilmiyorsa oluşur. `main`’deki Dockerfile + yukarıdaki `docker build` komutu ile uyumlu olun; gerekirse **Clear build cache** ve yeniden deploy.
 
