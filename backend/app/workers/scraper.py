@@ -160,10 +160,11 @@ async def _scrape_google_play(
     else:
         locale_candidates = PLAY_STORE_MATRIX
 
-    max_inserted = int(settings.scrape_max_reviews or 10000)
+    max_inserted = int(settings.scrape_max_reviews or 250000)
     lo, hi = fetch.from_date, fetch.to_date
     total_inserted = 0
     loop = asyncio.get_running_loop()
+    sem = asyncio.Semaphore(35)
 
     # Package variants for case-sensitivity: try original then lowercase if needed.
     pkg_variants = [pkg]
@@ -179,7 +180,7 @@ async def _scrape_google_play(
         inserted = 0
         continuation = None
         batches = 0
-        max_batches = 80
+        max_batches = 100
 
         while batches < max_batches and total_inserted < max_inserted:
             if (lang, country) in play_blacklist:
@@ -215,15 +216,6 @@ async def _scrape_google_play(
                     error=str(exc),
                 )
                 break
-            except Exception as exc:  # noqa: BLE001
-                log.warning(
-                    "play_store_batch_failed",
-                    lang=lang,
-                    country=country,
-                    score=score,
-                    error=str(exc),
-                )
-                break
 
             batches += 1
             continuation = next_tok
@@ -239,7 +231,7 @@ async def _scrape_google_play(
                     at = at.replace(tzinfo=UTC)
                 if at and not _in_range(at, lo, hi):
                     if at.date() < lo:
-                        continue
+                        return inserted
                     continue
                 rid = str(rev.get("reviewId") or "")[:255]
                 if not rid:
@@ -261,8 +253,8 @@ async def _scrape_google_play(
                     lang=lang,
                     review_date=at.date() if at else lo,
                     thumbs_up=int(rev.get("thumbsUpCount") or 0),
-                    developer_reply=str(rep) if rep else None,
-                    reply_date=rep_at.date() if isinstance(rep_at, datetime) else None,
+                    developer_reply=str(rev.get("replyContent")) if rev.get("replyContent") else None,
+                    reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
                 )
                 inserted += 1
                 total_inserted += 1
