@@ -34,5 +34,9 @@ out/
 # Docker
 *.log
 
+# Yerel worker test çıktıları
+backend/.worker*.log
+backend/.worker*.pid
+
 # Alembic (keep versions/ tracked when added)
 # backend/alembic/versions/*.pyc
