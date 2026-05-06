@@ -48,11 +48,23 @@ def _load_app_store_class() -> type:
         def _parse_data(self, after: datetime | None) -> None:
             response = self._response.json()
             for data in response["data"]:
+                self._scanned_total = getattr(self, "_scanned_total", 0) + 1
+                if hasattr(self, "_vivindis_max_scanned") and self._scanned_total > self._vivindis_max_scanned:
+                    raise StopIteration()
+
                 review = dict(data["attributes"])
                 review["_vivindis_review_id"] = str(data.get("id", ""))
                 review["date"] = datetime.strptime(review["date"], "%Y-%m-%dT%H:%M:%SZ")
-                if after and review["date"] < after:
+                rd = review["date"].date()
+
+                hi_date = getattr(self, "_vivindis_hi_date", None)
+                lo_date = getattr(self, "_vivindis_lo_date", None)
+
+                if hi_date and rd > hi_date:
                     continue
+                if lo_date and rd < lo_date:
+                    raise StopIteration()
+
                 self.reviews.append(review)
                 self.reviews_count += 1
                 self._fetched_count += 1
@@ -147,7 +159,8 @@ async def _scrape_google_play(
     lang = settings.scrape_play_lang.strip() or "en"
     country = settings.scrape_play_country.strip() or "us"
     sleep_s = float(settings.scrape_play_sleep_seconds or 1.5)
-    max_total = int(settings.scrape_max_reviews or 5000)
+    max_inserted = int(settings.scrape_max_reviews or 5000)
+    max_scanned = 100_000
 
     inserted = 0
     continuation = None
@@ -155,13 +168,13 @@ async def _scrape_google_play(
     lo, hi = fetch.from_date, fetch.to_date
     batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
 
-    while total_seen < max_total:
+    while inserted < max_inserted and total_seen < max_scanned:
         batch, continuation = gp_reviews(
             pkg,
             lang=lang,
             country=country,
             sort=Sort.NEWEST,
-            count=min(200, max_total - total_seen),
+            count=min(200, max_scanned - total_seen),
             continuation_token=continuation,
         )
         if not batch:
@@ -169,14 +182,22 @@ async def _scrape_google_play(
 
         stop_all = False
         for rev in batch:
+            if inserted >= max_inserted:
+                stop_all = True
+                break
+
             total_seen += 1
             at = rev.get("at")
             if isinstance(at, datetime) and at.tzinfo is None:
                 at = at.replace(tzinfo=UTC)
-            if at and not _in_range(at, lo, hi):
-                if at.date() < lo:
+            
+            if at:
+                ad = at.date()
+                if ad > hi:
+                    continue
+                if ad < lo:
                     stop_all = True
-                continue
+                    break
 
             rid = str(rev.get("reviewId") or "")[:255]
             if not rid:
@@ -233,20 +254,30 @@ async def _scrape_app_store(
 
     country = settings.scrape_app_store_country.strip() or "tr"
     sleep_s = int(settings.scrape_app_store_sleep_seconds or 2)
-    max_total = int(settings.scrape_max_reviews or 5000)
+    max_inserted = int(settings.scrape_max_reviews or 5000)
+    max_scanned = 100_000
 
     slug = (app.name or "app").lower().replace(" ", "-")
     slug = "".join(c if c.isalnum() or c == "-" else "-" for c in slug).strip("-") or "app"
 
     store = VivindisAppStore(country=country, app_name=slug, app_id=int(numeric_id))
-    after_dt = _dmin(fetch.from_date)
-
+    
     lo, hi = fetch.from_date, fetch.to_date
+    store._vivindis_lo_date = lo
+    store._vivindis_hi_date = hi
+    store._vivindis_max_scanned = max_scanned
+    store._scanned_total = 0
+
     effective_sleep = _app_store_sleep_for_window(sleep_s, lo, hi)
-    store.review(how_many=max_total, after=after_dt, sleep=effective_sleep if effective_sleep > 0 else None)
+    # We pass effective_how_many to let the library fetch enough to reach our dates,
+    # but we will break out of `_parse_data` early when we hit max_inserted or lo_date.
+    effective_how_many = max(max_inserted, max_scanned)
+    store.review(how_many=effective_how_many, sleep=effective_sleep if effective_sleep > 0 else None)
 
     inserted = 0
     for rev in store.reviews:
+        if inserted >= max_inserted:
+            break
         rid = str(rev.get("_vivindis_review_id") or "").strip()
         if not rid:
             key_src = f"{numeric_id}|{rev.get('date')}|{rev.get('userName','')}|{str(rev.get('review',''))[:200]}"
@@ -260,6 +291,7 @@ async def _scrape_app_store(
         else:
             rd = lo
 
+        # Additional safety check
         if not (lo <= rd <= hi):
             continue
 
