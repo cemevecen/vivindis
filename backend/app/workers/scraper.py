@@ -144,14 +144,21 @@ async def _scrape_google_play(
     fetch: ReviewFetch,
     app: App,
     settings: Any,
+    review_scope: str,
+    req_lang: str | None,
+    req_country: str | None,
 ) -> int:
     pkg = (app.package_name or "").strip()
     if not pkg:
         log.warning("scrape_play_skip_empty_package", app_id=str(app.id))
         return 0
 
-    lang = settings.scrape_play_lang.strip() or "en"
-    country = settings.scrape_play_country.strip() or "us"
+    if review_scope == "local":
+        lang = (req_lang or settings.scrape_play_lang).strip().lower() or "tr"
+        country = (req_country or settings.scrape_play_country).strip().lower() or "tr"
+    else:
+        lang = "en"
+        country = "us"
     sleep_s = float(settings.scrape_play_sleep_seconds or 1.5)
     max_inserted = int(settings.scrape_max_reviews or 5000)
     max_scanned = 100_000
@@ -334,7 +341,13 @@ async def _scrape_app_store(
     return inserted
 
 
-async def _execute_review_fetch(session: Any, fetch_id: uuid.UUID) -> tuple[list[str], list[str]]:
+async def _execute_review_fetch(
+    session: Any,
+    fetch_id: uuid.UUID,
+    review_scope: str,
+    req_lang: str | None,
+    req_country: str | None,
+) -> tuple[list[str], list[str]]:
     settings = get_settings()
     res = await session.execute(
         select(ReviewFetch)
@@ -355,7 +368,15 @@ async def _execute_review_fetch(session: Any, fetch_id: uuid.UUID) -> tuple[list
     total_inserted = 0
     try:
         if app.platform in (AppPlatform.GOOGLE_PLAY, AppPlatform.BOTH):
-            total_inserted += await _scrape_google_play(session, fetch=fetch, app=app, settings=settings)
+            total_inserted += await _scrape_google_play(
+                session,
+                fetch=fetch,
+                app=app,
+                settings=settings,
+                review_scope=review_scope,
+                req_lang=req_lang,
+                req_country=req_country,
+            )
         if app.platform in (AppPlatform.APP_STORE, AppPlatform.BOTH):
             total_inserted += await _scrape_app_store(session, fetch=fetch, app=app, settings=settings)
 
@@ -411,10 +432,22 @@ async def _mark_fetch_failed(session: Any, fetch_id: uuid.UUID, message: str) ->
 
 
 @celery_app.task(name="app.workers.scraper.review_fetch_task")
-def review_fetch_task(fetch_id: str) -> None:
+def review_fetch_task(
+    fetch_id: str,
+    review_scope: str = "global",
+    lang: str | None = None,
+    country: str | None = None,
+) -> None:
     fid = uuid.UUID(fetch_id)
+    normalized_scope = "local" if review_scope == "local" else "global"
     try:
-        heuristic_ids, ai_ids = run_async_db(_execute_review_fetch, fid)
+        heuristic_ids, ai_ids = run_async_db(
+            _execute_review_fetch,
+            fid,
+            normalized_scope,
+            (lang or "").strip().lower() or None,
+            (country or "").strip().lower() or None,
+        )
     except VivindisAppStoreImportError as exc:
         run_async_db(_mark_fetch_failed, fid, str(exc))
         log.error("fetch_aborted_import", fetch_id=fetch_id)

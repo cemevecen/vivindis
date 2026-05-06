@@ -30,8 +30,13 @@ router = APIRouter(prefix="/apps", tags=["apps"])
 log = get_logger(__name__)
 
 
-def _enqueue_review_fetch(fetch_id: str) -> None:
-    review_fetch_task.apply_async(args=[fetch_id], queue="scraper")
+def _enqueue_review_fetch(
+    fetch_id: str,
+    review_scope: str,
+    lang: str | None,
+    country: str | None,
+) -> None:
+    review_fetch_task.apply_async(args=[fetch_id, review_scope, lang, country], queue="scraper")
 
 
 def _store_platform_for_app(app: App) -> StorePlatform:
@@ -127,7 +132,13 @@ async def create_fetch(
     # Commit hemen: istemci polling GET'i yanıt dönmeden önce çalıştırabilir; ayrıca Celery worker
     # ayrı bağlantıda kaydı görmeli (dependency sonundaki commit bazen yanıttan sonra kalır).
     await session.commit()
-    background_tasks.add_task(_enqueue_review_fetch, str(fetch.id))
+    background_tasks.add_task(
+        _enqueue_review_fetch,
+        str(fetch.id),
+        body.review_scope,
+        body.lang,
+        body.country,
+    )
     return fetch
 
 

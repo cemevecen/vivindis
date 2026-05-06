@@ -164,7 +164,13 @@ function AnalyzeHubConnected() {
     mutationFn: async (appId: string) => {
       return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
         method: "POST",
-        body: { from_date: dateRange.from, to_date: dateRange.to },
+        body: {
+          from_date: dateRange.from,
+          to_date: dateRange.to,
+          review_scope: reviewScope,
+          lang: searchLang,
+          country: searchCountry,
+        },
         getToken,
       });
     },
@@ -363,7 +369,7 @@ function AnalyzeHubConnected() {
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
     storePullMutation.mutate(sessionApp.id);
-  }, [sessionApp, storePullMutation]);
+  }, [reviewScope, searchCountry, searchLang, sessionApp, storePullMutation]);
 
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
   const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);

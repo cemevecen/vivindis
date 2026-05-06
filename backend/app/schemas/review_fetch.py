@@ -13,12 +13,22 @@ from app.models.enums import FetchStatus
 class ReviewFetchCreate(BaseModel):
     from_date: date
     to_date: date
+    review_scope: str = "global"
+    lang: str | None = None
+    country: str | None = None
 
     @model_validator(mode="after")
     def check_range(self) -> ReviewFetchCreate:
         if self.from_date > self.to_date:
             msg = "from_date, to_date'den sonra olamaz."
             raise ValueError(msg)
+        if self.review_scope not in {"local", "global"}:
+            msg = "review_scope yalnızca 'local' veya 'global' olabilir."
+            raise ValueError(msg)
+        if self.lang is not None:
+            self.lang = self.lang.strip().lower()[:8] or None
+        if self.country is not None:
+            self.country = self.country.strip().lower()[:8] or None
         return self
 
 
