@@ -52,6 +52,7 @@ services:
       CLERK_JWT_ISSUER: ${CLERK_JWT_ISSUER:-}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
       DATABASE_ECHO: ${DATABASE_ECHO:-false}
+      SCRAPE_REQUESTS_PER_SECOND: ${SCRAPE_REQUESTS_PER_SECOND:-7}
     ports:
       # Yerelde 8000 başka bir servise aitse Vivindis’e 8001 üzerinden erişin.
       - "8001:8000"
@@ -81,6 +82,7 @@ services:
       GEMINI_MODEL: ${GEMINI_MODEL:-}
       GROQ_API_KEY: ${GROQ_API_KEY:-}
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      SCRAPE_REQUESTS_PER_SECOND: ${SCRAPE_REQUESTS_PER_SECOND:-7}
     volumes:
       - ./backend:/app
     working_dir: /app
