@@ -20,67 +20,32 @@ from app.workers.runtime import run_async_db
 log = get_logger(__name__)
 
 _POS_TR = {
-    "güzel",
-    "süper",
-    "harika",
-    "mükemmel",
-    "başarılı",
-    "sevdim",
-    "iyi",
-    "teşekkür",
-    "kusursuz",
-    "muhteşem",
+    "güzel", "süper", "harika", "mükemmel", "başarılı", "sevdim", "iyi", "teşekkür", "kusursuz", "muhteşem",
+    "hızlı", "kolay", "basit", "faydalı", "yararlı", "efsane", "müthiş", "beğendim", "tavsiye", "kaliteli",
+    "akıcı", "stabil", "on numara", "başarılar", "kazançlı", "güvenilir", "şahane", "bravo", "tebrik", "memnun"
 }
 _NEG_TR = {
-    "kötü",
-    "berbat",
-    "rezalet",
-    "çöp",
-    "donuyor",
-    "açılmıyor",
-    "hata",
-    "sinir",
-    "iade",
-    "kaldır",
+    "kötü", "berbat", "rezalet", "çöp", "donuyor", "açılmıyor", "hata", "sinir", "iade", "kaldır",
+    "yavaş", "kasıyor", "bozuk", "çalışmıyor", "dolandırıcı", "saçma", "gereksiz", "pahalı", "reklam", "soygun",
+    "pisman", "eksik", "berbat", "vasat", "yazık", "rezil", "fiyasko", "hüsran", "çöküyor", "kapandı"
 }
+_MANIP_TR = ["üstte kalsın", "görünsün diye", "yıldız verdim", "yıldızım görünsün", "popüler olsun"]
+_PIVOTS_TR = ["ama", "fakat", "lakin", "ancak", "oysaki", "oysa", "yalnız", "ne var ki"]
+
 _POS_EN = {
-    "great",
-    "good",
-    "love",
-    "awesome",
-    "excellent",
-    "perfect",
-    "best",
-    "thanks",
-    "nice",
-    "smooth",
+    "great", "good", "love", "awesome", "excellent", "perfect", "best", "thanks", "nice", "smooth",
+    "fast", "easy", "helpful", "useful", "amazing", "wonderful", "liked", "recommend", "brilliant", "superb",
+    "stable", "reliable", "fantastic", "top", "congrats", "satisfied"
 }
 _NEG_EN = {
-    "bad",
-    "terrible",
-    "worst",
-    "crash",
-    "bug",
-    "slow",
-    "broken",
-    "useless",
-    "hate",
-    "garbage",
+    "bad", "terrible", "worst", "crash", "bug", "slow", "broken", "useless", "hate", "garbage",
+    "awful", "scam", "expensive", "adds", "poor", "freeze", "junk", "laggy", "fail", "missing",
+    "disappointing", "rubbish", "horrible", "refund", "fraud", "unusable"
 }
+_PIVOTS_EN = ["but", "however", "yet", "nevertheless", "though"]
 
 _STOP = _POS_TR | _NEG_TR | _POS_EN | _NEG_EN | {
-    "the",
-    "and",
-    "for",
-    "this",
-    "that",
-    "with",
-    "bir",
-    "bu",
-    "ve",
-    "çok",
-    "app",
-    "uygulama",
+    "the", "and", "for", "this", "that", "with", "bir", "bu", "ve", "çok", "app", "uygulama", "da", "de", "için"
 }
 
 
@@ -88,11 +53,37 @@ def _tokens(text: str) -> list[str]:
     return re.findall(r"[\w']+", text.lower(), flags=re.UNICODE)
 
 
-def _sentiment_hits(text: str) -> tuple[int, int]:
-    toks = set(_tokens(text))
-    pos = len(toks & _POS_TR) + len(toks & _POS_EN)
-    neg = len(toks & _NEG_TR) + len(toks & _NEG_EN)
-    return pos, neg
+def _sentiment_hits(text: str) -> tuple[float, float]:
+    """Advanced sentiment analysis using pivots and weights."""
+    text_low = text.lower()
+    
+    # Manipulation check: if they say 'upper kalsın diye 5 star', it's likely negative context
+    for p in _MANIP_TR:
+        if p in text_low:
+            return 0.0, 2.0  # Force a negative bias
+
+    # Pivot analysis: find the last conjunction and give weight to the part after it
+    pivots = _PIVOTS_TR + _PIVOTS_EN
+    pivot_indices = [text_low.rfind(p) for p in pivots if text_low.rfind(p) != -1]
+    
+    if pivot_indices:
+        last_pivot = max(pivot_indices)
+        pre_text = text_low[:last_pivot]
+        post_text = text_low[last_pivot:]
+        
+        pre_toks = set(_tokens(pre_text))
+        post_toks = set(_tokens(post_text))
+        
+        # We weight the part after the last pivot (e.g. 'good BUT SLOW')
+        pos = (len(pre_toks & (_POS_TR | _POS_EN)) * 0.5) + (len(post_toks & (_POS_TR | _POS_EN)) * 1.5)
+        neg = (len(pre_toks & (_NEG_TR | _NEG_EN)) * 0.5) + (len(post_toks & (_NEG_TR | _NEG_EN)) * 1.5)
+    else:
+        toks = set(_tokens(text_low))
+        pos = float(len(toks & (_POS_TR | _POS_EN)))
+        neg = float(len(toks & (_NEG_TR | _NEG_EN)))
+
+    # Negative weighting (1.25x multiplier as used in store_review repo)
+    return pos, neg * 1.25
 
 
 def _detect_lang(text: str) -> str:
