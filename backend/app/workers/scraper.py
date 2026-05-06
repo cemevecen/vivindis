@@ -276,6 +276,8 @@ async def _scrape_app_store(
     fetch: ReviewFetch,
     app: App,
     settings: Any,
+    review_scope: str,
+    req_country: str | None,
 ) -> int:
     VivindisAppStore = _load_app_store_class()
     numeric_id = (app.bundle_id or "").strip()
@@ -283,7 +285,10 @@ async def _scrape_app_store(
         log.warning("scrape_app_store_skip_missing_bundle", app_id=str(app.id))
         return 0
 
-    country = settings.scrape_app_store_country.strip() or "tr"
+    if review_scope == "local":
+        country = (req_country or settings.scrape_app_store_country).strip().lower() or "tr"
+    else:
+        country = "us"
     sleep_s = int(settings.scrape_app_store_sleep_seconds or 2)
     max_total = int(settings.scrape_max_reviews or 5000)
 
@@ -292,6 +297,13 @@ async def _scrape_app_store(
 
     store = VivindisAppStore(country=country, app_name=slug, app_id=int(numeric_id))
     after_dt = _dmin(fetch.from_date)
+    log.info(
+        "scrape_app_store_started",
+        fetch_id=str(fetch.id),
+        app_id=str(app.id),
+        bundle_id=numeric_id,
+        country=country,
+    )
 
     lo, hi = fetch.from_date, fetch.to_date
     effective_sleep = _app_store_sleep_for_window(sleep_s, lo, hi)
@@ -338,6 +350,24 @@ async def _scrape_app_store(
         )
         inserted += 1
 
+    if inserted == 0:
+        log.warning(
+            "scrape_app_store_empty_result",
+            fetch_id=str(fetch.id),
+            app_id=str(app.id),
+            bundle_id=numeric_id,
+            country=country,
+            from_date=str(fetch.from_date),
+            to_date=str(fetch.to_date),
+        )
+    log.info(
+        "scrape_app_store_finished",
+        fetch_id=str(fetch.id),
+        app_id=str(app.id),
+        bundle_id=numeric_id,
+        country=country,
+        inserted=inserted,
+    )
     return inserted
 
 
@@ -378,7 +408,14 @@ async def _execute_review_fetch(
                 req_country=req_country,
             )
         if app.platform in (AppPlatform.APP_STORE, AppPlatform.BOTH):
-            total_inserted += await _scrape_app_store(session, fetch=fetch, app=app, settings=settings)
+            total_inserted += await _scrape_app_store(
+                session,
+                fetch=fetch,
+                app=app,
+                settings=settings,
+                review_scope=review_scope,
+                req_country=req_country,
+            )
 
         cnt_r = await session.execute(
             select(func.count()).select_from(Review).where(Review.fetch_id == fetch.id),
