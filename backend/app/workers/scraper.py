@@ -172,113 +172,128 @@ async def _scrape_google_play(
     lo, hi = fetch.from_date, fetch.to_date
     batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
     for idx, (lang, country) in enumerate(locale_candidates, start=1):
-        inserted = 0
-        continuation = None
-        total_seen = 0
-        log.info(
-            "scrape_play_started",
-            fetch_id=str(fetch.id),
-            app_id=str(app.id),
-            package_name=pkg,
-            lang=lang,
-            country=country,
-            attempt=idx,
-        )
+        # Google Play multi-strategy: try with date filter first, then fallback to all-time for this locale.
+        for strategy_name, after_dt in [("date_range", lo), ("all_time", None)]:
+            inserted = 0
+            continuation = None
+            total_seen = 0
+            log.info(
+                "scrape_play_started",
+                fetch_id=str(fetch.id),
+                app_id=str(app.id),
+                package_name=pkg,
+                lang=lang,
+                country=country,
+                strategy=strategy_name,
+                attempt=idx,
+            )
 
-        while total_seen < max_scanned and inserted < max_inserted:
-            try:
-                batch, continuation = gp_reviews(
-                    pkg,
-                    lang=lang,
-                    country=country,
-                    sort=Sort.NEWEST,
-                    count=min(200, max_scanned - total_seen),
-                    continuation_token=continuation,
-                )
-            except Exception:  # noqa: BLE001
-                log.exception(
-                    "scrape_play_reviews_call_failed",
-                    fetch_id=str(fetch.id),
-                    app_id=str(app.id),
-                    package_name=pkg,
-                    lang=lang,
-                    country=country,
-                )
-                raise
-            if not batch:
-                log.warning(
-                    "scrape_play_empty_batch",
-                    fetch_id=str(fetch.id),
-                    app_id=str(app.id),
-                    package_name=pkg,
-                    total_seen=total_seen,
-                    continuation_present=bool(continuation and continuation.token),
-                    attempt=idx,
-                )
-                break
+            while total_seen < max_scanned and inserted < max_inserted:
+                try:
+                    batch, continuation = gp_reviews(
+                        pkg,
+                        lang=lang,
+                        country=country,
+                        sort=Sort.NEWEST,
+                        count=min(200, max_scanned - total_seen),
+                        continuation_token=continuation,
+                    )
+                except Exception:  # noqa: BLE001
+                    log.exception(
+                        "scrape_play_reviews_call_failed",
+                        fetch_id=str(fetch.id),
+                        app_id=str(app.id),
+                        package_name=pkg,
+                        lang=lang,
+                        country=country,
+                        strategy=strategy_name,
+                    )
+                    raise
 
-            stop_all = False
-            for rev in batch:
-                if inserted >= max_inserted:
-                    stop_all = True
+                if not batch:
+                    log.warning(
+                        "scrape_play_empty_batch",
+                        fetch_id=str(fetch.id),
+                        app_id=str(app.id),
+                        package_name=pkg,
+                        total_seen=total_seen,
+                        continuation_present=bool(continuation and continuation.token),
+                        strategy=strategy_name,
+                        attempt=idx,
+                    )
                     break
-                total_seen += 1
-                at = rev.get("at")
-                if isinstance(at, datetime) and at.tzinfo is None:
-                    at = at.replace(tzinfo=UTC)
-                if at and not _in_range(at, lo, hi):
-                    if at.date() < lo:
+
+                stop_all = False
+                for rev in batch:
+                    if inserted >= max_inserted:
                         stop_all = True
-                    continue
+                        break
+                    total_seen += 1
+                    at = rev.get("at")
+                    if isinstance(at, datetime) and at.tzinfo is None:
+                        at = at.replace(tzinfo=UTC)
 
-                rid = str(rev.get("reviewId") or "")[:255]
-                if not rid:
-                    continue
+                    # Only apply date filter if we are in 'date_range' strategy.
+                    if strategy_name == "date_range":
+                        if at and not _in_range(at, lo, hi):
+                            if at.date() < lo:
+                                stop_all = True
+                            continue
+                    else:
+                        # All-time strategy: still respect the hi/lo for upserting,
+                        # but don't stop the loop just because we hit an old date.
+                        if at and not _in_range(at, lo, hi):
+                            continue
 
-                rd = at.date() if isinstance(at, datetime) else lo
-                score = int(rev.get("score") or 0)
-                thumbs = int(rev.get("thumbsUpCount") or 0)
-                body = str(rev.get("content") or "")
-                author = rev.get("userName")
-                title = None
-                rep = rev.get("replyContent")
-                rep_at = rev.get("repliedAt")
-                rep_d = rep_at.date() if isinstance(rep_at, datetime) else None
+                    rid = str(rev.get("reviewId") or "")[:255]
+                    if not rid:
+                        continue
 
-                await _upsert_review(
-                    session,
-                    app_id=app.id,
-                    fetch_id=fetch.id,
-                    platform=StorePlatform.GOOGLE_PLAY,
-                    store_review_id=rid,
-                    rating=score,
-                    title=title,
-                    body=body,
-                    author=str(author) if author else None,
-                    lang="und",
-                    review_date=rd,
-                    thumbs_up=thumbs,
-                    developer_reply=str(rep) if rep else None,
-                    reply_date=rep_d,
-                )
-                inserted += 1
+                    rd = at.date() if isinstance(at, datetime) else lo
+                    score = int(rev.get("score") or 0)
+                    thumbs = int(rev.get("thumbsUpCount") or 0)
+                    body = str(rev.get("content") or "")
+                    author = rev.get("userName")
+                    title = None
+                    rep = rev.get("replyContent")
+                    rep_at = rev.get("repliedAt")
+                    rep_d = rep_at.date() if isinstance(rep_at, datetime) else None
 
-            if stop_all or continuation is None or continuation.token is None:
-                break
-            if batch_sleep > 0:
-                await asyncio.sleep(batch_sleep)
+                    await _upsert_review(
+                        session,
+                        app_id=app.id,
+                        fetch_id=fetch.id,
+                        platform=StorePlatform.GOOGLE_PLAY,
+                        store_review_id=rid,
+                        rating=score,
+                        title=title,
+                        body=body,
+                        author=str(author) if author else None,
+                        lang="und",
+                        review_date=rd,
+                        thumbs_up=thumbs,
+                        developer_reply=str(rep) if rep else None,
+                        reply_date=rep_d,
+                    )
+                    inserted += 1
 
-        log.info(
-            "scrape_play_finished",
-            fetch_id=str(fetch.id),
-            app_id=str(app.id),
-            package_name=pkg,
-            inserted=inserted,
-            total_seen=total_seen,
-            attempt=idx,
-        )
-        if inserted > 0:
-            return inserted
+                if stop_all or continuation is None or continuation.token is None:
+                    break
+                if batch_sleep > 0:
+                    await asyncio.sleep(batch_sleep)
+
+            log.info(
+                "scrape_play_finished",
+                fetch_id=str(fetch.id),
+                app_id=str(app.id),
+                package_name=pkg,
+                inserted=inserted,
+                total_seen=total_seen,
+                strategy=strategy_name,
+                attempt=idx,
+            )
+            if inserted > 0:
+                return inserted
     return 0
 
 
