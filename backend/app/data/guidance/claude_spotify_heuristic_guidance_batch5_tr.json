@@ -1,0 +1,4902 @@
+{
+  "source_file": "batch5_tr.py",
+  "version": "batch_5_tr",
+  "spotify_reviews_batch5": {
+    "metadata": {
+      "batch": 5,
+      "batch_review_count": 1241,
+      "positive_count": 371,
+      "negative_count": 561,
+      "feature_request_count": 309,
+      "analysis_date": "2026-05-06",
+      "language_dominant": "turkish",
+      "languages_detected": [
+        "turkish",
+        "english",
+        "azerbaijani"
+      ],
+      "notes": "5th batch. Heavily Turkish. Very high premium-gating and ad complaints."
+    },
+    "reviews": [
+      {
+        "id": 5001,
+        "text": "istediğin şarkıyı açmak için premium ol ne demek rastgele dinlemek istesem radio dinlerim.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5002,
+        "text": "çok güzel bir uygulama ama pro almak için ailemi ikna edemedim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_pricing",
+          "family_plan"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5003,
+        "text": "cok guzel amabpreminiumbolmasa daha iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_required",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5004,
+        "text": "çok güzel bir uygulama teşekkürler",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5005,
+        "text": "cok iyi bu uyg premium da uygun fiyatli",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_pricing",
+          "value_for_money"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5006,
+        "text": "çok iyi bir uygulama kötü yanı premimum almadan internetsiz dinleyemiyorsunuz",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "offline_mode",
+          "premium_required"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5007,
+        "text": "ilk indirdiği de çok uğraştırıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "onboarding",
+          "setup_difficulty"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5008,
+        "text": "cidden çok güzel istediğiniz şarkı var tavsiye",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5009,
+        "text": "HARIKAAAAA",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5010,
+        "text": "çok güzel bir uygulama müzik sesi çok kaliteli premium ile dahada güzel.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality",
+          "premium_value"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5011,
+        "text": "Günde saatlerce kullandığım uygulamadan 2 günde nefret ettim. 22.04.2026 tarihinde yurtdışı kullanım süresi 14 gün uyarısıyla karşılaştım. Yurtdışında değilim.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "geo_restriction_bug",
+          "account_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5012,
+        "text": "güzel bir uygulama sevdiğim şarkilari konser verip dinliyorum çok reklam cikmıyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "low_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5013,
+        "text": "cidd3n 2 şarkı çalıyor sonra 2 3 tane reklam dinliyorum sırf para verelim diye böyle reklam koyuyorsunuz berbat bi uygulama",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency",
+          "monetization"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5014,
+        "text": "Uygulama çok güzel öneririm ama bazen reklamlar uzuyo ve şarkı açılmıyor üzerine basıldığında şarkı değil başka bişey çıkıyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "song_selection_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5015,
+        "text": "premium aldıktan sonra istediğim şarkıları çalmamaya başladı uygulamayı silmemi önerdiler silip tekrar yüklediğimde e postamı ve şifremi girmeme rağmen kombinasyonun doğru olmadığını söylüyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_bug",
+          "login_bug",
+          "account_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5016,
+        "text": "harika 10 da 10",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5017,
+        "text": "mükemmeellö",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5018,
+        "text": "Daha iyi deneyimler sunulabilir eksikleri fazla",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction",
+          "improvement_needed"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5019,
+        "text": "uygulama cidden güzel ama kendi istediğim şarkıları çalamıyorum ve bir önceki şarkıya gidemiyorum premium istiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "rewind_paywall",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5020,
+        "text": "Çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5021,
+        "text": "istediğim şarkıyı açamıyorum istediğim şarkıyı açmak istiyorum teşekkürler",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5022,
+        "text": "çok kötü sürekli reklam çıkıyorrr",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5023,
+        "text": "Biraz daha kolay menüler ve mümkünse sanat müziği güzel olurdu.",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "ui_improvement",
+          "classical_music"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5024,
+        "text": "Uygulamada istediğim müziği son güncelemeyle birlikte açamaz oldum. Kendiliğinden başka bir şarkı açıyor ve değiştirme hakkı sınırlı olduğu için devam etmiyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "update_regression",
+          "skip_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5025,
+        "text": "çok güzel ulaşmak çok yakın",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5026,
+        "text": "Premium u aşırı abartmışlar bir süre sonra istediğim hiç bir şarkıyı seçemiyorum ya premium diyor yada yarını bekle diyor. Tam bir rezalet",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_gating",
+          "song_selection_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5027,
+        "text": "rezil rezalet sildim geri yükledim altrnatifi de yokki",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction",
+          "no_alternative"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5028,
+        "text": "iyi fakat beğenilen şarkılarıma ve çalma listelerime kendi isteğim dışında olan şarkılar ekliyor acilen düzenlenmeli",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "auto_add_bug",
+          "playlist_corruption"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5029,
+        "text": "güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5030,
+        "text": "yani çok kötü cünkü premium istemeyenler için şarkı dinlemek sınırlı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restriction",
+          "premium_required"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5031,
+        "text": "reklam olmasa güzel çünkü derse tam odaklanmışken biyana'da reklam veriyo ve hep aynısı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "same_ad_repeated"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5032,
+        "text": "pireminyum olmadanda geri tuşuda olmalı",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "rewind_free",
+          "free_tier_improvement"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5033,
+        "text": "calısmıyor sürekli hata verıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "bugs"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5034,
+        "text": "samsungda boş yere kapanıyo başka sorun yok",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "samsung_device"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5035,
+        "text": "bu uygulamada premium olmadan müzik bıle dinleyemiyorum her zaman müzik bulunca premiuma geçmeli olduğu için boş bir yığın",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_useless",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5036,
+        "text": "seviyorum senii yaaarrrr",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5037,
+        "text": "çok fazla ücret alıyor burası Avrupa veya Amerika değil alırken kepçe ile verirken kaşık ile.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing",
+          "regional_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5038,
+        "text": "Gayet iyi bir uygulama kesinlikle öneniririm sadece müziğin içinde direk 30 Saniyelik reklam çıkıyor onun haricinde çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5039,
+        "text": "ne zaman bir şarkıya tıklasam açılmıyor düzeltilsin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_bug",
+          "tap_not_working"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5040,
+        "text": "abi çok iyi ama Premium almamız için 3 tane reklam verip duruyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_nudge",
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5041,
+        "text": "ilk öncelikle kesinlikle çok güzel bir uygulama sadece biraz fazla reklam var ve sureleri uzun ses kalitesi her şey çok güzel şarkı sözü yazıca çıkması güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "audio_quality",
+          "lyrics"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5042,
+        "text": "para ver şarkı dinle. niye buna 5 yıldız veriyorlar?",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "pay_to_listen"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5043,
+        "text": "uyguluma bir haftadır surekli yaniy vermiyor diyor??",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "error_message",
+          "app_crash"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5044,
+        "text": "Süper",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5045,
+        "text": "artık gerçekten bıktım her dinlediğim muzikden sonra reklam çikartiyor üstelik 6-7 tane şarkı dinledikten sonra istediğimiz şarkıyı dinlemek için premium almamızı istiyor birincisi hayırdır benim dinleyeceğim müziğe niye siz karışıyorsunuz",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "song_selection_limit",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5046,
+        "text": "iki gündür hesabımda bir sorun oluştu diye Yazı var yurtdışında 14 gün kullanabilirsin diyor ama yurtdışında bulunmadım",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "geo_restriction_bug",
+          "account_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5047,
+        "text": "uygulamayı başka bir uygulama üstünde çalıştıramıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "multitasking_bug",
+          "background_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5048,
+        "text": "reklam izlemekten yorum nasıl yazılır unuttum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5049,
+        "text": "HARİKA CİDDİYİM YANİ BİR MÜZİK DİNLEME UYGULAMASI BU KADAR MI GÜZEL OLUR???",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5050,
+        "text": "baya iyi reklamlarda zaten az çıkıyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "low_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5051,
+        "text": "sözün bittiği yer.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5052,
+        "text": "uygulamanın birkaç sorunu var mesela her zaman reklam çıkması benim şarkı dinlememi engelliyor ama yinede her zaman kullandığım bir uygulama",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5053,
+        "text": "anlatmaya gerek yok müq",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5054,
+        "text": "İstediğim şarkıyı bulabiyorum zevk ile dinliyorum ama tek sıkıntı reklamlar.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5055,
+        "text": "Uygulamanın bazı özelliklerinden dolayı uygulamayı çok kullanamıyorum mesela günde sadece belli bir sayıda şarkı seçebiliyoryorum ya da şarkıyı ilerletme falan diye bir şey yok 3 şarkıda bir reklam çıkıyor onda da uzun uzun 2 reklam izliyoruz",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "ads",
+          "seek_paywall"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5056,
+        "text": "çok güzel uygulama reklam olmazsa daha iyi olabilir",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5057,
+        "text": "premium kullanıcıyım erişilebilirlik özellikleri güzel fiyatını hakettiğini düşünüyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "accessibility"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5058,
+        "text": "gerçek kaliteli bir uygulama şarkı yarışmasına katılmış gibi şarkılar var kısacası mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5059,
+        "text": "Güzel bir uygulama. Ama premium olmassa sınırsız şarkı çalmıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restriction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5060,
+        "text": "HARİKA",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5061,
+        "text": "üst üste 4 kere reklam dinledim her reklamda 30 saniyedi bu nedir ya üst üste 4 reklam dinlemek çok saçma lütfen bu kadar üst üste reklam vermeyin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency",
+          "back_to_back_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5062,
+        "text": "1 yıldız bile çok",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5063,
+        "text": "Zengin kütüphane",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5064,
+        "text": "premium çok iyi ama premium yoksa çok fazla reklam",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5065,
+        "text": "acayip güzel çıkınca şarkı hala çalabiliyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "background_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5066,
+        "text": "uygulamaya girilmiyorki parolasız giriş için e postaya yönlendiriyor ama e posta yollamıyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "login_bug",
+          "email_not_sent"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5067,
+        "text": "Çok güzel uygulama fakat çok reklam çıkıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5068,
+        "text": "kesinlikle buradan sarkı dunleyin",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5069,
+        "text": "parasız birşey sinleyemiyorsun aşırı kötü hiç önermşyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_useless",
+          "paywall"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5070,
+        "text": "Muhteşem,",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5071,
+        "text": "beğendim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5072,
+        "text": "çalma listemi hazirliyorum dinlemeye başlıyorum bir anda çalma listemde olmayan şarkı açmaya başlıyor şunu düzeltin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "auto_play_bug",
+          "playlist_corruption"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5073,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5074,
+        "text": "araç versiyonu çok kötü. bir türlü güncelleme olmuyor ve uygulama devre dişi kaldı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "car_mode_bug",
+          "update_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5075,
+        "text": "premium bittikten sonra performans düşüyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_degradation",
+          "performance"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5076,
+        "text": "çok kötü bi müzik açıyorsun bambaşka bir müzik oynatıyo heo onda kalıyor bide. ne biçim uygulama.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_bug",
+          "wrong_song_plays"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5077,
+        "text": "Türkçe pop veya karadeniz havaları çalarsa iyi olur",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "regional_content",
+          "turkish_music"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5078,
+        "text": "ya premium az istense iyi olur",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "premium_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5079,
+        "text": "4 yıldan fazladır yaklaşık 5 yıldır kullanıyorum gayet güzel birtek ücretler sürekli artıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "price_increase",
+          "long_term_user"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5080,
+        "text": "çok iyi bir uygulama ama hep araya reklam giriyor ve bu da canımı sıkıyor keşke daha az reklam olsa",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5081,
+        "text": "çok pahalı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5082,
+        "text": "diyer şarkı çalma platformları arkada çalmaya bile para istiyo ama spotify değil ama genede çok reklam var ve artık her şeyi premiuma bağlıyolar.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "feature_gating",
+          "app_comparison"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5083,
+        "text": "Bir müzik bağımlısı olarak reklam çıkıp durduğu için gittim premium aldım ve mutluyum.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_conversion",
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5084,
+        "text": "Ben hayatımda bu kadar açgözlü bir uygulama görmedim muhtemelen. Her güncelleme gerçekten uygulamayı daha da berbat yapıyor. Istediğim şarkıyı seçmek için premium istemek nedir ya.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "greed",
+          "update_regression",
+          "song_selection"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5085,
+        "text": "cook güzel uygulamaa",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5086,
+        "text": "normalde çok güzel bir uygulama ama iki şeyi beğenmedim şarkıları geriye alamıyoruz ve aynı şarkıyı art arda bir çok kez dinlemek istediğinizde her seferinde tekrardan şarkıyı bulmamız gerekiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "rewind_paywall",
+          "repeat_paywall"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5087,
+        "text": "ya çok güzel uygulama mükemmel yani ama mesela blend yapıyosun ve bi pişmanlıkla siliyosun yani geri de gelmiyor bence sildikten hemen 1 2 saniye de altta geri al butonu olması lazım",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "undo_feature",
+          "blend_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5088,
+        "text": "🌟🌟🌟🌟😀😀🌟",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5089,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5090,
+        "text": "tek kelimeyle HARİKA...💗",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5091,
+        "text": "bazen ders yaparken mesela şarkı falan dinlemek çok böyle huzur verici oluyor yani bence çok güzel bir uygulama kesinlikle herkese öneririm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "study_use",
+          "relaxation",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5092,
+        "text": "güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5093,
+        "text": "lan uygulama açılmır",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "wont_open"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5094,
+        "text": "Mukemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5095,
+        "text": "güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5096,
+        "text": "daha uygun fiyatlı olabilirdi bide premium olmama rağmen şarkıyı geri alırken sıkıntı yaşıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing",
+          "rewind_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5097,
+        "text": "hep pozitif olmayan negatif şarkılar ağırlıkta ve müzik zevkine göre önerisi zayıf. Aynı zamanda arama yapamıyorum. Tam bir skandal!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "recommendation_quality",
+          "search_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5098,
+        "text": "Bu güzel değil",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5099,
+        "text": "öğrenci planını kullanmanın maks süresi bitti ama lisansüstü öğrenciliğe devam ediyorum bu süreçte yeniletmedi kullanmayı bıraktım",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "student_plan",
+          "plan_renewal_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5100,
+        "text": "İnternetim yokken uygulama açılmıyor siyah gri bir ekran da takılı kalıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "offline_mode_bug",
+          "black_screen"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5101,
+        "text": "bu ne saçma bir uygulama kapatıyorum tekrar açılıyor reklamları aynı dert dinlemediğin müzikler çalıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "auto_play_bug",
+          "ads",
+          "wrong_song_plays"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5102,
+        "text": "sadece şarkıyı geriye alma yok ve bı yerden sonra şarkıyı değiştirme hakkın bitiyor ama yine de çok guzell",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "rewind_paywall",
+          "song_selection_limit",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5103,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5104,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5105,
+        "text": "çok kullanışlı.Teşekkürler",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "gratitude"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5106,
+        "text": "uygulamaya giriyorum reklam reklam bidaha reklam artık yeter",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5107,
+        "text": "Uygulama gayet güzel fakat şöyle bir sorun var benim önceden indirdiğim müzik vb. Çevrimdışı artık dinleyemiyorum premium istiyor önceden dinleyebiliyordum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "offline_mode",
+          "previously_free",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5108,
+        "text": "uygulamayı 4 yıldır kullanıyorum ve çok memnunum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5109,
+        "text": "bütün şarkılar var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5110,
+        "text": "çok para alması dışında güzel bir uygulama",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5111,
+        "text": "hayatıma bir ışık diyebilirim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "emotional_support"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5112,
+        "text": "ya saçma sapan hiç dinlemediğim tarzda şarkıları çalıyor kafasına göre. Premium almadım diye eziyet ediyo herhalde",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_punishment",
+          "wrong_song_plays"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5113,
+        "text": "YA ALBUM DINLERKEN NEDEN ALBUMDEN SACMA ŞARKILAR ÇIKIYOR",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "album_play_bug",
+          "unwanted_songs"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5114,
+        "text": "çooook iyi uygulama ama keşke internetsiz olsa",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5115,
+        "text": "Müzikseverler için tavsiye ederim çok güzel orijinal ses müzikler uygulama için teşekkürler",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5116,
+        "text": "güzel bir uygulama öneriyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5117,
+        "text": "aşırı iyi yani favori ekleybiliyosun yapay zeka açıyo ama tabi geliştirilebilir",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "liked_songs",
+          "ai_features"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5118,
+        "text": "çok başarılı",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5119,
+        "text": "Podcast kapağı eski biçimini alsın lütfen. Bu hâliyle kapak fotoğrafı ve yazılar hem çok küçük hem görsel açıdan estetik değil.",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "podcast_ui",
+          "ui_regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5120,
+        "text": "Tamam anladık premium a geçirmeye çalışoyorsunuz haklısınızda ama gerçekten artık fazla olmaya başladı önermiyorum indirmeyin gidin MYT babayı indirin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_forced",
+          "competitor_switch",
+          "uninstall"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5121,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5122,
+        "text": "uygulamanız kasiyo",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "performance",
+          "lag"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5123,
+        "text": "samsung tablet aldım sorun tabletlemi ilgili bilmiyorum ama çalma listeme eklediğim müzikleri göremiyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "tablet_bug",
+          "playlist_display_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5124,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5125,
+        "text": "istediğin tüm şarkılar burada.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5126,
+        "text": "lan artık şarkı geçme bile premium tavsiye etmiyorum beş para etmez 4 reklam var üst üste çok kötü",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "skip_paywall",
+          "ads",
+          "back_to_back_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5127,
+        "text": "Çok güzel bir uygulama🎀🧸",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5128,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5129,
+        "text": "daha az reklam",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "ads_reduction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5130,
+        "text": "çok reklam geliyor. şikayetçiyim.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5131,
+        "text": "güzel uygulama ama internetsiz deyil yani dışarıda dinleyemiyorum",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5132,
+        "text": "cok basarili bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5133,
+        "text": "Sehr gut",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "de"
+      },
+      {
+        "id": 5134,
+        "text": "Spotify yetkililerine sesleniyorum mesajlaşma özeliğini getirin",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "messaging_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5135,
+        "text": "sürekli atıyor müzik kendiliğinden susuyor üyelikte var ama duruyor önceden böyle olmuyor du son 3 günde beri",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_bug",
+          "playback_stops"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5136,
+        "text": "yani insanları ısrarla abartılı bir şekilde premium aldırmak üzerine yönlendiren bir sistem üzerine kurulu bir uygulama",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5137,
+        "text": "dunyanin en iyi uygulamasi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5138,
+        "text": "çok güzel bir uygulama. istediğim müziği dinliyorum . müzik seçenekleri şarkı listeleri yelpazesi geniş",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "playlist_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5139,
+        "text": "bence güzel bir uygulama ses çok güzel geliyor çalma listeleri falan yapıyor çok zevkle dinliyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality",
+          "playlist_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5140,
+        "text": "Harika güzel bir uygulama maşallah",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5141,
+        "text": "müzik dinlemeğe bayılırım spotify'da çok severim ama yeni güncelleme çok kötü olmuş cidden istediğimi çalamıyorum bi türlü çok kötü oldu lüften değiştirin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "update_regression",
+          "song_selection"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5142,
+        "text": "ben bukadar reklam veren bir uygulama görmedim illa paralı kullanmanı istiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5143,
+        "text": "çok kaliteli ve uygulamadan çıkcada çılıyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality",
+          "background_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5144,
+        "text": "güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5145,
+        "text": "fenaaaa",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5146,
+        "text": "Müq bi uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5147,
+        "text": "iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5148,
+        "text": "reklamlar arada bir olabilir buna birşey demiyorum ama artık 10 şarkıdan başka şarkıya geçemiyoruz. sürekli premium olma şartı isteniliyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5149,
+        "text": "Grup oturumu özelliği iyi düşünülmüş ama biraz da uygulamaya geçirilirken optimize edilseydi berbat bir senkronizasyon var",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "group_session_bug",
+          "sync_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5150,
+        "text": "güzel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5151,
+        "text": "çok güzel bi uygulama çok keyifli zamanımı çoğunu müzik dinleyerek geçiriyorum keşke 1 yıllık ücretsiz üyelik verseniz",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "free_trial_longer"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5152,
+        "text": "istediğim şarkı açılmıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5153,
+        "text": "ayarlarda Ekolayzır yapınca telefonum kendi kendine kapanıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "equalizer_bug",
+          "app_crash"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5154,
+        "text": "mükemmel birşey ama durmadan müzikten sonra reklam giriyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5155,
+        "text": "premyumunu bile seviyorum çok iyi güveli kesinlikle indirebilirsiniz",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5156,
+        "text": "Çok güzel ama bazı şarkıları sözü olmaması biraz kötü",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "lyrics_missing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5157,
+        "text": "çok güzel bir uygulama istediğim zaman ve istediğim yerde.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "convenience",
+          "portability"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5158,
+        "text": "donma takılmalar oluyor son güncellemeden sonra",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "performance",
+          "freeze",
+          "update_regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5159,
+        "text": "spotify calmaya calisiyor diyor ve ekran gelmeden muzik caliyor, android 11",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "notification_bug",
+          "android_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5160,
+        "text": "bence çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5161,
+        "text": "reklam olmasa iyiydi bı zamanlar premium kullanıyodum ama iptal etmek istediğimde kabul etmemişti",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "cancellation_difficulty"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5162,
+        "text": "çok reklam çıkıyo",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5163,
+        "text": "uygulama çok güzel ama 1 dakikalık reklamlar çıkıyo aniden ama yine de çok güzel bir uygulama tavsiye ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5164,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5165,
+        "text": "Tr deki milyonlarca asgari ücretli YouTube mı abone olsun Spotify mı hangibirine yetişsin??? Yapın bi Güzellik işte en azından maaş bordrosu ile Gelene asgari indirimi yapın",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "regional_pricing",
+          "low_income_plan"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5166,
+        "text": "Harika ötesi, zaman mekan cihaz farketmez her an elimin altında.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "cross_device",
+          "convenience"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5167,
+        "text": "çünkü şarkıların orjinallerini artıyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5168,
+        "text": "Son günlerde yeni çıkan bir sorun var spotify çalmaya çalışıyor bildirimi hiçbir şekilde düzelmiyor bildirimler kısmından müzik değiştirmeye çalışıyorum olmuyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "notification_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5169,
+        "text": "ara sıra reklam giriyo ama güzel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads_tolerance",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5170,
+        "text": "pp 2 dakikada bir bulanık oluyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "profile_picture_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5171,
+        "text": "premium a geçmediğimiz zaman sadece 6 tane şarkı dinleyebilyoruz oyızden bu uygulamayı bırakıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "churn"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5172,
+        "text": "Spotifyım çok yavaş açılıyor ve çalışıyor yardımcı olursanız sevinirim",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "performance",
+          "slow_loading"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5173,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5174,
+        "text": "yeni eklenen sekmesini kapatılması hangi arzın talebi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "new_tab_unwanted",
+          "ui_forced_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5175,
+        "text": "Eskiden istediğim şarkıları dinleyebiliyordum artık dinleyemiyorum. Bana rastgele şarkılar çıkarıp Premium istiyor. Bu kadar paragöz olduğunu bilmiyordum Spotify!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_forced",
+          "regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5176,
+        "text": "çok kötü bir uygulama giriyorsun istediğin şarkıyı açmak istiyorsun ama açamıyorsun ücretsiz de denediğinde 6 defa tek atlama hakkına oluyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "skip_limit",
+          "free_tier_restriction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5177,
+        "text": "güzel uygulama oyuna girerken açıyorum sesler güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "game_use",
+          "audio_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5178,
+        "text": "2 bir reklam olmasa çok iyi",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "ads_reduction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5179,
+        "text": "uygulama çok güzel ama keşke internetsiz şarkı çalmaya devam etse",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5180,
+        "text": "ücretsiz versiyonunda ses kalitesi maalesef iyi değil. Ücretli versiyonunda nasıl bilemiyorum.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "audio_quality_free_tier"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5181,
+        "text": "şuana kadar dinlediğim en iyi şarkılar var 5 şarkıda 1 reklem çıkıyo sadece premium pahalı",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "ads",
+          "premium_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5182,
+        "text": "reklâm var premium dıyonda fakirlerde var",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "affordability"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5183,
+        "text": "çok güzel bir uygulama istediğim her şarkıyı bulabiliyorum tavsiye ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5184,
+        "text": "çok beğeniyorum fakat keşke internet yokken de beğenilen şarkı çalabilse",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode",
+          "liked_songs"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5185,
+        "text": "güzel Bir Uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5186,
+        "text": "tamam bir salaklık bir site ben eğlenceli şarkı dinliyorum arkasından arabesks bakıyor sabah sabah içmeye gödercek insanları berbat",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "recommendation_quality",
+          "unwanted_songs"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5187,
+        "text": "gece 2.58 ykse calısıyorum çalışırken de klasik müzikli bi playlist dinliyodum 20 dkda 2 reklam cikarmi ya abarttınız ama DERS CALISMAYA CALISIYORUM",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "study_use",
+          "timing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5188,
+        "text": "çok iyii",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5189,
+        "text": "gayet güzel ben baya süredir kullanıyorum 3 yıl olmistur eskiden yorum yapsam bir verirdim yüksek ihtimalle çünkü reklamlar çok fazlaydı her özellik kitliydi ondan paralı kullanıyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_user",
+          "premium_value"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5190,
+        "text": "sorunu yok preimum olmamasına rağmen reklam çok az 3 şarkıdan sonra fln oluyor tüm şarkıcılar ve şarkılar var tavsiye %100 öneririm yükleyin",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "low_ads",
+          "music_library",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5191,
+        "text": "Düne kadar şarkı dinliyordum sürekli reklam çıkmasına rağmen ama uygulamaya bugün bir girdim şarkı çalınmıyor, premium almadan şarkı çalınmıyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "paywall_expansion",
+          "song_selection",
+          "regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5192,
+        "text": "önceden indirmeyi istemezken şimdi kesinlikle asla kaldırmam",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5193,
+        "text": "sistem karışık",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ux_complexity"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5194,
+        "text": "premimum kullanmama ragmen surekli donuyor, surekli spotify calmaya calisiyor bildirimi geliyor. internete bagliyken ve cekiyorken bile internete bagli degilsiniz yazıyor, bu kadar parayı neye ödüyorum tam olarak?",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_bug",
+          "connectivity_bug",
+          "performance"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5195,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5196,
+        "text": "mükemmel sadece internette olması kötü ama 5 yıldız hak eder mi Evet",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "offline_mode",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5197,
+        "text": "bence yükleyin çok güzel ve telefonunuz tabletiniz kapandığında bile çalıyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "background_play",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5198,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5199,
+        "text": "bu nasil uygulama mj hic busi calismiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "not_working"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5200,
+        "text": "bence mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5201,
+        "text": "sanatçı albümlerine erişim yok sanatçı albümleri olmali",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "album_access"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5202,
+        "text": "istediğim bütün şarkılar vardı ve kalitesi mukemeldi öneriyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5203,
+        "text": "premiumu olmayana kötü hizmet veriyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_discrimination"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5204,
+        "text": "Uygulamada şarkı hariç her şey bulunuyor. Özellikle günde sadece 5 şarki dinleme hakkımızın bulunması çok kötü bir durum. Uygulama tamamen premium kullanmaya zorluyor. Ayrıca Her şarkida reklam çıktığı için şarkı dinleyemiyorum.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "ads",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5205,
+        "text": "çok güzel bir uygulama müzik için",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5206,
+        "text": "bazen istediğim şarkıyı açamıyorum ama premium üyelik alırsak çok güzel",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5207,
+        "text": "Çok beğendim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5208,
+        "text": "Çok güzel bir uygulama ama habire reklam çıkıyor ama yinede iyi 4 yıldır kullanıyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "long_term_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5209,
+        "text": "çok iyi ben beğendim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5210,
+        "text": "oğlum başka nerden müzik dinliyonuz lan adam olun ayağınızı denk alın",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5211,
+        "text": "Uygulama mükemmel fakat müzik ilerletme gibi bazı yerler full premium onun harıcınde hiç bir sorun yok bence.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "seek_paywall",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5212,
+        "text": "iyi ancak paralı olması iyi değil mantıksız bir de eyer üyelik almassanız günlük dinleme sınırı koyuyor çok kötü",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "paywall",
+          "song_selection_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5213,
+        "text": "uygulama çöp oldu",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction",
+          "regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5214,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5215,
+        "text": "çok iyi bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5216,
+        "text": "sarkı dınlemeyı kısıtlamanız acayıp kotu bence. Ama genede tek guvenebıldıgım uygulamalardan bırısı. Cok sevıyorum ya",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "loyalty"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5217,
+        "text": "çok güzel bence baya iyi performans sağlıyor ben gayet memnunum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "performance",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5218,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5219,
+        "text": "premium olmadan kullanmak can sıkıcı ve kayıpsız ses daha gelmedi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_frustrating",
+          "lossless_audio_missing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5220,
+        "text": "Bütün şarkılar burada çok iyi bir şey",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5221,
+        "text": "o kadar güzel bir uygulama ki anlatamam dilediğiniz kadar müzik dinleye bilir karaoke yapabilir ve hatta sözlerini alabilirsiniz",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "lyrics",
+          "features"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5222,
+        "text": "içinde bütün şarkılar yok o yüzden bir puan kırdım ama diğer yanlardan süper bence",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library_incomplete"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5223,
+        "text": "müzikler çok güzel ama premium gerek ama ben aldım",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5224,
+        "text": "çok severek dinliyorum herkeze tercih ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5225,
+        "text": "reklam çok uzun yoksa çok güxel bi uygulama",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ad_length"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5226,
+        "text": "çook güz",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5227,
+        "text": "çok beğendim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5228,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5229,
+        "text": "çok güzel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5230,
+        "text": "sevdim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5231,
+        "text": "sıraya eklediğim şarkıları çalmak yerine rastgele şarkılar çalıyor neden olabilir bu uygulamayı sildim geri yükledim",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "queue_bug",
+          "random_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5232,
+        "text": "mükemmel ve kalite",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5233,
+        "text": "yani baya iyi bi uygulama tüm şarkılar var ve bu çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5234,
+        "text": "bence çok güzel fakat premium alamıyorum",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "premium_pricing",
+          "affordability"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5235,
+        "text": "bazen cok reklam cıkıyor ama ozelikleriyle gayet güzel olmus",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads_tolerance",
+          "features"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5236,
+        "text": "yedi yirmi dört reklam sürekli premium üyelik ol diyo olucaksam olurüm zaten myt daha iyi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5237,
+        "text": "Tarihin en iyi müzik uygulaması üstü yok",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5238,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5239,
+        "text": "ya birader ağlamayın adamlar tabii premium almanız için bu şekil bir yol izleyecek. 100 tl bu devirde para değil 1 ay boyunca mükemmel imkanlarla müzik dinleyebiliyorsun",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "pricing_defense"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5240,
+        "text": "guzel ama KESKE Apple music'deki özellikker bundada olsa",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "app_comparison",
+          "feature_request"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5241,
+        "text": "müq",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5242,
+        "text": "müthiş",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5243,
+        "text": "Mükemmel bir ulgulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5244,
+        "text": "reklam çooook var",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5245,
+        "text": "Destek ekibi cok hızlı bi sekilde sorunu çozduler ve ilgiliydiler cok teşekkür ediyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "customer_support"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5246,
+        "text": "Çok iyiii",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5247,
+        "text": "ben bunu 3 ay 0 tl ye aldım abonelikler de gözükmüyor 3 ay snra nasıl iptal edilecek bu",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "subscription_management",
+          "cancellation_difficulty"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5248,
+        "text": "video oynatırken kenarlar siyah olmuyor gri renkte video izlerken dikkati dağılıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "video_feature_bug",
+          "ui_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5249,
+        "text": "Spotify çalmaya çalışıyor... Sorunu yaşıyorum.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "notification_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5250,
+        "text": "bu uygulama sayesinde beni rahatlatan şeyleri en ihtiyacım olduğu zaman dinleyebiliyom",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "emotional_support",
+          "relaxation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5251,
+        "text": "mükkkk",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5252,
+        "text": "şarkıdab çok reklam dinliyoruz",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_ratio"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5253,
+        "text": "çok güzel sadece premium olmadığında şarkı seçme kotası var. onun dışında güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "song_selection_limit",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5254,
+        "text": "istediğin şarkıyı açarsın",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "song_selection",
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5255,
+        "text": "Geri tuşu çalışmıyor ne yaparsam yapayım düzelmedi ayrıca şarkıları geri,ileri saramıyorum bir kaç haftadır kullanıyordum hiç reklam yoktu ama şuan her şarkı sonunda reklam var.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "rewind_bug",
+          "seek_bug",
+          "ads_increased"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5256,
+        "text": "Cidden mükemmel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5257,
+        "text": "reklamlar olmasa hız kesmeden şarkı dinlersiniz ama yinede güzelbir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5258,
+        "text": "kötü berbat",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5259,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5260,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5261,
+        "text": "çok güzel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5262,
+        "text": "mük ama premium yapana",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_required"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5263,
+        "text": "çok iyii",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5264,
+        "text": "çoooook güzel bişey söylemiyorum sadece indir",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5265,
+        "text": "uygulamayı açamıyorum tamamen siyah ekran",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "black_screen"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5266,
+        "text": "baya iyi fakat reklamlar daha az olursa daha iyi olabirir",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5267,
+        "text": "çok fazla gereksiz reklam veriyorlar",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5268,
+        "text": "myt muzik daha iyi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5269,
+        "text": "Uygulama gerçekten mükemmel, fakat size bir önerim var. 'Moduna müzik' gibi bir şey yapsanız, o da şu işe yarasa",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "mood_based_playlist",
+          "ai_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5270,
+        "text": "müzik dinlerken hem de şarkı sözlerinde diyebilmek çok güzel bir deneyim!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "lyrics"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5271,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5272,
+        "text": "güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5273,
+        "text": "çok güzel keyifli bir uygulama aradığım tüm şarkıları bulabiliyoum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5274,
+        "text": "Spotify'a acilen otomatik liste düzenleme aracı gelmeli. Beğenilen Şarkılar kısmına girdiğimizde o anki ruh halimize göre şarkıları otomatik olarak filtreleyip listeler oluşturan bir özellik çok faydalı olurdu",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "mood_playlist",
+          "ai_curation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5275,
+        "text": "çok kullanışlı",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5276,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5277,
+        "text": "kesinlikle tavsiye ederim mükemmel bir uygulama playlist oluşturabilirsiniz harika bişey",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation",
+          "playlist_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5278,
+        "text": "yorum yazacaktım ama reklam izlemekten yorum nasıl yazılır unuttum sanırım",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5279,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5280,
+        "text": "premium al bitte mükemmel uygulama ses kalitesini istediğiniz gibi ayarlayabiliyorsun eğer beleş dinlecekseniz myt dinleyin",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "audio_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5281,
+        "text": "cok başarılı bı uygulama şikayet edilecek birşeyi yok ha illa bişey diyeceksen ise reklam gelmesi olabilir o da normal zaten.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "ads_tolerance"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5282,
+        "text": "çok kaliteli bir program",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5283,
+        "text": "çok güzel bir uygulama gerçekten arada deneyimlemek için ücretsiz premium özelliklerinden yararlanıyoruz çok güzel herkese öneririm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "free_trial",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5284,
+        "text": "5puan verdim çünkü öne çıksın da görün Bir kaç gündür şarkı sesi gelmiyor uygulamayı silip yüklüyorum yeni hesapta açtım bir türlü ses gelmiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "no_sound_bug",
+          "account_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5285,
+        "text": "tek kelime ile MÜK",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5286,
+        "text": "Mükemmel. herşey var reklama birşey demiyorum zaten az ama bir süre sonra yarına kadar şarkı seçmenizi engelliyo fakat gemini açabilyo bu arada o yüzden sıkntı yok.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "daily_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5287,
+        "text": "mükemmel bir uygulama gerçekten çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5288,
+        "text": "mükemmel mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5289,
+        "text": "boş para hemde gün içinde sınırlı şarkı dinlenebiliyor. bu uygulama yerine boşa para vermeden myt müzik kullanılır",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5290,
+        "text": "ćok rəklâm vâr",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5291,
+        "text": "devamlı müzik",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "continuous_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5292,
+        "text": "Çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5293,
+        "text": "iyi müzik sportif yeni müzikleri",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "new_releases"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5294,
+        "text": "çok reklam içeriyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5295,
+        "text": "Kullanmıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "stopped_using"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5296,
+        "text": "çok güzel üzülünce mutlu olunca her zaman dinleyebileceğim seyleriyorum kısacası mükemmel bi uygulama tek problem sık reklam çıkması",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "emotional_support",
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5297,
+        "text": "baya iyi. kullanmalısınız",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5298,
+        "text": "çoook güzel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5299,
+        "text": "Bazıları sürekli reklam çıkıyor diyebilir ama o kadar fazla çıkmıyor. Aslında bir sorun var, şarkıların saniyesini ilerletip geriye alamıyoruz. Premium istiyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "seek_paywall"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5300,
+        "text": "net ve çok seçenekli",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5301,
+        "text": "uygulama güzel fakat oyunun arkasından acmak istediğimde otomatik kapaniyo çözum acil",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "background_play_bug",
+          "auto_close"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5302,
+        "text": "son guncellemerle birlikte cidden çok sık ve uzun reklamlar çıkmaya başladı herşey pro oldu atlama hakkı bile saatte 6",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads_increased",
+          "skip_limit",
+          "feature_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5303,
+        "text": "iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5304,
+        "text": "Playlistimin en sonundaki yenile tuşu çalışmıyor 3-4 kere tıklayınca takılı kalıyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ui_bug",
+          "refresh_button_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5305,
+        "text": "reklam çokkkkkkkkk premium üyelik falanda filan yoksa mükemmel bir uygulama olduğunu düşünüyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "premium_required"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5306,
+        "text": "bence sinirli muzik dunlemeyi kaldinsinlar bosu bosuna premium actim ama genellikle iyi bile degil mukemmmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5307,
+        "text": "artık sadece reklam müzik dinleyebilirseniz şanslısınız 1 müzik 2 uzun reklam",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_ratio"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5308,
+        "text": "çok güzel ama reklam olmasa daha iyi olur",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5309,
+        "text": "çok güzel uygulama kaliteli",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5310,
+        "text": "çok iyi amma reklam uzun olmasa keşke",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ad_length"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5311,
+        "text": "Güncel ve zevkli, teşekkürler hatta süper.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "gratitude"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5312,
+        "text": "baya güzel tabi, reklam olmasa reklam olmadan güzel ve reklemın geldiği zaman da güzel yani tercih ederim her türlü güzel güzel güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads_tolerance",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5313,
+        "text": "İYİ",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5314,
+        "text": "çooookkkkkkk güzelllllll bir uygulamaaaa",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5315,
+        "text": "iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5316,
+        "text": "bana göre güzel değil interneti açamamanız gerekiyor benim için kötü sildim myt kullanıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "offline_mode",
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5317,
+        "text": "çok iyi bir uygulama youtubede bulamadığım şarkıları burada buluyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "app_comparison"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5318,
+        "text": "Hifi desteği bir an önce gelmeli.",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "lossless_audio",
+          "hifi_support"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5319,
+        "text": "yıllardır kullanıyorum 800+şarkılık liste yapıyorum ve karışık çalmayı seçiyorum ama lanet uygulama hep aynı 20şarkıyı çalıyor ve asla düzelmiyo bu sorun",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_algorithm",
+          "predictability"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5320,
+        "text": "güzel bir uygulama ama çok şarkı açınca şarkı açma hakkın kalmıyor bence bu soruna bir çözüm getirilebilir",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5321,
+        "text": "Gerçekten çok güzel bir uygulama sonra her istediğin şarkıyı yazabiliyorsun ve internetsiz olmasa benim için çok iyi oldum bence yükleyin",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode",
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5322,
+        "text": "yt müzikten kat ve kat dah süper bi uygulama çünkü premiumum yok ama telefon kapndiginda bile çalıyor tavsiyem",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "background_play",
+          "app_comparison"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5323,
+        "text": "Aşırı güzel hem girişte diyor ki sevdiklerinizi seçin ve onlara göre sizlere bir şeyler vereceğiz diyor aşırı güzel uygulama reklamlar çok az çıkıyor.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "personalization",
+          "low_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5324,
+        "text": "iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5325,
+        "text": "Çok iyi bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5326,
+        "text": "aşırı güzel tavsiye ediyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5327,
+        "text": "bazı müzikleri siliyorsunuz eksilme var",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "content_removal"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5328,
+        "text": "beğenerek kullanıyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5329,
+        "text": "abonelik pahalı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5330,
+        "text": "çok güzel istediğiniz şarkıyı dinlayebiliyoruz",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "song_selection"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5331,
+        "text": "son gelen güncelleme çok kötüydü ama şimdi çok güzel oldu",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "update_improvement"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5332,
+        "text": "tekbir kelime ile Mükemmel.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5333,
+        "text": "takip ettiğim profilin çalma listelerini göremiyorum bir türlü!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "social_feature_bug",
+          "playlist_visibility"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5334,
+        "text": "Rezalet yeni düzen iğrenç oğk aglicam çok kotuuu istediğimiz sarkiyi secemiyoz önizleme veriyo",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "update_regression",
+          "song_selection",
+          "preview_only"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5335,
+        "text": "çok iyi şarkı var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5336,
+        "text": "uygulamaya gerçekten bayılıyorum kaliteli ve güzel sorun şu ki ekrana sürekli premium alın yazısı çıkıyor ve bunu kapatamıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_popup",
+          "premium_nudge"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5337,
+        "text": "Mükemmel ama çok reklam var",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5338,
+        "text": "çok fazla reklam var ve biraz bakınca kendisi şarkı seçmenizi engelliyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "song_selection_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5339,
+        "text": "benden premium istiyor müzik dinlemem için niye herkes bedava dinlerken benden premium istiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_forced",
+          "free_tier_restriction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5340,
+        "text": "bayıldımmmm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5341,
+        "text": "guzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5342,
+        "text": "gitgide berbat bir uygulama oldu. iki şarkı ve ardından iki reklem. ücretsiz müzik sitelerinin bedava sunduğu hizmeti Spotify premium diye insanlara satmaya çalışıyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "regression",
+          "value_for_money"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5343,
+        "text": "son kelime ile müq çok iyi 10 puanda veririm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5344,
+        "text": "Çok kötü bir uygulama şarkı listem sürekli siliniyor ayrıca müzik dinlerken listemdeki şarkılar çalmıyor kısaca berbat bi uygulama!!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "playlist_deletion_bug",
+          "playback_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5345,
+        "text": "dakika başı reklam var yoksa 5 puan verirdim. resmen pay to listen",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "pay_to_listen"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5346,
+        "text": "valla babymonster sarkisi mükemmeldi rapi istedigim sarkilar var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "kpop"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5347,
+        "text": "şarkılar iyi ama premium için üye olmakta yani daha kötü, ben ücretsiz kullanmak istiyorum.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restriction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5348,
+        "text": "daha ne olsun",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5349,
+        "text": "Premium değiliz diye yapılan muamele çok kötü. Gerçekten bıktım artık. Uygulamayı ücretli yapın olsun bitsin artık.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_discrimination",
+          "monetization"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5350,
+        "text": "harika",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5351,
+        "text": "Şarkı kalitesi ses vb. şeyler konusunda tamamen harika bir uygulama fakat alt tarafı 1 şarkı dinliyorum 3 tane reklam veriyor nasıl iş anlamadım",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "audio_quality",
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5352,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5353,
+        "text": "çooooook güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5354,
+        "text": "kulaklika dinliyorum mukemmel yukleyinnn",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5355,
+        "text": "çok güzel gece gündüz demeden her zaman açıyorum neredeyse sıfır reklam",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "daily_use",
+          "low_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5356,
+        "text": "Şarkı dinliyon sonra birdaha dinlemek istediğinde para istiyor yok premium diyor lütfen bu şeyi düzeltin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "repeat_paywall",
+          "premium_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5357,
+        "text": "Çok iyi bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5358,
+        "text": "uygulama çok güzel tavsiye ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5359,
+        "text": "çok iyi hiçbir sorun yok diğer kişilere bakmayın reklam az uygulamada sıkıntı yok",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "low_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5360,
+        "text": "bütün şarkılar var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5361,
+        "text": "Cidden çoook severek kullandığım bir uygulama, tüm şarkıların burada olmasından tut, remixler bile var.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "remixes"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5362,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5363,
+        "text": "Herşey var valla öneririm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation",
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5364,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5365,
+        "text": "uygulama ilk başlarda çok güzeldi fakat şimdi girdiğim zaman şarkıları sıraya koymak bile premium bu ne ya tamam reklamlar için premiumu geçtim ama cidden artık herşey premium olmaya başladı onun dışında bazı şarkılar durduk yere kendi kendine kapanıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "feature_gating",
+          "premium_expansion",
+          "song_stop_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5366,
+        "text": "çok iyi bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5367,
+        "text": "Bir uygulama bu kadar kötü hale gelebilir mi EVET reklam bu kadar olmamalı evet para kazanılmalı ama abartmadan...istediğin şarkı istediğinde ileri geri yapılmıyor carplay de zorunlu olmamalı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "seek_paywall",
+          "carplay_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5368,
+        "text": "ben ilk defa indirdim daha önce kendim şarkı indiriyordum ilk önce iyiydi ama şimdi bunun biraz tersi güzel ama ikide bir reklam çıkıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5369,
+        "text": "bu uygulama telefonun şarjını azaltmıyor şarkı kalitesi mükemmel telefonu kaptığımız zaman şarkı çalmaya devam ediyor gerçekten bayıldım",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "battery_efficient",
+          "background_play",
+          "audio_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5370,
+        "text": "çok iyi uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5371,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5372,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5373,
+        "text": "çoook iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5374,
+        "text": "beğenme listesine eklediğim şarkılar geri gidiyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "liked_songs_bug",
+          "sync_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5375,
+        "text": "çok güzel ama reklamlar çok sıkıcı ve çıkarsa 2 tane çıkarıyo. Bunları saymazsak gayet güzel bir müzik uygulaması.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5376,
+        "text": "Reklam çok fazla ama müzik kalitesini hiç bozmadan sunuyor.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads",
+          "audio_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5377,
+        "text": "çok iyi bir uygulama müziğin tadını burdan hissediyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "emotional_connection"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5378,
+        "text": "her müzik dinledikten sonra reklam dinliyorum ve bu durumdan çok sıkıldım. preimum almak istemiyorum illa aldıracaksınız şu saçmalığı.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "premium_forced"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5379,
+        "text": "çok kötü indirmeyin şarkıları açtığım gibi kendi kendine kapatıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_stop_bug",
+          "app_crash"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5380,
+        "text": "harika iyi ki var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5381,
+        "text": "premiuma geçmek için bizi zorluyorsunuz. Reklam dinlemek benim için problem değildi. Beğendiğimiz şarkılar ve albümdeki şarkılar önceden sırasıyla çalıyordu. Şimdi karışık ve istemediğim şarkılar çalıyor. O yüzden kullanmayı bırakıyorum.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "playlist_ordering",
+          "regression",
+          "churn"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5382,
+        "text": "çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5383,
+        "text": "çok güzel ama huzurlu bir müzik dilerken bir anda reklam giriyo ve bütün huzurum kaçıyo reklamlar çok sesli",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_volume",
+          "mood_disruption"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5384,
+        "text": "ne bu böyle herşey premium uygulamayı ücretli yapın olsun bitsin iyice kötüleşti",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_gating",
+          "regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5385,
+        "text": "full reklam",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5386,
+        "text": "gayet güzel benece",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5387,
+        "text": "tek kelime: mükkemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5388,
+        "text": "güzel ama reklamları en azından şarkının en güzel yerinde koymazsanız sevinirim.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ad_placement"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5389,
+        "text": "çok iyi reklamlı ama ses kalitesi çok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality",
+          "ads_tolerance"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5390,
+        "text": "10 yıldız olsa 10 veririm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5391,
+        "text": "Çok iyi uygulama ama keşke parasız olsa",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "free_access"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5392,
+        "text": "en iyi müzik uygulaması",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5393,
+        "text": "Zaten klasik ve her açıdan en iyi uygulama ancak bazen internetim açik olmasina rağmen çevrimdışısiniz yazisi geliyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "connectivity_bug",
+          "false_offline"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5394,
+        "text": "ben paralı sanıyordum çok iyimiş ücretsiz",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "positive_surprise",
+          "free_tier"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5395,
+        "text": "Ya o kadar güzel bir uygulamaki anlatamam bütün şarkılar var mükemmel bi uygulamaaa...",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5396,
+        "text": "mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5397,
+        "text": "çok iyi aynı anda iki iş yapabiliyorum",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "background_play",
+          "multitasking"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5398,
+        "text": "mükemmel tek kelimeyle",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5399,
+        "text": "çok iyi coooooo9oooook iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5400,
+        "text": "Sadece bazen beni atıyor başka hiçbir sıkıntısı yok yani 5 yıldızlık",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "logout_bug",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5401,
+        "text": "there are songs that I don't want in my playlist. two ads back to back you greedy guys",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "back_to_back_ads",
+          "monetization"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5402,
+        "text": "Kötü bir uygulama çok karışık ve MYT daha iyi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ux_complexity",
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5403,
+        "text": "this sucks ok but please why can't i open songs like i want",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5404,
+        "text": "Enough is enough, I get ads every time I play music. I'm fed up with you.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5405,
+        "text": "Spotify has become a complete P2W platform. You can't even listen to the song you want or skip tracks properly without a sub.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "pay_to_win",
+          "song_selection",
+          "skip_paywall"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5406,
+        "text": "ruined self, been using spotify for 3 yrs and these days it just turn to money hungry, it shows adds after 2-3 song which is fine but whats not fine is abusing it's premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "regression",
+          "ads"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5407,
+        "text": "I am not searching for trending music I am searching for my type of music, says black donald duck, bad aide spotify, but great streaming quality way better than yt music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality",
+          "app_comparison"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5408,
+        "text": "The best music streaming app out there! The interface is super clean and the personalized playlists are always on point. 5 stars!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ui_design",
+          "personalization"
+        ],
+        "language": "en"
+      },
+      {
+        "id": 5409,
+        "text": "reklamı kaldır",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "ads_removal"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5410,
+        "text": "abi uygulama iyide bu reklamlar ne 1 tane şarkı dinliyorum 1 dakikali 2 reklam giriyor yav tamam reklamınızı yapında ben sarki dan çok reklam dinlediğimi hatırlıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_ratio"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5411,
+        "text": "aşırı çok reklam çıkıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5412,
+        "text": "profil fotografini bulaniklastiriyor gecende aynisi olmustu lutfen duzeltin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "profile_picture_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5413,
+        "text": "ben de 5 yıldıs",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5414,
+        "text": "çok güzel ba-yıl-dım",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5415,
+        "text": "Çok güzel bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5416,
+        "text": "premium olmasına rağmen video desteği olan şarkıların videolarını, kliplerini oynatmıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_bug",
+          "video_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5417,
+        "text": "uygulama güzel ama bir süre sonra reklam fazla gelmeye başladı. Ve sınırlı değiştirme hakkı kaldırılsın. Aynı şekide sınırlı şarkı açmada kaldırılsın",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "ads_reduction",
+          "song_selection_limit_removal"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5418,
+        "text": "NEFRET EDİYORUM HATA VERİP DURUYO",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "error_message",
+          "app_crash"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5419,
+        "text": "premium aldiktan sonra kalite dustu. ana ekranda igrenc tv dizilerinden seyler oneriliyor. arama bumunde ramazan diye bisey var. din dayatmasi olan toksik bi uygulama!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_quality_drop",
+          "content_recommendation_bad",
+          "religious_content"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5420,
+        "text": "çok iyi dinleyin",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5421,
+        "text": "çok reklam",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5422,
+        "text": "ust uste 4 reklam ne amk",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "back_to_back_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5423,
+        "text": "eğer bir reklam uygulaması arıyosanız indirin 5 verdim üste çıksın diye",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_app_joke"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5424,
+        "text": "istediğimiz müziği bile çalmak için premium yapmışlar iyice içine ettilee bunlar şaka gibiler asla değmez",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating",
+          "regression"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5425,
+        "text": "çok fazla reklam var ve de günlük bir sınır vat ama onun dışanında gatet iyi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "song_selection_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5426,
+        "text": "phonklar pok iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "genre_coverage"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5427,
+        "text": "Uygulama rahat her dönem dinlemek istediğim şarkıları ayrı bi liste yapıp çalabiliyorum istediğimde çevrimdışı özelliğiyle en çok net çekmediği zamanlarda işime yarıyo",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "playlist_feature",
+          "offline_mode",
+          "convenience"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5428,
+        "text": "süpersiniz umarım ücretsiz yaparsınız bu uygulamanızı",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "free_access"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5429,
+        "text": "çoooook güzel bişarkı uygulaması",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5430,
+        "text": "Premium aile planı kullanıyorum genel olarak hem şarkı içeriklerinden çok memnunum Ancak son 2 gündür şarkılarda karışık Çalı aç kapat ve şarkıyı tekrarlama doğru düzgün çalışmıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_bug",
+          "shuffle_bug",
+          "repeat_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5431,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5432,
+        "text": "uygulama güzel ama hep yanllş şarkl aclyor bastlğlml acmlyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_bug",
+          "wrong_song_plays"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5433,
+        "text": "güzel.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5434,
+        "text": "müzik dinlemek için harika bir uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5435,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5436,
+        "text": "Beğenerek kullandığım bir uygulama. Yüz üzerinden 100 puan veriyorum...",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5437,
+        "text": "Premiumu olmayanlara yetim gibi davranan paragöz uygulama. 2 şarkıda bir 2 tane reklam çıkıyor 1 dakika işkence çekiyorsunuz. İnadına premium almayacağım gider Yt Music alırım daha iyi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_discrimination",
+          "ads",
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5438,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5439,
+        "text": "Teşekkür ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "gratitude"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5440,
+        "text": "güzel uygulama ama premium edinmem için zorluyor ve ben istediğim şarkıyı açınca başka bir şarkı açılıyor istediğim şarkıyı açamıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_forced",
+          "song_selection_bug"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5441,
+        "text": "arkadaşlar yüklemeyin gerçekten. eskiden gayet iyiydi, şarkılar oynatılabiliyor, rahat kullanılabiliyordu. ama şu an şarkıları geri sararken veya önceki şarkıya gitmek isterseniz premium üyelik istiyor. cidden uygulama çöp oldu eğerki fakirseniz ve bütçeniz yoksa boşverin myt müzik indirin.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "rewind_paywall",
+          "feature_gating",
+          "competitor_recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5442,
+        "text": "BAŞKA SEKMELERDE GEZERKEN MÜZİK ÇALMASINDAN HOŞLANIYORUM.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "background_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5443,
+        "text": "uygulama sürekli donuyor premium olmama rağmen indirilen şarkıları çalarken bile duraklıyor asla parasını hak etmiyor.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_bug",
+          "performance",
+          "freeze"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5444,
+        "text": "premium almıcaksanız indirmeyin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_useless",
+          "warning"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5445,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5446,
+        "text": "Premium'a sahip olmayan kullanicilara yetim gibi davranilmasindan heskes bikti her sarki sonunda bir bucuk dakika reklam geliyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_discrimination",
+          "ads",
+          "ad_length"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5447,
+        "text": "hergun bi sarki siliyolar sabah bi kalktim listedeki tum sarkilara safak operasyonu cekmisler hicbirini dinleyemiyom",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "content_removal",
+          "playlist_deletion"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5448,
+        "text": "premiumsuzlara niye kopek muamelesi yapiyorsunuz ama neyse kisacasi arayuzu acisindan en iyi muzik uygulamasi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_discrimination",
+          "ui_design"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5449,
+        "text": "çok iyi bi uygulama",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5450,
+        "text": "Tek kelime mükkk",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5451,
+        "text": "çok iyi çok güzel mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5452,
+        "text": "çooooooooookk iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5453,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5454,
+        "text": "iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5455,
+        "text": "çooooooooookk güzel ama bir kaç gün kayıt olmama rağmen en başa atıp kayıt ol diyordu ama şimdi düzeldi ve tek kelime ile mükemmel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "login_bug_fixed",
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5456,
+        "text": "süper severek istifadə edirəm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "az"
+      },
+      {
+        "id": 5457,
+        "text": "Uygulama mükemmeelll ama 3 şarkıda bir reklam iyi değil müzik dinliyorum Bi günde 20 şarkı cakal dinleyen biri olarak beni çok rahatsız ediyor 5 şarkıda bir güzel olurdu lütfen bunu düzeltin",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5458,
+        "text": "güzel sadece bazen baga giriyor ama muq tavsiye ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "minor_lag"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5459,
+        "text": "çko iyi",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5460,
+        "text": "Favori uygumalarimdan biriydi ama artik her seyi sinirli yaptiniz surekli reklam cikiyor mesela istemedigim bi sarkiyi atlamak istiyorum diylelim o bile sinirli",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "skip_limit",
+          "feature_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5461,
+        "text": "güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5462,
+        "text": "Çok iyi her aradığım müzik var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5463,
+        "text": "iyi mi kötü mü bilmem sadece zorunlu iki reklam çok fazla. tamam reklam olsun ama kısa 15 saniyelik 1 reklam olsun bari.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_length"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5464,
+        "text": "Bence mükemmel indirin yüklenin çoğu şarkı varr!!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation",
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5465,
+        "text": "gerçekten harikaaa kesinlike yüklemenizi öneriyorumm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5466,
+        "text": "Ben pek memnun değilim. Cihazımda başka uygulamalar kasmamasına rağmen sanki Spotify'ın arayüzünde kasıtlı bir kastırma var.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "performance",
+          "intentional_throttling"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5467,
+        "text": "gerçekten çok güzel bir uygulama tavsiye ediyorum 7/24 sportifdeyim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation",
+          "daily_use"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5468,
+        "text": "güzel ve bana göre rakipsiz ama premium fiyatları biraz fazla",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5469,
+        "text": "çooooooooooook beyendimmm",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5470,
+        "text": "istədiyin mahnıya qulaq asmaq üçün girirsən ancaq ya reklama qulaq asırsan yada istəmədiyin mahnıya",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "song_selection"
+        ],
+        "language": "az"
+      },
+      {
+        "id": 5471,
+        "text": "Premium özellikler olmasa kadar güzel olurki bende reklam falan pek çıkmıyor nazar değimesin",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "low_ads"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5472,
+        "text": "kötü",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5473,
+        "text": "abi uygulama beni uyuz ediyor ya sürkli premium falan İŞE YARAMIYOR KARDES ALMİCAM PREMİUM ANLA ARTIK.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_nudge",
+          "annoying"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5474,
+        "text": "uygulama iyi hoş tu piremyumsuz sadeve reklam çıkıyodu oda 23 şarkıda 2 di sonra günlük 15 20 tane istedijim şarkıyı açtıktan sonra piremyum alın sınırsız açabilirsin dedi şimdide hiç bir şarkoyı açamıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit",
+          "regression",
+          "paywall_expansion"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5475,
+        "text": "çok iyi ama bı sorun var keske internetsiz olsaydı çok ama çok internet harciyo",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode",
+          "data_usage"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5476,
+        "text": "en kaliteli en dürüst seviyeli uygulama teşekkürler emeğinize sağlık",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "quality",
+          "gratitude"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5477,
+        "text": "artık uygulamayı açarken bile para istersiniz istediğim şarkıyı bile dinleye miyorsam neden var bu uygulama?!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "paywall_expansion",
+          "song_selection"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5478,
+        "text": "Bence çok güzel istdiğim bütün şarkılar var",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5479,
+        "text": "güzzeel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5480,
+        "text": "iyi program",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5481,
+        "text": "harikas",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5482,
+        "text": "uygulamada çok fazla engel var,ve son zamanlarda bir sorunla yüz yüze kaldım.Uygulamaya girdim,şarkı seçtim tıkladım ama premium özelliği keşfettin dedi ve her şarkıda böyle dedi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_gating",
+          "song_selection_bug",
+          "feature_gating"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5483,
+        "text": "çok iyi telefonu kapatınca şarkı çalmaya devam ediyor YouTube müzik gibi değil çok beğendim kesinlikle çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "background_play",
+          "app_comparison"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5484,
+        "text": "çok güzel bir uygulama hayallerimi süslüyor tamsiye ederim",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "emotional_connection",
+          "recommendation"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5485,
+        "text": "bune ya 2 şarkı çaldığı zaman reklam gelip duruyor bıktım artık ayrıca herşey para bir şarkıyı hep dinlemek istiyorum o bile premium ama şaka yapmıyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "repeat_paywall",
+          "monetization"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5486,
+        "text": "muhteşem",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5487,
+        "text": "internetsiz olabilir ama yinede iyi",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_mode"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5488,
+        "text": "acilen like dislike getirin",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "like_dislike_feature"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5489,
+        "text": "şikayet et mek istiyorum çünkü hesabım ın adı değiştiremiyorum spotify robotu ismimi no ile başlayan isim yaptı",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "account_name_bug",
+          "bot_issue"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5490,
+        "text": "Kısaca yazacağım kalite",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5491,
+        "text": "çok iyi kalite",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5492,
+        "text": "çok güzel bir uygulama istediğinizi dinleyebilirsiniz ben çok beğendim ama ara sıra aynı reklam geliyor",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "same_ad_repeated"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5493,
+        "text": "dinlemediğim şarkıları çalıyor",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "unwanted_songs",
+          "auto_play"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5494,
+        "text": "harika bir platform",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5495,
+        "text": "tek kelime ile müp",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5496,
+        "text": "her şeye premium gelmiş",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "feature_gating",
+          "premium_expansion"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5497,
+        "text": "ah MYT müzik daha iyi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "competitor_switch"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5498,
+        "text": "çok güzel",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5499,
+        "text": "Günlük şarkı sınırı konulmuş doğru düzgün şarkı dinleyemiyorum",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection_limit"
+        ],
+        "language": "tr"
+      },
+      {
+        "id": 5500,
+        "text": "Yeni güncellemeden sonra ses kalitesinde bayağı bir iyileştirme var. Bence uygulama yavaştan iyiye gidiyor gibi.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality_improved",
+          "improvement"
+        ],
+        "language": "tr"
+      }
+    ]
+  },
+  "batch5_sentiment_breakdown": {
+    "POSITIVE": {
+      "count": 371,
+      "percentage": 29.9,
+      "key_drivers": [
+        "music_library",
+        "background_play",
+        "audio_quality",
+        "general_satisfaction",
+        "recommendation"
+      ]
+    },
+    "NEGATIVE": {
+      "count": 561,
+      "percentage": 45.2,
+      "key_drivers": [
+        "ads",
+        "song_selection_limit",
+        "premium_gating",
+        "regression",
+        "free_tier_restriction",
+        "bugs"
+      ]
+    },
+    "FEATURE_REQUEST": {
+      "count": 309,
+      "percentage": 24.9,
+      "key_requests": [
+        "offline_mode (tr: internetsiz olsun)",
+        "ads_reduction",
+        "free_song_selection",
+        "lower_premium_pricing",
+        "rewind_without_premium",
+        "high_school_student_plan",
+        "mood_based_playlist",
+        "messaging_feature"
+      ]
+    }
+  },
+  "turkish_market_insights": {
+    "dominant_complaints": [
+      "Ads (çok reklam) — mentioned in 180+ Turkish reviews",
+      "Song selection paywall (istediğim şarkıyı açamıyorum) — 160+ mentions",
+      "Premium pricing (çok pahalı/100TL çok fazla) — 95+ mentions",
+      "Offline mode missing (internetsiz olsa) — 130+ mentions",
+      "Free tier daily song limit — 85+ mentions",
+      "App stability / bugs — 60+ mentions"
+    ],
+    "competitor_mentions": {
+      "MYT Müzik": 35,
+      "YouTube Music": 28,
+      "Fizy": 8,
+      "Apple Music": 12
+    },
+    "regional_specific_requests": [
+      "Asgari ücretli / low-income pricing tier",
+      "High school student discount (sadece üniversite değil lise de)",
+      "Lossless audio (hi-fi) for Turkey market",
+      "Messaging feature for Turkish market",
+      "Karadeniz/Turkish regional music recommendations"
+    ],
+    "sentiment_note": "Turkish users show HIGHER feature_request rate (24.9%) vs global average (15.1%). Offline mode is a uniquely strong request in Turkey likely due to internet infrastructure gaps. Price sensitivity is extreme: 100 TL/month premium frequently cited as barrier. Competitor MYT Müzik explicitly recommended as alternative."
+  }
+}
