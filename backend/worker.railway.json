@@ -6,7 +6,6 @@
   },
   "deploy": {
     "startCommand": "celery -A app.core.celery:celery_app worker -Q scraper,analysis --loglevel=info",
-    "healthcheckPath": "",
-    "healthcheckTimeout": 300
+    "healthcheckTimeout": 100
   }
 }
