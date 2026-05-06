@@ -165,7 +165,12 @@ async def _scrape_google_play(
     total_inserted = 0
     loop = asyncio.get_running_loop()
 
-    async def _scrape_locale_score(lang: str, country: str, score: int) -> int:
+    # Package variants for case-sensitivity: try original then lowercase if needed.
+    pkg_variants = [pkg]
+    if pkg.lower() != pkg:
+        pkg_variants.append(pkg.lower())
+
+    async def _scrape_locale_score(lang: str, country: str, score: int, target_pkg: str) -> int:
         nonlocal total_inserted
         if (lang, country) in play_blacklist:
             return 0
@@ -187,7 +192,7 @@ async def _scrape_google_play(
 
                 def _sync() -> tuple[list[dict[str, Any]], Any]:
                     return gp_reviews(
-                        pkg,
+                        target_pkg,
                         lang=lang,
                         country=country,
                         sort=Sort.NEWEST,
@@ -197,31 +202,13 @@ async def _scrape_google_play(
                     )
 
                 batch, next_tok = await loop.run_in_executor(None, _sync)
-            except NotFoundError:
-                play_blacklist.add((lang, country))
-                log.warning(
-                    "scrape_play_not_found",
-                    fetch_id=str(fetch.id),
-                    lang=lang,
-                    country=country,
-                    score=score,
-                )
+            except (NotFoundError, ExtraHTTPError):
+                # We don't blacklist yet if we have more variants to try
                 return inserted
-            except ExtraHTTPError as exc:
-                err = str(exc).lower()
-                if "404" in err or "not found" in err:
-                    play_blacklist.add((lang, country))
-                    log.warning(
-                        "scrape_play_http_not_found",
-                        fetch_id=str(fetch.id),
-                        lang=lang,
-                        country=country,
-                        score=score,
-                        error=str(exc),
-                    )
-                    return inserted
+            except Exception as exc:  # noqa: BLE001
                 log.warning(
                     "play_store_batch_failed",
+                    pkg=target_pkg,
                     lang=lang,
                     country=country,
                     score=score,
@@ -285,8 +272,17 @@ async def _scrape_google_play(
 
         return inserted
 
-    tasks = [_scrape_locale_score(l, c, s) for (l, c) in locale_candidates for s in (1, 2, 3, 4, 5)]
-    await asyncio.gather(*tasks)
+    # Try variants sequentially: first original case, then lowercase if 0 found.
+    for variant in pkg_variants:
+        tasks = [
+            _scrape_locale_score(l, c, s, variant)
+            for (l, c) in locale_candidates
+            for s in (1, 2, 3, 4, 5)
+        ]
+        await asyncio.gather(*tasks)
+        if total_inserted > 0:
+            break
+
     return total_inserted
 
 
