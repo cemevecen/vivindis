@@ -395,8 +395,8 @@ function AnalyzeHubConnected() {
           body: { types },
           getToken,
         });
-      } catch {
-        toast.error(t("analyzeKickoffFailed"));
+      } catch (e) {
+        toast.error(formatClientFetchError(e));
       }
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
@@ -609,8 +609,8 @@ function AnalyzeHubConnected() {
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
         await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
         router.push(`/apps/${appId}/analysis?fetchId=${storeFetchId}`);
-      } catch {
-        toast.error(t("analyzeKickoffFailed"));
+      } catch (e) {
+        toast.error(formatClientFetchError(e));
       } finally {
         setAnalysisKickoffBusy(false);
       }
