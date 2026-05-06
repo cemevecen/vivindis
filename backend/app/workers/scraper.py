@@ -161,17 +161,44 @@ async def _scrape_google_play(
     total_seen = 0
     lo, hi = fetch.from_date, fetch.to_date
     batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
+    log.info(
+        "scrape_play_started",
+        fetch_id=str(fetch.id),
+        app_id=str(app.id),
+        package_name=pkg,
+        lang=lang,
+        country=country,
+    )
 
     while total_seen < max_scanned and inserted < max_inserted:
-        batch, continuation = gp_reviews(
-            pkg,
-            lang=lang,
-            country=country,
-            sort=Sort.NEWEST,
-            count=min(200, max_scanned - total_seen),
-            continuation_token=continuation,
-        )
+        try:
+            batch, continuation = gp_reviews(
+                pkg,
+                lang=lang,
+                country=country,
+                sort=Sort.NEWEST,
+                count=min(200, max_scanned - total_seen),
+                continuation_token=continuation,
+            )
+        except Exception:  # noqa: BLE001
+            log.exception(
+                "scrape_play_reviews_call_failed",
+                fetch_id=str(fetch.id),
+                app_id=str(app.id),
+                package_name=pkg,
+                lang=lang,
+                country=country,
+            )
+            raise
         if not batch:
+            log.warning(
+                "scrape_play_empty_batch",
+                fetch_id=str(fetch.id),
+                app_id=str(app.id),
+                package_name=pkg,
+                total_seen=total_seen,
+                continuation_present=bool(continuation and continuation.token),
+            )
             break
 
         stop_all = False
@@ -225,6 +252,14 @@ async def _scrape_google_play(
         if batch_sleep > 0:
             await asyncio.sleep(batch_sleep)
 
+    log.info(
+        "scrape_play_finished",
+        fetch_id=str(fetch.id),
+        app_id=str(app.id),
+        package_name=pkg,
+        inserted=inserted,
+        total_seen=total_seen,
+    )
     return inserted
 
 
