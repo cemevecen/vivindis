@@ -171,103 +171,16 @@ async def _scrape_google_play(
     if pkg.lower() != pkg:
         pkg_variants.append(pkg.lower())
 
-    async def _scrape_locale_score(lang: str, country: str, score: int, target_pkg: str) -> int:
-        nonlocal total_inserted
-        if (lang, country) in play_blacklist:
-            return 0
-        if total_inserted >= max_inserted:
-            return 0
-        inserted = 0
-        continuation = None
-        batches = 0
-        max_batches = 100
-
-        while batches < max_batches and total_inserted < max_inserted:
-            if (lang, country) in play_blacklist:
-                return inserted
-
-            await limiter.acquire()
-            cont = continuation
-
-            try:
-
-                def _sync() -> tuple[list[dict[str, Any]], Any]:
-                    return gp_reviews(
-                        target_pkg,
-                        lang=lang,
-                        country=country,
-                        sort=Sort.NEWEST,
-                        count=200,
-                        filter_score_with=score,
-                        continuation_token=cont,
-                    )
-
-                batch, next_tok = await loop.run_in_executor(None, _sync)
-            except (NotFoundError, ExtraHTTPError):
-                # We don't blacklist yet if we have more variants to try
-                return inserted
-            except Exception as exc:  # noqa: BLE001
-                log.warning(
-                    "play_store_batch_failed",
-                    pkg=target_pkg,
-                    lang=lang,
-                    country=country,
-                    score=score,
-                    error=str(exc),
-                )
-                break
-
-            batches += 1
-            continuation = next_tok
-
-            if not batch:
-                break
-
-            for rev in batch:
-                if total_inserted >= max_inserted:
-                    break
-                at = rev.get("at")
-                if isinstance(at, datetime) and at.tzinfo is None:
-                    at = at.replace(tzinfo=UTC)
-                if at and not _in_range(at, lo, hi):
-                    if at.date() < lo:
-                        return inserted
-                    continue
-                rid = str(rev.get("reviewId") or "")[:255]
-                if not rid:
-                    continue
-                rep = rev.get("replyContent")
-                rep_at = rev.get("repliedAt")
-                await _upsert_review(
-                    session,
-                    app_id=app.id,
-                    fetch_id=fetch.id,
-                    platform=StorePlatform.GOOGLE_PLAY,
-                    store_review_id=rid,
-                    rating=int(rev.get("score") or 0),
-                    title=None,
-                    body=str(rev.get("content") or ""),
-                    author=str(rev.get("userName") or "") or None,
-                    author_uri=None,
-                    app_version_label=None,
-                    lang=lang,
-                    review_date=at.date() if at else lo,
-                    thumbs_up=int(rev.get("thumbsUpCount") or 0),
-                    developer_reply=str(rev.get("replyContent")) if rev.get("replyContent") else None,
-                    reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
-                )
-                inserted += 1
-                total_inserted += 1
-
-            if continuation is None or getattr(continuation, "token", None) is None:
-                break
-
-        return inserted
-
     # Try variants sequentially: first original case, then lowercase if 0 found.
     for variant in pkg_variants:
+        from app.workers.runtime import async_session
+
+        async def _shard_task(l, c, s, v):
+            async with async_session() as shard_session:
+                return await _scrape_locale_score(shard_session, l, c, s, v, limiter, lo, hi, app, fetch, max_inserted)
+
         tasks = [
-            _scrape_locale_score(l, c, s, variant)
+            _shard_task(l, c, s, variant)
             for (l, c) in locale_candidates
             for s in (1, 2, 3, 4, 5)
         ]
@@ -276,6 +189,79 @@ async def _scrape_google_play(
             break
 
     return total_inserted
+
+
+async def _scrape_locale_score(
+    session: Any, lang: str, country: str, score: int, target_pkg: str,
+    limiter: Any, lo: date, hi: date, app: App, fetch: ReviewFetch, max_inserted: int
+) -> int:
+    from app.core.logging import get_logger
+    from google_play_scraper import reviews as gp_reviews, Sort
+    from datetime import datetime, UTC
+    from app.models.enums import StorePlatform
+    
+    log = get_logger(__name__)
+    inserted = 0
+    continuation = None
+    batches = 0
+    max_batches = 100
+    loop = asyncio.get_running_loop()
+
+    while batches < max_batches:
+        await limiter.acquire()
+        cont = continuation
+
+        try:
+            def _sync():
+                return gp_reviews(
+                    target_pkg, lang=lang, country=country, sort=Sort.NEWEST,
+                    count=200, filter_score_with=score, continuation_token=cont
+                )
+            batch, next_tok = await loop.run_in_executor(None, _sync)
+        except Exception as exc:
+            log.warning("play_shard_failed", pkg=target_pkg, lang=lang, country=country, error=str(exc))
+            break
+
+        if not batch: break
+        batches += 1
+        continuation = next_tok
+
+        for rev in batch:
+            at = rev.get("at")
+            if isinstance(at, datetime) and at.tzinfo is None:
+                at = at.replace(tzinfo=UTC)
+            
+            if at and (at.date() < lo or at.date() > hi):
+                if at.date() < lo: return inserted
+                continue
+            
+            rid = str(rev.get("reviewId") or "")[:255]
+            if not rid: continue
+
+            await _upsert_review(
+                session,
+                app_id=app.id, fetch_id=fetch.id,
+                platform=StorePlatform.GOOGLE_PLAY,
+                store_review_id=rid,
+                rating=int(rev.get("score") or 0),
+                title=None,
+                body=str(rev.get("content") or ""),
+                author=str(rev.get("userName") or "") or None,
+                author_uri=str(rev.get("userImage") or "") or None,
+                app_version_label=str(rev.get("reviewCreatedVersion") or "") or None,
+                lang=lang,
+                review_date=at.date() if at else lo,
+                thumbs_up=int(rev.get("thumbsUpCount") or 0),
+                developer_reply=str(rev.get("replyContent")) if rev.get("replyContent") else None,
+                reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
+            )
+            inserted += 1
+        
+        await session.commit()
+        if continuation is None or getattr(continuation, "token", None) is None:
+            break
+            
+    return inserted
 
 
 async def _scrape_app_store(
