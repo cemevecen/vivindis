@@ -1,0 +1,3988 @@
+{
+  "source_file": "heuristic_analysis_v2.py",
+  "version": "2.0",
+  "spotify_reviews_heuristic_v2": {
+    "metadata": {
+      "total_reviews": 2048,
+      "positive_count": 847,
+      "negative_count": 892,
+      "feature_request_count": 309,
+      "analysis_date": "2026-05-06",
+      "version": "2.0",
+      "duplicate_removed": 152,
+      "notes": "Second batch merged with first batch, duplicates eliminated"
+    },
+    "reviews": [
+      {
+        "id": 1049,
+        "text": "Extremely good 👍 5 Stars✨ rate love Spotify",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "rating"
+        ]
+      },
+      {
+        "id": 1050,
+        "text": "I love it 🤩",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1051,
+        "text": "it's wonderful 😊",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1052,
+        "text": "best way to listen to music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "ease_of_use"
+        ]
+      },
+      {
+        "id": 1053,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1054,
+        "text": "exceptional",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1055,
+        "text": "very good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1056,
+        "text": "good listening",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1057,
+        "text": "perfect listening experience",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1058,
+        "text": "Good to use",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use"
+        ]
+      },
+      {
+        "id": 1059,
+        "text": "I can listen to all my music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ]
+      },
+      {
+        "id": 1060,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1061,
+        "text": "very most popular song app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "popularity"
+        ]
+      },
+      {
+        "id": 1062,
+        "text": "I like that",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1063,
+        "text": "very nice app for song",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1064,
+        "text": "Nice application.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1065,
+        "text": "Excellent experience",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1066,
+        "text": "good sound",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality"
+        ]
+      },
+      {
+        "id": 1067,
+        "text": "Very nice appp relaxing 😌😎 stress free",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "relaxation",
+          "mental_health"
+        ]
+      },
+      {
+        "id": 1068,
+        "text": "best 👌🏼",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1069,
+        "text": "easy to find artist and music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "search"
+        ]
+      },
+      {
+        "id": 1070,
+        "text": "the best music app so far if u aren't using Spotify mehnn u missing out 💯",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "recommendation"
+        ]
+      },
+      {
+        "id": 1071,
+        "text": "makes the playlist on our song listening way. and that's good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "playlist_feature"
+        ]
+      },
+      {
+        "id": 1072,
+        "text": "veri good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1073,
+        "text": "ok good 👍",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1074,
+        "text": "great app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1075,
+        "text": "love it!!!!!!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1076,
+        "text": "excellent 🥳🥳🥳",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1077,
+        "text": "best choice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1078,
+        "text": "Amazing source for music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ]
+      },
+      {
+        "id": 1079,
+        "text": "very nice 🙂",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1080,
+        "text": "ok",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1081,
+        "text": "excellent",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1082,
+        "text": "superb",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1083,
+        "text": "the best and so good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1084,
+        "text": "nice app! it even gives you a free whole month to access everything before it gives you ads when the time has come",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "free_trial",
+          "trial_period"
+        ]
+      },
+      {
+        "id": 1085,
+        "text": "unlimited music at a reasonable price",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "pricing"
+        ]
+      },
+      {
+        "id": 1086,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1087,
+        "text": "amazing",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1088,
+        "text": "so nice as u can feel even if u a fool u can appreciate",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1089,
+        "text": "old and new songs and my favourite songs is coming im full happy 😊",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ]
+      },
+      {
+        "id": 1090,
+        "text": "Best App",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1091,
+        "text": "it's all good 👍",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1092,
+        "text": "Nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1093,
+        "text": "I enjoy using the app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1094,
+        "text": "better than every app.......",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1095,
+        "text": "flawless",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1096,
+        "text": "I love Spotify",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1097,
+        "text": "very nice 👌",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1098,
+        "text": "very nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1099,
+        "text": "Excellent UI, recommendations, and queue system",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ui_quality",
+          "recommendations",
+          "queue_system"
+        ]
+      },
+      {
+        "id": 1100,
+        "text": "they dont miss .1🗯🗯",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1101,
+        "text": "Great app, amazing features on premium but do make it a little bit cheaper",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "premium_pricing",
+          "cost_request"
+        ]
+      },
+      {
+        "id": 1102,
+        "text": "hate the ads.........",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1103,
+        "text": "very bad app i can't play the sonh i want to play and i dont want to buy spotify premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating",
+          "paywall"
+        ]
+      },
+      {
+        "id": 1104,
+        "text": "TOO MANY ADS!!!!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1105,
+        "text": "I don't like it when I can't play where I want it to",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "control"
+        ]
+      },
+      {
+        "id": 1106,
+        "text": "good app but make a good aesthetic widget",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "widget_design",
+          "ui_improvement"
+        ]
+      },
+      {
+        "id": 1107,
+        "text": "it makes me feel comfortable when using it ☺️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1108,
+        "text": "Please let us block podcasts! The same 4 podcats are plaguing me months after binging them for just one weekend. Help!",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "podcast_filtering",
+          "podcast_management"
+        ]
+      },
+      {
+        "id": 1109,
+        "text": "udah berbulan-bulan gw pake premium, gw baru tau, ternyata ni app sebusuk itu. gw udah berhenti langganan, udah lumayan lama, gw baru nyadar ternyata setiap muter 2 lagu selalu muncul iklan, dan itu iklannya selalu 3x30 detikan.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency",
+          "premium_cancellation",
+          "churn"
+        ]
+      },
+      {
+        "id": 1110,
+        "text": "THE QUEUE SYSTEM ON THIS APP IS A GENERATIONAL DISGRACE!!!!!!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "queue_system",
+          "ux_issue"
+        ]
+      },
+      {
+        "id": 1111,
+        "text": "Good but Internet doesn't work at tines",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "connectivity",
+          "offline_access"
+        ]
+      },
+      {
+        "id": 1112,
+        "text": "update sucks",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "update_regression",
+          "ui_update"
+        ]
+      },
+      {
+        "id": 1113,
+        "text": "مرررره حلو و يعطيك على جوك بس تطلع اعلانات بنص الأغاني",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_placement"
+        ]
+      },
+      {
+        "id": 1114,
+        "text": "Fix the issue where the music stops playing every several second.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "playback_bug",
+          "audio_issue"
+        ]
+      },
+      {
+        "id": 1115,
+        "text": "By design I'm not allowed to remove privacy invading 'DJ'. Same with error reporting.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "privacy",
+          "ai_dj",
+          "forced_features"
+        ]
+      },
+      {
+        "id": 1116,
+        "text": "not letting the music play",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "playback_bug"
+        ]
+      },
+      {
+        "id": 1117,
+        "text": "Some music is still missing. I pay for premium and still get ads every now and then. Been using Spotify nearly from begging, but the price is too high for till getting ads between my podcasts.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "music_library",
+          "ads_in_premium",
+          "podcast_ads",
+          "premium_pricing"
+        ]
+      },
+      {
+        "id": 1118,
+        "text": "Реклама на рекламе слушать невозможно",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1119,
+        "text": "ad are very disturb and all good",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1120,
+        "text": "so many ad😭",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1121,
+        "text": "always ads no songs worst app",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1122,
+        "text": "it bad 🤬🤬",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ]
+      },
+      {
+        "id": 1123,
+        "text": "Cant even use the damn shuffle button anymore",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_feature",
+          "ui_issue"
+        ]
+      },
+      {
+        "id": 1124,
+        "text": "I may not be the only one to notice but the recent update is really annoying-some since before, we truly felt it was free",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "update_regression",
+          "paywall_increase",
+          "free_tier_degradation"
+        ]
+      },
+      {
+        "id": 1125,
+        "text": "This app still took my money even after I already canceled my premium plan.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "billing_issue",
+          "subscription_cancellation",
+          "refund"
+        ]
+      },
+      {
+        "id": 1126,
+        "text": "ads is a problem",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1127,
+        "text": "they don't even have correct alphabetical order sorting, T is impossible to be before A",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "search_bug",
+          "sorting_bug"
+        ]
+      },
+      {
+        "id": 1128,
+        "text": "third class app who bags for premium every 5 minutes",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_upsell",
+          "annoying",
+          "monetization"
+        ]
+      },
+      {
+        "id": 1129,
+        "text": "annoying ads, way too much stuff behind a paywall but I get to listen to JoJo so it's a 3",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "paywall",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1130,
+        "text": "if I could give this app a zero, I genuinely would. I'm not able to play any songs at all and whenever I click on a song from an artist's profile, it says 'you discovered a premium feature!'",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating",
+          "feature_gating",
+          "app_failure"
+        ]
+      },
+      {
+        "id": 1131,
+        "text": "The application does not show the lyrics for some songs.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "lyrics_feature",
+          "incomplete_content"
+        ]
+      },
+      {
+        "id": 1132,
+        "text": "Too much premium, cant even click the songs I want to listen to",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_gating",
+          "song_selection",
+          "paywall"
+        ]
+      },
+      {
+        "id": 1133,
+        "text": "three consecutive audio ads? I mean c'mon",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1134,
+        "text": "when I feel lonely I always prefer Spotify for refreshment 🫶🏻",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "mental_health",
+          "relaxation"
+        ]
+      },
+      {
+        "id": 1135,
+        "text": "it's a 9/10 there is room for improvement",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "satisfaction",
+          "potential"
+        ]
+      },
+      {
+        "id": 1136,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1137,
+        "text": "prea multe reclame și skip-uri limitate",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "skip_limit"
+        ]
+      },
+      {
+        "id": 1138,
+        "text": "Such an exhausted experience with free version, can't change song after 6 skip , 4 minutes of add in 1 mint of song",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restriction",
+          "skip_limit",
+          "ads"
+        ]
+      },
+      {
+        "id": 1139,
+        "text": "If you are mad then only download this app cuz it includes premium membership compalsary",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_gating",
+          "forced_monetization"
+        ]
+      },
+      {
+        "id": 1140,
+        "text": "i have only one word -Spotify yes",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1141,
+        "text": "yah app gana sunane ke liye best hai agar Ksi ko aise bhi aur Bollywood haryanvi koi si bhi gane sunane",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "language_support"
+        ]
+      },
+      {
+        "id": 1142,
+        "text": "Love it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1143,
+        "text": "very exceptional",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1144,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1145,
+        "text": "no comment cause this is soo good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1146,
+        "text": "very good,there is every music there and, i just love it there is a thing where u can uplaod music ,combain and do a playlist",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "playlist_feature"
+        ]
+      },
+      {
+        "id": 1147,
+        "text": "Stopped working out of nowhere",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "malfunction"
+        ]
+      },
+      {
+        "id": 1148,
+        "text": "Been rocking with them since before the premium started, then after I was a little upset then my playlists overtime gotten much much better",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_satisfaction",
+          "improvement"
+        ]
+      },
+      {
+        "id": 1149,
+        "text": "I love it!But the one with subscription is the best",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_satisfaction",
+          "subscription_value"
+        ]
+      },
+      {
+        "id": 1150,
+        "text": "expensive",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ]
+      },
+      {
+        "id": 1151,
+        "text": "the free version was toleratable for the last couple years. but as of late, 3 consecutive and unskippable each 15 to 30 second ads to limited privilege",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "free_tier_degradation"
+        ]
+      },
+      {
+        "id": 1152,
+        "text": "Very interesting",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1153,
+        "text": "always offline, have to restart the app",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "connectivity",
+          "offline_mode",
+          "restart_needed"
+        ]
+      },
+      {
+        "id": 1154,
+        "text": "too much ads",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1155,
+        "text": "unbelievable performance playlist and songs for mee .. 💯🔥",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "performance",
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1156,
+        "text": "Bring back $9.99 a month.This new price is a scam just like America.Can we just have a ad free only plan that's as cheap as the student plan?",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "pricing_request",
+          "ad_free_plan"
+        ]
+      },
+      {
+        "id": 1157,
+        "text": "it's all good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1158,
+        "text": "sekarang malah gk bisa mutar lagu di salah satu akun, ganti akun baru bisa normal",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "account_issue",
+          "multi_account",
+          "playback_bug"
+        ]
+      },
+      {
+        "id": 1159,
+        "text": "Nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1160,
+        "text": "froud",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "trust_issue",
+          "scam"
+        ]
+      },
+      {
+        "id": 1161,
+        "text": "it's good, I js wish they would bring back how it used to be",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "regression",
+          "feature_removal"
+        ]
+      },
+      {
+        "id": 1162,
+        "text": "I enjoy using the app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1163,
+        "text": "doesn't work on Motorola too many problems",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "device_compatibility",
+          "motorola",
+          "bugs"
+        ]
+      },
+      {
+        "id": 1164,
+        "text": "The free version is still pretty good. Ads are a bit of a pain in the a$$,but I can live with it.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "free_tier_satisfaction",
+          "ads_tolerance"
+        ]
+      },
+      {
+        "id": 1165,
+        "text": "this app sucks. its really bad. it has a lot of ads. after every song, there are 3 ads..minimum..",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1166,
+        "text": "good app idk what else really i just dont like ads",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1167,
+        "text": "they dont miss .1🗯🗯",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1168,
+        "text": "very nice for listening music you must try",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1169,
+        "text": "this is the best website for things I didn't even know they do. easy, helpful, and intuitive",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "features"
+        ]
+      },
+      {
+        "id": 1170,
+        "text": "Excellent",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1171,
+        "text": "it is really helpful for when you're trying to work out or if you are working and you just want to relax",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "use_case",
+          "workout",
+          "relaxation"
+        ]
+      },
+      {
+        "id": 1172,
+        "text": "without premium wrost app ever seen.. which is stop automatic while I playing my playlist..",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restrictions",
+          "auto_play"
+        ]
+      },
+      {
+        "id": 1173,
+        "text": "very bad experience!",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ]
+      },
+      {
+        "id": 1174,
+        "text": "great app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1175,
+        "text": "Very nice and relaxing",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "relaxation",
+          "mental_health"
+        ]
+      },
+      {
+        "id": 1176,
+        "text": "but they need to fix that thing that you need to pay to download songs but they say is free",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "download_feature",
+          "paywall",
+          "false_advertising"
+        ]
+      },
+      {
+        "id": 1177,
+        "text": "amwzing",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1178,
+        "text": "it's stupid how you need to have premium or you have to have limited skips and choosing songs in a day",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "skip_limit",
+          "song_selection",
+          "free_tier_restriction"
+        ]
+      },
+      {
+        "id": 1179,
+        "text": "very good 👍",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1180,
+        "text": "can barely even run",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "performance",
+          "lag",
+          "stability"
+        ]
+      },
+      {
+        "id": 1181,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1182,
+        "text": "Entertaining.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1183,
+        "text": "it is best apps",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1184,
+        "text": "Best songs for the world of india in hindi and English hai aap",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "language_support"
+        ]
+      },
+      {
+        "id": 1185,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1186,
+        "text": "want a break from the adds?? -yes, yes I do",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1187,
+        "text": "I love it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1188,
+        "text": "it's easy and 100% clean.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "ui_design"
+        ]
+      },
+      {
+        "id": 1189,
+        "text": "I've enjoyed it over the years",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_satisfaction"
+        ]
+      },
+      {
+        "id": 1190,
+        "text": "unusable without premium i have to wait till tmrw just to listen to a song because i can only do it a few times a day",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restriction",
+          "song_limit",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1191,
+        "text": "I really don't have a description butt Spotify is amazing 🤩",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1192,
+        "text": "1) Shows me info and controls about random speakers in the building that are not mine, which is kinda creepy",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "privacy",
+          "device_discovery_bug"
+        ]
+      },
+      {
+        "id": 1193,
+        "text": "thank for the update",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1194,
+        "text": "bahut aacha hai ah aap",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1195,
+        "text": "muy buena",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1196,
+        "text": "AI is stupid, can't understand simple request. I ask 3 songs each genre but the AI give 2 songs each genre.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ai_dj",
+          "ai_limitation",
+          "feature_usability"
+        ]
+      },
+      {
+        "id": 1197,
+        "text": "it is very good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1198,
+        "text": "having a great song and entertainment",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "entertainment"
+        ]
+      },
+      {
+        "id": 1199,
+        "text": "download interface very bad",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "download_feature",
+          "ux_issue"
+        ]
+      },
+      {
+        "id": 1200,
+        "text": "MUSIC IS MY LIFE IT HAS BEEN SINCE I WAS A KID AND SPOTIFY IS PERFECT🥹❤️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_user",
+          "music_passion"
+        ]
+      },
+      {
+        "id": 1201,
+        "text": "keeps crashing after a couple of seconds. it's unusable.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "stability"
+        ]
+      },
+      {
+        "id": 1202,
+        "text": "Excelent to keep all your musical taste in one place, and amazing to discover new tracks",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "organization",
+          "discovery"
+        ]
+      },
+      {
+        "id": 1203,
+        "text": "great playback and alot of music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "playback_quality",
+          "music_library"
+        ]
+      },
+      {
+        "id": 1204,
+        "text": "I loving listening to my favorite songs and my old and new music.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1205,
+        "text": "best song n very smooth",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "performance"
+        ]
+      },
+      {
+        "id": 1206,
+        "text": "the adds giving you adds about the adds is really annoying. i can't skip any song without getting four adds per song",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_meta",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1207,
+        "text": "i love it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1208,
+        "text": "beautiful app. I recommend using Premium tho, small fee for such great music listening",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1209,
+        "text": "it won't let me turn off shuffle 😞",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_toggle",
+          "ui_control"
+        ]
+      },
+      {
+        "id": 1210,
+        "text": "auto shuffle doesn't make sense. its annoying and too many ads in between.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "auto_shuffle",
+          "ads"
+        ]
+      },
+      {
+        "id": 1211,
+        "text": "Good but much higher costing of premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ]
+      },
+      {
+        "id": 1212,
+        "text": "mostly ok, I can take the ads and only listening without rewinding, but the randomizing thing sucks for me",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_algorithm",
+          "ads"
+        ]
+      },
+      {
+        "id": 1213,
+        "text": "cool app listen to my music offline for the fr3ee thanks Spotify music player greatest .",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "offline_mode",
+          "free_tier"
+        ]
+      },
+      {
+        "id": 1214,
+        "text": "The constant price hikes are insane and making me search for an alternative.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "price_increase",
+          "premium_cost"
+        ]
+      },
+      {
+        "id": 1215,
+        "text": "I like it but I am having problems. I have subscription from the trial and when I logged out it doesn't logged me back",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "login_issue",
+          "trial_conversion"
+        ]
+      },
+      {
+        "id": 1216,
+        "text": "the Greatest app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1217,
+        "text": "Great experience",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1218,
+        "text": "I had the automatic smart mixes of songs one after another it's so good, I LOVE IT.....",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "smart_mix",
+          "feature"
+        ]
+      },
+      {
+        "id": 1219,
+        "text": "cannot access through alexa",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "voice_assistant",
+          "integration",
+          "device_support"
+        ]
+      },
+      {
+        "id": 1220,
+        "text": "love it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1221,
+        "text": "It is very fun",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "fun",
+          "entertainment"
+        ]
+      },
+      {
+        "id": 1222,
+        "text": "Literally the best freaking app ever. I don't like that the monthly payment keeps going up but other than that literally the best freakin app ever.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction",
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1223,
+        "text": "I love Spotify",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1224,
+        "text": "perfect",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1225,
+        "text": "dogshit app",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ]
+      },
+      {
+        "id": 1226,
+        "text": "premium doesn't work still have adds even after paying the 13 dollars will never use again",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads_in_premium",
+          "premium_malfunction",
+          "premium_value"
+        ]
+      },
+      {
+        "id": 1227,
+        "text": "absolutely love it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1228,
+        "text": "good playlist inventory for all moods",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "playlist_quality",
+          "variety"
+        ]
+      },
+      {
+        "id": 1229,
+        "text": "good but I don't know why that ummmm restart song button is not working",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "restart_button",
+          "feature_bug"
+        ]
+      },
+      {
+        "id": 1230,
+        "text": "very bad 😔",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ]
+      },
+      {
+        "id": 1231,
+        "text": "play the latest music video",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "music_video_feature"
+        ]
+      },
+      {
+        "id": 1232,
+        "text": "Very nice for music. I strongly recommend.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "recommendation"
+        ]
+      },
+      {
+        "id": 1233,
+        "text": "amazing",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1234,
+        "text": "pretty much has everything under the sun music.1",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "completeness"
+        ]
+      },
+      {
+        "id": 1235,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1236,
+        "text": "U can't pay for premium 😔",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "payment_issue",
+          "premium_access"
+        ]
+      },
+      {
+        "id": 1237,
+        "text": "absolutely love it❤️❤️❤️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1238,
+        "text": "love love love it it's in my daily life, in my fitness life, help kids het to bed and so much more.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "daily_use",
+          "lifestyle",
+          "family"
+        ]
+      },
+      {
+        "id": 1239,
+        "text": "it is awesome and there is hardly any adds",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ad_free_experience",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1240,
+        "text": "not downloading in no wifi",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "download_feature",
+          "wifi_required"
+        ]
+      },
+      {
+        "id": 1241,
+        "text": "pretty ok app finally. one pretty major annoyance though. I'll delete a song from the queue and it somehow pops back up.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "queue_bug",
+          "song_deletion"
+        ]
+      },
+      {
+        "id": 1242,
+        "text": "Awesome, cant keave without Spotify!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "addiction",
+          "essential_app"
+        ]
+      },
+      {
+        "id": 1243,
+        "text": "I still have 85 GB left but can't download anything anymore.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "download_feature",
+          "storage_bug"
+        ]
+      },
+      {
+        "id": 1244,
+        "text": "really good app! has way more than apple music, but my only complaint is that the fres version is very limited",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1245,
+        "text": "supper",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1246,
+        "text": "Nice options bc you can listen to music, audio books, podcasts, and even watch some YouTubers",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "content_variety",
+          "features"
+        ]
+      },
+      {
+        "id": 1247,
+        "text": "why are there ads in premium as well? greedy people",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads_in_premium",
+          "monetization"
+        ]
+      },
+      {
+        "id": 1248,
+        "text": "I love songs",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1249,
+        "text": "great app, good variety of music reasonable ad spacing all together very functional",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ad_balance",
+          "music_variety",
+          "functionality"
+        ]
+      },
+      {
+        "id": 1250,
+        "text": "90% ads 10% music",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_ratio"
+        ]
+      },
+      {
+        "id": 1251,
+        "text": "perfect ever",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1252,
+        "text": "live it had it sins 2019",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_user"
+        ]
+      },
+      {
+        "id": 1253,
+        "text": "SO MUCH ADS",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_frequency"
+        ]
+      },
+      {
+        "id": 1254,
+        "text": "fix djx make him better plus mix transitions are at most mid ngl u can do better 🤌🏾 otherwise dope af",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ai_dj",
+          "feature_quality"
+        ]
+      },
+      {
+        "id": 1255,
+        "text": "It great app..easy to use it..bravo",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use"
+        ]
+      },
+      {
+        "id": 1256,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1257,
+        "text": "granite app is good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1258,
+        "text": "best quality sound",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality"
+        ]
+      },
+      {
+        "id": 1259,
+        "text": "I love this app I enjoy listening to all the music I love without interruptions",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "interruption_free"
+        ]
+      },
+      {
+        "id": 1260,
+        "text": "Horrible Customer Service",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "customer_support",
+          "support_quality"
+        ]
+      },
+      {
+        "id": 1261,
+        "text": "I really love the vibe it gives. but the ads really interrupt the mood",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "interruption"
+        ]
+      },
+      {
+        "id": 1262,
+        "text": "Very durable 💪🏼",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "reliability",
+          "stability"
+        ]
+      },
+      {
+        "id": 1263,
+        "text": "Has everything I need and more for podcast and music options!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "content_variety",
+          "podcast_library"
+        ]
+      },
+      {
+        "id": 1264,
+        "text": "stop resetting the queue for no reason, stop making it jam for no reason",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "queue_bug",
+          "performance_issue"
+        ]
+      },
+      {
+        "id": 1265,
+        "text": "This app would be amazing if customer service actually you know, HELPED.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "customer_support",
+          "support_quality"
+        ]
+      },
+      {
+        "id": 1266,
+        "text": "awesome",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1267,
+        "text": "Great app easy to use lots of perks",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "features"
+        ]
+      },
+      {
+        "id": 1268,
+        "text": "put offline mode toggle right next to turn off offline access, which delete all my download.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "offline_mode",
+          "ui_issue",
+          "data_loss"
+        ]
+      },
+      {
+        "id": 1269,
+        "text": "Why change this asap I can't even listen to what I want I gotta pay to hear what I want",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1270,
+        "text": "Too many ads..",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1271,
+        "text": "so many advertising",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1272,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1273,
+        "text": "if u get the free trial be sure to cancel your subscription multiple times to be sure they don't keep it active",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "auto_renewal",
+          "billing_issue",
+          "subscription_management"
+        ]
+      },
+      {
+        "id": 1274,
+        "text": "Best songs ever here ! Nice 👍",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1275,
+        "text": "This app have my favorite songs and perfect hits. I love this app from the bottom of my heart",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "emotional_connection"
+        ]
+      },
+      {
+        "id": 1276,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1277,
+        "text": "Great Fun!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "entertainment",
+          "enjoyment"
+        ]
+      },
+      {
+        "id": 1278,
+        "text": "YouTube music sucks so there's no other option.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1279,
+        "text": "had a free premium trial - absolutely brilliant, but without premium the app is awful, not even allowed to play your own music",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restrictions",
+          "auto_play"
+        ]
+      },
+      {
+        "id": 1280,
+        "text": "The new widget is glitchy. It is not responsive at times and is slow to react to touch.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "widget_bug",
+          "ui_responsiveness"
+        ]
+      },
+      {
+        "id": 1281,
+        "text": "enjoy it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "enjoyment"
+        ]
+      },
+      {
+        "id": 1282,
+        "text": "honestly, Spotify is my favorite app out of all my other apps.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "favorite_app",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1283,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1284,
+        "text": "I love Spotify and I'm extremely happy with it. I love the wide variety of music it has to offer.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_variety",
+          "music_library"
+        ]
+      },
+      {
+        "id": 1285,
+        "text": "it's turning into the better, less censorship form of YouTube which I love",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "platform_evolution",
+          "content_freedom"
+        ]
+      },
+      {
+        "id": 1286,
+        "text": "the app operates normally once a week. I have to keep reloading the app to see my favourite creators podcasts",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_stability",
+          "podcast_display",
+          "reload_needed"
+        ]
+      },
+      {
+        "id": 1287,
+        "text": "Thanks I really appreciate this app pls keep up the great work and God bless you again amazing amen",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "gratitude",
+          "appreciation"
+        ]
+      },
+      {
+        "id": 1288,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1289,
+        "text": "cool",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1290,
+        "text": "great ⁷",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1291,
+        "text": "absolute time wasting, you spend most of the time listening to the ads after one song is played",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "time_wasting"
+        ]
+      },
+      {
+        "id": 1292,
+        "text": "if u don't have premium at best 3 stars but it's amazing with premium to be honest",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "free_tier_limitation"
+        ]
+      },
+      {
+        "id": 1293,
+        "text": "spotify is everything I had hoped for. from exceptional music to ease of use Spotify is the best.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "ease_of_use"
+        ]
+      },
+      {
+        "id": 1294,
+        "text": "you were amazing in the begining but now everthing is paid",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "paywall_increase",
+          "feature_gating",
+          "regression"
+        ]
+      },
+      {
+        "id": 1295,
+        "text": "too many adds cant pick your songs to play ONLY 6 skips per SIX hours plays the same songs",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "song_selection",
+          "skip_limit",
+          "shuffle"
+        ]
+      },
+      {
+        "id": 1296,
+        "text": "awesome",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1297,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1298,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1299,
+        "text": "great get premium it will change your life",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value"
+        ]
+      },
+      {
+        "id": 1300,
+        "text": "I love it so much",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1301,
+        "text": "you removed 30 minutes of free listening! from your ads because you damn well know that you'll give me four ads after 4 songs",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "false_advertising",
+          "ads_increase",
+          "deception"
+        ]
+      },
+      {
+        "id": 1302,
+        "text": "App has begun randomly crashing. Instead of pushing AI slop and podcast videos I never asked for",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_crash",
+          "feature_creep",
+          "ai_content"
+        ]
+      },
+      {
+        "id": 1303,
+        "text": "this is a amazing song player but i wish that i can download music for free without using the spotify premium",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_download",
+          "paywall_removal"
+        ]
+      },
+      {
+        "id": 1304,
+        "text": "I do like Spotify cuz it's a good music app. but why not let us choose what music we play sometimes?",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "control"
+        ]
+      },
+      {
+        "id": 1305,
+        "text": "awesome place for all of your music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ]
+      },
+      {
+        "id": 1306,
+        "text": "I love how can listen to what ever type of music and also it makes a list just for me",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendations",
+          "personalization"
+        ]
+      },
+      {
+        "id": 1307,
+        "text": "It's been an incredible experience ✨️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1308,
+        "text": "fantastic app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1309,
+        "text": "It's nice and relaxing most of the time until ads come",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "relaxation",
+          "ads_interruption"
+        ]
+      },
+      {
+        "id": 1310,
+        "text": "Just be a premium user if you want to enjoy",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_limitation",
+          "premium_required"
+        ]
+      },
+      {
+        "id": 1311,
+        "text": "cool",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1312,
+        "text": "it is useless if I can't turn off shuffle",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_toggle",
+          "control"
+        ]
+      },
+      {
+        "id": 1313,
+        "text": "Songs. Yes",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library"
+        ]
+      },
+      {
+        "id": 1314,
+        "text": "it is a good my hole family use it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "family_use",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1315,
+        "text": "forcing me to buy subscription....😡 literally getting irritated by stupid adds.....",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_forcing",
+          "ads",
+          "monetization"
+        ]
+      },
+      {
+        "id": 1316,
+        "text": "good other than needing to pay to turn off shuffle and to turn on repeat",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_paywall",
+          "repeat_paywall",
+          "feature_gating"
+        ]
+      },
+      {
+        "id": 1317,
+        "text": "Amazing!!! The amount of music you have available. Just love it. 🥰",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "completeness"
+        ]
+      },
+      {
+        "id": 1318,
+        "text": "everything you need in a single tap",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "ui_design"
+        ]
+      },
+      {
+        "id": 1319,
+        "text": "you killed shuffle",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_algorithm",
+          "feature_degradation"
+        ]
+      },
+      {
+        "id": 1320,
+        "text": "The fact that I can get ahold of old jams is making the app more fascinating",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "archival"
+        ]
+      },
+      {
+        "id": 1321,
+        "text": "the entire spotify library got leaked. if they cant keep that safe they cant keep your information or cards safe",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "security",
+          "data_breach",
+          "privacy"
+        ]
+      },
+      {
+        "id": 1322,
+        "text": "peak music app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1323,
+        "text": "it's a complete experience that's mind blowing",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "comprehensive",
+          "feature_rich"
+        ]
+      },
+      {
+        "id": 1324,
+        "text": "please remove on premium and offline song download 🤗",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_download",
+          "paywall_removal"
+        ]
+      },
+      {
+        "id": 1325,
+        "text": "Best free music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "free_tier",
+          "music_library"
+        ]
+      },
+      {
+        "id": 1326,
+        "text": "I can't choose the song i want , Spotify do it for me and I don't like that",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "auto_play",
+          "song_selection",
+          "control"
+        ]
+      },
+      {
+        "id": 1327,
+        "text": "so fun",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "entertainment"
+        ]
+      },
+      {
+        "id": 1328,
+        "text": "could you guys please stop poping the the horror ads during the night time",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_content",
+          "timing"
+        ]
+      },
+      {
+        "id": 1329,
+        "text": "fixed my issue. love Spotify over any other music streaming service. I love it when the end of the year comes around so I can see Spotify Wrapped.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "feature",
+          "spotify_wrapped",
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1330,
+        "text": "I have used spotify premium since 2012, in in 22 different countries as I traveled.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_user",
+          "international_use"
+        ]
+      },
+      {
+        "id": 1331,
+        "text": "used to be good.. 30mins of free music after 3 or 4 ads.. now its 3 or 4 ads every 2 or 3 music..",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads_increase",
+          "regression"
+        ]
+      },
+      {
+        "id": 1332,
+        "text": "Not the best one, but convenient 😊",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "convenience"
+        ]
+      },
+      {
+        "id": 1333,
+        "text": "nice music app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1334,
+        "text": "I love Spotify. The app runs smoothly and the recommendations are great.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "performance",
+          "recommendations"
+        ]
+      },
+      {
+        "id": 1335,
+        "text": "I've always liked Spotify, although there were a couple things I wish didn't change with recent updates",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_satisfaction",
+          "minor_issues"
+        ]
+      },
+      {
+        "id": 1336,
+        "text": "thank you of the zero ad",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ad_free_experience"
+        ]
+      },
+      {
+        "id": 1337,
+        "text": "Excellent app, just subscribe and it would serve you well",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value"
+        ]
+      },
+      {
+        "id": 1338,
+        "text": "very good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1339,
+        "text": "excellent",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1340,
+        "text": "I like it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1341,
+        "text": "over rated app",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "overrated"
+        ]
+      },
+      {
+        "id": 1342,
+        "text": "great app for streaming music pretty much everyone ik has it but i wish it could show us the music vids",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "music_video",
+          "feature_request"
+        ]
+      },
+      {
+        "id": 1343,
+        "text": "Fabulous app 👌",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1344,
+        "text": "such a glitch filled app, trying to open playlists it just doesnt even open them",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "playlist_bug",
+          "ui_bug",
+          "stability"
+        ]
+      },
+      {
+        "id": 1345,
+        "text": "works flawlessly",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "reliability",
+          "stability"
+        ]
+      },
+      {
+        "id": 1346,
+        "text": "ecellen",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1347,
+        "text": "on my ipad it glitches and doesn't let me play the music i want like its on shuffle mode but i cant turn it off",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "tablet_issue",
+          "shuffle_bug",
+          "device_compatibility"
+        ]
+      },
+      {
+        "id": 1348,
+        "text": "Primium membership is very costly so I switched to YouTube Music premium membership.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing",
+          "app_migration",
+          "competitor_switch"
+        ]
+      },
+      {
+        "id": 1349,
+        "text": "music sick",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1350,
+        "text": "great music and easy to find",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "search_ease"
+        ]
+      },
+      {
+        "id": 1351,
+        "text": "good experience",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1352,
+        "text": "It is very good but not on watch",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "smartwatch_limitation"
+        ]
+      },
+      {
+        "id": 1353,
+        "text": "slow in downloading 👎 but provides music simply 🤙",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "download_speed",
+          "download_feature"
+        ]
+      },
+      {
+        "id": 1354,
+        "text": "I love it!!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1355,
+        "text": "it good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1356,
+        "text": "way better than Amazon music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1357,
+        "text": "Great app, all the music a person could every want. if at all possible, could you allow a custom sleep timer?",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "sleep_timer",
+          "feature_request"
+        ]
+      },
+      {
+        "id": 1358,
+        "text": "you are nice nyt yohh too much adds namaste",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1359,
+        "text": "Endless music across multiple genres.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "variety"
+        ]
+      },
+      {
+        "id": 1360,
+        "text": "very nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1361,
+        "text": "Perfect much appreciated",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1362,
+        "text": "good but ads",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1363,
+        "text": "well... why do I keep getting the spotify is trying to play notification?",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "notification_bug",
+          "ui_issue"
+        ]
+      },
+      {
+        "id": 1364,
+        "text": "I've used Spotify for a long time. Originally just free and then for a while premium.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "long_term_user"
+        ]
+      },
+      {
+        "id": 1365,
+        "text": "love dis is the best app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1366,
+        "text": "all songs available",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "completeness"
+        ]
+      },
+      {
+        "id": 1367,
+        "text": "I love all the opportunities to discover new music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "discovery",
+          "music_exploration"
+        ]
+      },
+      {
+        "id": 1368,
+        "text": "bad experience 😞",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ]
+      },
+      {
+        "id": 1369,
+        "text": "perfect than any music app❤️❤️❤️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "app_comparison",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1370,
+        "text": "exciting catalog for all.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "variety"
+        ]
+      },
+      {
+        "id": 1371,
+        "text": "better than. anghami",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1372,
+        "text": "bring back Spotify preview. It's ridiculous that you removed it.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "feature_removal",
+          "preview_feature"
+        ]
+      },
+      {
+        "id": 1373,
+        "text": "I tried some music for peaceful sleep and they kept running ads in between.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "use_case",
+          "interruption"
+        ]
+      },
+      {
+        "id": 1374,
+        "text": "great music. Thank you",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "gratitude"
+        ]
+      },
+      {
+        "id": 1375,
+        "text": "fantastic",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1376,
+        "text": "I do love this app sm, But I dislike how many adds their are.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1377,
+        "text": "Absolutely amazing. When I don't wanna hear my teachers yapp , I put on spotify",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "use_case",
+          "escape",
+          "entertainment"
+        ]
+      },
+      {
+        "id": 1378,
+        "text": "because they give us a free trial for 1 month",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "free_trial",
+          "trial_period"
+        ]
+      },
+      {
+        "id": 1379,
+        "text": "awesome app highly recommend",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "recommendation",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1380,
+        "text": "w music listening",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1381,
+        "text": "Quality at it's best",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "audio_quality"
+        ]
+      },
+      {
+        "id": 1382,
+        "text": "Best music app easy to use and playlists are always perfect I use it daily",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "playlist_quality",
+          "daily_use"
+        ]
+      },
+      {
+        "id": 1383,
+        "text": "Issues this app has: shuffle is often not random, it cues the same songs to the point I can guess what will play next",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "shuffle_algorithm",
+          "predictability"
+        ]
+      },
+      {
+        "id": 1384,
+        "text": "I love the worship collections",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "niche_content"
+        ]
+      },
+      {
+        "id": 1385,
+        "text": "very good application 👍",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1386,
+        "text": "I've really enjoyed using Spotify. I'm 55 so I'm not always the best with the newest stuff but they make the directions pretty idiot proof!",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ease_of_use",
+          "accessibility",
+          "age_inclusive"
+        ]
+      },
+      {
+        "id": 1387,
+        "text": "whenever I try to log in or sign up for free whatever I do..at last it always shows something went wrong",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "login_issue",
+          "signup_issue",
+          "error_message"
+        ]
+      },
+      {
+        "id": 1388,
+        "text": "its got the music i like to listen to and dosnt have many adds",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "low_ads"
+        ]
+      },
+      {
+        "id": 1389,
+        "text": "amazing",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1390,
+        "text": "the besttt",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1391,
+        "text": "very good app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1392,
+        "text": "the best app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1393,
+        "text": "I truly enjoy using this app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1394,
+        "text": "very Good है",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1395,
+        "text": "❤️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1396,
+        "text": "im telling you the sharp s they have in their ads is an torture method",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_content",
+          "annoying"
+        ]
+      },
+      {
+        "id": 1397,
+        "text": "best asp for music lover",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1398,
+        "text": "always feels good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "emotional_satisfaction"
+        ]
+      },
+      {
+        "id": 1399,
+        "text": "good if u purchase premium. if not they treat u like dogs.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_discrimination",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1400,
+        "text": "too many ads, I don't have money to buy subscription so i can't purchase it.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "paywall",
+          "affordability"
+        ]
+      },
+      {
+        "id": 1401,
+        "text": "they're goated",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1402,
+        "text": "really the best music app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1403,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1404,
+        "text": "they fixed all the issues I had with the app so I'm changing it to 5 stars.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "bug_fix",
+          "improvement"
+        ]
+      },
+      {
+        "id": 1405,
+        "text": "paid huh, one of the worst.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_value",
+          "premium_quality"
+        ]
+      },
+      {
+        "id": 1406,
+        "text": "It's good but it's really expensive",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_pricing"
+        ]
+      },
+      {
+        "id": 1407,
+        "text": "Great way to clear your mind. Sucks that I can't download music",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_download",
+          "mental_health"
+        ]
+      },
+      {
+        "id": 1408,
+        "text": "Even with Premium subscription hearing ads within Podcast is kind of annoying thing.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads_in_premium",
+          "podcast_ads"
+        ]
+      },
+      {
+        "id": 1409,
+        "text": "🩵❤️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1410,
+        "text": "good music sometimes hard to find song or artist but is responsive plays clear an fluent",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality",
+          "responsiveness"
+        ]
+      },
+      {
+        "id": 1411,
+        "text": "It's audio quality is not the best compared to some competitors.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "audio_quality",
+          "app_comparison"
+        ]
+      },
+      {
+        "id": 1412,
+        "text": "worst experience 0% songs matching",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "music_library",
+          "search",
+          "matching"
+        ]
+      },
+      {
+        "id": 1413,
+        "text": "app for listening ads. last stage of capitalism",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "monetization"
+        ]
+      },
+      {
+        "id": 1414,
+        "text": "I love Spotify and I will always keep it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "loyalty",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1415,
+        "text": "I love the app great stuff, is there a way to download music though?",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "offline_download"
+        ]
+      },
+      {
+        "id": 1416,
+        "text": "app ceo is way too greedy full of ads we can't even listen to our preferred music",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "monetization",
+          "song_selection"
+        ]
+      },
+      {
+        "id": 1417,
+        "text": "stop updating the app so you can only use premiem",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "update_regression",
+          "premium_forced"
+        ]
+      },
+      {
+        "id": 1418,
+        "text": "IM NIT GETTING PREMIUM JUST TO SKIP SONGS. CHANGE IT NOW",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "skip_limit",
+          "premium_forced"
+        ]
+      },
+      {
+        "id": 1419,
+        "text": "As supportive as I am of artist spotlights on both their albums and cover art",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "artist_support",
+          "cover_art"
+        ]
+      },
+      {
+        "id": 1420,
+        "text": "beautiful",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1421,
+        "text": "precious",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1422,
+        "text": "good app i am very satisfied 👍🏻",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "satisfaction"
+        ]
+      },
+      {
+        "id": 1423,
+        "text": "genuinely the worst thing to have. I can't even change the music on my own without asking a premium.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "song_selection",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1424,
+        "text": "love Spotify",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1425,
+        "text": "it ask for money.its so greedy and not play good music because tt tells to us premium.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1426,
+        "text": "it really good I just get ads alot but I like it",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "ads_tolerance",
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1427,
+        "text": "too much adds.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1428,
+        "text": "worst , for everything it wants me to buy premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_gating",
+          "monetization"
+        ]
+      },
+      {
+        "id": 1429,
+        "text": "Love it but whyyyyy give moneyyyyyyyy...",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_required",
+          "paywall"
+        ]
+      },
+      {
+        "id": 1430,
+        "text": "this app is so trash that you don't have access to normal functions unless you buy premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restrictions",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1431,
+        "text": "what can you say other than great music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1432,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1433,
+        "text": "IT'S LITERALLY MY ONE OF THE FAVOURITE APPS AND I LITERALLY CAN'T LIVE WITHOUT SPOTIFY",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "favorite_app",
+          "addiction",
+          "essential"
+        ]
+      },
+      {
+        "id": 1434,
+        "text": "why are you guy always trying to get money from use now you are saying we have to pay to choose song",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "song_selection",
+          "paywall"
+        ]
+      },
+      {
+        "id": 1435,
+        "text": "Nice. Able to see my motivational quotes. Buh reduce the goddamn advertisement.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "feature"
+        ]
+      },
+      {
+        "id": 1436,
+        "text": "it's tuff",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1437,
+        "text": "it's good but the the sudden ads are bad",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "unexpected_ads"
+        ]
+      },
+      {
+        "id": 1438,
+        "text": "I ended up switching to YT Music just due to having more songs available",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "app_migration",
+          "music_library",
+          "competitor_switch"
+        ]
+      },
+      {
+        "id": 1439,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1440,
+        "text": "Always been good for me, especially having a new car, so I can listen to what I want to",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "car_use",
+          "device_integration"
+        ]
+      },
+      {
+        "id": 1441,
+        "text": "very lovely 🌹",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1442,
+        "text": "Not that great when u leave it in the background to then come back and play something later.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "background_play",
+          "session_management"
+        ]
+      },
+      {
+        "id": 1443,
+        "text": "Works great on all my devices! Play what I want, when I want. 😀",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "multi_device",
+          "control"
+        ]
+      },
+      {
+        "id": 1444,
+        "text": "it's very nice 💋🤭🤭😻😍",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1445,
+        "text": "even basic features are becoming premium features",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "feature_gating",
+          "paywall",
+          "monetization"
+        ]
+      },
+      {
+        "id": 1446,
+        "text": "Amazing. Listen to music anywhere with no annoying ads.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "portability",
+          "ad_free"
+        ]
+      },
+      {
+        "id": 1447,
+        "text": "As someone that spends money for a subscription, I believe that it's really a great app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_value",
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1448,
+        "text": "I joined the beta tester program and they bricked the app on May 2nd, 2026.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "beta_program",
+          "app_crash",
+          "stability"
+        ]
+      },
+      {
+        "id": 1449,
+        "text": "best music player app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_playback"
+        ]
+      },
+      {
+        "id": 1450,
+        "text": "app is good but more add",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1451,
+        "text": "The literally removed every option. You can't even decide which song to listen.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "feature_removal",
+          "song_selection"
+        ]
+      },
+      {
+        "id": 1452,
+        "text": "the best ever.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1453,
+        "text": "very poor app for music everytime promotions of buying premium pop ups",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_upsell",
+          "popups"
+        ]
+      },
+      {
+        "id": 1454,
+        "text": "I love Spotify",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1455,
+        "text": "nice app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1456,
+        "text": "please improve Equalizer qual. with proper surround sound and bass control.",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "equalizer",
+          "audio_quality"
+        ]
+      },
+      {
+        "id": 1457,
+        "text": "Everything was great until last night 5/4/2026. I went to listen to a podcast and nothing loaded.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "podcast_bug",
+          "loading_issue"
+        ]
+      },
+      {
+        "id": 1458,
+        "text": "super bro🤝",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1459,
+        "text": "Awasome",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1460,
+        "text": "I like it since i purchase the premium",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "premium_satisfaction"
+        ]
+      },
+      {
+        "id": 1461,
+        "text": "love this spotify ❤️",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1462,
+        "text": "love the functionality of the app and all aspects but I strongly detest the inconsistentcy in the payment plans",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "payment_consistency",
+          "billing",
+          "pricing"
+        ]
+      },
+      {
+        "id": 1463,
+        "text": "PERFECT I LOVE IT",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1464,
+        "text": "very simple and enjoyable",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "simplicity",
+          "enjoyment"
+        ]
+      },
+      {
+        "id": 1465,
+        "text": "It's an excellent app but I've been having a certain bug that doesn't let me enter my playlist",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "playlist_bug",
+          "access_issue"
+        ]
+      },
+      {
+        "id": 1466,
+        "text": "The free version of Spotify is garbage. It won't let you play songs in order.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_restriction",
+          "playlist_ordering"
+        ]
+      },
+      {
+        "id": 1467,
+        "text": "love the playlists Spotify provides for free on my Android phone",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "playlist_quality",
+          "free_tier"
+        ]
+      },
+      {
+        "id": 1468,
+        "text": "good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1469,
+        "text": "Why does Spotify Subscription not show up in my google playstore Subscriptions ?",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "subscription_management",
+          "billing_integration"
+        ]
+      },
+      {
+        "id": 1470,
+        "text": "love the music",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_quality"
+        ]
+      },
+      {
+        "id": 1471,
+        "text": "it's good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1472,
+        "text": "nice",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1473,
+        "text": "listen to what you want when you want.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "control",
+          "convenience"
+        ]
+      },
+      {
+        "id": 1474,
+        "text": "i found every song in here 😎😎😎😎",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_library",
+          "completeness"
+        ]
+      },
+      {
+        "id": 1475,
+        "text": "too many ads",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      },
+      {
+        "id": 1476,
+        "text": "Good 10/ /6",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1477,
+        "text": "I LOVE Spotify 💝💝!!! It helps me rewind, get my mood up, vibe to my fave hits",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "emotional_support",
+          "mood"
+        ]
+      },
+      {
+        "id": 1478,
+        "text": "tiene un algoritmo bastante bien desarrollado",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "algorithm",
+          "recommendations"
+        ]
+      },
+      {
+        "id": 1479,
+        "text": "i real enjoy any music i request on the app any time. a fantastic app",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "music_selection",
+          "satisfaction"
+        ]
+      },
+      {
+        "id": 1480,
+        "text": "only download if You can get premium or else it's a wate app",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "free_tier_useless",
+          "premium_required"
+        ]
+      },
+      {
+        "id": 1481,
+        "text": "wow",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1482,
+        "text": "At first I liked it, but over time it made me sick, we hear more ads than music.",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "ad_ratio",
+          "regression"
+        ]
+      },
+      {
+        "id": 1483,
+        "text": "yall money hungry lol",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "monetization",
+          "greed"
+        ]
+      },
+      {
+        "id": 1484,
+        "text": "this app is that good... i didn't expect that..... i am very satisfied.....",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "positive_surprise",
+          "satisfaction"
+        ]
+      },
+      {
+        "id": 1485,
+        "text": "Good for work",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "work_use",
+          "productivity"
+        ]
+      },
+      {
+        "id": 1486,
+        "text": "super",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1487,
+        "text": "It was great experience",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "user_experience"
+        ]
+      },
+      {
+        "id": 1488,
+        "text": "Excellent! It does more than I expected.",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "features",
+          "expectations"
+        ]
+      },
+      {
+        "id": 1489,
+        "text": "very bard",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "general_dissatisfaction"
+        ]
+      },
+      {
+        "id": 1490,
+        "text": "Even simple things like choosing a song you want to play or skipping the current song is locked behind a premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "basic_features_paywall",
+          "premium_gating"
+        ]
+      },
+      {
+        "id": 1491,
+        "text": "liked at first until I had to listen to ads",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "regression"
+        ]
+      },
+      {
+        "id": 1492,
+        "text": "love Spotify so muchh",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1493,
+        "text": "PLEASE REMOVE SMART SHUFFLE AND PREMIUM MEMBERSHIP 😔",
+        "sentiment": "FEATURE_REQUEST",
+        "topics": [
+          "smart_shuffle_removal",
+          "paywall_removal"
+        ]
+      },
+      {
+        "id": 1494,
+        "text": "I love this application sooooo much",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1495,
+        "text": "less good than it used to be - certain adverts in particular don't work properly",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads",
+          "regression",
+          "ad_quality"
+        ]
+      },
+      {
+        "id": 1496,
+        "text": "pls Spotify is supposed to be free premium",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_required",
+          "free_tier_degradation"
+        ]
+      },
+      {
+        "id": 1497,
+        "text": "great app highly recommend it...if you got the money",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "premium_required",
+          "cost_barrier"
+        ]
+      },
+      {
+        "id": 1498,
+        "text": "it's amazing aap",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1499,
+        "text": "it is really good",
+        "sentiment": "POSITIVE",
+        "topics": [
+          "general_satisfaction"
+        ]
+      },
+      {
+        "id": 1500,
+        "text": "Too many ads",
+        "sentiment": "NEGATIVE",
+        "topics": [
+          "ads"
+        ]
+      }
+    ]
+  },
+  "sentiment_breakdown_v2": {
+    "POSITIVE": {
+      "count": 847,
+      "percentage": 41.4,
+      "top_topics": [
+        "general_satisfaction",
+        "music_quality",
+        "music_library",
+        "ease_of_use",
+        "recommendations",
+        "user_experience",
+        "long_term_satisfaction"
+      ]
+    },
+    "NEGATIVE": {
+      "count": 892,
+      "percentage": 43.6,
+      "top_topics": [
+        "ads",
+        "premium_gating",
+        "song_selection",
+        "paywall",
+        "app_crash",
+        "free_tier_restriction",
+        "monetization",
+        "shuffle_algorithm",
+        "premium_pricing",
+        "ads_in_premium"
+      ]
+    },
+    "FEATURE_REQUEST": {
+      "count": 309,
+      "percentage": 15.1,
+      "top_topics": [
+        "offline_download",
+        "premium_pricing",
+        "shuffle_improvement",
+        "ad_reduction",
+        "feature_removal_reversal",
+        "podcast_filtering",
+        "device_control",
+        "widget_improvement",
+        "sleep_timer",
+        "music_video"
+      ]
+    }
+  }
+}
