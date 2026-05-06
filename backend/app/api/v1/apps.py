@@ -248,15 +248,18 @@ async def list_reviews(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     limit: Annotated[int, Query(ge=1, le=100)] = 50,
     offset: Annotated[int, Query(ge=0)] = 0,
+    fetch_id: Annotated[uuid.UUID | None, Query()] = None,
 ) -> ReviewListResponse:
-    count_q = await session.execute(
-        select(func.count()).select_from(Review).where(Review.app_id == app.id),
-    )
+    filters = [Review.app_id == app.id]
+    if fetch_id is not None:
+        filters.append(Review.fetch_id == fetch_id)
+
+    count_q = await session.execute(select(func.count()).select_from(Review).where(*filters))
     total = int(count_q.scalar_one())
 
     result = await session.execute(
         select(Review)
-        .where(Review.app_id == app.id)
+        .where(*filters)
         .order_by(Review.review_date.desc(), Review.created_at.desc())
         .limit(limit)
         .offset(offset),

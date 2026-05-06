@@ -311,7 +311,7 @@ function AnalyzeHubConnected() {
         let total = 0;
         for (;;) {
           const chunk = await apiFetch<ReviewListResponseDto>(
-            `/api/v1/apps/${appId}/reviews?limit=${limit}&offset=${offset}`,
+            `/api/v1/apps/${appId}/reviews?fetch_id=${encodeURIComponent(storeFetchId)}&limit=${limit}&offset=${offset}`,
             { getToken },
           );
           total = chunk.total;
