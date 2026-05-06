@@ -315,82 +315,94 @@ async def _scrape_app_store(
 
     lo, hi = fetch.from_date, fetch.to_date
     effective_sleep = _app_store_sleep_for_window(sleep_s, lo, hi)
-    for idx, country in enumerate(country_candidates, start=1):
-        store = VivindisAppStore(country=country, app_name=slug, app_id=int(numeric_id))
-        after_dt = _dmin(fetch.from_date)
-        log.info(
-            "scrape_app_store_started",
-            fetch_id=str(fetch.id),
-            app_id=str(app.id),
-            bundle_id=numeric_id,
-            country=country,
-            attempt=idx,
-        )
-        store.review(how_many=max_total, after=after_dt, sleep=effective_sleep if effective_sleep > 0 else None)
-
-        inserted = 0
-        for rev in store.reviews:
-            rid = str(rev.get("_vivindis_review_id") or "").strip()
-            if not rid:
-                key_src = f"{numeric_id}|{rev.get('date')}|{rev.get('userName','')}|{str(rev.get('review',''))[:200]}"
-                import hashlib
-
-                rid = hashlib.sha256(key_src.encode("utf-8")).hexdigest()[:120]
-
-            rd_raw = rev.get("date")
-            if isinstance(rd_raw, datetime):
-                rd = rd_raw.date()
-            else:
-                rd = lo
-
-            if not (lo <= rd <= hi):
-                continue
-
-            rating = int(rev.get("rating") or 0)
-            title = rev.get("title")
-            body = str(rev.get("review") or rev.get("body") or "")
-            author = rev.get("userName")
-
-            await _upsert_review(
-                session,
-                app_id=app.id,
-                fetch_id=fetch.id,
-                platform=StorePlatform.APP_STORE,
-                store_review_id=rid[:255],
-                rating=rating,
-                title=str(title)[:1024] if title else None,
-                body=body,
-                author=str(author) if author else None,
-                lang="und",
-                review_date=rd,
-                thumbs_up=0,
-                developer_reply=None,
-                reply_date=None,
-            )
-            inserted += 1
-
-        if inserted == 0:
-            log.warning(
-                "scrape_app_store_empty_result",
+    strategy_idx = 0
+    for country in country_candidates:
+        for app_name, after_dt in ((slug, _dmin(fetch.from_date)), ("app", _dmin(fetch.from_date)), (slug, None)):
+            strategy_idx += 1
+            store = VivindisAppStore(country=country, app_name=app_name, app_id=int(numeric_id))
+            log.info(
+                "scrape_app_store_started",
                 fetch_id=str(fetch.id),
                 app_id=str(app.id),
                 bundle_id=numeric_id,
                 country=country,
-                from_date=str(fetch.from_date),
-                to_date=str(fetch.to_date),
-                attempt=idx,
+                app_name=app_name,
+                after_mode="from_date" if after_dt is not None else "all_time",
+                attempt=strategy_idx,
             )
-        log.info(
-            "scrape_app_store_finished",
-            fetch_id=str(fetch.id),
-            app_id=str(app.id),
-            bundle_id=numeric_id,
-            country=country,
-            inserted=inserted,
-            attempt=idx,
-        )
-        if inserted > 0:
-            return inserted
+            store.review(
+                how_many=max_total,
+                after=after_dt,
+                sleep=effective_sleep if effective_sleep > 0 else None,
+            )
+
+            inserted = 0
+            for rev in store.reviews:
+                rid = str(rev.get("_vivindis_review_id") or "").strip()
+                if not rid:
+                    key_src = f"{numeric_id}|{rev.get('date')}|{rev.get('userName','')}|{str(rev.get('review',''))[:200]}"
+                    import hashlib
+
+                    rid = hashlib.sha256(key_src.encode("utf-8")).hexdigest()[:120]
+
+                rd_raw = rev.get("date")
+                if isinstance(rd_raw, datetime):
+                    rd = rd_raw.date()
+                else:
+                    rd = lo
+
+                if not (lo <= rd <= hi):
+                    continue
+
+                rating = int(rev.get("rating") or 0)
+                title = rev.get("title")
+                body = str(rev.get("review") or rev.get("body") or "")
+                author = rev.get("userName")
+
+                await _upsert_review(
+                    session,
+                    app_id=app.id,
+                    fetch_id=fetch.id,
+                    platform=StorePlatform.APP_STORE,
+                    store_review_id=rid[:255],
+                    rating=rating,
+                    title=str(title)[:1024] if title else None,
+                    body=body,
+                    author=str(author) if author else None,
+                    lang="und",
+                    review_date=rd,
+                    thumbs_up=0,
+                    developer_reply=None,
+                    reply_date=None,
+                )
+                inserted += 1
+
+            if inserted == 0:
+                log.warning(
+                    "scrape_app_store_empty_result",
+                    fetch_id=str(fetch.id),
+                    app_id=str(app.id),
+                    bundle_id=numeric_id,
+                    country=country,
+                    app_name=app_name,
+                    after_mode="from_date" if after_dt is not None else "all_time",
+                    from_date=str(fetch.from_date),
+                    to_date=str(fetch.to_date),
+                    attempt=strategy_idx,
+                )
+            log.info(
+                "scrape_app_store_finished",
+                fetch_id=str(fetch.id),
+                app_id=str(app.id),
+                bundle_id=numeric_id,
+                country=country,
+                app_name=app_name,
+                after_mode="from_date" if after_dt is not None else "all_time",
+                inserted=inserted,
+                attempt=strategy_idx,
+            )
+            if inserted > 0:
+                return inserted
     return 0
 
 
