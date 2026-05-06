@@ -43,6 +43,13 @@ type Props = {
   clerkEnabled: boolean;
 };
 
+type FetchProgressEvent = {
+  key: string;
+  at: string;
+  label: string;
+  reason: string;
+};
+
 function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
   const tNav = useTranslations("navigation");
@@ -92,6 +99,8 @@ function AnalyzeHubConnected() {
   const [selectedStoreHit, setSelectedStoreHit] = useState<StoreSearchResultItem | null>(null);
   const [sessionApp, setSessionApp] = useState<AppDto | null>(null);
   const [storeFetchId, setStoreFetchId] = useState<string | null>(null);
+  const [fetchProgressEvents, setFetchProgressEvents] = useState<FetchProgressEvent[]>([]);
+  const [nowTick, setNowTick] = useState<number>(() => Date.now());
   const [isPinningStore, setIsPinningStore] = useState(false);
   const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
   const pinRequestRef = useRef(0);
@@ -100,6 +109,8 @@ function AnalyzeHubConnected() {
   const lastFetchHydratedToPoolRef = useRef<string | null>(null);
   const storeFetchFailedToastRef = useRef<string | null>(null);
   const storeFetchPollErrorToastRef = useRef<string | null>(null);
+  const progressEventKeysRef = useRef<Set<string>>(new Set());
+  const lastRunningCountRef = useRef<number>(0);
 
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
@@ -135,6 +146,20 @@ function AnalyzeHubConnected() {
     queryKey: queryKeys.apps.all,
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
   });
+
+  const addFetchProgressEvent = useCallback((event: FetchProgressEvent) => {
+    if (progressEventKeysRef.current.has(event.key)) {
+      return;
+    }
+    progressEventKeysRef.current.add(event.key);
+    setFetchProgressEvents((prev) => [...prev, event]);
+  }, []);
+
+  const resetFetchProgressTimeline = useCallback(() => {
+    progressEventKeysRef.current = new Set();
+    lastRunningCountRef.current = 0;
+    setFetchProgressEvents([]);
+  }, []);
 
   useEffect(() => {
     sessionAppRef.current = sessionApp;
@@ -176,6 +201,12 @@ function AnalyzeHubConnected() {
     },
     onSuccess: (row) => {
       setStoreFetchId(String(row.id).trim());
+      addFetchProgressEvent({
+        key: `${row.id}:created`,
+        at: new Date().toISOString(),
+        label: "Fetch kaydı oluşturuldu",
+        reason: "İstek API tarafından alındı, worker kuyruğa gönderiliyor.",
+      });
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
     },
     onError: (err) => {
@@ -202,6 +233,64 @@ function AnalyzeHubConnected() {
   });
 
   useEffect(() => {
+    const timer = window.setInterval(() => setNowTick(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const row = fetchRowQuery.data;
+    if (!storeFetchId || !row || row.id !== storeFetchId) {
+      return;
+    }
+    const isoNow = new Date().toISOString();
+    if (row.status === "pending") {
+      addFetchProgressEvent({
+        key: `${storeFetchId}:pending`,
+        at: row.created_at || isoNow,
+        label: "Kuyruğa alındı",
+        reason: "Worker bu fetch görevini alana kadar bekleniyor.",
+      });
+      return;
+    }
+    if (row.status === "running") {
+      addFetchProgressEvent({
+        key: `${storeFetchId}:running`,
+        at: row.started_at || isoNow,
+        label: "Worker görevi başlattı",
+        reason: "Mağaza API çağrıları ile yorumlar toplanıyor.",
+      });
+      const count = row.review_count ?? 0;
+      if (count > 0 && count !== lastRunningCountRef.current) {
+        lastRunningCountRef.current = count;
+        addFetchProgressEvent({
+          key: `${storeFetchId}:running-count:${count}`,
+          at: isoNow,
+          label: `${count} yorum toplandı`,
+          reason: "Scraper yeni yorumları havuza eklemeye devam ediyor.",
+        });
+      }
+      return;
+    }
+    if (row.status === "completed") {
+      addFetchProgressEvent({
+        key: `${storeFetchId}:completed`,
+        at: row.completed_at || isoNow,
+        label: `Fetch tamamlandı (${row.review_count} yorum)`,
+        reason: "Mağaza çekimi bitti; analiz adımına geçebilirsiniz.",
+      });
+      return;
+    }
+    if (row.status === "failed") {
+      addFetchProgressEvent({
+        key: `${storeFetchId}:failed`,
+        at: row.completed_at || isoNow,
+        label: "Fetch başarısız",
+        reason: row.error_message || "Worker hata döndürdü, log kontrol edilmeli.",
+      });
+    }
+  }, [addFetchProgressEvent, fetchRowQuery.data, storeFetchId]);
+
+  useEffect(() => {
     const row = fetchRowQuery.data;
     if (!sessionApp || !storeFetchId || row?.id !== storeFetchId || row.status !== "completed") {
       return;
@@ -210,6 +299,12 @@ function AnalyzeHubConnected() {
     const appId = sessionApp.id;
     void (async () => {
       try {
+        addFetchProgressEvent({
+          key: `${storeFetchId}:hydrate-start`,
+          at: new Date().toISOString(),
+          label: "Yorumlar arayüze aktarılıyor",
+          reason: "Review listesi sayfalı çekilip havuz sayacına yazılıyor.",
+        });
         const limit = 100;
         let offset = 0;
         const bodies: string[] = [];
@@ -239,6 +334,12 @@ function AnalyzeHubConnected() {
         }
         setPoolLines(bodies);
         lastFetchHydratedToPoolRef.current = storeFetchId;
+        addFetchProgressEvent({
+          key: `${storeFetchId}:hydrate-complete`,
+          at: new Date().toISOString(),
+          label: `Arayüz havuzu güncellendi (${bodies.length} satır)`,
+          reason: "Artık analiz butonuyla bir sonraki adıma geçebilirsiniz.",
+        });
       } catch (e) {
         if (!cancelled) {
           const detail = e instanceof ApiError ? e.message : tCommon("error");
@@ -249,7 +350,7 @@ function AnalyzeHubConnected() {
     return () => {
       cancelled = true;
     };
-  }, [sessionApp, storeFetchId, fetchRowQuery.data, getToken, t, tCommon]);
+  }, [addFetchProgressEvent, sessionApp, storeFetchId, fetchRowQuery.data, getToken, t, tCommon]);
 
   useEffect(() => {
     const row = fetchRowQuery.data;
@@ -363,13 +464,28 @@ function AnalyzeHubConnected() {
     if (!sessionApp) {
       return;
     }
+    resetFetchProgressTimeline();
+    addFetchProgressEvent({
+      key: `${sessionApp.id}:request-start`,
+      at: new Date().toISOString(),
+      label: "Çekim isteği gönderildi",
+      reason: "API kaydı oluşturup worker kuyruğuna yazana kadar bekleniyor.",
+    });
     setStoreFetchId(null);
     setPoolLines([]);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
     storePullMutation.mutate(sessionApp.id);
-  }, [reviewScope, searchCountry, searchLang, sessionApp, storePullMutation]);
+  }, [
+    addFetchProgressEvent,
+    resetFetchProgressTimeline,
+    reviewScope,
+    searchCountry,
+    searchLang,
+    sessionApp,
+    storePullMutation,
+  ]);
 
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
   const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
@@ -404,6 +520,38 @@ function AnalyzeHubConnected() {
     }
     return row.error_message ?? "";
   }, [fetchRowQuery.data, storeFetchId]);
+
+  const fetchTimeline = useMemo(() => {
+    const fmt = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+    return fetchProgressEvents.map((ev) => {
+      const ts = Date.parse(ev.at);
+      const time = Number.isFinite(ts) ? fmt.format(new Date(ts)) : ev.at;
+      return { ...ev, time };
+    });
+  }, [fetchProgressEvents, locale]);
+
+  const fetchElapsedText = useMemo(() => {
+    if (!fetchTimeline.length) {
+      return "";
+    }
+    const startMs = Date.parse(fetchTimeline[0].at);
+    if (!Number.isFinite(startMs)) {
+      return "";
+    }
+    const endMs =
+      fetchRowQuery.data?.status === "completed" || fetchRowQuery.data?.status === "failed"
+        ? Date.parse(fetchRowQuery.data?.completed_at || "")
+        : nowTick;
+    const safeEnd = Number.isFinite(endMs) ? endMs : nowTick;
+    const sec = Math.max(0, Math.floor((safeEnd - startMs) / 1000));
+    const mm = String(Math.floor(sec / 60)).padStart(2, "0");
+    const ss = String(sec % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }, [fetchRowQuery.data?.completed_at, fetchRowQuery.data?.status, fetchTimeline, nowTick]);
 
   const effectiveAppId = useMemo(() => {
     const fromSelect = targetAppId.trim();
@@ -750,6 +898,24 @@ function AnalyzeHubConnected() {
                       />
                     </div>
                     <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
+                    {fetchElapsedText ? (
+                      <p className="text-xs font-medium text-slate-700">Gecen sure: {fetchElapsedText}</p>
+                    ) : null}
+                  </div>
+                ) : null}
+                {fetchTimeline.length > 0 ? (
+                  <div className="space-y-2 rounded-xl border border-slate-200 bg-white/70 p-3">
+                    <p className="text-sm font-medium text-slate-800">Canli islem gunlugu</p>
+                    <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
+                      {fetchTimeline.map((ev) => (
+                        <div key={ev.key} className="rounded-md border border-slate-100 bg-slate-50/80 px-2 py-1.5">
+                          <p className="text-xs font-semibold text-slate-700">
+                            [{ev.time}] {ev.label}
+                          </p>
+                          <p className="text-xs text-slate-600">{ev.reason}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
                 {sessionApp && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
