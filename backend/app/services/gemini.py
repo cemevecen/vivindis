@@ -17,7 +17,7 @@ log = get_logger(__name__)
 def get_gemini_model_name() -> str:
     s = get_settings()
     raw = (s.gemini_model or "").strip()
-    return raw or "gemini-1.5-flash"
+    return raw or "gemini-2.0-flash"
 
 
 def generate_review_batch_json(
