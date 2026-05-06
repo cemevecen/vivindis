@@ -145,299 +145,155 @@ async def _scrape_google_play(
     app: App,
     settings: Any,
     review_scope: str,
-    req_lang: str | None,
-    req_country: str | None,
+    app: App,
+    fetch: ReviewFetch,
+    review_scope: str,
+    req_lang: str | None = None,
+    req_country: str | None = None,
 ) -> int:
+    settings = get_settings()
     pkg = (app.package_name or "").strip()
     if not pkg:
         log.warning("scrape_play_skip_empty_package", app_id=str(app.id))
         return 0
 
+    PLAY_STORE_MATRIX = [
+        ("tr", "tr"), ("en", "us"), ("en", "gb"), ("en", "au"), ("en", "ca"),
+        ("en", "in"), ("en", "sg"), ("en", "za"), ("en", "ie"), ("en", "nz"),
+        ("ar", "sa"), ("ar", "ae"), ("ar", "eg"), ("ar", "ma"),
+        ("de", "de"), ("de", "at"), ("de", "ch"), ("fr", "fr"), ("fr", "be"),
+        ("es", "es"), ("es", "mx"), ("it", "it"), ("nl", "nl"), ("pt", "br"),
+        ("pt", "pt"), ("ru", "ru"), ("ru", "kz"), ("ru", "by"), ("uk", "ua"),
+        ("ja", "jp"), ("ko", "kr"), ("zh", "tw"), ("zh", "hk"), ("id", "id"), ("th", "th")
+    ]
+
     if review_scope == "local":
-        primary_lang = (req_lang or settings.scrape_play_lang).strip().lower() or "tr"
-        primary_country = (req_country or settings.scrape_play_country).strip().lower() or "tr"
-        fallback_lang, fallback_country = "en", "us"
+        locale_candidates = [(req_lang or "tr", req_country or "tr"), ("en", "us")]
     else:
-        primary_lang, primary_country = "en", "us"
-        fallback_lang = (settings.scrape_play_lang or "").strip().lower() or "tr"
-        fallback_country = (settings.scrape_play_country or "").strip().lower() or "tr"
-    # Expand locale candidates to cover more global markets if the primary ones (US/TR) fail.
-    # We start with the core candidates and add more if needed.
-    locale_candidates: list[tuple[str, str]] = []
-    for cand in ((primary_lang, primary_country), (fallback_lang, fallback_country)):
-        if cand not in locale_candidates:
-            locale_candidates.append(cand)
+        locale_candidates = PLAY_STORE_MATRIX
 
-    # If the app is likely global and we need more coverage, add major markets.
-    if review_scope == "global":
-        for extra in [("en", "gb"), ("en", "in"), ("pt", "br"), ("de", "de"), ("es", "es"), ("fr", "fr")]:
-            if extra not in locale_candidates:
-                locale_candidates.append(extra)
-
-    sleep_s = float(settings.scrape_play_sleep_seconds or 1.5)
-    max_inserted = int(settings.scrape_max_reviews or 5000)
-    max_scanned = 100_000
-
+    max_inserted = int(settings.scrape_max_reviews or 10000)
     lo, hi = fetch.from_date, fetch.to_date
-    batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
     total_inserted = 0
+    sem = asyncio.Semaphore(15)
 
-    for idx, (lang, country) in enumerate(locale_candidates, start=1):
-        # Google Play multi-strategy: try with date filter first, then fallback to all-time for this locale.
-        for strategy_name, after_dt in [("date_range", lo), ("all_time", None)]:
+    async def _scrape_locale_score(lang: str, country: str, score: int):
+        nonlocal total_inserted
+        if total_inserted >= max_inserted:
+            return 0
+        inserted = 0
+        continuation = None
+        for page in range(1, 11):
             if total_inserted >= max_inserted:
                 break
-
-            inserted = 0
-            continuation = None
-            total_seen = 0
-            log.info(
-                "scrape_play_started",
-                fetch_id=str(fetch.id),
-                app_id=str(app.id),
-                package_name=pkg,
-                lang=lang,
-                country=country,
-                strategy=strategy_name,
-                attempt=idx,
-            )
-
-            while total_seen < max_scanned and total_inserted < max_inserted:
-                batch = None
-                # Retry logic for network/rate-limit issues
-                for retry_attempt in range(3):
-                    try:
-                        batch, continuation = gp_reviews(
-                            pkg,
-                            lang=lang,
-                            country=country,
-                            sort=Sort.NEWEST,
-                            count=min(200, max_scanned - total_seen),
-                            continuation_token=continuation,
+            async with sem:
+                try:
+                    loop = asyncio.get_event_loop()
+                    batch, next_token = await loop.run_in_executor(
+                        None,
+                        lambda: gp_reviews(
+                            pkg, lang=lang, country=country, sort=Sort.NEWEST,
+                            count=200, score=score, continuation_token=continuation
                         )
-                        break
-                    except Exception as exc:  # noqa: BLE001
-                        wait_time = (retry_attempt + 1) * 5
-                        log.warning(
-                            "scrape_play_reviews_call_retry",
-                            fetch_id=str(fetch.id),
-                            package_name=pkg,
-                            lang=lang,
-                            country=country,
-                            retry=retry_attempt + 1,
-                            wait=wait_time,
-                            error=str(exc),
-                        )
-                        await asyncio.sleep(wait_time)
-
-                if not batch:
-                    log.warning(
-                        "scrape_play_empty_batch",
-                        fetch_id=str(fetch.id),
-                        app_id=str(app.id),
-                        package_name=pkg,
-                        total_seen=total_seen,
-                        continuation_present=bool(continuation and continuation.token),
-                        strategy=strategy_name,
-                        attempt=idx,
                     )
+                    continuation = next_token
+                except Exception as exc:
+                    log.warning("play_store_batch_failed", lang=lang, country=country, score=score, error=str(exc))
                     break
-
-                for rev in batch:
-                    if total_inserted >= max_inserted:
-                        break
-                    total_seen += 1
-                    at = rev.get("at")
-                    if isinstance(at, datetime) and at.tzinfo is None:
-                        at = at.replace(tzinfo=UTC)
-
-                    # Only apply date filter if we are in 'date_range' strategy.
-                    if strategy_name == "date_range":
-                        if at and not _in_range(at, lo, hi):
-                            # We don't use 'stop_all' anymore because Play Store batches
-                            # can be slightly out of order or have gaps.
-                            # We just skip and continue scanning.
-                            continue
-                    else:
-                        # All-time strategy: still respect the hi/lo for upserting,
-                        # but don't stop the loop just because we hit an old date.
-                        if at and not _in_range(at, lo, hi):
-                            continue
-
-                    rid = str(rev.get("reviewId") or "")[:255]
-                    if not rid:
-                        continue
-
-                    rd = at.date() if isinstance(at, datetime) else lo
-                    score = int(rev.get("score") or 0)
-                    thumbs = int(rev.get("thumbsUpCount") or 0)
-                    body = str(rev.get("content") or "")
-                    author = rev.get("userName")
-                    title = None
-                    rep = rev.get("replyContent")
-                    rep_at = rev.get("repliedAt")
-                    rep_d = rep_at.date() if isinstance(rep_at, datetime) else None
-
-                    await _upsert_review(
-                        session,
-                        app_id=app.id,
-                        fetch_id=fetch.id,
-                        platform=StorePlatform.GOOGLE_PLAY,
-                        store_review_id=rid,
-                        rating=score,
-                        title=title,
-                        body=body,
-                        author=str(author) if author else None,
-                        lang="und",
-                        review_date=rd,
-                        thumbs_up=thumbs,
-                        developer_reply=str(rep) if rep else None,
-                        reply_date=rep_d,
-                    )
-                    inserted += 1
-                    total_inserted += 1
-
-                if continuation is None or continuation.token is None:
+            if not batch:
+                break
+            for rev in batch:
+                if total_inserted >= max_inserted:
                     break
-                if batch_sleep > 0:
-                    await asyncio.sleep(batch_sleep)
+                at = rev.get("at")
+                if isinstance(at, datetime) and at.tzinfo is None:
+                    at = at.replace(tzinfo=UTC)
+                if at and not _in_range(at, lo, hi):
+                    if at.date() < lo: return inserted
+                    continue
+                rid = str(rev.get("reviewId") or "")[:255]
+                if not rid: continue
+                await _upsert_review(
+                    session, app_id=app.id, fetch_id=fetch.id,
+                    platform=StorePlatform.GOOGLE_PLAY, store_review_id=rid,
+                    rating=int(rev.get("score") or 0), title=None,
+                    body=str(rev.get("content") or ""), author=str(rev.get("userName") or "Anon"),
+                    lang=lang, review_date=at.date() if at else lo,
+                    thumbs_up=int(rev.get("thumbsUpCount") or 0),
+                    developer_reply=str(rev.get("replyContent")) if rev.get("replyContent") else None,
+                    reply_date=rev.get("repliedAt").date() if rev.get("repliedAt") else None,
+                )
+                inserted += 1
+                total_inserted += 1
+            if not continuation or not continuation.token:
+                break
+        return inserted
 
-            log.info(
-                "scrape_play_finished",
-                fetch_id=str(fetch.id),
-                app_id=str(app.id),
-                package_name=pkg,
-                inserted=inserted,
-                total_seen=total_seen,
-                strategy=strategy_name,
-                attempt=idx,
-            )
-            # We continue to next locales to accumulate more reviews.
+    tasks = [_scrape_locale_score(l, c, s) for (l, c) in locale_candidates for s in [1, 2, 3, 4, 5]]
+    await asyncio.gather(*tasks)
     return total_inserted
 
 
 async def _scrape_app_store(
     session: Any,
-    *,
-    fetch: ReviewFetch,
     app: App,
-    settings: Any,
+    fetch: ReviewFetch,
     review_scope: str,
-    req_country: str | None,
+    req_lang: str | None = None,
+    req_country: str | None = None,
 ) -> int:
-    VivindisAppStore = _load_app_store_class()
+    settings = get_settings()
     numeric_id = (app.bundle_id or "").strip()
-    if not numeric_id or not numeric_id.isdigit():
-        log.warning("scrape_app_store_skip_missing_bundle", app_id=str(app.id))
+    if not numeric_id:
         return 0
 
-    if review_scope == "local":
-        primary_country = (req_country or settings.scrape_app_store_country).strip().lower() or "tr"
-        fallback_country = "us"
-    else:
-        primary_country = "us"
-        fallback_country = (settings.scrape_app_store_country or "").strip().lower() or "tr"
-    country_candidates: list[str] = []
-    for cand in (primary_country, fallback_country):
-        if cand not in country_candidates:
-            country_candidates.append(cand)
-    sleep_s = int(settings.scrape_app_store_sleep_seconds or 2)
-    max_total = int(settings.scrape_max_reviews or 5000)
+    APP_STORE_COUNTRIES = [
+        "tr", "us", "gb", "de", "fr", "ca", "au", "it", "es", "sa", "ae", "qa", "kw", "jo", "lb", "eg", "ly", "dz", "ma", "tn",
+        "ru", "kz", "uz", "tm", "kg", "cy", "gr", "ro", "bg", "pl", "hu", "cz", "se", "no", "dk", "nl", "be", "ch"
+    ]
 
-    slug = (app.name or "app").lower().replace(" ", "-")
-    slug = "".join(c if c.isalnum() or c == "-" else "-" for c in slug).strip("-") or "app"
-
+    countries = [req_country or "tr", "us"] if review_scope == "local" else APP_STORE_COUNTRIES
+    max_inserted = int(settings.scrape_max_reviews or 10000)
     lo, hi = fetch.from_date, fetch.to_date
-    effective_sleep = _app_store_sleep_for_window(sleep_s, lo, hi)
-    strategy_idx = 0
     total_inserted = 0
-    for country in country_candidates:
-        for app_name, after_dt in ((slug, _dmin(fetch.from_date)), ("app", _dmin(fetch.from_date)), (slug, None)):
-            strategy_idx += 1
-            store = VivindisAppStore(country=country, app_name=app_name, app_id=int(numeric_id))
-            log.info(
-                "scrape_app_store_started",
-                fetch_id=str(fetch.id),
-                app_id=str(app.id),
-                bundle_id=numeric_id,
-                country=country,
-                app_name=app_name,
-                after_mode="from_date" if after_dt is not None else "all_time",
-                attempt=strategy_idx,
-            )
-            store.review(
-                how_many=max_total,
-                after=after_dt,
-                sleep=effective_sleep if effective_sleep > 0 else None,
-            )
+    sem = asyncio.Semaphore(20)
 
-            inserted = 0
-            for rev in store.reviews:
-                rid = str(rev.get("_vivindis_review_id") or "").strip()
-                if not rid:
-                    key_src = f"{numeric_id}|{rev.get('date')}|{rev.get('userName','')}|{str(rev.get('review',''))[:200]}"
-                    import hashlib
-
-                    rid = hashlib.sha256(key_src.encode("utf-8")).hexdigest()[:120]
-
-                rd_raw = rev.get("date")
-                if isinstance(rd_raw, datetime):
-                    rd = rd_raw.date()
-                else:
-                    rd = lo
-
-                if not (lo <= rd <= hi):
-                    continue
-
-                rating = int(rev.get("rating") or 0)
-                title = rev.get("title")
-                body = str(rev.get("review") or rev.get("body") or "")
-                author = rev.get("userName")
-
+    async def _fetch_rss_page(country: str, page: int):
+        nonlocal total_inserted
+        if total_inserted >= max_inserted: return 0
+        url = f"https://itunes.apple.com/{country}/rss/customerreviews/page={page}/id={numeric_id}/sortBy=mostRecent/json"
+        async with sem:
+            try:
+                async with httpx.AsyncClient(timeout=10.0) as client:
+                    resp = await client.get(url)
+                    if resp.status_code != 200: return 0
+                    data = resp.json()
+            except Exception: return 0
+        entries = data.get("feed", {}).get("entry", [])
+        if not isinstance(entries, list): entries = [entries] if entries else []
+        inserted = 0
+        for entry in entries:
+            if "author" not in entry or total_inserted >= max_inserted: continue
+            try:
+                rid = entry.get("id", {}).get("label", "")
+                date_str = entry.get("updated", {}).get("label", "")
+                at = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                rd = at.date()
+                if not (lo <= rd <= hi): continue
                 await _upsert_review(
-                    session,
-                    app_id=app.id,
-                    fetch_id=fetch.id,
-                    platform=StorePlatform.APP_STORE,
-                    store_review_id=rid[:255],
-                    rating=rating,
-                    title=str(title)[:1024] if title else None,
-                    body=body,
-                    author=str(author) if author else None,
-                    lang="und",
-                    review_date=rd,
-                    thumbs_up=0,
-                    developer_reply=None,
-                    reply_date=None,
+                    session, app_id=app.id, fetch_id=fetch.id, platform=StorePlatform.APP_STORE,
+                    store_review_id=rid, rating=int(entry.get("im:rating", {}).get("label", "0")),
+                    title=entry.get("title", {}).get("label", ""), body=entry.get("content", {}).get("label", ""),
+                    author=entry.get("author", {}).get("name", {}).get("label", "Anon"),
+                    lang="und", review_date=rd,
                 )
                 inserted += 1
                 total_inserted += 1
+            except Exception: continue
+        return inserted
 
-            if inserted == 0:
-                log.warning(
-                    "scrape_app_store_empty_result",
-                    fetch_id=str(fetch.id),
-                    app_id=str(app.id),
-                    bundle_id=numeric_id,
-                    country=country,
-                    app_name=app_name,
-                    after_mode="from_date" if after_dt is not None else "all_time",
-                    from_date=str(fetch.from_date),
-                    to_date=str(fetch.to_date),
-                    attempt=strategy_idx,
-                )
-            log.info(
-                "scrape_app_store_finished",
-                fetch_id=str(fetch.id),
-                app_id=str(app.id),
-                bundle_id=numeric_id,
-                country=country,
-                app_name=app_name,
-                after_mode="from_date" if after_dt is not None else "all_time",
-                inserted=inserted,
-                attempt=strategy_idx,
-            )
-            # Accumulate instead of returning early.
+    tasks = [_fetch_rss_page(c, p) for c in countries for p in range(1, 11)]
+    await asyncio.gather(*tasks)
     return total_inserted
 
 
@@ -448,7 +304,6 @@ async def _execute_review_fetch(
     req_lang: str | None,
     req_country: str | None,
 ) -> tuple[list[str], list[str]]:
-    settings = get_settings()
     res = await session.execute(
         select(ReviewFetch)
         .options(selectinload(ReviewFetch.app))
@@ -456,7 +311,6 @@ async def _execute_review_fetch(
     )
     fetch = res.scalar_one_or_none()
     if fetch is None:
-        log.error("fetch_not_found", fetch_id=str(fetch_id))
         return [], []
 
     app = fetch.app
