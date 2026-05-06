@@ -97,7 +97,7 @@ def _google_play_search_sync(query: str, lang: str, country: str, num: int) -> l
             return items
 
     if last_exc is not None:
-        raise last_exc
+        return []
     return []
 
 
