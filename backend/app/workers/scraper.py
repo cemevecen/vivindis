@@ -46,13 +46,19 @@ def _load_app_store_class() -> type:
 
     class VivindisAppStore(_AppStore):
         def _parse_data(self, after: datetime | None) -> None:
+            if not hasattr(self, "_vivindis_stop"):
+                self._vivindis_stop = False
+            if self._vivindis_stop:
+                return
+
             response = self._response.json()
             for data in response["data"]:
                 review = dict(data["attributes"])
                 review["_vivindis_review_id"] = str(data.get("id", ""))
                 review["date"] = datetime.strptime(review["date"], "%Y-%m-%dT%H:%M:%SZ")
                 if after and review["date"] < after:
-                    continue
+                    self._vivindis_stop = True
+                    break
                 self.reviews.append(review)
                 self.reviews_count += 1
                 self._fetched_count += 1
@@ -147,7 +153,8 @@ async def _scrape_google_play(
     lang = settings.scrape_play_lang.strip() or "en"
     country = settings.scrape_play_country.strip() or "us"
     sleep_s = float(settings.scrape_play_sleep_seconds or 1.5)
-    max_total = int(settings.scrape_max_reviews or 5000)
+    max_inserted = int(settings.scrape_max_reviews or 5000)
+    max_scanned = 100_000
 
     inserted = 0
     continuation = None
@@ -155,13 +162,13 @@ async def _scrape_google_play(
     lo, hi = fetch.from_date, fetch.to_date
     batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
 
-    while total_seen < max_total:
+    while total_seen < max_scanned and inserted < max_inserted:
         batch, continuation = gp_reviews(
             pkg,
             lang=lang,
             country=country,
             sort=Sort.NEWEST,
-            count=min(200, max_total - total_seen),
+            count=min(200, max_scanned - total_seen),
             continuation_token=continuation,
         )
         if not batch:
@@ -169,6 +176,9 @@ async def _scrape_google_play(
 
         stop_all = False
         for rev in batch:
+            if inserted >= max_inserted:
+                stop_all = True
+                break
             total_seen += 1
             at = rev.get("at")
             if isinstance(at, datetime) and at.tzinfo is None:
