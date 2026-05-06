@@ -171,6 +171,7 @@ async def _scrape_google_play(
 
     lo, hi = fetch.from_date, fetch.to_date
     batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
+    total_inserted = 0
     for idx, (lang, country) in enumerate(locale_candidates, start=1):
         # Google Play multi-strategy: try with date filter first, then fallback to all-time for this locale.
         for strategy_name, after_dt in [("date_range", lo), ("all_time", None)]:
@@ -225,7 +226,7 @@ async def _scrape_google_play(
 
                 stop_all = False
                 for rev in batch:
-                    if inserted >= max_inserted:
+                    if total_inserted >= max_inserted:
                         stop_all = True
                         break
                     total_seen += 1
@@ -276,6 +277,7 @@ async def _scrape_google_play(
                         reply_date=rep_d,
                     )
                     inserted += 1
+                    total_inserted += 1
 
                 if stop_all or continuation is None or continuation.token is None:
                     break
@@ -292,9 +294,8 @@ async def _scrape_google_play(
                 strategy=strategy_name,
                 attempt=idx,
             )
-            if inserted > 0:
-                return inserted
-    return 0
+            # We don't return early anymore; we want to try other locales/strategies to accumulate more reviews.
+    return total_inserted
 
 
 async def _scrape_app_store(
@@ -331,6 +332,7 @@ async def _scrape_app_store(
     lo, hi = fetch.from_date, fetch.to_date
     effective_sleep = _app_store_sleep_for_window(sleep_s, lo, hi)
     strategy_idx = 0
+    total_inserted = 0
     for country in country_candidates:
         for app_name, after_dt in ((slug, _dmin(fetch.from_date)), ("app", _dmin(fetch.from_date)), (slug, None)):
             strategy_idx += 1
@@ -391,6 +393,7 @@ async def _scrape_app_store(
                     reply_date=None,
                 )
                 inserted += 1
+                total_inserted += 1
 
             if inserted == 0:
                 log.warning(
@@ -416,9 +419,8 @@ async def _scrape_app_store(
                 inserted=inserted,
                 attempt=strategy_idx,
             )
-            if inserted > 0:
-                return inserted
-    return 0
+            # Accumulate instead of returning early.
+    return total_inserted
 
 
 async def _execute_review_fetch(
