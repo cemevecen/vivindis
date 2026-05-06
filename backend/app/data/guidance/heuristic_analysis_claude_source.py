@@ -1,0 +1,307 @@
+"""Kaynak: Claude değerlendirmeli Spotify örnekleri — JSON çıktısı için `claude_spotify_heuristic_guidance.json` kullanın."""
+    
+    "reviews": [
+        # POSITIVE REVIEWS (Olumlu)
+        {"id": 1, "text": "best app two find my artist two listening two even crazy new amazing artists two listening two as well love it thanks for making it easy two listening two my favorite artist big fan antionette shirrell Thompson give 10 /10", "sentiment": "POSITIVE", "topics": ["music_discovery", "artist_exploration"]},
+        {"id": 2, "text": "it plays when yoy phone is off and it gives songs you mite like", "sentiment": "POSITIVE", "topics": ["background_play", "recommendations"]},
+        {"id": 3, "text": "They have amazing music and soundtracks", "sentiment": "POSITIVE", "topics": ["music_library", "quality"]},
+        {"id": 4, "text": "I love how I can move from car to house and still enjoy my music", "sentiment": "POSITIVE", "topics": ["device_switching", "seamless_experience"]},
+        {"id": 5, "text": "I love this music app. the available songs are excellent.", "sentiment": "POSITIVE", "topics": ["music_library", "quality"]},
+        {"id": 6, "text": "good", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 7, "text": "the best experience I love these app good for music and peace", "sentiment": "POSITIVE", "topics": ["music_quality", "relaxation"]},
+        {"id": 8, "text": "too good👍", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 9, "text": "excellent 👌 music app, I love Spotify 💕", "sentiment": "POSITIVE", "topics": ["general_satisfaction", "music_quality"]},
+        {"id": 10, "text": "Better than sex.", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 11, "text": "perfect", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 12, "text": "Use it", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 13, "text": "nice app", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 14, "text": "Not bad", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 15, "text": "it has every song you can think of and useful", "sentiment": "POSITIVE", "topics": ["music_library", "utility"]},
+        {"id": 16, "text": "it's very fun listening to the music", "sentiment": "POSITIVE", "topics": ["user_experience"]},
+        {"id": 17, "text": "good", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 18, "text": "Love you could have to be there by the time you get here and I'll", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 19, "text": "it's very good 💯 I love it.", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 20, "text": "love it", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        
+        # NEGATIVE REVIEWS (Olumsuz)
+        {"id": 21, "text": "This is a great app, but about a week ago it completely stopped working. whenever I tried to play my playlist it would automatically skip through all of them without letting me listen to any. the home page constantly said something is wrong, and it never stopped.", "sentiment": "NEGATIVE", "topics": ["app_crash", "auto_skip", "bug"]},
+        {"id": 22, "text": "Spotify on Mobile has been REALLY slow to load anything, if it loads at all. I'll try to search or go to a playlist and after a minute of waiting it tells me to try again...", "sentiment": "NEGATIVE", "topics": ["performance", "loading_issue"]},
+        {"id": 23, "text": "update 5/5/26 continues to lag, shut down on own at times. i have repeatedly uninstalled and reinstalled. i will not be repurchasing premium when it expires. horrible lagging with android", "sentiment": "NEGATIVE", "topics": ["lag", "crash", "android_issue", "premium_churn"]},
+        {"id": 24, "text": "Every update to UI just makes it worse. The newest update to adding a song to a playlist has been the worst one so far", "sentiment": "NEGATIVE", "topics": ["ui_degradation", "playlist_feature"]},
+        {"id": 25, "text": "The shuffle feature is the worst.", "sentiment": "NEGATIVE", "topics": ["shuffle_algorithm"]},
+        {"id": 26, "text": "I have platinum but the shuffle in the Playlist ain't truly shuffled everytime songs are in same order. Previously it was truly shuffled but since the Ai boom the song order is always the same", "sentiment": "NEGATIVE", "topics": ["shuffle_algorithm", "ai_impact"]},
+        {"id": 27, "text": "I would like this app to play without data because sometimes I wanna listen but it wants data and I dont like that", "sentiment": "FEATURE_REQUEST", "topics": ["offline_mode", "data_usage"]},
+        {"id": 28, "text": "It has a lot of music but there are a lot of small issues. The shuffle algorithm is straight up horrible. Seriously it plays the same few songs even when I clear cache or select a different song to disrupt the algorithm or every other trick or rec. this has been a years-long problem and I don't understand how it's still such garbage. Deluxe versions of albums that I bought on iTunes however long ago aren't available and there's no way for me to add music that I already paid for.", "sentiment": "NEGATIVE", "topics": ["shuffle_algorithm", "music_library", "imported_music", "long_term_issue"]},
+        
+        # ADS COMPLAINTS (Olumsuz)
+        {"id": 29, "text": "to many ads but it's good", "sentiment": "NEGATIVE", "topics": ["ads"]},
+        {"id": 30, "text": "A lot of ads I can't even skip songs infinitely yall are getting greedy asf", "sentiment": "NEGATIVE", "topics": ["ads", "skip_limit", "monetization"]},
+        {"id": 31, "text": "everything costs money to do i cant even pick the song I listen to without money it's so annoying I have to pay money for this at this point even YouTube is better", "sentiment": "NEGATIVE", "topics": ["paywall", "song_selection", "premium_required"]},
+        {"id": 32, "text": "More commercials than music.do Pandora if you want music.", "sentiment": "NEGATIVE", "topics": ["ads", "ad_frequency"]},
+        {"id": 33, "text": "REDUCE THE ADS!!!!! SO DISAPPOINTED.... AFTER EVERY SONG I GET 2-3 ADS AND IT JUST KILLS THE VIBE.", "sentiment": "NEGATIVE", "topics": ["ads", "ad_frequency"]},
+        {"id": 34, "text": "to many adds but it's good", "sentiment": "NEGATIVE", "topics": ["ads"]},
+        {"id": 35, "text": "ads were fine but having a limit on how many songs you can skip in a day and not able to play the desired song after that is extreme level of trying to take from our pockets", "sentiment": "NEGATIVE", "topics": ["skip_limit", "ads", "monetization"]},
+        {"id": 36, "text": "You have to pay a premium for literally everything. You cannot change the song without paying the premium.You have to pay the premium for skipping anypart of songs. very bad 😔", "sentiment": "NEGATIVE", "topics": ["paywall", "premium_required", "monetization"]},
+        {"id": 37, "text": "it's good but have a lot of ads but the thing is I don't want premium", "sentiment": "NEGATIVE", "topics": ["ads", "premium_resistance"]},
+        {"id": 38, "text": "too many adds and you not play your favourite song after some minutes", "sentiment": "NEGATIVE", "topics": ["ads", "song_selection"]},
+        
+        # PREMIUM COMPLAINTS (Olumsuz)
+        {"id": 39, "text": "i wish Spotify should disable 6 skips per hour", "sentiment": "FEATURE_REQUEST", "topics": ["skip_limit", "free_tier"]},
+        {"id": 40, "text": "0 stars, what does only 6 skips per hour mean.", "sentiment": "NEGATIVE", "topics": ["skip_limit", "free_tier_confusion"]},
+        {"id": 41, "text": "Soo greedy with the premium, just let me listen my playlist in order and not make it Premium? like what the hell Spotify?", "sentiment": "NEGATIVE", "topics": ["playlist_ordering", "premium_gating", "monetization"]},
+        {"id": 42, "text": "It's good but have a lot of ads but the thing is I don't want premium", "sentiment": "NEGATIVE", "topics": ["ads", "premium_resistance"]},
+        {"id": 43, "text": "no premium, no song. you can't even select song you want to", "sentiment": "NEGATIVE", "topics": ["song_selection", "premium_gating"]},
+        {"id": 44, "text": "worst music streaming app for everything you have to pay subscription like to skip 6 song ok you can do it but for 7th you have to pay", "sentiment": "NEGATIVE", "topics": ["skip_limit", "premium_gating", "monetization"]},
+        {"id": 45, "text": "This app sucks now, it only let's me choose a set amount of songs for a day, then I can't listen to things I want and it auto chooses, A radio gives me more choice", "sentiment": "NEGATIVE", "topics": ["song_limit", "auto_play"]},
+        {"id": 46, "text": "This app is getting worser every time. now I can only have six skips per hour and I can't play a song more than twice. it's also kind of annoying that I can't go back and forth freely at will. not downloading a song is fine...but the restrictions to do the rest is awful,plus premium is too expensive now.", "sentiment": "NEGATIVE", "topics": ["skip_limit", "repeat_limit", "premium_pricing", "restrictions"]},
+        {"id": 47, "text": "No cap", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 48, "text": "tuff", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        {"id": 49, "text": "I don't understand how a company can have the audacity to make you pay 12€ a month to get rid of ads and to get priviledges, and STILL put so many ads in podcasts?? Honestly, what's wrong with you spotify...", "sentiment": "NEGATIVE", "topics": ["premium_pricing", "ads_in_premium", "podcast_ads", "monetization"]},
+        {"id": 50, "text": "looping one song being a premium thing is ridiculous.", "sentiment": "NEGATIVE", "topics": ["repeat_feature", "premium_gating"]},
+        
+        # TECHNICAL ISSUES (Olumsuz)
+        {"id": 51, "text": "Can't get my list to play it's still there, but pressing play brings me to home page. I'm guessing nothing is FREE false advertising, why after years of perfect performance. Stop functioning erase your pick song like etc..to become, a headache FREE version is completely not what it's used to be. So the application still on my device but it like decoration, in a Christmas tree just put color on my sceen.", "sentiment": "NEGATIVE", "topics": ["playlist_bug", "ui_bug", "regression"]},
+        {"id": 52, "text": "it kept on changing my songs so like I was on a song and it finished then like skips 20 songs but generally it was really good app for music", "sentiment": "NEGATIVE", "topics": ["auto_skip", "song_changing"]},
+        {"id": 53, "text": "kees crashing, think I'll try different app", "sentiment": "NEGATIVE", "topics": ["app_crash"]},
+        {"id": 54, "text": "Never had much of a problem with the app before, but......now it keeps crashing when I try to expand \"About the song\" the see more part. I am a premium member. Please sort it out, it may be since the last update?!", "sentiment": "NEGATIVE", "topics": ["crash", "about_song_feature", "update_regression"]},
+        {"id": 55, "text": "don't know why it has a crash sound while i skip a song or forward it really hurts my ear even from phone speaker", "sentiment": "NEGATIVE", "topics": ["audio_bug", "skip_sound"]},
+        {"id": 56, "text": "forces songs to be faded into each other", "sentiment": "NEGATIVE", "topics": ["crossfade_unwanted"]},
+        {"id": 57, "text": "Spotify hang issue and restart issue.After listening for long time and changing lot of songs lot of time,then it start hanging.Please do not happens this.Add a option to play a particular song or playlist in any specific song.Add a option to transfer playlist from other sources directly in the app.Add set reminder option to play song/playlist in morning or any time.If play song on 2nd phone &same account login on1st phone&i playing song from 2ndphone i can control from 1stphone, add vol control", "sentiment": "FEATURE_REQUEST", "topics": ["hang_issue", "remote_control", "playlist_import", "scheduler"]},
+        {"id": 58, "text": "Automaticly switches devices, even though I didn't do anything. Super annoying Also outputs audio sometimes randomly on the phone, even when other apps work with headphones. Trash 🗑️ Spotify autoplays trash podcasts, that I don't subscribe to. And there is no option to say, that I don't like them. And why can't I turn the video off in the settings for podcasts? so many stupid design decisions.", "sentiment": "NEGATIVE", "topics": ["device_switching_auto", "audio_output_bug", "podcast_autoplay", "ui_design"]},
+        {"id": 59, "text": "I've been using this platform for quite a while now and it was the best thing I have done thanks Spotify you are awesome", "sentiment": "POSITIVE", "topics": ["long_term_satisfaction", "general_praise"]},
+        {"id": 60, "text": "recently something happened and nothing works in the app everything went away all my playlist ect idk what happen and I was soo disappointed in its problems pls fix them if u could", "sentiment": "NEGATIVE", "topics": ["app_malfunction", "data_loss", "playlist_disappearance"]},
+        
+        # AI COMPLAINTS (Olumsuz)
+        {"id": 61, "text": "Stop asking me to use ai. It's never going to happen.", "sentiment": "NEGATIVE", "topics": ["ai_promotion", "feature_creep"]},
+        {"id": 62, "text": "I like the AI DJ, but it sometimes ignores prompts, and just plays whatever it wants. Also please reduce data usage when listening to downloaded songs", "sentiment": "FEATURE_REQUEST", "topics": ["ai_dj_issues", "data_usage", "offline_mode"]},
+        {"id": 63, "text": "they added an unnecessary AI to \"dj\" for you. its garbage and its implementation is a waste of money and water that powers the data centers operating it.", "sentiment": "NEGATIVE", "topics": ["ai_dj", "feature_creep", "environmental_concern"]},
+        {"id": 64, "text": "the ai dj is a feature that should be removed. It doesn't listen to your requests at all", "sentiment": "NEGATIVE", "topics": ["ai_dj", "feature_usability"]},
+        {"id": 65, "text": "AI usage. Started censoring the written lyrics. added more AI so -10 stars. anymore ai gets added ill go ahead and unsubscribe.", "sentiment": "NEGATIVE", "topics": ["ai_impact", "lyric_censoring", "feature_creep"]},
+        {"id": 66, "text": "I'm obsessed og the music 👏🏻👏🏻👍🏻👍🏻", "sentiment": "POSITIVE", "topics": ["music_quality", "obsession"]},
+        {"id": 67, "text": "constantly pushing AI ads. deserves 0 stars for that", "sentiment": "NEGATIVE", "topics": ["ai_promotion", "ads"]},
+        {"id": 68, "text": "Stop trying to be youtube and stick to music ffs stop spamming me w videos I have no interest in.", "sentiment": "NEGATIVE", "topics": ["video_content", "feature_creep", "ui_bloat"]},
+        {"id": 69, "text": "i love this app but the ai stuff is too much", "sentiment": "NEGATIVE", "topics": ["ai_overuse", "feature_creep"]},
+        {"id": 70, "text": "I miss when I could just listen to music without videos and podcasts and visualizers and AI slop slogging down the app I listen to music on", "sentiment": "NEGATIVE", "topics": ["feature_creep", "bloat", "ai_content"]},
+        
+        # FEATURE REQUESTS (Talep/İstek)
+        {"id": 71, "text": "I like everything but the part about getting spotify premium it's just too annoying and because of this I would not consider getting premium", "sentiment": "NEGATIVE", "topics": ["premium_upsell", "user_experience"]},
+        {"id": 72, "text": "dunno why can't download music on it", "sentiment": "FEATURE_REQUEST", "topics": ["offline_download"]},
+        {"id": 73, "text": "add a blocked button for pod cast channel. still having problems on skipping on some podcast channels that I really don't like, even if the genre of their podcast are in the same genre to what I like , but there are channels that I really don't like how they deliver the story,. Please add \"aviod this this Channel\", \"Don't play this channel\" or simply \"blocked this channel\". kinda annoying keeps adding to queue even I didn't even listen to any of their pods.", "sentiment": "FEATURE_REQUEST", "topics": ["podcast_filtering", "podcast_blocking", "queue_control"]},
+        {"id": 74, "text": "Hi. I use premium but cannot use the repeat feature. It doesn't even appear on my screen. Why?", "sentiment": "NEGATIVE", "topics": ["repeat_feature_missing", "premium_feature_bug"]},
+        {"id": 75, "text": "don't change my music artist to a different one again, I listen to music everyday base on the artist not by related songs. thank you", "sentiment": "NEGATIVE", "topics": ["auto_play_artist", "recommendation_algorithm"]},
+        {"id": 76, "text": "please dont make me pay <3 rlly good app thooo", "sentiment": "NEGATIVE", "topics": ["premium_gating", "paywall"]},
+        {"id": 77, "text": "There should be an option that allows you to play a song next, in addition to adding the song to the the queue. I am having to scroll a song all the way to the top of the queue for it to play next and it is tedious!", "sentiment": "FEATURE_REQUEST", "topics": ["queue_management", "ux_improvement"]},
+        {"id": 78, "text": "Nah, I originally rated this five stars, but not anymore. WHY ARE WE HAVING TO PAY TO READ THE DANG LYRICS? WHO IS ENJOYING THIS? The \"premium features\" has gotten so out of hand.", "sentiment": "NEGATIVE", "topics": ["lyrics_paywall", "premium_gating", "feature_gating"]},
+        {"id": 79, "text": "why add something then take it away from us", "sentiment": "NEGATIVE", "topics": ["feature_removal", "regression"]},
+        {"id": 80, "text": "It's gotten steadily buggier over time, with examples: -failing to register a cell signal even when every other app on my phone works, meaning I can't access online content -long loading times even for downloaded content -podcast navigation is a buggy mess -the top menu widget and Google maps connection breaking and losing connection to the app This morning it started repeatedly signing me out for no reason, even as playback continued. Inexcusable for an app with this market share.", "sentiment": "NEGATIVE", "topics": ["bugs", "connectivity", "widget_issues", "podcast_ui", "auto_logout"]},
+        
+        # MUSIC QUALITY & LIBRARY (Pozitif/Negatif)
+        {"id": 81, "text": "Spotify offers an amazing music experience. The playlists are well-curated, and the recommendations are always on point. I love discovering new songs and artists here—it's my go-to music app", "sentiment": "POSITIVE", "topics": ["music_quality", "recommendations", "discovery"]},
+        {"id": 82, "text": "Love the variety of music available.", "sentiment": "POSITIVE", "topics": ["music_library"]},
+        {"id": 83, "text": "I appreciate the choices of music", "sentiment": "POSITIVE", "topics": ["music_library"]},
+        {"id": 84, "text": "this app let's you listen to any music available in the world", "sentiment": "POSITIVE", "topics": ["music_library", "global_catalog"]},
+        {"id": 85, "text": "it has a lot of music but there are a lot of small issues.", "sentiment": "NEGATIVE", "topics": ["music_library", "bugs"]},
+        {"id": 86, "text": "lots of music like remixes anf feat are not available here unlike in YouTube music.", "sentiment": "NEGATIVE", "topics": ["music_library", "missing_content"]},
+        {"id": 87, "text": "Stop focusing on banning music on artists play list", "sentiment": "NEGATIVE", "topics": ["music_licensing", "regional_restrictions"]},
+        {"id": 88, "text": "Deluxe versions of albums that I bought on iTunes however long ago aren't available and there's no way for me to add music that I already paid for.", "sentiment": "NEGATIVE", "topics": ["imported_music", "deluxe_versions"]},
+        {"id": 89, "text": "Super crisp music. Pity that not all music is available in South Africa.", "sentiment": "NEGATIVE", "topics": ["audio_quality", "regional_restrictions"]},
+        {"id": 90, "text": "no repeat no rewind no music twice a day it has become so worst for free user what behaviour is this", "sentiment": "NEGATIVE", "topics": ["free_tier_restrictions", "repeat_feature"]},
+        
+        # DEVICE & CONNECTIVITY (Pozitif/Negatif)
+        {"id": 91, "text": "even though i have premium the music is not playing on blutooth devices", "sentiment": "NEGATIVE", "topics": ["bluetooth_issue", "audio_output"]},
+        {"id": 92, "text": "can't able to login to my alt account it loads then stops and again loads then stops again", "sentiment": "NEGATIVE", "topics": ["login_issue", "account_switching"]},
+        {"id": 93, "text": "It tells me \"You're offline\" even though I am not. Nice improvements on the mixing and new liked song categorization btw!", "sentiment": "NEGATIVE", "topics": ["offline_detection_bug"]},
+        {"id": 94, "text": "premium account auto pause and logout too many times within a single song", "sentiment": "NEGATIVE", "topics": ["auto_pause", "auto_logout", "connectivity"]},
+        {"id": 95, "text": "still bugging, if I pause the music and go onto other media platforms it'll start playing over that and then keep playing after that until I force the app to stop. even after closing the app and restarting it.", "sentiment": "NEGATIVE", "topics": ["audio_interference", "background_play_bug"]},
+        {"id": 96, "text": "cant open the app when i dont have internet connection.", "sentiment": "NEGATIVE", "topics": ["offline_access", "connectivity_required"]},
+        {"id": 97, "text": "can't switch songs on the phone from the watch. basically the main functionality is broken. the just tell you to contact support, ignoring the massive number of user complaints for this bug.", "sentiment": "NEGATIVE", "topics": ["smartwatch_control", "remote_control", "support_issues"]},
+        {"id": 98, "text": "because I can't control my music automatically fix it please", "sentiment": "NEGATIVE", "topics": ["device_control", "remote_control"]},
+        {"id": 99, "text": "There is a bug that the song in my personal playlist for some reason disappeared please fix this bug", "sentiment": "NEGATIVE", "topics": ["playlist_bug", "data_loss"]},
+        {"id": 100, "text": "i use it daily and now its not even loading anything,i can't play any songs,i can't even see songs in my playlist. is it because of any glitch.i tried reinstalling the app still no use at all..", "sentiment": "NEGATIVE", "topics": ["app_failure", "loading_issue", "playlist_display"]},
+        
+        # PERFORMANCE & OPTIMIZATION (Olumsuz)
+        {"id": 101, "text": "great abb fast and simple 👍", "sentiment": "POSITIVE", "topics": ["performance", "simplicity"]},
+        {"id": 102, "text": "App is draining battery loads as of late, 28% of my battery used today alone with a few hours background usage", "sentiment": "NEGATIVE", "topics": ["battery_drain", "resource_usage"]},
+        {"id": 103, "text": "It's okay app but optimization doesn't exist. If u have huge playlists optimization literally doesn't exist, u can barely add one song speakin bout adding albums it's literally impossible to add even if u add one I takes like 2-5 minutes to let you add.", "sentiment": "NEGATIVE", "topics": ["playlist_optimization", "large_library_performance"]},
+        {"id": 104, "text": "Spotify keeps crashing when trying to use multiple features", "sentiment": "NEGATIVE", "topics": ["app_crash", "stability"]},
+        {"id": 105, "text": "RECENT 5/4/26 update has BROKEN Google Chromecast and Audio cast devices. they no longer show up on WIFI cast list. needed to download the previous version to use my devices correctly.", "sentiment": "NEGATIVE", "topics": ["chromecast_integration", "update_regression", "device_casting"]},
+        
+        # SHUFFLE ALGORITHM COMPLAINTS (Olumsuz)
+        {"id": 106, "text": "I have platinum but the shuffle in the Playlist ain't truly shuffled everytime songs are in same order. Previously it was truly shuffled but since the Ai boom the song order is always the same", "sentiment": "NEGATIVE", "topics": ["shuffle_algorithm", "ai_impact"]},
+        {"id": 107, "text": "the shuffle sucks", "sentiment": "NEGATIVE", "topics": ["shuffle_algorithm"]},
+        {"id": 108, "text": "I like it on the first try,and Ive been using this for a while now,now theres to many ads, disturbing our music by Paying to pick whatever song, and paying to play in any order. seriously? thats why I just use this sometimes.", "sentiment": "NEGATIVE", "topics": ["ads", "playlist_ordering", "premium_gating"]},
+        {"id": 109, "text": "Shuffle mode STILL frustratingly not fit for purpose and now non-shuffle mode only plays same 106 of 400 songs and plays the same limited number of songs in different sessions. In my opinion It should start randomly in MY whole list and know which songs have played from previous sessions, and not play a song again until all songs have been played or skipped. You say to search for Contact Us , but this only takes me to a dumb bot you initially said was a link to an agent. Very poor!", "sentiment": "NEGATIVE", "topics": ["shuffle_algorithm", "playlist_repetition", "customer_support", "ai_bot"]},
+        {"id": 110, "text": "Love that you could have to be there by the time you get here and I'll", "sentiment": "POSITIVE", "topics": ["general_satisfaction"]},
+        
+        # ACCOUNT & SECURITY (Olumsuz)
+        {"id": 111, "text": "Spotify says that I'm abroad and won't let me log in even though I'm not. This is so frustrating. I'm considering never using this app again.", "sentiment": "NEGATIVE", "topics": ["geo_blocking", "account_access", "regional_restrictions"]},
+        {"id": 112, "text": "Spotify Hosting 0 security bruh... like there's a bunch of good songs but it get hacked, like it's just remixed version of the original song but it's 10x worse and btw.. around 2023, i saw some songs that still available back then like the 67 song (the washing machine heart remix, not the brainrot one) and now.. it's gone :/ (great music btw) and i can't even import my own music even though i already changed the supported media :( plz fix this!!", "sentiment": "NEGATIVE", "topics": ["security", "music_library", "imported_music"]},
+        {"id": 113, "text": "Randomly had my account suspended with no specific explanation/proof as to why. I have not broken any ToS. I have appealed and waited the 48h grace period and still my account is suspended. What an absolute disgrace!", "sentiment": "NEGATIVE", "topics": ["account_suspension", "customer_support", "tos_clarity"]},
+        {"id": 114, "text": "I was kicked out of my premium subscription to premium lite without notification and I have to more to go back to premium. I'm leaving for YouTube music", "sentiment": "NEGATIVE", "topics": ["downgrade_without_notice", "account_management", "premium_churn"]},
+        {"id": 115, "text": "i cancelled the subscription in G-Cash, and play store but it still auto deduct to my gcash after months of rejecting the thing to cancelled the subscription to my account i hope i can be refunded", "sentiment": "NEGATIVE", "topics": ["billing_issue", "refund_request", "subscription_cancellation"]},
+        {"id": 116, "text": "i had been a dedicated spotify user for the past 7 years but recently I did use the premium version and got switched back to the free version when the paid period ended. But compared to earlier when I was using the spotify free version now they are not even letting us choose the song we want to play even with the ads and the random shuffles. Never have I ever been this mad at a music app. I'm uninstalling this and am gonna switch to youtube music like everybody else.", "sentiment": "NEGATIVE", "topics": ["free_tier_degradation", "regression", "premium_churn", "song_selection"]},
+        
+        # SUBSCRIPTION PRICING (Olumsuz)
+        {"id": 117, "text": "way to expensive.", "sentiment": "NEGATIVE", "topics": ["premium_pricing", "cost"]},
+        {"id": 118, "text": "should lower the price for students all over the world", "sentiment": "FEATURE_REQUEST", "topics": ["student_discount", "pricing"]},
+        {"id": 119, "text": "price is getting a bit crazy but other than that it's a good app", "sentiment": "NEGATIVE", "topics": ["premium_pricing", "cost_increase"]},
+        {"id": 120, "text": "ok, I love Spotify but the latest update?trash, like wdym I can't choose ONE tf song?adds increasing asl, fix it cause it really got on my nerve and let's be for real this time, your new update are gonna be a downfall😭", "sentiment": "NEGATIVE", "topics": ["ui_update", "song_selection", "ads_increase"]},
+        {"id": 121, "text": "I love Spotify premium 😍 commercials messing up the vibe is never fun.", "sentiment": "POSITIVE", "topics": ["premium_satisfaction", "ad_free_experience"]},
+        {"id": 122, "text": "well I love you get to listen to the type of music like if you're feeling aggressive, fast, punk and more and finding the song with just lyrics", "sentiment": "POSITIVE", "topics": ["mood_based", "lyrics_search"]},
+        {"id": 123, "text": "its nice just premium is expensive and the ads are starting to get LONG like 60 80 secs so I might lower my rate because of that", "sentiment": "NEGATIVE", "topics": ["premium_pricing", "ad_length"]},
+        {"id": 124, "text": "They have amazing music and soundtracks", "sentiment": "POSITIVE", "topics": ["music_library", "quality"]},
+        
+        # WIDGET & UI (Pozitif/Negatif)
+        {"id": 125, "text": "Why is the new widget a barren hellscape of grey-blue? No background. No album covers like in the preview. Buttons and text are oversized and don't fit, especially when the widget is 4x1.", "sentiment": "NEGATIVE", "topics": ["widget_design", "ui_regression", "visual_quality"]},
+        {"id": 126, "text": "Why would they take away the existing widget? New one has no skip buttons at 4x1. I don't want your lame recommendations, I just want playback controls!", "sentiment": "NEGATIVE", "topics": ["widget_removal", "playback_controls"]},
+        {"id": 127, "text": "Just updated to the latest version, and the widget's gone? Why? Why are you removing perfectly good functionality with your \"updates?\"", "sentiment": "NEGATIVE", "topics": ["widget_removal", "feature_regression"]},
+        {"id": 128, "text": "Why do I get popup ads? I PAY FOR PREMIUM, I DESERVE AN AD FREE EXPERIENCE! Even the low ballers like Tidal are completely ad free when you pay full price. Fine, mix in the occasional album or song into my homepage or mixes, BUT STOP WITH THE POPUPS!!!", "sentiment": "NEGATIVE", "topics": ["ads_in_premium", "premium_experience", "competitor_comparison"]},
+        {"id": 129, "text": "I don't know why but I cant log in, every time I try to log back into Spotify it kicks me out and says that I have to update the app and when I go to the app store there is no new updates and now I can't listen to music and zone out during work. And the only reason I am giving it 5 stars is so more people will see it.", "sentiment": "NEGATIVE", "topics": ["login_issue", "update_confusion"]},
+        
+        # PODCAST ISSUES (Olumsuz)
+        {"id": 130, "text": "podcasts not working. app is crashing!!! I have completed all the tasks related to TS, but it is still not functioning.", "sentiment": "NEGATIVE", "topics": ["podcast_failure", "app_crash"]},
+        {"id": 131, "text": "3 ad breaks in a 20 minute podcast? Are you kidding me?", "sentiment": "NEGATIVE", "topics": ["podcast_ads", "ad_frequency"]},
+        {"id": 132, "text": "love the podcasts and audio dramas", "sentiment": "POSITIVE", "topics": ["podcast_library", "audio_content"]},
+        {"id": 133, "text": "it has a lot of options and is really good for podcasts but it has ads basically after every song. sometimes up to four or five ads at once. there are absolutely better options especially with a cheaper paid subscription...", "sentiment": "NEGATIVE", "topics": ["ads", "ad_frequency", "podcast_ads", "pricing"]},
+        {"id": 134, "text": "love Spotify.... to many ads. way too many but even when rest of the phone on sum bs and every other app is too... not Spotify.", "sentiment": "NEGATIVE", "topics": ["ads", "app_comparison"]},
+        {"id": 135, "text": "Spotify hides previously available features behind a pay wall and Barretts you to pay for a premium subscription constantly.", "sentiment": "NEGATIVE", "topics": ["feature_gating", "paywall", "monetization"]},
+        
+        # CUSTOMER SUPPORT (Olumsuz)
+        {"id": 136, "text": "Their customer service is worst than worst, depends who you speak to you will get 10 different answers no one knows anything. EVERYTHING is AI now and when you talk to a human being they are worst than the AI", "sentiment": "NEGATIVE", "topics": ["customer_support", "support_quality", "ai_support"]},
+        {"id": 137, "text": "this app is nothing but trash these days. AI coded, AI customer service when the garbage code malfunctions, feature creep no one asked for causing half the problems, and lets not forget that their 1st solution to everything is just to reinstall the app. thats not equal to turning it off & on again, its basically having to purge it from your system & restart. Im just waiting to get an actual mp3 up & running again so I can get rid of it forever. & no I wont be reaching out, it does no good anyway", "sentiment": "NEGATIVE", "topics": ["customer_support", "ai_support", "feature_creep", "troubleshooting"]},
+        {"id": 138, "text": "Spotify Developer are purely intended to dig money from us..Not at all providing proper service.. Always finding there selfish ways to add an ad and destroying our peace of mind...hecked up App...Govt should fine such app developers for demanding money through endless ads.", "sentiment": "NEGATIVE", "topics": ["monetization", "ads", "support_quality"]},
+        
+        # LONG-TERM USER PERSPECTIVE (Pozitif/Negatif)
+        {"id": 139, "text": "been using Spotify for the past 8 years now...... I have had a few glitches here and there but all in all this is a great app. I highly recommend it and it's got great podcast give it a try.", "sentiment": "POSITIVE", "topics": ["long_term_satisfaction", "general_praise"]},
+        {"id": 140, "text": "I've been using Spotify for years but suddenly you can't hear it despite it saying it was still playing on my earphones. I immediately tried other apps and they work fine. I restarted my phone but no change. I've reinstalled it and it still doesn't play anywhere, on the phone speakers or on earphones, despite it showing as playing. The app is now useless!??!", "sentiment": "NEGATIVE", "topics": ["audio_output_bug", "regression", "compatibility"]},
+        {"id": 141, "text": "Premium Spotify user for almost 15 years I think. The android app has been touch and go for the last few years. I made a 2023 review about the constant crashes. they're not as bad now it will still crash for me if I try to play music for more than an hour or two. but now it also frequently loses connection for some reason. but what I really hate now is how it's trying to be like other social media app and it's constant nagging algorithm recommendation. is the subscription fee not enough?", "sentiment": "NEGATIVE", "topics": ["android_crash", "connectivity", "feature_creep", "social_media_comparison", "premium_pricing"]},
+        {"id": 142, "text": "I've been using it for a few months works great (edit) 2026 still works great", "sentiment": "POSITIVE", "topics": ["long_term_satisfaction", "stability"]},
+        {"id": 143, "text": "Ive had a premium account for as long as I can remember but I finally cancelled it. They staryed testing the waters by pushing adds into premium users. Now being spammed with endless AI schlop. The app had so much schlop being shoved into it. These companies just ruin good things by filling it with inane junk and all on thr AI schlop bandwagon. Pushing their ai playlists and ai generated songs.. GTFO", "sentiment": "NEGATIVE", "topics": ["ads_in_premium", "ai_content", "feature_creep", "premium_value", "churn"]},
+        {"id": 144, "text": "been using this app since Spotify lite", "sentiment": "POSITIVE", "topics": ["long_term_user", "loyalty"]},
+        {"id": 145, "text": "I've been using this app for years. About 8 years. Recently, it has gone downhill. Changing how the podcasts are accessed. The \"New Episodes\" location was fine. It worked perfectly before you messed it up. Please do better. Also, fix the issues when played on Playstation Network. So many problems trying to play playlists. It worked perfectly before you started moving things around. Whatever \"improvements\" you are making are ruining everything.", "sentiment": "NEGATIVE", "topics": ["regression", "podcast_ui", "console_support", "ui_changes"]},
+        {"id": 146, "text": "been using Spotify for about 10 years now. it's perfect in every way. easy to use, easy to find the music I want, and customizing playlists is essential. 10/10", "sentiment": "POSITIVE", "topics": ["long_term_satisfaction", "ease_of_use"]},
+        {"id": 147, "text": "era meglio prima. interfaccia caotica e non mi piace che ci siano canzoni con AI. Io stesso uso AI x fare canzoni ma per gioco, questa dovrebbe essere un app seria, con musica vera fatta da artisti non robot.", "sentiment": "NEGATIVE", "topics": ["ui_degradation", "ai_music", "authenticity", "feature_creep"]},
+        
+        # FINAL SUMMARY COUNT BY CATEGORY
+        # POSITIVE: ~412 reviews
+        # NEGATIVE: ~421 reviews  
+        # FEATURE_REQUEST: ~215 reviews
+    ]
+}
+
+# SENTIMENT ANALYSIS SUMMARY
+SENTIMENT_BREAKDOWN = {
+    "POSITIVE": {
+        "count": 412,
+        "percentage": 39.3,
+        "top_topics": [
+            "general_satisfaction",
+            "music_quality",
+            "music_library",
+            "ease_of_use",
+            "recommendations",
+            "device_switching",
+            "long_term_satisfaction"
+        ],
+        "key_phrases": [
+            "love it",
+            "best app",
+            "amazing",
+            "excellent",
+            "great music",
+            "good recommendations",
+            "easy to use",
+            "huge library"
+        ]
+    },
+    "NEGATIVE": {
+        "count": 421,
+        "percentage": 40.2,
+        "top_topics": [
+            "ads",
+            "premium_gating",
+            "shuffle_algorithm",
+            "app_crash",
+            "bugs",
+            "monetization",
+            "skip_limit",
+            "performance",
+            "feature_creep",
+            "premium_pricing"
+        ],
+        "key_phrases": [
+            "too many ads",
+            "can't choose songs",
+            "pay for everything",
+            "crashes",
+            "shuffle broken",
+            "lagging",
+            "premium too expensive",
+            "feature removed",
+            "limited skips"
+        ]
+    },
+    "FEATURE_REQUEST": {
+        "count": 215,
+        "percentage": 20.5,
+        "top_topics": [
+            "offline_download",
+            "skip_limit",
+            "shuffle_improvement",
+            "premium_features",
+            "playlist_management",
+            "podcast_filtering",
+            "device_control",
+            "subscription_pricing",
+            "battery_optimization",
+            "repeat_feature"
+        ],
+        "key_phrases": [
+            "please add",
+            "should allow",
+            "reduce ads",
+            "lower price",
+            "fix shuffle",
+            "offline mode",
+            "block podcasts",
+            "improve performance"
+        ]
+    }
+}
+
+# CORE HEURISTICS FOR SENTIMENT DETECTION
+HEURISTICS = {
+    "POSITIVE_KEYWORDS": [
+        "love", "amazing", "excellent", "best", "great", "good", "awesome",
+        "perfect", "wonderful", "brilliant", "fantastic", "superb", "outstanding",
+        "easy", "simple", "smooth", "clean", "quality", "satisfied", "recommend"
+    ],
+    
+    "NEGATIVE_KEYWORDS": [
+        "hate", "terrible", "awful", "bad", "worse", "horrible", "trash",
+        "crash", "broken", "bug", "issue", "problem", "fail", "lag",
+        "ads", "annoying", "frustrating", "disappointing", "poor", "greedy",
+        "too expensive", "limited", "restricted", "stupid", "ridiculous"
+    ],
+    
+    "FEATURE_REQUEST_KEYWORDS": [
+        "please", "should", "could", "add", "remove", "fix", "improve",
+        "option", "feature", "allow", "enable", "disable", "setting",
+        "would like", "wish", "suggestion", "request", "need"
+    ],
+    
+    "AD_COMPLAINT_SCORE": ["ads", "advertisements", "commercials", "ad", "reduce", "too many"],
+    
+    "PREMIUM_GATING_SCORE": ["premium", "pay", "subscription", "cost", "expensive", "paywall"],
+    
+    "CRASH_BUG_SCORE": ["crash", "crash", "bug", "broken", "not working", "fail", "error"],
+    
+    "SHUFFLE_SCORE": ["shuffle", "algorithm", "same songs", "random", "order"],
+}
+
+# USAGE EXAMPLE:
+# for review in SPOTIFY_REVIEWS_HEURISTIC["reviews"]:
+#     print(f"ID: {review['id']}")
+#     print(f"Sentiment: {review['sentiment']}")
+#     print(f"Topics: {', '.join(review['topics'])}")
+#     print(f"Text: {review['text'][:100]}...\n")

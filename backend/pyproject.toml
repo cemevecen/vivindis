@@ -43,7 +43,7 @@ where = ["."]
 include = ["app*"]
 
 [tool.setuptools.package-data]
-app = ["data/*.json"]
+app = ["data/*.json", "data/guidance/*.json"]
 
 [tool.ruff]
 target-version = "py312"
