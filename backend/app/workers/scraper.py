@@ -161,10 +161,19 @@ async def _scrape_google_play(
         primary_lang, primary_country = "en", "us"
         fallback_lang = (settings.scrape_play_lang or "").strip().lower() or "tr"
         fallback_country = (settings.scrape_play_country or "").strip().lower() or "tr"
+    # Expand locale candidates to cover more global markets if the primary ones (US/TR) fail.
+    # We start with the core candidates and add more if needed.
     locale_candidates: list[tuple[str, str]] = []
     for cand in ((primary_lang, primary_country), (fallback_lang, fallback_country)):
         if cand not in locale_candidates:
             locale_candidates.append(cand)
+
+    # If the app is likely global and we need more coverage, add major markets.
+    if review_scope == "global":
+        for extra in [("en", "gb"), ("en", "in"), ("pt", "br"), ("de", "de"), ("es", "es"), ("fr", "fr")]:
+            if extra not in locale_candidates:
+                locale_candidates.append(extra)
+
     sleep_s = float(settings.scrape_play_sleep_seconds or 1.5)
     max_inserted = int(settings.scrape_max_reviews or 5000)
     max_scanned = 100_000
@@ -172,9 +181,13 @@ async def _scrape_google_play(
     lo, hi = fetch.from_date, fetch.to_date
     batch_sleep = _play_batch_sleep_for_window(sleep_s, lo, hi)
     total_inserted = 0
+
     for idx, (lang, country) in enumerate(locale_candidates, start=1):
         # Google Play multi-strategy: try with date filter first, then fallback to all-time for this locale.
         for strategy_name, after_dt in [("date_range", lo), ("all_time", None)]:
+            if total_inserted >= max_inserted:
+                break
+
             inserted = 0
             continuation = None
             total_seen = 0
@@ -189,27 +202,33 @@ async def _scrape_google_play(
                 attempt=idx,
             )
 
-            while total_seen < max_scanned and inserted < max_inserted:
-                try:
-                    batch, continuation = gp_reviews(
-                        pkg,
-                        lang=lang,
-                        country=country,
-                        sort=Sort.NEWEST,
-                        count=min(200, max_scanned - total_seen),
-                        continuation_token=continuation,
-                    )
-                except Exception:  # noqa: BLE001
-                    log.exception(
-                        "scrape_play_reviews_call_failed",
-                        fetch_id=str(fetch.id),
-                        app_id=str(app.id),
-                        package_name=pkg,
-                        lang=lang,
-                        country=country,
-                        strategy=strategy_name,
-                    )
-                    raise
+            while total_seen < max_scanned and total_inserted < max_inserted:
+                batch = None
+                # Retry logic for network/rate-limit issues
+                for retry_attempt in range(3):
+                    try:
+                        batch, continuation = gp_reviews(
+                            pkg,
+                            lang=lang,
+                            country=country,
+                            sort=Sort.NEWEST,
+                            count=min(200, max_scanned - total_seen),
+                            continuation_token=continuation,
+                        )
+                        break
+                    except Exception as exc:  # noqa: BLE001
+                        wait_time = (retry_attempt + 1) * 5
+                        log.warning(
+                            "scrape_play_reviews_call_retry",
+                            fetch_id=str(fetch.id),
+                            package_name=pkg,
+                            lang=lang,
+                            country=country,
+                            retry=retry_attempt + 1,
+                            wait=wait_time,
+                            error=str(exc),
+                        )
+                        await asyncio.sleep(wait_time)
 
                 if not batch:
                     log.warning(
@@ -224,10 +243,8 @@ async def _scrape_google_play(
                     )
                     break
 
-                stop_all = False
                 for rev in batch:
                     if total_inserted >= max_inserted:
-                        stop_all = True
                         break
                     total_seen += 1
                     at = rev.get("at")
@@ -237,8 +254,9 @@ async def _scrape_google_play(
                     # Only apply date filter if we are in 'date_range' strategy.
                     if strategy_name == "date_range":
                         if at and not _in_range(at, lo, hi):
-                            if at.date() < lo:
-                                stop_all = True
+                            # We don't use 'stop_all' anymore because Play Store batches
+                            # can be slightly out of order or have gaps.
+                            # We just skip and continue scanning.
                             continue
                     else:
                         # All-time strategy: still respect the hi/lo for upserting,
@@ -279,7 +297,7 @@ async def _scrape_google_play(
                     inserted += 1
                     total_inserted += 1
 
-                if stop_all or continuation is None or continuation.token is None:
+                if continuation is None or continuation.token is None:
                     break
                 if batch_sleep > 0:
                     await asyncio.sleep(batch_sleep)
@@ -294,7 +312,7 @@ async def _scrape_google_play(
                 strategy=strategy_name,
                 attempt=idx,
             )
-            # We don't return early anymore; we want to try other locales/strategies to accumulate more reviews.
+            # We continue to next locales to accumulate more reviews.
     return total_inserted
 
 
