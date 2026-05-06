@@ -22,6 +22,8 @@ class ReviewResponse(BaseModel):
     title: str | None
     body: str
     author: str | None
+    author_uri: str | None = None
+    app_version_label: str | None = None
     lang: str
     review_date: date
     thumbs_up: int

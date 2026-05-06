@@ -59,6 +59,8 @@ class Review(Base):
     title: Mapped[str | None] = mapped_column(String(1024), nullable=True)
     body: Mapped[str] = mapped_column(Text, default="")
     author: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    author_uri: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    app_version_label: Mapped[str | None] = mapped_column(String(64), nullable=True)
     lang: Mapped[str] = mapped_column(String(16), default="und")
     review_date: Mapped[date] = mapped_column("review_date", Date, nullable=False)
     thumbs_up: Mapped[int] = mapped_column(Integer, default=0)

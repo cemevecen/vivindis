@@ -69,6 +69,11 @@ class Settings(BaseSettings):
     scrape_play_sleep_seconds: float = Field(default=1.5, validation_alias="SCRAPE_PLAY_SLEEP_SECONDS")
     scrape_app_store_sleep_seconds: int = Field(default=2, validation_alias="SCRAPE_APP_STORE_SLEEP_SECONDS")
     scrape_max_reviews: int = Field(default=5000, validation_alias="SCRAPE_MAX_REVIEWS")
+    scrape_requests_per_second: float = Field(
+        default=7.0,
+        validation_alias="SCRAPE_REQUESTS_PER_SECOND",
+        description="Play/App Store HTTP için token-bucket hızı (5–10 önerilir).",
+    )
 
     @field_validator("database_url", mode="before")
     @classmethod
@@ -89,6 +94,13 @@ class Settings(BaseSettings):
     def empty_expire_to_default(cls, v: object) -> object:
         if v == "" or v is None:
             return 10080
+        return v
+
+    @field_validator("scrape_requests_per_second", mode="before")
+    @classmethod
+    def empty_scrape_rps_to_default(cls, v: object) -> object:
+        if v == "" or v is None:
+            return 7.0
         return v
 
 
