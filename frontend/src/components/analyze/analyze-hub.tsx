@@ -1125,7 +1125,7 @@ function AnalyzeHubConnected() {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="rounded-full bg-orange-100 px-2.5 py-1 text-sm font-bold text-orange-900">
                         %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
                       </p>
                     </div>
@@ -1149,6 +1149,34 @@ function AnalyzeHubConnected() {
                           }%`,
                         }}
                       />
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-4">
+                      <div className="rounded-xl border border-orange-200 bg-orange-50/70 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-900/70">İlerleme</p>
+                        <p className="text-lg font-bold tabular-nums text-orange-950">
+                          %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Geçen süre</p>
+                        <p className="text-lg font-bold tabular-nums text-slate-900">{fetchElapsedText}</p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Ortalama kalan</p>
+                        <p className="text-lg font-bold tabular-nums text-slate-900">
+                          {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
+                            ? formatDuration(fetchEtaSec)
+                            : fetchRowQuery.data?.status === "completed"
+                              ? "00:00"
+                              : "--:--"}
+                        </p>
+                      </div>
+                      <div className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Toplanan</p>
+                        <p className="text-lg font-bold tabular-nums text-slate-900">
+                          {fetchRowQuery.data?.review_count ?? hydratedPoolCount}
+                        </p>
+                      </div>
                     </div>
                     <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
                     <p className="text-xs font-semibold text-slate-700">{fetchStageLabel}</p>
