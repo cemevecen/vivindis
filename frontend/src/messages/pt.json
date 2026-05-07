@@ -7,6 +7,9 @@
     "analyze": "Analyze",
     "about": "About"
   },
+  "footer": {
+    "rights": "Todos os direitos reservados."
+  },
   "common": {
     "save": "Salvar",
     "cancel": "Cancelar",

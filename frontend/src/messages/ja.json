@@ -7,6 +7,9 @@
     "analyze": "Analyze",
     "about": "About"
   },
+  "footer": {
+    "rights": "無断転載を禁じます。"
+  },
   "common": {
     "save": "保存",
     "cancel": "キャンセル",

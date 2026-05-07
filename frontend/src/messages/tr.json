@@ -7,6 +7,9 @@
     "about": "Hakkında",
     "sidebarNav": "Ana menü"
   },
+  "footer": {
+    "rights": "Tüm hakları saklıdır."
+  },
   "common": {
     "save": "Kaydet",
     "cancel": "İptal",

@@ -7,6 +7,9 @@
     "about": "About",
     "sidebarNav": "Main menu"
   },
+  "footer": {
+    "rights": "All rights reserved."
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
