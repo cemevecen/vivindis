@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, Search, Upload } from "lucide-react";
+import { Download, RotateCcw, Search, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -95,6 +95,12 @@ function AnalyzeHubConnected() {
   const [activeCompareB, setActiveCompareB] = useState("");
   const [compareHitA, setCompareHitA] = useState<StoreSearchResultItem | null>(null);
   const [compareHitB, setCompareHitB] = useState<StoreSearchResultItem | null>(null);
+  const [comparePlatformA, setComparePlatformA] = useState<SearchPlatform>("google_play");
+  const [comparePlatformB, setComparePlatformB] = useState<SearchPlatform>("google_play");
+  const [compareReviewScopeA, setCompareReviewScopeA] = useState<ReviewScope>("global");
+  const [compareReviewScopeB, setCompareReviewScopeB] = useState<ReviewScope>("global");
+  const [compareRegistryAppA, setCompareRegistryAppA] = useState<AppDto | null>(null);
+  const [compareRegistryAppB, setCompareRegistryAppB] = useState<AppDto | null>(null);
   const [compareBusy, setCompareBusy] = useState(false);
 
   const [targetAppId, setTargetAppId] = useState<string>("");
@@ -148,20 +154,20 @@ function AnalyzeHubConnected() {
   });
 
   const searchQueryA = useQuery({
-    queryKey: queryKeys.store.search(`${activeCompareA}:cmpA`, platform, searchLang, searchCountry),
+    queryKey: queryKeys.store.search(`${activeCompareA}:cmpA`, comparePlatformA, searchLang, searchCountry),
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
-        `/api/v1/store/search?q=${encodeURIComponent(activeCompareA)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
+        `/api/v1/store/search?q=${encodeURIComponent(activeCompareA)}&platform=${comparePlatformA}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
         { getToken },
       ),
     enabled: activeCompareA.length >= 2 && Boolean(isSignedIn),
   });
 
   const searchQueryB = useQuery({
-    queryKey: queryKeys.store.search(`${activeCompareB}:cmpB`, platform, searchLang, searchCountry),
+    queryKey: queryKeys.store.search(`${activeCompareB}:cmpB`, comparePlatformB, searchLang, searchCountry),
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
-        `/api/v1/store/search?q=${encodeURIComponent(activeCompareB)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
+        `/api/v1/store/search?q=${encodeURIComponent(activeCompareB)}&platform=${comparePlatformB}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
         { getToken },
       ),
     enabled: activeCompareB.length >= 2 && Boolean(isSignedIn),
@@ -872,28 +878,126 @@ function AnalyzeHubConnected() {
     setPastedText("");
   };
 
+  const resetCompareColumnA = useCallback(() => {
+    setCompareHitA(null);
+    setCompareDraftA("");
+    setActiveCompareA("");
+    setCompareRegistryAppA(null);
+  }, []);
+
+  const resetCompareColumnB = useCallback(() => {
+    setCompareHitB(null);
+    setCompareDraftB("");
+    setActiveCompareB("");
+    setCompareRegistryAppB(null);
+  }, []);
+
+  const onRegistrySlotCheckbox = useCallback(
+    (side: "a" | "b", app: AppDto, checked: boolean) => {
+      if (!checked) {
+        if (side === "a" && compareRegistryAppA?.id === app.id) {
+          setCompareRegistryAppA(null);
+        }
+        if (side === "b" && compareRegistryAppB?.id === app.id) {
+          setCompareRegistryAppB(null);
+        }
+        return;
+      }
+      const other = side === "a" ? compareRegistryAppB : compareRegistryAppA;
+      if (other?.id === app.id) {
+        toast.error(t("compareSameAppTwice"));
+        return;
+      }
+      if (side === "a") {
+        setCompareRegistryAppA(app);
+        setCompareHitA(null);
+      } else {
+        setCompareRegistryAppB(app);
+        setCompareHitB(null);
+      }
+    },
+    [compareRegistryAppA, compareRegistryAppB, t],
+  );
+
+  const canStartCompare = useMemo(() => {
+    const hasA = Boolean(compareRegistryAppA || compareHitA);
+    const hasB = Boolean(compareRegistryAppB || compareHitB);
+    if (!hasA || !hasB) {
+      return false;
+    }
+    if (compareRegistryAppA && compareRegistryAppB && compareRegistryAppA.id === compareRegistryAppB.id) {
+      return false;
+    }
+    if (
+      compareHitA &&
+      compareHitB &&
+      compareHitA.platform === compareHitB.platform &&
+      compareHitA.id === compareHitB.id
+    ) {
+      return false;
+    }
+    return true;
+  }, [compareRegistryAppA, compareRegistryAppB, compareHitA, compareHitB]);
+
   const handleCompareStart = async () => {
     if (!requireSignedIn()) {
       return;
     }
-    if (!compareHitA || !compareHitB) {
+    if (!canStartCompare) {
+      toast.error(t("compareNeedBothSlots"));
       return;
     }
+    const regA = compareRegistryAppA;
+    const regB = compareRegistryAppB;
+    const hitA = compareHitA;
+    const hitB = compareHitB;
+
     setCompareBusy(true);
     try {
-      const a = await apiFetch<AppDto>("/api/v1/apps", {
-        method: "POST",
-        body: appBodyFromHit(compareHitA),
-        getToken,
-      });
-      const b = await apiFetch<AppDto>("/api/v1/apps", {
-        method: "POST",
-        body: appBodyFromHit(compareHitB),
-        getToken,
-      });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
-      toast.success(t("compareCreatedBoth", { a: a.name, b: b.name }));
-      router.push(`/compare?app_a=${a.id}&app_b=${b.id}`);
+      if (regA && regB) {
+        toast.success(t("compareOpenedRegistryPair"));
+        router.push(`/compare?app_a=${regA.id}&app_b=${regB.id}`);
+        return;
+      }
+      if (hitA && hitB) {
+        const a = await apiFetch<AppDto>("/api/v1/apps", {
+          method: "POST",
+          body: appBodyFromHit(hitA),
+          getToken,
+        });
+        const b = await apiFetch<AppDto>("/api/v1/apps", {
+          method: "POST",
+          body: appBodyFromHit(hitB),
+          getToken,
+        });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
+        toast.success(t("compareCreatedBoth", { a: a.name, b: b.name }));
+        router.push(`/compare?app_a=${a.id}&app_b=${b.id}`);
+        return;
+      }
+      if (regA && hitB) {
+        const b = await apiFetch<AppDto>("/api/v1/apps", {
+          method: "POST",
+          body: appBodyFromHit(hitB),
+          getToken,
+        });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
+        toast.success(t("compareMixedCreatedOne", { created: b.name, existing: regA.name }));
+        router.push(`/compare?app_a=${regA.id}&app_b=${b.id}`);
+        return;
+      }
+      if (hitA && regB) {
+        const a = await apiFetch<AppDto>("/api/v1/apps", {
+          method: "POST",
+          body: appBodyFromHit(hitA),
+          getToken,
+        });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
+        toast.success(t("compareMixedCreatedOne", { created: a.name, existing: regB.name }));
+        router.push(`/compare?app_a=${a.id}&app_b=${regB.id}`);
+        return;
+      }
+      toast.error(t("compareNeedBothSlots"));
     } catch (e) {
       const msg = e instanceof ApiError ? e.message : tCommon("error");
       toast.error(msg);
@@ -1509,15 +1613,118 @@ function AnalyzeHubConnected() {
         ) : null}
 
         {mode === "compare" ? (
-          <section className="space-y-5">
+          <section className="space-y-6">
             <p className="text-sm text-muted-foreground">{t("compareHint")}</p>
             <div className="grid gap-6 lg:grid-cols-2">
-              <div className="space-y-3">
+              <div className="space-y-3 rounded-2xl border border-border/80 bg-muted/20 p-4 sm:p-5">
+                <Label htmlFor="compare-reg-a" className="text-foreground">
+                  {t("compareRegisteredSelectLabel")}
+                </Label>
+                <SelectNative
+                  id="compare-reg-a"
+                  value={compareRegistryAppA?.id ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    if (!v) {
+                      setCompareRegistryAppA(null);
+                      return;
+                    }
+                    const app = appsQuery.data?.find((a) => a.id === v);
+                    if (app) {
+                      setCompareRegistryAppA(app);
+                      setCompareHitA(null);
+                    }
+                  }}
+                  className="rounded-xl"
+                  disabled={!appsQuery.data?.length}
+                >
+                  <option value="">{t("compareRegisteredSelectPlaceholder")}</option>
+                  {(appsQuery.data ?? []).map((app) => (
+                    <option key={app.id} value={app.id}>
+                      {app.name}
+                    </option>
+                  ))}
+                </SelectNative>
                 <Label className="text-foreground">{t("compareApp1Label")}</Label>
+                <div className="space-y-2">
+                  <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant={comparePlatformA === "google_play" ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          comparePlatformA === "google_play" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => {
+                          setComparePlatformA("google_play");
+                          setCompareHitA(null);
+                          setActiveCompareA("");
+                        }}
+                      >
+                        {t("platformAndroid")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={comparePlatformA === "app_store" ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          comparePlatformA === "app_store" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => {
+                          setComparePlatformA("app_store");
+                          setCompareHitA(null);
+                          setActiveCompareA("");
+                        }}
+                      >
+                        {t("platformIos")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={comparePlatformA === "both" ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          comparePlatformA === "both" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => {
+                          setComparePlatformA("both");
+                          setCompareHitA(null);
+                          setActiveCompareA("");
+                        }}
+                      >
+                        {t("platformBoth")}
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 rounded-full"
+                      onClick={resetCompareColumnA}
+                    >
+                      <RotateCcw className="size-3.5" aria-hidden />
+                      {t("compareColumnReset")}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
+                  <SegmentedTwo
+                    ariaLabel={t("reviewScopeLabel")}
+                    left={t("reviewScopeLocal")}
+                    right={t("reviewScopeGlobal")}
+                    value={compareReviewScopeA === "local" ? "left" : "right"}
+                    onChange={(v) => setCompareReviewScopeA(v === "left" ? "local" : "global")}
+                  />
+                </div>
                 <Input
                   value={compareDraftA}
                   onChange={(e) => setCompareDraftA(e.target.value)}
-                  placeholder={t("searchPlaceholder")}
+                  placeholder={t("compareSearchPlaceholder")}
                   className="rounded-xl"
                 />
                 <Button
@@ -1535,25 +1742,179 @@ function AnalyzeHubConnected() {
                   <Search className="mr-2 size-4" aria-hidden />
                   {t("searchAction")}
                 </Button>
+                {compareRegistryAppA ? (
+                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      {t("compareSelectedSummaryLabel")}
+                    </p>
+                    <div className="mt-2 flex gap-3">
+                      {compareRegistryAppA.icon_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- app icon URL
+                        <img
+                          src={compareRegistryAppA.icon_url}
+                          alt=""
+                          width={48}
+                          height={48}
+                          className="size-12 shrink-0 rounded-xl border border-border bg-card object-cover"
+                        />
+                      ) : (
+                        <div className="size-12 shrink-0 rounded-xl border border-dashed border-border bg-muted/50" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-foreground">{compareRegistryAppA.name}</p>
+                        <p className="truncate font-mono text-xs text-muted-foreground">
+                          {compareRegistryAppA.platform === "app_store"
+                            ? compareRegistryAppA.bundle_id || "—"
+                            : compareRegistryAppA.package_name}
+                          {" · "}
+                          {compareRegistryAppA.platform === "google_play"
+                            ? t("platformAndroid")
+                            : compareRegistryAppA.platform === "app_store"
+                              ? t("platformIos")
+                              : t("platformBoth")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+                {!compareRegistryAppA && compareHitA ? (
+                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      {t("compareSelectedSummaryLabel")}
+                    </p>
+                    <p className="mt-1 font-semibold text-foreground">{compareHitA.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {compareHitA.platform === "google_play" ? compareHitA.id : `id ${compareHitA.id}`}
+                      {" · "}
+                      {compareHitA.platform === "google_play" ? t("platformAndroid") : t("platformIos")}
+                    </p>
+                  </div>
+                ) : null}
                 {activeCompareA.length >= 2 && searchQueryA.data ? (
                   <ul className="grid gap-2">
                     {searchQueryA.data.results.map((hit) => (
                       <StoreResultCard
                         key={`ca-${hit.platform}-${hit.id}`}
                         hit={hit}
-                        onPin={() => setCompareHitA(hit)}
+                        onPin={() => {
+                          setCompareRegistryAppA(null);
+                          setCompareHitA(hit);
+                        }}
                         selectLabel={t("comparePickSlotA")}
                       />
                     ))}
                   </ul>
                 ) : null}
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 rounded-2xl border border-border/80 bg-muted/20 p-4 sm:p-5">
+                <Label htmlFor="compare-reg-b" className="text-foreground">
+                  {t("compareRegisteredSelectLabel")}
+                </Label>
+                <SelectNative
+                  id="compare-reg-b"
+                  value={compareRegistryAppB?.id ?? ""}
+                  onChange={(e) => {
+                    const v = e.target.value.trim();
+                    if (!v) {
+                      setCompareRegistryAppB(null);
+                      return;
+                    }
+                    const app = appsQuery.data?.find((a) => a.id === v);
+                    if (app) {
+                      setCompareRegistryAppB(app);
+                      setCompareHitB(null);
+                    }
+                  }}
+                  className="rounded-xl"
+                  disabled={!appsQuery.data?.length}
+                >
+                  <option value="">{t("compareRegisteredSelectPlaceholder")}</option>
+                  {(appsQuery.data ?? []).map((app) => (
+                    <option key={app.id} value={app.id}>
+                      {app.name}
+                    </option>
+                  ))}
+                </SelectNative>
                 <Label className="text-foreground">{t("compareApp2Label")}</Label>
+                <div className="space-y-2">
+                  <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant={comparePlatformB === "google_play" ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          comparePlatformB === "google_play" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => {
+                          setComparePlatformB("google_play");
+                          setCompareHitB(null);
+                          setActiveCompareB("");
+                        }}
+                      >
+                        {t("platformAndroid")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={comparePlatformB === "app_store" ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          comparePlatformB === "app_store" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => {
+                          setComparePlatformB("app_store");
+                          setCompareHitB(null);
+                          setActiveCompareB("");
+                        }}
+                      >
+                        {t("platformIos")}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant={comparePlatformB === "both" ? "default" : "outline"}
+                        size="sm"
+                        className={cn(
+                          "rounded-full",
+                          comparePlatformB === "both" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => {
+                          setComparePlatformB("both");
+                          setCompareHitB(null);
+                          setActiveCompareB("");
+                        }}
+                      >
+                        {t("platformBoth")}
+                      </Button>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="gap-1 rounded-full"
+                      onClick={resetCompareColumnB}
+                    >
+                      <RotateCcw className="size-3.5" aria-hidden />
+                      {t("compareColumnReset")}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
+                  <SegmentedTwo
+                    ariaLabel={t("reviewScopeLabel")}
+                    left={t("reviewScopeLocal")}
+                    right={t("reviewScopeGlobal")}
+                    value={compareReviewScopeB === "local" ? "left" : "right"}
+                    onChange={(v) => setCompareReviewScopeB(v === "left" ? "local" : "global")}
+                  />
+                </div>
                 <Input
                   value={compareDraftB}
                   onChange={(e) => setCompareDraftB(e.target.value)}
-                  placeholder={t("searchPlaceholder")}
+                  placeholder={t("compareSearchPlaceholder")}
                   className="rounded-xl"
                 />
                 <Button
@@ -1571,13 +1932,64 @@ function AnalyzeHubConnected() {
                   <Search className="mr-2 size-4" aria-hidden />
                   {t("searchAction")}
                 </Button>
+                {compareRegistryAppB ? (
+                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      {t("compareSelectedSummaryLabel")}
+                    </p>
+                    <div className="mt-2 flex gap-3">
+                      {compareRegistryAppB.icon_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- app icon URL
+                        <img
+                          src={compareRegistryAppB.icon_url}
+                          alt=""
+                          width={48}
+                          height={48}
+                          className="size-12 shrink-0 rounded-xl border border-border bg-card object-cover"
+                        />
+                      ) : (
+                        <div className="size-12 shrink-0 rounded-xl border border-dashed border-border bg-muted/50" />
+                      )}
+                      <div className="min-w-0">
+                        <p className="truncate font-semibold text-foreground">{compareRegistryAppB.name}</p>
+                        <p className="truncate font-mono text-xs text-muted-foreground">
+                          {compareRegistryAppB.platform === "app_store"
+                            ? compareRegistryAppB.bundle_id || "—"
+                            : compareRegistryAppB.package_name}
+                          {" · "}
+                          {compareRegistryAppB.platform === "google_play"
+                            ? t("platformAndroid")
+                            : compareRegistryAppB.platform === "app_store"
+                              ? t("platformIos")
+                              : t("platformBoth")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+                {!compareRegistryAppB && compareHitB ? (
+                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      {t("compareSelectedSummaryLabel")}
+                    </p>
+                    <p className="mt-1 font-semibold text-foreground">{compareHitB.name}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {compareHitB.platform === "google_play" ? compareHitB.id : `id ${compareHitB.id}`}
+                      {" · "}
+                      {compareHitB.platform === "google_play" ? t("platformAndroid") : t("platformIos")}
+                    </p>
+                  </div>
+                ) : null}
                 {activeCompareB.length >= 2 && searchQueryB.data ? (
                   <ul className="grid gap-2">
                     {searchQueryB.data.results.map((hit) => (
                       <StoreResultCard
                         key={`cb-${hit.platform}-${hit.id}`}
                         hit={hit}
-                        onPin={() => setCompareHitB(hit)}
+                        onPin={() => {
+                          setCompareRegistryAppB(null);
+                          setCompareHitB(hit);
+                        }}
                         selectLabel={t("comparePickSlotB")}
                       />
                     ))}
@@ -1585,6 +1997,53 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
             </div>
+            {appsQuery.data && appsQuery.data.length > 0 ? (
+              <div className="space-y-2 rounded-2xl border border-border bg-card p-4 sm:p-5">
+                <p className="text-sm font-semibold text-foreground">{t("compareRegisteredListTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
+                <ul className="max-h-56 divide-y divide-border overflow-y-auto rounded-xl border border-border">
+                  {appsQuery.data.map((app) => (
+                    <li key={app.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
+                      <div className="flex min-w-0 flex-1 items-center gap-2">
+                        {app.icon_url ? (
+                          // eslint-disable-next-line @next/next/no-img-element -- app icon URL
+                          <img
+                            src={app.icon_url}
+                            alt=""
+                            width={36}
+                            height={36}
+                            className="size-9 shrink-0 rounded-lg border border-border object-cover"
+                          />
+                        ) : (
+                          <div className="size-9 shrink-0 rounded-lg border border-dashed border-border bg-muted/50" />
+                        )}
+                        <span className="truncate text-sm font-medium text-foreground">{app.name}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-4">
+                        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                          <input
+                            type="checkbox"
+                            className="size-4 rounded border-border accent-primary"
+                            checked={compareRegistryAppA?.id === app.id}
+                            onChange={(e) => onRegistrySlotCheckbox("a", app, e.target.checked)}
+                          />
+                          {t("compareRegisteredCol1")}
+                        </label>
+                        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
+                          <input
+                            type="checkbox"
+                            className="size-4 rounded border-border accent-primary"
+                            checked={compareRegistryAppB?.id === app.id}
+                            onChange={(e) => onRegistrySlotCheckbox("b", app, e.target.checked)}
+                          />
+                          {t("compareRegisteredCol2")}
+                        </label>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
             <div className="space-y-2">
               <Label htmlFor="compare-date" className="text-foreground">
                 {t("compareDateLabel")}
@@ -1600,14 +2059,25 @@ function AnalyzeHubConnected() {
                 <option value="90d">{t("datePresetLast90")}</option>
                 <option value="365d">{t("datePresetLast365")}</option>
               </SelectNative>
+              <p className="text-xs text-muted-foreground">{t("compareDateRangePoolHint")}</p>
+            </div>
+            <div className="space-y-2">
+              <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
+              <SegmentedTwo
+                ariaLabel={t("analysisModeLabel")}
+                left={t("analysisModeFast")}
+                right={t("analysisModeRich")}
+                value={analysisMode === "fast" ? "left" : "right"}
+                onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
+              />
             </div>
             <Button
               type="button"
               className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-base font-semibold text-white shadow-md disabled:opacity-50"
-              disabled={!compareHitA || !compareHitB || compareBusy}
+              disabled={!canStartCompare || compareBusy}
               onClick={() => void handleCompareStart()}
             >
-              {t("startCompareCta")}
+              {compareBusy ? tCommon("loading") : t("startCompareCta")}
             </Button>
             <p className="text-xs text-muted-foreground">{tNav("compare")}</p>
           </section>
@@ -1620,7 +2090,7 @@ function AnalyzeHubConnected() {
                 <p className="text-xs font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-200/90">{t("poolBadgeTitle")}</p>
                 <p className="text-3xl font-bold tabular-nums text-foreground">{poolDisplayCount}</p>
                 {isHydratingPool ? (
-                  <p className="mt-1 text-xs font-medium text-orange-800 dark:text-orange-200">Havuza aktarım devam ediyor...</p>
+                  <p className="mt-1 text-xs font-medium text-orange-800 dark:text-orange-200">{t("hydratePoolTitle")}</p>
                 ) : null}
               </div>
               {poolLines.length > 0 ? (
