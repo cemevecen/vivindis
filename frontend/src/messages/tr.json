@@ -204,7 +204,13 @@
     "clearCompare": "Seçimi temizle",
     "heuristicReadyHint": "Bu uygulama için tamamlanmış bir heuristic analizi var (son koşu).",
     "runHeuristicHint": "İçe aktarma tamamlanınca analizi analitik sayfasından çalıştırın.",
-    "backToAnalyze": "Analiz merkezine dön"
+    "backToAnalyze": "Analiz merkezine dön",
+    "splitViewOn": "Bölünmüş görünüm",
+    "splitViewOff": "Özet kartlar",
+    "splitViewHint": "Bölünmüş görünümde iki uygulama yan yana: her sütunda yorum çekme, içe aktarım durumu, analiz başlatma ve kompakt grafikler — sayfadan çıkmadan.",
+    "splitFetchStatusHeading": "Son içe aktarma",
+    "splitNoFetchYet": "Henüz çekim yok — yukarıdaki formdan yorum çekin.",
+    "splitChartsHeading": "Sonuç önizlemesi"
   },
   "dashboard": {
     "title": "Panel",

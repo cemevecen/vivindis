@@ -204,7 +204,13 @@
     "clearCompare": "Clear selection",
     "heuristicReadyHint": "A completed heuristic analysis exists for this app (latest run).",
     "runHeuristicHint": "After import completes, run analysis from the analytics page.",
-    "backToAnalyze": "Back to Analyze hub"
+    "backToAnalyze": "Back to Analyze hub",
+    "splitViewOn": "Split view",
+    "splitViewOff": "Overview cards",
+    "splitViewHint": "Split view shows both apps side by side: start a review pull in each column, watch import status, run analysis, and read compact charts without leaving this page.",
+    "splitFetchStatusHeading": "Latest import",
+    "splitNoFetchYet": "No import yet — submit the form above to pull reviews.",
+    "splitChartsHeading": "Results preview"
   },
   "dashboard": {
     "title": "Dashboard",

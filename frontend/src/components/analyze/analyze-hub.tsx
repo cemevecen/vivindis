@@ -956,7 +956,7 @@ function AnalyzeHubConnected() {
     try {
       if (regA && regB) {
         toast.success(t("compareOpenedRegistryPair"));
-        router.push(`/compare?app_a=${regA.id}&app_b=${regB.id}`);
+        router.push(`/compare?app_a=${regA.id}&app_b=${regB.id}&split=1`);
         return;
       }
       if (hitA && hitB) {
@@ -972,7 +972,7 @@ function AnalyzeHubConnected() {
         });
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareCreatedBoth", { a: a.name, b: b.name }));
-        router.push(`/compare?app_a=${a.id}&app_b=${b.id}`);
+        router.push(`/compare?app_a=${a.id}&app_b=${b.id}&split=1`);
         return;
       }
       if (regA && hitB) {
@@ -983,7 +983,7 @@ function AnalyzeHubConnected() {
         });
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareMixedCreatedOne", { created: b.name, existing: regA.name }));
-        router.push(`/compare?app_a=${regA.id}&app_b=${b.id}`);
+        router.push(`/compare?app_a=${regA.id}&app_b=${b.id}&split=1`);
         return;
       }
       if (hitA && regB) {
@@ -994,7 +994,7 @@ function AnalyzeHubConnected() {
         });
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareMixedCreatedOne", { created: a.name, existing: regB.name }));
-        router.push(`/compare?app_a=${a.id}&app_b=${regB.id}`);
+        router.push(`/compare?app_a=${a.id}&app_b=${regB.id}&split=1`);
         return;
       }
       toast.error(t("compareNeedBothSlots"));

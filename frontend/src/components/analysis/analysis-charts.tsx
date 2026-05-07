@@ -39,9 +39,11 @@ type BlockProps = {
     empty: string;
     failed: string;
   };
+  /** Dar sütun (karşılaştırma split görünümü): grafikleri dikey istifle, yüksekliği azalt. */
+  compact?: boolean;
 };
 
-function ChartBlock({ title, analysis, labels }: BlockProps) {
+function ChartBlock({ title, analysis, labels, compact = false }: BlockProps) {
   if (!analysis) {
     return (
       <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
@@ -77,6 +79,8 @@ function ChartBlock({ title, analysis, labels }: BlockProps) {
   const ratings = ratingsFromResult(result);
   const topics = topicsFromResult(result, 8);
   const score = overallScoreFromResult(result);
+  const chartH = compact ? 160 : 200;
+  const pieR = compact ? 52 : 70;
 
   return (
     <section className="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
@@ -92,12 +96,12 @@ function ChartBlock({ title, analysis, labels }: BlockProps) {
         ) : null}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="min-h-[220px]">
+      <div className={compact ? "grid grid-cols-1 gap-4" : "grid gap-6 lg:grid-cols-3"}>
+        <div className={compact ? "min-h-[180px]" : "min-h-[220px]"}>
           <p className="mb-2 text-xs font-medium text-muted-foreground">{labels.sentiment}</p>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={chartH}>
             <PieChart>
-              <Pie dataKey="value" data={sentiment} nameKey="name" cx="50%" cy="50%" outerRadius={70}>
+              <Pie dataKey="value" data={sentiment} nameKey="name" cx="50%" cy="50%" outerRadius={pieR}>
                 {sentiment.map((entry) => (
                   <Cell key={entry.name} fill={SENTIMENT_COLORS[entry.name] ?? "hsl(var(--muted-foreground))"} />
                 ))}
@@ -108,9 +112,9 @@ function ChartBlock({ title, analysis, labels }: BlockProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="min-h-[220px] lg:col-span-1">
+        <div className={compact ? "min-h-[180px]" : "min-h-[220px] lg:col-span-1"}>
           <p className="mb-2 text-xs font-medium text-muted-foreground">{labels.ratings}</p>
-          <ResponsiveContainer width="100%" height={200}>
+          <ResponsiveContainer width="100%" height={chartH}>
             <BarChart data={ratings}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="rating" tick={{ fontSize: 11 }} />
@@ -121,10 +125,10 @@ function ChartBlock({ title, analysis, labels }: BlockProps) {
           </ResponsiveContainer>
         </div>
 
-        <div className="min-h-[220px] lg:col-span-1">
+        <div className={compact ? "min-h-[180px]" : "min-h-[220px] lg:col-span-1"}>
           <p className="mb-2 text-xs font-medium text-muted-foreground">{labels.topics}</p>
           {topics.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={chartH}>
               <BarChart data={topics} layout="vertical" margin={{ left: 4, right: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
                 <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
@@ -152,14 +156,16 @@ type Props = {
   heuristic?: AnalysisDto;
   ai?: AnalysisDto;
   chartLabels: BlockProps["labels"] & { heuristicTitle: string; aiTitle: string };
+  /** İki uygulamayı yan yana gösterirken her sütunda dar grafik düzeni. */
+  splitPane?: boolean;
 };
 
-export function AnalysisCharts({ heuristic, ai, chartLabels }: Props) {
+export function AnalysisCharts({ heuristic, ai, chartLabels, splitPane = false }: Props) {
   const { heuristicTitle, aiTitle, ...labels } = chartLabels;
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <ChartBlock title={heuristicTitle} analysis={heuristic} labels={labels} />
-      <ChartBlock title={aiTitle} analysis={ai} labels={labels} />
+    <div className={splitPane ? "grid grid-cols-1 gap-4" : "grid gap-6 lg:grid-cols-2"}>
+      <ChartBlock title={heuristicTitle} analysis={heuristic} labels={labels} compact={splitPane} />
+      <ChartBlock title={aiTitle} analysis={ai} labels={labels} compact={splitPane} />
     </div>
   );
 }
