@@ -8,7 +8,7 @@ export async function SiteFooter() {
   const tNav = await getTranslations("navigation");
 
   return (
-    <footer className="shrink-0 border-t border-border bg-background/95">
+    <footer className="shrink-0 border-t border-border bg-neutral-100/95 dark:bg-zinc-900/95">
       <div className="mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-4 overflow-x-auto px-4 py-6 sm:gap-x-8">
         <p className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">{t("rights")}</p>
         <Link
