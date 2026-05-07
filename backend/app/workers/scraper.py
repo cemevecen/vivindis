@@ -330,7 +330,9 @@ async def _scrape_locale_score(
                 at = at.replace(tzinfo=UTC)
             
             if at and (at.date() < lo or at.date() > hi):
-                if at.date() < lo: return inserted
+                if at.date() < lo:
+                    await session.commit()
+                    return inserted
                 continue
             
             rid = str(rev.get("reviewId") or "")[:255]
