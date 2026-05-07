@@ -27,6 +27,22 @@ def _play_store_url(package_name: str) -> str:
     return f"https://play.google.com/store/apps/details?id={package_name}"
 
 
+_PLAY_SEARCH_APP_ID_ALIASES: dict[tuple[str, str], str] = {
+    # google_play_scraper.search sometimes returns this top result with appId=None.
+    ("sofascore: canlı skor", "sofascore"): "com.sofascore.results",
+    ("sofascore: live sports scores", "sofascore"): "com.sofascore.results",
+}
+
+
+def _infer_play_app_id(row: dict[str, Any]) -> str:
+    app_id = str(row.get("appId") or "").strip()
+    if app_id:
+        return app_id
+    title = str(row.get("title") or "").strip().lower()
+    developer = str(row.get("developer") or "").strip().lower()
+    return _PLAY_SEARCH_APP_ID_ALIASES.get((title, developer), "")
+
+
 def _app_store_url(country: str, track_id: str, fallback: str | None) -> str:
     if fallback and fallback.startswith("http"):
         return fallback
@@ -51,7 +67,7 @@ def _google_play_rows_from_raw(raw: list[dict[str, Any]]) -> list[StoreSearchRes
         if not isinstance(row, dict):
             continue
         try:
-            app_id = str(row.get("appId") or "").strip()
+            app_id = _infer_play_app_id(row)
             if not app_id:
                 continue
             score = row.get("score")
