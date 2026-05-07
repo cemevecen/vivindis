@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
-import { useSearchParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
@@ -54,9 +54,15 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   const locale = useLocale();
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+  const params = useParams();
+  const routeIdRaw = params?.id;
+  const routeId = Array.isArray(routeIdRaw) ? routeIdRaw[0] : routeIdRaw;
+  /** Rota değişince prop bazen gecikebiliyor; client `useParams` kaynak alınır. */
+  const effectiveAppId =
+    typeof routeId === "string" && routeId.length > 0 ? routeId : appId;
   const searchParams = useSearchParams();
   const pairParam = searchParams.get("pair_app_id")?.trim() ?? "";
-  const pairValid = Boolean(pairParam && UUID_RE.test(pairParam) && pairParam !== appId);
+  const pairValid = Boolean(pairParam && UUID_RE.test(pairParam) && pairParam !== effectiveAppId);
 
   const pairAppQuery = useQuery({
     queryKey: queryKeys.apps.detail(pairParam),
@@ -86,14 +92,14 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   const queries = useQueries({
     queries: [
       {
-        queryKey: queryKeys.apps.detail(appId),
-        queryFn: () => apiFetch<AppDto>(`/api/v1/apps/${appId}`, { getToken }),
-        enabled: clerkEnabled && Boolean(appId),
+        queryKey: queryKeys.apps.detail(effectiveAppId),
+        queryFn: () => apiFetch<AppDto>(`/api/v1/apps/${effectiveAppId}`, { getToken }),
+        enabled: clerkEnabled && Boolean(effectiveAppId),
       },
       {
-        queryKey: queryKeys.apps.fetches(appId),
-        queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${appId}/fetches`, { getToken }),
-        enabled: clerkEnabled && Boolean(appId),
+        queryKey: queryKeys.apps.fetches(effectiveAppId),
+        queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${effectiveAppId}/fetches`, { getToken }),
+        enabled: clerkEnabled && Boolean(effectiveAppId),
       },
     ],
   });
@@ -103,7 +109,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   const allAppsQuery = useQuery({
     queryKey: queryKeys.apps.all,
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
-    enabled: clerkEnabled && Boolean(appId),
+    enabled: clerkEnabled && Boolean(effectiveAppId),
   });
 
   const duplicateApps = useMemo(() => {
@@ -123,8 +129,8 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
       }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.detail(appId) });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.detail(effectiveAppId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(effectiveAppId) });
       toast.success(t("deleteSuccess"));
     },
     onError: (error) => {
@@ -194,7 +200,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
               {t("pairBannerOpenPartner")}
             </Link>
             <Link
-              href={`/compare?app_a=${appId}&app_b=${pairParam}`}
+              href={`/compare?app_a=${effectiveAppId}&app_b=${pairParam}`}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               {t("pairBannerCompare")}
@@ -275,7 +281,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
         </div>
       </div>
 
-      <StartFetchForm appId={appId} />
+      <StartFetchForm appId={effectiveAppId} />
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium">{t("fetchList")}</h2>
@@ -321,7 +327,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
                           : t("statusFailed")}
                   </span>
                   <Link
-                    href={`/apps/${appId}/analysis?fetchId=${row.id}`}
+                    href={`/apps/${effectiveAppId}/analysis?fetchId=${row.id}`}
                     className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                   >
                     {ta("viewAnalytics")}
