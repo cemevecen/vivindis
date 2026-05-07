@@ -52,10 +52,14 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
           <ChevronDown className="size-3.5 opacity-70" aria-hidden />
         </Menu.Trigger>
         <Menu.Portal>
-          <Menu.Positioner className="outline-none" sideOffset={8} align="end">
+          <Menu.Positioner
+            className="z-50 outline-none"
+            sideOffset={8}
+            align="end"
+          >
             <Menu.Popup
               className={cn(
-                "z-50 min-w-[9rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md",
+                "min-w-[9rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md",
               )}
             >
               <Menu.RadioGroup
