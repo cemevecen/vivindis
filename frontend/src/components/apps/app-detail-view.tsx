@@ -197,9 +197,11 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
                   <p>
                     {dateFmt.format(parseApiDate(row.from_date))} — {dateFmt.format(parseApiDate(row.to_date))}
                   </p>
-                  <p className="text-muted-foreground">
-                    {t("reviews")}: {row.review_count}
-                  </p>
+                  {row.status === "pending" || row.status === "running" ? null : (
+                    <p className="text-muted-foreground">
+                      {t("reviews")}: {row.review_count}
+                    </p>
+                  )}
                   {row.status === "failed" && row.error_message ? (
                     <p className="text-xs text-destructive">
                       {t("fetchError")}: {row.error_message}

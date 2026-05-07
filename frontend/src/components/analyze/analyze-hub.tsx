@@ -126,11 +126,9 @@ function AnalyzeHubConnected() {
   const pinnedPanelRef = useRef<HTMLDivElement>(null);
   const lastFetchHydratedToPoolRef = useRef<string | null>(null);
   const hydrateRunTokenRef = useRef(0);
-  const fetchCountSamplesRef = useRef<Array<{ ts: number; count: number }>>([]);
   const storeFetchFailedToastRef = useRef<string | null>(null);
   const storeFetchPollErrorToastRef = useRef<string | null>(null);
   const progressEventKeysRef = useRef<Set<string>>(new Set());
-  const lastRunningCountRef = useRef<number>(0);
 
   const requireSignedIn = useCallback(() => {
     if (!isLoaded) {
@@ -195,8 +193,6 @@ function AnalyzeHubConnected() {
 
   const resetFetchProgressTimeline = useCallback(() => {
     progressEventKeysRef.current = new Set();
-    lastRunningCountRef.current = 0;
-    fetchCountSamplesRef.current = [];
     setFetchProgressEvents([]);
   }, []);
 
@@ -297,16 +293,6 @@ function AnalyzeHubConnected() {
         label: t("fetchEventWorkerStartedLabel"),
         reason: t("fetchEventWorkerStartedReason"),
       });
-      const count = row.review_count ?? 0;
-      if (count > 0 && count !== lastRunningCountRef.current) {
-        lastRunningCountRef.current = count;
-        addFetchProgressEvent({
-          key: `${storeFetchId}:running-count:${count}`,
-          at: isoNow,
-          label: t("fetchEventReviewsCountLabel", { count }),
-          reason: t("fetchEventReviewsCountReason"),
-        });
-      }
       return;
     }
     if (row.status === "completed") {
@@ -555,23 +541,6 @@ function AnalyzeHubConnected() {
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
   const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
 
-  useEffect(() => {
-    const row = fetchRowQuery.data;
-    if (!row || !storeFetchId || row.id !== storeFetchId || row.status !== "running") {
-      return;
-    }
-    const now = Date.now();
-    const count = Math.max(0, row.review_count ?? 0);
-    const prev = fetchCountSamplesRef.current[fetchCountSamplesRef.current.length - 1];
-    if (prev && prev.count === count) {
-      return;
-    }
-    fetchCountSamplesRef.current.push({ ts: now, count });
-    if (fetchCountSamplesRef.current.length > 40) {
-      fetchCountSamplesRef.current.shift();
-    }
-  }, [fetchRowQuery.data, storeFetchId]);
-
   const historicalAvgDurationSec = useMemo(() => {
     const rows = appFetchesQuery.data ?? [];
     const completed = rows
@@ -609,28 +578,7 @@ function AnalyzeHubConnected() {
     if (!row || row.status !== "running" || !storeFetchId || row.id !== storeFetchId) {
       return null;
     }
-    const samples = fetchCountSamplesRef.current;
-    if (samples.length < 2) {
-      return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
-    }
-    const first = samples.at(0);
-    const last = samples.at(-1);
-    if (first === undefined || last === undefined) {
-      return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
-    }
-    const deltaCount = last.count - first.count;
-    const deltaSec = Math.max(1, Math.floor((last.ts - first.ts) / 1000));
-    const speed = deltaCount / deltaSec;
-    const currentCount = Math.max(0, row.review_count ?? 0);
-
-    if (speed <= 0.01) {
-      return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
-    }
-
-    const projectedTotalBySpeed = currentCount + speed * Math.max(30, historicalAvgDurationSec * 0.8);
-    const projectedTotal = Math.max(currentCount + 25, Math.floor(projectedTotalBySpeed));
-    const remaining = Math.max(0, projectedTotal - currentCount);
-    return Math.floor(remaining / speed);
+    return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
   }, [fetchElapsedSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
 
   const fetchDynamicHint = useMemo(() => {
@@ -642,10 +590,7 @@ function AnalyzeHubConnected() {
       return t("fetchHintPending");
     }
     if (row.status === "running") {
-      const count = row.review_count ?? 0;
-      return count > 0
-        ? t("fetchHintRunningWithCount", { count })
-        : t("fetchHintRunningNoCount");
+      return t("fetchHintRunningNoCount");
     }
     if (row.status === "completed") {
       return t("fetchHintCompleted", { count: row.review_count ?? 0 });
@@ -660,9 +605,6 @@ function AnalyzeHubConnected() {
     }
     if (row.status === "pending") {
       return t("fetchStage1");
-    }
-    if (row.status === "running" && (row.review_count ?? 0) === 0) {
-      return t("fetchStage2");
     }
     if (row.status === "running") {
       return t("fetchStage3");
@@ -1220,8 +1162,7 @@ function AnalyzeHubConnected() {
                         </p>
                       </div>
                     </div>
-                    {(fetchRowQuery.data?.review_count ?? 0) > 0 ||
-                    fetchRowQuery.data?.status === "completed" ? (
+                    {fetchRowQuery.data?.status === "completed" ? (
                       <div className="rounded-xl border border-border bg-card/80 px-3 py-2 sm:max-w-md">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {t("progressSectionCollected")}

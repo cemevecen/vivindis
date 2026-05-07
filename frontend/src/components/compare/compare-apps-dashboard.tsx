@@ -159,9 +159,11 @@ function CompareAppSplitPane({
                     : tApps("statusFailed")}
             </span>
           </div>
-          <p className="mt-2 text-xs text-muted-foreground">
-            {tApps("reviews")}: {fetchRow.review_count}
-          </p>
+          {fetchRow.status === "pending" || fetchRow.status === "running" ? null : (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {tApps("reviews")}: {fetchRow.review_count}
+            </p>
+          )}
           {fetchRow.status === "failed" && fetchRow.error_message ? (
             <p className="mt-2 text-xs text-destructive">{fetchRow.error_message}</p>
           ) : null}
@@ -352,10 +354,12 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       <h2 className="mt-1 text-xl font-semibold tracking-tight">{app.name}</h2>
       <p className="mt-1 font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
       <dl className="mt-4 space-y-2 text-sm">
-        <div className="flex justify-between gap-2">
-          <dt className="text-muted-foreground">{tApps("reviews")}</dt>
-          <dd>{fetchRow?.review_count ?? "—"}</dd>
-        </div>
+        {fetchRow && (fetchRow.status === "pending" || fetchRow.status === "running") ? null : (
+          <div className="flex justify-between gap-2">
+            <dt className="text-muted-foreground">{tApps("reviews")}</dt>
+            <dd>{fetchRow?.review_count ?? "—"}</dd>
+          </div>
+        )}
         <div className="flex justify-between gap-2">
           <dt className="text-muted-foreground">{tApps("status")}</dt>
           <dd>{fetchRow ? fetchRow.status : "—"}</dd>

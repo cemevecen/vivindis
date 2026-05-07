@@ -74,6 +74,7 @@ type Props = {
 
 export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const t = useTranslations("analysis");
+  const tAnalyzeHub = useTranslations("analyzeHub");
   const tDash = useTranslations("dashboard");
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
@@ -373,7 +374,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     fetch.status === "pending"
       ? t("liveStatusPending")
       : fetch.status === "running"
-        ? t("liveStatusRunning", { count: fetch.review_count })
+        ? tAnalyzeHub("fetchHintRunningNoCount")
         : busy
           ? t("liveStatusAnalyzing")
           : t("liveStatusReady");
@@ -432,9 +433,11 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                   : tApps("statusFailed")}
           </span>
         </div>
-        <p className="mt-2 text-xs text-muted-foreground">
-          {tApps("reviews")}: {fetch.review_count}
-        </p>
+        {fetch.status === "pending" || fetch.status === "running" ? null : (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {tApps("reviews")}: {fetch.review_count}
+          </p>
+        )}
         {fetch.status === "completed" && fetch.review_count === 0 ? (
           <p className="mt-2 text-xs text-amber-700">{t("noReviewsInRange")}</p>
         ) : null}
