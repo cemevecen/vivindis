@@ -5,5 +5,5 @@ type Props = {
 };
 
 export default function LocaleHomePage({ params }: Props) {
-  redirect(`/${params.locale}/dashboard`);
+  redirect(`/${params.locale}/analyze`);
 }
