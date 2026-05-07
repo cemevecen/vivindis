@@ -106,6 +106,8 @@ function AnalyzeHubConnected() {
   /** Havuz: dosya/metin satırları (mağaza çekimi tamamlanınca sayaç ayrıca fetch.review_count ile birleşir). */
   const [poolLines, setPoolLines] = useState<string[]>([]);
   const [hydratedReviews, setHydratedReviews] = useState<HydratedReviewItem[]>([]);
+  const [isHydratingPool, setIsHydratingPool] = useState(false);
+  const [hydratedPoolCount, setHydratedPoolCount] = useState(0);
   const [fileLabel, setFileLabel] = useState("");
   const [fileDragOver, setFileDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -320,6 +322,8 @@ function AnalyzeHubConnected() {
     let cancelled = false;
     const appId = sessionApp.id;
     void (async () => {
+      setIsHydratingPool(true);
+      setHydratedPoolCount(0);
       try {
         addFetchProgressEvent({
           key: `${storeFetchId}:hydrate-start`,
@@ -345,6 +349,7 @@ function AnalyzeHubConnected() {
               bodies.push(text);
             }
           }
+          setHydratedPoolCount(bodies.length);
           offset += chunk.items.length;
           if (cancelled) {
             return;
@@ -369,6 +374,10 @@ function AnalyzeHubConnected() {
         if (!cancelled) {
           const detail = e instanceof ApiError ? e.message : tCommon("error");
           toast.error(t("storeReviewsHydrateFailed", { detail }));
+        }
+      } finally {
+        if (!cancelled) {
+          setIsHydratingPool(false);
         }
       }
     })();
@@ -436,6 +445,8 @@ function AnalyzeHubConnected() {
     setStoreFetchId(null);
     setIsPinningStore(false);
     setHydratedReviews([]);
+    setIsHydratingPool(false);
+    setHydratedPoolCount(0);
   }, []);
 
   const clearStorePin = useCallback(() => {
@@ -447,6 +458,8 @@ function AnalyzeHubConnected() {
     setStoreFetchId(null);
     setIsPinningStore(false);
     setHydratedReviews([]);
+    setIsHydratingPool(false);
+    setHydratedPoolCount(0);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
@@ -459,6 +472,8 @@ function AnalyzeHubConnected() {
       setSelectedStoreHit(hit);
       setStoreFetchId(null);
       setHydratedReviews([]);
+      setIsHydratingPool(false);
+      setHydratedPoolCount(0);
       try {
         const app = await apiFetch<AppDto>("/api/v1/apps", {
           method: "POST",
@@ -502,6 +517,8 @@ function AnalyzeHubConnected() {
     setStoreFetchId(null);
     setPoolLines([]);
     setHydratedReviews([]);
+    setIsHydratingPool(false);
+    setHydratedPoolCount(0);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
@@ -1097,6 +1114,18 @@ function AnalyzeHubConnected() {
                     {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
                   </p>
                 ) : null}
+                {isHydratingPool ? (
+                  <div className="space-y-2 rounded-xl border border-orange-200 bg-orange-50/70 p-3">
+                    <p className="text-sm font-semibold text-orange-900">Yorumlar havuza aktarılıyor...</p>
+                    <p className="text-xs text-orange-800">
+                      Aktarılan satır: {hydratedPoolCount}
+                      {fetchRowQuery.data?.review_count ? ` / ${fetchRowQuery.data.review_count}` : ""}
+                    </p>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100">
+                      <div className="h-full w-1/3 animate-pulse rounded-full bg-orange-500" />
+                    </div>
+                  </div>
+                ) : null}
                 {hydratedReviews.length > 0 ? (
                   <details className="rounded-xl border border-slate-200 bg-white/80 p-3">
                     <summary className="cursor-pointer select-none text-sm font-semibold text-slate-800">
@@ -1427,6 +1456,9 @@ function AnalyzeHubConnected() {
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/80">{t("poolBadgeTitle")}</p>
                 <p className="text-3xl font-bold tabular-nums text-slate-900">{poolDisplayCount}</p>
+                {isHydratingPool ? (
+                  <p className="mt-1 text-xs font-medium text-orange-800">Havuza aktarım devam ediyor...</p>
+                ) : null}
               </div>
               {poolLines.length > 0 ? (
                 <Button
@@ -1437,6 +1469,8 @@ function AnalyzeHubConnected() {
                   onClick={() => {
                     setPoolLines([]);
                     setHydratedReviews([]);
+                    setIsHydratingPool(false);
+                    setHydratedPoolCount(0);
                   }}
                 >
                   {t("clearManualPool")}
