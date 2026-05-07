@@ -1,21 +1,23 @@
 "use client";
 
-import { Menu } from "@base-ui/react/menu";
-import { Check, ChevronDown, Monitor, Moon, Sun } from "lucide-react";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/utils";
 
+type ThemeChoice = "light" | "dark" | "system";
+
 type ThemeToggleProps = {
   className?: string;
 };
 
-const itemClassName = cn(
-  "flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none",
-  "data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground",
-);
+const choices: { value: ThemeChoice; Icon: typeof Sun; labelKey: "themeLight" | "themeDark" | "themeSystem" }[] = [
+  { value: "light", Icon: Sun, labelKey: "themeLight" },
+  { value: "dark", Icon: Moon, labelKey: "themeDark" },
+  { value: "system", Icon: Monitor, labelKey: "themeSystem" },
+];
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const t = useTranslations("common");
@@ -29,86 +31,53 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
   if (!mounted) {
     return (
       <div
-        className={cn("h-9 w-[4.25rem] shrink-0 rounded-md border border-border bg-muted/40", className)}
+        className={cn(
+          "inline-flex h-9 shrink-0 gap-0.5 rounded-lg border border-border bg-muted/40 p-0.5",
+          className,
+        )}
         aria-hidden
-      />
+      >
+        {choices.map((c) => (
+          <div key={c.value} className="size-8 shrink-0 rounded-md bg-muted/60" />
+        ))}
+      </div>
     );
   }
 
-  const current = theme ?? "system";
-  const TriggerIcon = current === "dark" ? Moon : current === "light" ? Sun : Monitor;
+  const current: ThemeChoice =
+    theme === "light" || theme === "dark" || theme === "system" ? theme : "system";
 
   return (
-    <div className={cn(className)}>
-      <Menu.Root>
-        <Menu.Trigger
-          className={cn(
-            "inline-flex h-9 shrink-0 items-center gap-1 rounded-md border border-input bg-background px-2 py-1.5 text-foreground shadow-sm outline-none transition-colors",
-            "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
-          )}
-          aria-label={t("themeLabel")}
-        >
-          <TriggerIcon className="size-4" aria-hidden />
-          <ChevronDown className="size-3.5 opacity-70" aria-hidden />
-        </Menu.Trigger>
-        <Menu.Portal>
-          <Menu.Positioner
-            className="z-50 outline-none"
-            sideOffset={8}
-            align="end"
+    <div
+      className={cn(
+        "inline-flex h-9 shrink-0 items-center rounded-lg border border-input bg-muted/50 p-0.5 shadow-sm",
+        className,
+      )}
+      role="group"
+      aria-label={t("themeLabel")}
+    >
+      {choices.map(({ value, Icon, labelKey }) => {
+        const active = current === value;
+        return (
+          <button
+            key={value}
+            type="button"
+            className={cn(
+              "inline-flex size-8 shrink-0 items-center justify-center rounded-md outline-none transition-colors",
+              "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              active
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:bg-background/70 hover:text-foreground",
+            )}
+            aria-pressed={active}
+            aria-label={t(labelKey)}
+            title={t(labelKey)}
+            onClick={() => setTheme(value)}
           >
-            <Menu.Popup
-              className={cn(
-                "min-w-[9rem] rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md",
-              )}
-            >
-              <Menu.RadioGroup
-                value={current}
-                onValueChange={(value) => {
-                  setTheme(String(value));
-                }}
-              >
-                <Menu.RadioItem
-                  value="light"
-                  className={itemClassName}
-                  closeOnClick
-                  label={t("themeLight")}
-                >
-                  <Menu.RadioItemIndicator className="flex size-4 shrink-0 items-center justify-center" keepMounted>
-                    <Check className="size-3.5" aria-hidden />
-                  </Menu.RadioItemIndicator>
-                  <Sun className="size-4 shrink-0" aria-hidden />
-                  <span className="sr-only">{t("themeLight")}</span>
-                </Menu.RadioItem>
-                <Menu.RadioItem
-                  value="dark"
-                  className={itemClassName}
-                  closeOnClick
-                  label={t("themeDark")}
-                >
-                  <Menu.RadioItemIndicator className="flex size-4 shrink-0 items-center justify-center" keepMounted>
-                    <Check className="size-3.5" aria-hidden />
-                  </Menu.RadioItemIndicator>
-                  <Moon className="size-4 shrink-0" aria-hidden />
-                  <span className="sr-only">{t("themeDark")}</span>
-                </Menu.RadioItem>
-                <Menu.RadioItem
-                  value="system"
-                  className={itemClassName}
-                  closeOnClick
-                  label={t("themeSystem")}
-                >
-                  <Menu.RadioItemIndicator className="flex size-4 shrink-0 items-center justify-center" keepMounted>
-                    <Check className="size-3.5" aria-hidden />
-                  </Menu.RadioItemIndicator>
-                  <Monitor className="size-4 shrink-0" aria-hidden />
-                  <span className="sr-only">{t("themeSystem")}</span>
-                </Menu.RadioItem>
-              </Menu.RadioGroup>
-            </Menu.Popup>
-          </Menu.Positioner>
-        </Menu.Portal>
-      </Menu.Root>
+            <Icon className="size-4" aria-hidden />
+          </button>
+        );
+      })}
     </div>
   );
 }
