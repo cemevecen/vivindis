@@ -1,16 +1,18 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { useQueries, useQuery } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useMemo } from "react";
+import { toast } from "sonner";
 
 import { StartFetchForm } from "@/components/apps/start-fetch-form";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
-import { apiFetch } from "@/lib/api";
+import { findDuplicateAppsForApp } from "@/lib/app-dedupe";
+import { ApiError, apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AppDto, FetchStatus, ReviewFetchDto } from "@/types/app";
@@ -51,6 +53,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const { getToken } = useAuth();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const pairParam = searchParams.get("pair_app_id")?.trim() ?? "";
   const pairValid = Boolean(pairParam && UUID_RE.test(pairParam) && pairParam !== appId);
@@ -65,6 +68,16 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
     () =>
       new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
         dateStyle: "medium",
+        timeZone: "UTC",
+      }),
+    [locale],
+  );
+
+  const dateTimeFmt = useMemo(
+    () =>
+      new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
+        dateStyle: "medium",
+        timeStyle: "short",
         timeZone: "UTC",
       }),
     [locale],
@@ -86,6 +99,39 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
   });
 
   const [appQuery, fetchQuery] = queries;
+
+  const allAppsQuery = useQuery({
+    queryKey: queryKeys.apps.all,
+    queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
+    enabled: clerkEnabled && Boolean(appId),
+  });
+
+  const duplicateApps = useMemo(() => {
+    const row = appQuery.data;
+    const all = allAppsQuery.data;
+    if (!row || !all) {
+      return [];
+    }
+    return findDuplicateAppsForApp(all, row);
+  }, [allAppsQuery.data, appQuery.data]);
+
+  const deleteDuplicateMutation = useMutation({
+    mutationFn: (id: string) =>
+      apiFetch<void>(`/api/v1/apps/${id}`, {
+        method: "DELETE",
+        getToken,
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.detail(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      toast.success(t("deleteSuccess"));
+    },
+    onError: (error) => {
+      const message = error instanceof ApiError ? error.message : t("deleteFailed");
+      toast.error(message);
+    },
+  });
 
   if (!clerkEnabled) {
     return (
@@ -159,6 +205,57 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
         <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
           {tCommon("error")}
         </div>
+      ) : null}
+      {duplicateApps.length > 0 ? (
+        <section className="rounded-lg border border-amber-200/80 bg-amber-50/60 p-4 dark:border-amber-900/45 dark:bg-amber-950/25">
+          <h2 className="text-sm font-semibold text-amber-950 dark:text-amber-100">
+            {t("duplicateRegistrationsHeading")}
+          </h2>
+          <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/85">{t("duplicateRegistrationsHint")}</p>
+          <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-card">
+            {duplicateApps.map((d) => (
+              <li
+                key={d.id}
+                className="flex flex-col gap-2 px-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="min-w-0 space-y-0.5">
+                  <p className="truncate font-medium text-foreground">{d.name || t("detailTitle")}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {t("duplicateSavedAt", {
+                      date: dateTimeFmt.format(new Date(d.created_at)),
+                    })}
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <Link
+                    href={`/apps/${d.id}`}
+                    className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                  >
+                    {t("duplicateOpen")}
+                  </Link>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                    disabled={deleteDuplicateMutation.isPending}
+                    onClick={() => {
+                      const ok = window.confirm(
+                        t("deleteConfirm", { name: d.name || t("detailTitle") }),
+                      );
+                      if (!ok) {
+                        return;
+                      }
+                      deleteDuplicateMutation.mutate(d.id);
+                    }}
+                  >
+                    {t("duplicateDelete")}
+                  </Button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { AppList } from "@/components/apps/app-list";
 import { AppsSkeleton } from "@/components/apps/apps-skeleton";
 import { Button } from "@/components/ui/button";
+import { dedupeAppsForList } from "@/lib/app-dedupe";
 import { ApiError, apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import type { AppDto } from "@/types/app";
@@ -69,9 +70,11 @@ function AppsConnectedList() {
     );
   }
 
+  const apps = dedupeAppsForList(query.data ?? []);
+
   return (
     <AppList
-      apps={query.data ?? []}
+      apps={apps}
       deletingAppId={deleteMutation.isPending ? deleteMutation.variables ?? null : null}
       onDeleteApp={handleDeleteApp}
     />

@@ -30,6 +30,7 @@ import {
   type ReviewScope,
   type SearchPlatform,
 } from "@/lib/analyze-hub-utils";
+import { dedupeAppsForList } from "@/lib/app-dedupe";
 import { parseReviewFile } from "@/lib/parse-review-file";
 import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
@@ -176,6 +177,11 @@ function AnalyzeHubConnected() {
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
     enabled: Boolean(isSignedIn),
   });
+
+  const registeredAppsDeduped = useMemo(
+    () => dedupeAppsForList(appsQuery.data ?? []),
+    [appsQuery.data],
+  );
 
   const appFetchesQuery = useQuery({
     queryKey: sessionApp ? queryKeys.apps.fetches(sessionApp.id) : ["analyzeHub", "fetches", "idle"],
@@ -728,11 +734,10 @@ function AnalyzeHubConnected() {
   const iosHits = useMemo(() => results.filter((r) => r.platform === "app_store"), [results]);
 
   const appChoices = useMemo(() => {
-    const list = appsQuery.data ?? [];
-    if (sessionApp && !list.some((a) => a.id === sessionApp.id)) {
-      return [sessionApp, ...list];
-    }
-    return list;
+    const raw = appsQuery.data ?? [];
+    const merged =
+      sessionApp && !raw.some((a) => a.id === sessionApp.id) ? [sessionApp, ...raw] : raw;
+    return dedupeAppsForList(merged, { preferAppId: sessionApp?.id ?? null });
   }, [appsQuery.data, sessionApp]);
 
   const processFile = async (file: File | null) => {
@@ -1466,10 +1471,10 @@ function AnalyzeHubConnected() {
                     }
                   }}
                   className="rounded-xl"
-                  disabled={!appsQuery.data?.length}
+                  disabled={!registeredAppsDeduped.length}
                 >
                   <option value="">{t("compareRegisteredSelectPlaceholder")}</option>
-                  {(appsQuery.data ?? []).map((app) => (
+                  {registeredAppsDeduped.map((app) => (
                     <option key={app.id} value={app.id}>
                       {app.name}
                     </option>
@@ -1656,10 +1661,10 @@ function AnalyzeHubConnected() {
                     }
                   }}
                   className="rounded-xl"
-                  disabled={!appsQuery.data?.length}
+                  disabled={!registeredAppsDeduped.length}
                 >
                   <option value="">{t("compareRegisteredSelectPlaceholder")}</option>
-                  {(appsQuery.data ?? []).map((app) => (
+                  {registeredAppsDeduped.map((app) => (
                     <option key={app.id} value={app.id}>
                       {app.name}
                     </option>
@@ -1827,12 +1832,12 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
             </div>
-            {appsQuery.data && appsQuery.data.length > 0 ? (
+            {registeredAppsDeduped.length > 0 ? (
               <div className="space-y-2 rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <p className="text-sm font-semibold text-foreground">{t("compareRegisteredListTitle")}</p>
                 <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
                 <ul className="max-h-56 divide-y divide-border overflow-y-auto rounded-xl border border-border">
-                  {appsQuery.data.map((app) => (
+                  {registeredAppsDeduped.map((app) => (
                     <li key={app.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
                       <div className="flex min-w-0 flex-1 items-center gap-2">
                         {app.icon_url ? (

@@ -8,6 +8,7 @@ import { AppsSkeleton } from "@/components/apps/apps-skeleton";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
+import { dedupeAppsForList } from "@/lib/app-dedupe";
 import { apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
@@ -73,7 +74,7 @@ function DashboardConnected() {
     );
   }
 
-  const count = query.data?.length ?? 0;
+  const count = dedupeAppsForList(query.data ?? []).length;
 
   return (
     <div className="space-y-4 rounded-lg border border-border bg-card p-6 shadow-sm">

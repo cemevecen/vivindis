@@ -282,7 +282,12 @@
     "deleteShort": "Sil",
     "deleteConfirm": "“{name}” uygulamasını silmek istiyor musunuz? Bu işlem yorumları ve analizleri de kaldırır.",
     "deleteSuccess": "Uygulama silindi",
-    "deleteFailed": "Uygulama silinemedi."
+    "deleteFailed": "Uygulama silinemedi.",
+    "duplicateRegistrationsHeading": "Aynı uygulamanın ek kayıtları",
+    "duplicateRegistrationsHint": "Aynı mağaza tanımlayıcıları birden fazla kez kaydedilmiş. Uygulamalar listesinde mağaza başına tek kart gösterilir; fazla kayıtları burada açabilir veya silebilirsiniz.",
+    "duplicateOpen": "Aç",
+    "duplicateDelete": "Bu kaydı sil",
+    "duplicateSavedAt": "Kayıt: {date}"
   },
   "analysis": {
     "startAnalysis": "Analizi başlat",
