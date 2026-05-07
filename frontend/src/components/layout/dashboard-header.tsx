@@ -19,9 +19,6 @@ const clerkEnabled =
   typeof process !== "undefined" &&
   Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
 
-/** Üst menüdeki «Karşılaştır» (/compare) tekrarını gizler; canlı akış Analiz → uygulama karşılaştır. Onay sonrası bu sabiti ve ilgili filtreyi tamamen kaldırın. */
-const SHOW_TOP_NAV_COMPARE_LINK = false;
-
 const analyzeSourceTabs: { id: AnalyzeHubMode; labelKey: "tabStore" | "tabFile" | "tabText" | "tabCompare"; Icon: typeof Store }[] = [
   { id: "store", labelKey: "tabStore", Icon: Store },
   { id: "file", labelKey: "tabFile", Icon: Upload },
@@ -48,9 +45,6 @@ function DashboardHeaderContent() {
     { href: "/dashboard" as const, label: t("dashboard"), Icon: LayoutDashboard },
     { href: "/analyze" as const, label: t("analyze"), Icon: Search },
     { href: "/apps" as const, label: t("apps"), Icon: Smartphone },
-    ...(SHOW_TOP_NAV_COMPARE_LINK
-      ? [{ href: "/compare" as const, label: t("compare"), Icon: GitCompare }]
-      : []),
     { href: "/about" as const, label: t("about"), Icon: Info },
   ];
 
