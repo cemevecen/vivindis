@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, RotateCcw, Search, Upload } from "lucide-react";
+import { ChevronDown, Download, RotateCcw, Search, Upload, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -110,6 +110,7 @@ function AnalyzeHubConnected() {
   const [compareReviewScopeB, setCompareReviewScopeB] = useState<ReviewScope>("global");
   const [compareRegistryAppA, setCompareRegistryAppA] = useState<AppDto | null>(null);
   const [compareRegistryAppB, setCompareRegistryAppB] = useState<AppDto | null>(null);
+  const [compareQuickPickExpanded, setCompareQuickPickExpanded] = useState(true);
   const [compareBusy, setCompareBusy] = useState(false);
 
   const [targetAppId, setTargetAppId] = useState<string>("");
@@ -132,6 +133,7 @@ function AnalyzeHubConnected() {
   const [nowTick, setNowTick] = useState<number>(() => Date.now());
   const [isPinningStore, setIsPinningStore] = useState(false);
   const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
+  const prevCanStartCompareRef = useRef(false);
   const pinRequestRef = useRef(0);
   const sessionAppRef = useRef<AppDto | null>(null);
   const pinnedPanelRef = useRef<HTMLDivElement>(null);
@@ -861,6 +863,16 @@ function AnalyzeHubConnected() {
     setCompareRegistryAppB(null);
   }, []);
 
+  const clearCompareSelectionA = useCallback(() => {
+    setCompareRegistryAppA(null);
+    setCompareHitA(null);
+  }, []);
+
+  const clearCompareSelectionB = useCallback(() => {
+    setCompareRegistryAppB(null);
+    setCompareHitB(null);
+  }, []);
+
   const onRegistrySlotCheckbox = useCallback(
     (side: "a" | "b", app: AppDto, checked: boolean) => {
       if (!checked) {
@@ -907,6 +919,15 @@ function AnalyzeHubConnected() {
     }
     return true;
   }, [compareRegistryAppA, compareRegistryAppB, compareHitA, compareHitB]);
+
+  useEffect(() => {
+    if (!canStartCompare) {
+      setCompareQuickPickExpanded(true);
+    } else if (!prevCanStartCompareRef.current && canStartCompare) {
+      setCompareQuickPickExpanded(false);
+    }
+    prevCanStartCompareRef.current = canStartCompare;
+  }, [canStartCompare]);
 
   const handleCompareStart = async () => {
     if (!requireSignedIn()) {
@@ -1696,9 +1717,21 @@ function AnalyzeHubConnected() {
                 </Button>
                 {compareRegistryAppA ? (
                   <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
-                      {t("compareSelectedSummaryLabel")}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                        {t("compareSelectedSummaryLabel")}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        onClick={clearCompareSelectionA}
+                        aria-label={t("compareRemoveSelectedAppAria")}
+                      >
+                        <X className="size-4" aria-hidden />
+                      </Button>
+                    </div>
                     <div className="mt-2 flex gap-3">
                       {compareRegistryAppA.icon_url ? (
                         // eslint-disable-next-line @next/next/no-img-element -- app icon URL
@@ -1731,9 +1764,21 @@ function AnalyzeHubConnected() {
                 ) : null}
                 {!compareRegistryAppA && compareHitA ? (
                   <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
-                      {t("compareSelectedSummaryLabel")}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                        {t("compareSelectedSummaryLabel")}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        onClick={clearCompareSelectionA}
+                        aria-label={t("compareRemoveSelectedAppAria")}
+                      >
+                        <X className="size-4" aria-hidden />
+                      </Button>
+                    </div>
                     <p className="mt-1 font-semibold text-foreground">{compareHitA.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {compareHitA.platform === "google_play" ? compareHitA.id : `id ${compareHitA.id}`}
@@ -1876,9 +1921,21 @@ function AnalyzeHubConnected() {
                 </Button>
                 {compareRegistryAppB ? (
                   <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
-                      {t("compareSelectedSummaryLabel")}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                        {t("compareSelectedSummaryLabel")}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        onClick={clearCompareSelectionB}
+                        aria-label={t("compareRemoveSelectedAppAria")}
+                      >
+                        <X className="size-4" aria-hidden />
+                      </Button>
+                    </div>
                     <div className="mt-2 flex gap-3">
                       {compareRegistryAppB.icon_url ? (
                         // eslint-disable-next-line @next/next/no-img-element -- app icon URL
@@ -1911,9 +1968,21 @@ function AnalyzeHubConnected() {
                 ) : null}
                 {!compareRegistryAppB && compareHitB ? (
                   <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
-                      {t("compareSelectedSummaryLabel")}
-                    </p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                        {t("compareSelectedSummaryLabel")}
+                      </p>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        onClick={clearCompareSelectionB}
+                        aria-label={t("compareRemoveSelectedAppAria")}
+                      >
+                        <X className="size-4" aria-hidden />
+                      </Button>
+                    </div>
                     <p className="mt-1 font-semibold text-foreground">{compareHitB.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {compareHitB.platform === "google_play" ? compareHitB.id : `id ${compareHitB.id}`}
@@ -1941,45 +2010,75 @@ function AnalyzeHubConnected() {
             </div>
             {registeredAppsDeduped.length > 0 ? (
               <div className="space-y-2 rounded-2xl border border-border bg-card p-4 sm:p-5">
-                <p className="text-sm font-semibold text-foreground">{t("compareRegisteredListTitle")}</p>
-                <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
-                <div className="max-h-[22rem] overflow-y-auto rounded-xl border border-border p-2">
+                <button
+                  type="button"
+                  id="compare-registered-quick-pick-toggle"
+                  className="flex w-full items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
+                  onClick={() => setCompareQuickPickExpanded((open) => !open)}
+                  aria-expanded={compareQuickPickExpanded}
+                  aria-controls="compare-registered-quick-pick-panel"
+                  aria-label={
+                    compareQuickPickExpanded
+                      ? t("compareRegisteredQuickPickCollapse")
+                      : t("compareRegisteredQuickPickExpand")
+                  }
+                >
+                  <span className="text-sm font-semibold text-foreground">{t("compareRegisteredListTitle")}</span>
+                  <ChevronDown
+                    className={cn(
+                      "size-4 shrink-0 opacity-70 transition-transform",
+                      compareQuickPickExpanded && "rotate-180",
+                    )}
+                    aria-hidden
+                  />
+                </button>
+                {compareQuickPickExpanded ? (
                   <div
-                    className="grid gap-2"
-                    style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
+                    id="compare-registered-quick-pick-panel"
+                    role="region"
+                    aria-labelledby="compare-registered-quick-pick-toggle"
+                    className="space-y-2"
                   >
-                    {registeredAppsDeduped.map((app) => (
+                    <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
+                    <div className="max-h-[22rem] overflow-y-auto rounded-xl border border-border p-2">
                       <div
-                        key={app.id}
-                        className="flex flex-col items-center gap-1.5 rounded-lg border border-border/80 bg-card/40 p-2"
+                        className="grid gap-2"
+                        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
                       >
-                        <div className="flex w-full flex-col items-center gap-1">
-                          <RegisteredAppTileVisual app={app} platformLabel={registryPlatformLabel(app.platform)} />
-                        </div>
-                        <div className="flex w-full flex-col gap-1 border-t border-border/60 pt-1.5">
-                          <label className="flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-foreground">
-                            <input
-                              type="checkbox"
-                              className="size-3.5 shrink-0 rounded border-border accent-primary"
-                              checked={compareRegistryAppA?.id === app.id}
-                              onChange={(e) => onRegistrySlotCheckbox("a", app, e.target.checked)}
-                            />
-                            <span className="leading-tight">{t("compareRegisteredCol1")}</span>
-                          </label>
-                          <label className="flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-foreground">
-                            <input
-                              type="checkbox"
-                              className="size-3.5 shrink-0 rounded border-border accent-primary"
-                              checked={compareRegistryAppB?.id === app.id}
-                              onChange={(e) => onRegistrySlotCheckbox("b", app, e.target.checked)}
-                            />
-                            <span className="leading-tight">{t("compareRegisteredCol2")}</span>
-                          </label>
-                        </div>
+                        {registeredAppsDeduped.map((app) => (
+                          <div
+                            key={app.id}
+                            className="flex flex-col items-center gap-1.5 rounded-lg border border-border/80 bg-card/40 p-2"
+                          >
+                            <div className="flex w-full flex-col items-center gap-1">
+                              <RegisteredAppTileVisual app={app} platformLabel={registryPlatformLabel(app.platform)} />
+                            </div>
+                            <div className="flex w-full flex-col gap-1 border-t border-border/60 pt-1.5">
+                              <label className="flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-foreground">
+                                <input
+                                  type="checkbox"
+                                  className="size-3.5 shrink-0 rounded border-border accent-primary"
+                                  checked={compareRegistryAppA?.id === app.id}
+                                  onChange={(e) => onRegistrySlotCheckbox("a", app, e.target.checked)}
+                                />
+                                <span className="leading-tight">{t("compareRegisteredCol1")}</span>
+                              </label>
+                              <label className="flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-foreground">
+                                <input
+                                  type="checkbox"
+                                  className="size-3.5 shrink-0 rounded border-border accent-primary"
+                                  checked={compareRegistryAppB?.id === app.id}
+                                  onChange={(e) => onRegistrySlotCheckbox("b", app, e.target.checked)}
+                                />
+                                <span className="leading-tight">{t("compareRegisteredCol2")}</span>
+                              </label>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
+                ) : null}
               </div>
             ) : null}
             <div className="space-y-2">
