@@ -101,6 +101,7 @@
     "ai": "AI (Gemini)",
     "noAnalysisYet": "No results for this run yet.",
     "analysisError": "Analysis failed",
+    "analysesLoadError": "تعذّر تحميل قائمة التحليلات لهذا التطبيق (404 أو خطأ خادم). حدّث الصفحة أو تحقّق من نشر واجهة API.",
     "viewAnalytics": "Analytics",
     "exportHeading": "Export this run",
     "exportJsonHeuristic": "Heuristic — JSON",
