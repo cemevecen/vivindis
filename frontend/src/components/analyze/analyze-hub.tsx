@@ -64,6 +64,13 @@ function formatDuration(totalSec: number): string {
   return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
 }
 
+const TARGET_APP_UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function formatTargetAppOptionLabel(app: AppDto): string {
+  return `${app.name} — ${app.package_name || app.bundle_id || app.id.slice(0, 8)}`;
+}
+
 function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
   const tNav = useTranslations("navigation");
@@ -105,6 +112,8 @@ function AnalyzeHubConnected() {
   const [compareBusy, setCompareBusy] = useState(false);
 
   const [targetAppId, setTargetAppId] = useState<string>("");
+  const [targetAppPickerText, setTargetAppPickerText] = useState("");
+  const [targetAppPickerOpen, setTargetAppPickerOpen] = useState(false);
   const [pastedText, setPastedText] = useState("");
   /** Havuz: dosya/metin satırları (mağaza çekimi tamamlanınca sayaç ayrıca fetch.review_count ile birleşir). */
   const [poolLines, setPoolLines] = useState<string[]>([]);
@@ -211,6 +220,15 @@ function AnalyzeHubConnected() {
       setTargetAppId(sessionApp.id);
     }
   }, [sessionApp]);
+
+  useEffect(() => {
+    if (!targetAppId) {
+      return;
+    }
+    const all = appsQuery.data ?? [];
+    const row = all.find((a) => a.id === targetAppId);
+    setTargetAppPickerText(row ? formatTargetAppOptionLabel(row) : targetAppId);
+  }, [targetAppId, appsQuery.data]);
 
   const importMutation = useMutation({
     mutationFn: async (payload: { appId: string; items: { body: string; rating?: number }[] }) => {
@@ -464,7 +482,13 @@ function AnalyzeHubConnected() {
   const clearStorePin = useCallback(() => {
     pinRequestRef.current += 1;
     const app = sessionAppRef.current;
-    setTargetAppId((tid) => (app && tid === app.id ? "" : tid));
+    setTargetAppId((tid) => {
+      if (app && tid === app.id) {
+        setTargetAppPickerText("");
+        return "";
+      }
+      return tid;
+    });
     setSelectedStoreHit(null);
     setSessionApp(null);
     setStoreFetchId(null);
@@ -739,6 +763,52 @@ function AnalyzeHubConnected() {
       sessionApp && !raw.some((a) => a.id === sessionApp.id) ? [sessionApp, ...raw] : raw;
     return dedupeAppsForList(merged, { preferAppId: sessionApp?.id ?? null });
   }, [appsQuery.data, sessionApp]);
+
+  const targetAppPickerFiltered = useMemo(() => {
+    const q = targetAppPickerText.trim().toLowerCase();
+    if (!q) {
+      return appChoices;
+    }
+    return appChoices.filter(
+      (a) =>
+        (a.name || "").toLowerCase().includes(q) ||
+        (a.package_name || "").toLowerCase().includes(q) ||
+        (a.bundle_id || "").toLowerCase().includes(q) ||
+        a.id.toLowerCase().includes(q),
+    );
+  }, [appChoices, targetAppPickerText]);
+
+  const commitTargetAppPickerInput = useCallback(
+    (options?: { announceInvalid?: boolean }) => {
+      const raw = targetAppPickerText.trim();
+      if (!raw) {
+        setTargetAppId("");
+        return;
+      }
+      const uuidCandidate = raw.toLowerCase();
+      if (TARGET_APP_UUID_RE.test(uuidCandidate)) {
+        setTargetAppId(uuidCandidate);
+        return;
+      }
+      const exact = appChoices.find((a) => formatTargetAppOptionLabel(a) === raw);
+      if (exact) {
+        setTargetAppId(exact.id);
+        return;
+      }
+      const ci = appChoices.find(
+        (a) => formatTargetAppOptionLabel(a).toLowerCase() === raw.toLowerCase(),
+      );
+      if (ci) {
+        setTargetAppId(ci.id);
+        setTargetAppPickerText(formatTargetAppOptionLabel(ci));
+        return;
+      }
+      if (options?.announceInvalid) {
+        toast.error(t("targetAppUnresolved"));
+      }
+    },
+    [targetAppPickerText, appChoices, t],
+  );
 
   const processFile = async (file: File | null) => {
     setFileLabel("");
@@ -1338,23 +1408,73 @@ function AnalyzeHubConnected() {
         {mode === "file" || mode === "text" ? (
           <section className="space-y-5">
             <p className="text-sm text-muted-foreground">{t("fileTextIntro")}</p>
-            <div className="space-y-2">
-              <Label htmlFor="target-app" className="text-foreground">
+            <div className="relative space-y-2">
+              <Label htmlFor="target-app-picker" className="text-foreground">
                 {t("targetAppLabel")}
               </Label>
-              <SelectNative
-                id="target-app"
-                value={targetAppId}
-                onChange={(e) => setTargetAppId(e.target.value)}
+              <Input
+                id="target-app-picker"
+                autoComplete="off"
                 className="rounded-xl"
-              >
-                <option value="">{t("targetAppPlaceholder")}</option>
-                {appChoices.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.name} — {a.package_name || a.bundle_id || a.id.slice(0, 8)}
-                  </option>
-                ))}
-              </SelectNative>
+                placeholder={t("targetAppPlaceholder")}
+                aria-autocomplete="list"
+                aria-expanded={targetAppPickerOpen}
+                value={targetAppPickerText}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setTargetAppPickerText(v);
+                  if (v.trim() === "") {
+                    setTargetAppId("");
+                    return;
+                  }
+                  const sel = appChoices.find((a) => a.id === targetAppId);
+                  if (sel && v !== formatTargetAppOptionLabel(sel)) {
+                    setTargetAppId("");
+                  }
+                }}
+                onFocus={() => setTargetAppPickerOpen(true)}
+                onBlur={() => {
+                  window.setTimeout(() => {
+                    commitTargetAppPickerInput({ announceInvalid: false });
+                    setTargetAppPickerOpen(false);
+                  }, 160);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    commitTargetAppPickerInput({ announceInvalid: true });
+                    setTargetAppPickerOpen(false);
+                  }
+                  if (e.key === "Escape") {
+                    setTargetAppPickerOpen(false);
+                  }
+                }}
+              />
+              {targetAppPickerOpen && targetAppPickerFiltered.length > 0 ? (
+                <ul
+                  role="listbox"
+                  className="absolute z-50 mt-1 max-h-56 w-full overflow-y-auto rounded-xl border border-border bg-popover py-1 text-popover-foreground shadow-md"
+                >
+                  {targetAppPickerFiltered.map((a) => (
+                    <li key={a.id}>
+                      <button
+                        type="button"
+                        role="option"
+                        aria-selected={targetAppId === a.id}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-muted"
+                        onMouseDown={(ev) => ev.preventDefault()}
+                        onClick={() => {
+                          setTargetAppId(a.id);
+                          setTargetAppPickerText(formatTargetAppOptionLabel(a));
+                          setTargetAppPickerOpen(false);
+                        }}
+                      >
+                        {formatTargetAppOptionLabel(a)}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
               {sessionApp ? (
                 <p className="text-xs text-muted-foreground">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
               ) : null}
