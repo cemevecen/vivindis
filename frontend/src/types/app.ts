@@ -39,8 +39,14 @@ export type ReviewImportResponseDto = {
 
 /** `GET /api/v1/apps/{id}/reviews` — yalnızca havuz doldurmak için kullanılan alanlar. */
 export type ReviewListItemDto = {
+  id: string;
+  store_review_id: string;
+  rating: number;
   body: string;
   title: string | null;
+  review_date: string;
+  platform: "google_play" | "app_store";
+  author: string | null;
 };
 
 export type ReviewListResponseDto = {

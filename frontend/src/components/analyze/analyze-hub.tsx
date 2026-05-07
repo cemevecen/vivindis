@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { FileText, GitCompare, Search, Store, Upload } from "lucide-react";
+import { Download, FileText, GitCompare, Search, Store, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -50,6 +50,8 @@ type FetchProgressEvent = {
   reason: string;
 };
 
+type HydratedReviewItem = ReviewListResponseDto["items"][number];
+
 function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
   const tNav = useTranslations("navigation");
@@ -92,6 +94,7 @@ function AnalyzeHubConnected() {
   const [pastedText, setPastedText] = useState("");
   /** Havuz: dosya/metin satırları (mağaza çekimi tamamlanınca sayaç ayrıca fetch.review_count ile birleşir). */
   const [poolLines, setPoolLines] = useState<string[]>([]);
+  const [hydratedReviews, setHydratedReviews] = useState<HydratedReviewItem[]>([]);
   const [fileLabel, setFileLabel] = useState("");
   const [fileDragOver, setFileDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -308,6 +311,7 @@ function AnalyzeHubConnected() {
         const limit = 100;
         let offset = 0;
         const bodies: string[] = [];
+        const reviewRows: HydratedReviewItem[] = [];
         let total = 0;
         for (;;) {
           const chunk = await apiFetch<ReviewListResponseDto>(
@@ -316,6 +320,7 @@ function AnalyzeHubConnected() {
           );
           total = chunk.total;
           for (const it of chunk.items) {
+            reviewRows.push(it);
             const text = [it.title, it.body].filter(Boolean).join("\n").trim();
             if (text.length > 0) {
               bodies.push(text);
@@ -333,6 +338,7 @@ function AnalyzeHubConnected() {
           return;
         }
         setPoolLines(bodies);
+        setHydratedReviews(reviewRows);
         lastFetchHydratedToPoolRef.current = storeFetchId;
         addFetchProgressEvent({
           key: `${storeFetchId}:hydrate-complete`,
@@ -402,7 +408,7 @@ function AnalyzeHubConnected() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
       router.push(`/apps/${appId}/analysis?fetchId=${fetchId}`);
     },
-    [getToken, queryClient, router, runAnalysisTypes, t],
+    [getToken, queryClient, router, runAnalysisTypes],
   );
 
   const dismissStorePinCard = useCallback(() => {
@@ -410,6 +416,7 @@ function AnalyzeHubConnected() {
     setSelectedStoreHit(null);
     setStoreFetchId(null);
     setIsPinningStore(false);
+    setHydratedReviews([]);
   }, []);
 
   const clearStorePin = useCallback(() => {
@@ -420,6 +427,7 @@ function AnalyzeHubConnected() {
     setSessionApp(null);
     setStoreFetchId(null);
     setIsPinningStore(false);
+    setHydratedReviews([]);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
@@ -431,6 +439,7 @@ function AnalyzeHubConnected() {
       setIsPinningStore(true);
       setSelectedStoreHit(hit);
       setStoreFetchId(null);
+      setHydratedReviews([]);
       try {
         const app = await apiFetch<AppDto>("/api/v1/apps", {
           method: "POST",
@@ -473,6 +482,7 @@ function AnalyzeHubConnected() {
     });
     setStoreFetchId(null);
     setPoolLines([]);
+    setHydratedReviews([]);
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
@@ -480,9 +490,6 @@ function AnalyzeHubConnected() {
   }, [
     addFetchProgressEvent,
     resetFetchProgressTimeline,
-    reviewScope,
-    searchCountry,
-    searchLang,
     sessionApp,
     storePullMutation,
   ]);
@@ -718,6 +725,70 @@ function AnalyzeHubConnected() {
 
   const hideStoreResultGrid = Boolean(selectedStoreHit || isPinningStore);
 
+  const formatReviewDate = useCallback(
+    (iso: string) => {
+      const parsed = Date.parse(iso);
+      if (!Number.isFinite(parsed)) {
+        return iso;
+      }
+      return new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      }).format(new Date(parsed));
+    },
+    [locale],
+  );
+
+  const downloadReviewsCsv = useCallback(() => {
+    if (hydratedReviews.length === 0) {
+      toast.info("İndirilecek yorum bulunamadı.");
+      return;
+    }
+    const quote = (v: string) => `"${v.replace(/"/g, "\"\"")}"`;
+    const rows = [
+      ["index", "platform", "rating", "review_date", "author", "title", "body"],
+      ...hydratedReviews.map((r, idx) => [
+        String(idx + 1),
+        r.platform,
+        String(r.rating),
+        r.review_date,
+        r.author ?? "",
+        r.title ?? "",
+        r.body ?? "",
+      ]),
+    ];
+    const csv = rows.map((row) => row.map((col) => quote(col)).join(",")).join("\n");
+    const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `reviews-${storeFetchId ?? "export"}.csv`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, [hydratedReviews, storeFetchId]);
+
+  const downloadReviewsExcel = useCallback(async () => {
+    if (hydratedReviews.length === 0) {
+      toast.info("İndirilecek yorum bulunamadı.");
+      return;
+    }
+    const XLSX = await import("xlsx");
+    const rows = hydratedReviews.map((r, idx) => ({
+      index: idx + 1,
+      platform: r.platform,
+      rating: r.rating,
+      review_date: r.review_date,
+      author: r.author ?? "",
+      title: r.title ?? "",
+      body: r.body ?? "",
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "reviews");
+    XLSX.writeFile(workbook, `reviews-${storeFetchId ?? "export"}.xlsx`);
+  }, [hydratedReviews, storeFetchId]);
+
   useEffect(() => {
     if (!selectedStoreHit || (!sessionApp && !isPinningStore)) {
       return;
@@ -925,6 +996,39 @@ function AnalyzeHubConnected() {
                   <p className="text-sm font-medium text-emerald-800">
                     {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
                   </p>
+                ) : null}
+                {hydratedReviews.length > 0 ? (
+                  <details className="rounded-xl border border-slate-200 bg-white/80 p-3">
+                    <summary className="cursor-pointer select-none text-sm font-semibold text-slate-800">
+                      Yorumları incele ({hydratedReviews.length})
+                    </summary>
+                    <div className="mt-3 space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={downloadReviewsCsv}>
+                          <Download className="mr-2 size-4" aria-hidden />
+                          CSV indir
+                        </Button>
+                        <Button type="button" variant="outline" size="sm" onClick={() => void downloadReviewsExcel()}>
+                          <Download className="mr-2 size-4" aria-hidden />
+                          Excel indir
+                        </Button>
+                      </div>
+                      <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                        {hydratedReviews.map((row, idx) => (
+                          <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2">
+                            <div className="flex items-center justify-between gap-2 text-xs text-slate-600">
+                              <p>
+                                #{idx + 1} | puan: {row.rating}
+                              </p>
+                              <p>tarih: {formatReviewDate(row.review_date)}</p>
+                            </div>
+                            {row.title ? <p className="mt-1 text-sm font-medium text-slate-800">{row.title}</p> : null}
+                            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{row.body}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  </details>
                 ) : null}
               </div>
             ) : null}
@@ -1225,7 +1329,16 @@ function AnalyzeHubConnected() {
                 <p className="text-3xl font-bold tabular-nums text-slate-900">{poolDisplayCount}</p>
               </div>
               {poolLines.length > 0 ? (
-                <Button type="button" variant="ghost" size="sm" className="text-slate-600" onClick={() => setPoolLines([])}>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-slate-600"
+                  onClick={() => {
+                    setPoolLines([]);
+                    setHydratedReviews([]);
+                  }}
+                >
                   {t("clearManualPool")}
                 </Button>
               ) : null}
