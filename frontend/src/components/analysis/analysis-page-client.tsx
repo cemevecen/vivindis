@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -42,6 +42,20 @@ function statusClass(status: FetchStatus): string {
   }
 }
 
+function reviewTone(rating: number): "positive" | "neutral" | "negative" {
+  if (rating >= 4) {
+    return "positive";
+  }
+  if (rating <= 2) {
+    return "negative";
+  }
+  return "neutral";
+}
+
+function csvEscape(value: string): string {
+  return `"${value.replace(/"/g, "\"\"")}"`;
+}
+
 type Props = {
   appId: string;
   fetchId: string | undefined;
@@ -59,6 +73,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const [reviewTotal, setReviewTotal] = useState(0);
   const [reviewOffset, setReviewOffset] = useState(0);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewFilter, setReviewFilter] = useState<"all" | "positive" | "neutral" | "negative">("all");
+  const [reviewSort, setReviewSort] = useState<"newest" | "oldest" | "rating_desc" | "rating_asc">("newest");
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
@@ -125,6 +141,133 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     },
     [appId, fetchId, getToken],
   );
+
+  const loadAllReviews = useCallback(async (): Promise<ReviewListItemDto[]> => {
+    if (!fetchId) {
+      return [];
+    }
+    const all: ReviewListItemDto[] = [];
+    let offset = 0;
+    let total = 0;
+    for (;;) {
+      const chunk = await apiFetch<ReviewListResponseDto>(
+        `/api/v1/apps/${appId}/reviews?fetch_id=${encodeURIComponent(fetchId)}&limit=100&offset=${offset}`,
+        { getToken },
+      );
+      total = chunk.total;
+      all.push(...chunk.items);
+      offset += chunk.items.length;
+      if (offset >= total || chunk.items.length === 0) {
+        break;
+      }
+    }
+    return all;
+  }, [appId, fetchId, getToken]);
+
+  const visibleReviewItems = useMemo(() => {
+    const filtered =
+      reviewFilter === "all" ? reviewItems : reviewItems.filter((row) => reviewTone(row.rating) === reviewFilter);
+    return [...filtered].sort((a, b) => {
+      if (reviewSort === "rating_desc") {
+        return b.rating - a.rating;
+      }
+      if (reviewSort === "rating_asc") {
+        return a.rating - b.rating;
+      }
+      const da = Date.parse(a.review_date);
+      const db = Date.parse(b.review_date);
+      if (reviewSort === "oldest") {
+        return da - db;
+      }
+      return db - da;
+    });
+  }, [reviewFilter, reviewItems, reviewSort]);
+
+  const exportReviewsCsv = useCallback(async () => {
+    try {
+      const rows = await loadAllReviews();
+      const csvRows = [
+        ["index", "platform", "rating", "sentiment", "review_date", "author", "title", "body"],
+        ...rows.map((row, idx) => [
+          String(idx + 1),
+          row.platform,
+          String(row.rating),
+          reviewTone(row.rating),
+          row.review_date,
+          row.author ?? "",
+          row.title ?? "",
+          row.body ?? "",
+        ]),
+      ];
+      const csv = csvRows.map((r) => r.map(csvEscape).join(",")).join("\n");
+      const blob = new Blob(["\uFEFF", csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `analiz-edilen-yorumlar-${fetchId ?? "export"}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      toast.error(formatClientFetchError(e));
+    }
+  }, [fetchId, loadAllReviews]);
+
+  const exportReviewsExcel = useCallback(async () => {
+    try {
+      const rows = await loadAllReviews();
+      const XLSX = await import("xlsx");
+      const worksheet = XLSX.utils.json_to_sheet(
+        rows.map((row, idx) => ({
+          index: idx + 1,
+          platform: row.platform,
+          rating: row.rating,
+          sentiment: reviewTone(row.rating),
+          review_date: row.review_date,
+          author: row.author ?? "",
+          title: row.title ?? "",
+          body: row.body ?? "",
+        })),
+      );
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "yorumlar");
+      XLSX.writeFile(workbook, `analiz-edilen-yorumlar-${fetchId ?? "export"}.xlsx`);
+    } catch (e) {
+      toast.error(formatClientFetchError(e));
+    }
+  }, [fetchId, loadAllReviews]);
+
+  const exportReviewsPdf = useCallback(async () => {
+    try {
+      const rows = await loadAllReviews();
+      const html = rows
+        .map(
+          (row, idx) =>
+            `<article style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:10px 0;">
+              <p style="font-size:12px;color:#64748b;">#${idx + 1} | ${row.platform} | puan: ${row.rating} | ${row.review_date} | ${reviewTone(row.rating)}</p>
+              ${row.title ? `<h3 style="font-size:14px;margin:6px 0;">${row.title}</h3>` : ""}
+              <p style="font-size:13px;white-space:pre-wrap;">${row.body}</p>
+            </article>`,
+        )
+        .join("");
+      const win = window.open("", "_blank");
+      if (!win) {
+        toast.error("PDF penceresi açılamadı.");
+        return;
+      }
+      win.document.write(`
+        <html><head><title>Analiz edilen yorumlar</title></head>
+        <body style="font-family:Arial,sans-serif;padding:24px;">
+          <h1>Analiz edilen yorumlar</h1>
+          <p>Toplam yorum: ${rows.length}</p>
+          ${html}
+        </body></html>
+      `);
+      win.document.close();
+      win.print();
+    } catch (e) {
+      toast.error(formatClientFetchError(e));
+    }
+  }, [loadAllReviews]);
 
   useEffect(() => {
     setReviewItems([]);
@@ -337,21 +480,59 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
       {fetch.status === "completed" ? (
         <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold">Analiz edilen yorumlar</h2>
-            <p className="text-xs text-muted-foreground">
-              {reviewItems.length}/{reviewTotal}
-            </p>
+          <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold">Analiz edilen yorumlar</h2>
+              <p className="text-xs text-muted-foreground">
+                Yüklenen: {reviewItems.length}/{reviewTotal} · Görünen: {visibleReviewItems.length}
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <select
+                value={reviewFilter}
+                onChange={(e) => setReviewFilter(e.target.value as typeof reviewFilter)}
+                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                aria-label="Yorum duygu filtresi"
+              >
+                <option value="all">Tümü</option>
+                <option value="positive">Pozitif</option>
+                <option value="neutral">Nötr</option>
+                <option value="negative">Negatif</option>
+              </select>
+              <select
+                value={reviewSort}
+                onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
+                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                aria-label="Yorum sıralama"
+              >
+                <option value="newest">En yeni</option>
+                <option value="oldest">En eski</option>
+                <option value="rating_desc">Puan yüksek</option>
+                <option value="rating_asc">Puan düşük</option>
+              </select>
+            </div>
           </div>
           {reviewItems.length === 0 && !reviewsLoading ? (
             <p className="text-sm text-muted-foreground">Bu fetch için gösterilecek yorum yok.</p>
           ) : (
             <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
-              {reviewItems.map((row, idx) => (
+              {visibleReviewItems.map((row, idx) => (
                 <article key={row.id} className="rounded-lg border border-border bg-muted/20 p-3">
                   <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                    <p>
-                      #{idx + 1} | puan: {row.rating}
+                    <p className="inline-flex items-center gap-2">
+                      #{idx + 1}
+                      <span
+                        className={cn(
+                          "inline-flex size-2 rounded-full",
+                          reviewTone(row.rating) === "positive"
+                            ? "bg-emerald-500"
+                            : reviewTone(row.rating) === "negative"
+                              ? "bg-red-500"
+                              : "bg-slate-400",
+                        )}
+                        aria-hidden
+                      />
+                      <span>| puan: {row.rating}</span>
                     </p>
                     <p>{row.review_date}</p>
                   </div>
@@ -364,15 +545,28 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               ))}
             </div>
           )}
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 grid gap-2 sm:grid-cols-4">
             <Button
               type="button"
-              variant="outline"
+              className="bg-slate-900 text-white hover:bg-slate-800"
               size="sm"
               disabled={reviewsLoading || reviewOffset >= reviewTotal}
               onClick={() => void loadReviewChunk(reviewOffset, false)}
             >
-              {reviewsLoading ? tCommon("loading") : "Daha fazla yorum yükle"}
+              {reviewsLoading
+                ? tCommon("loading")
+                : reviewOffset < reviewTotal
+                  ? `Genişlet · ${reviewTotal - reviewOffset} yorum daha göster`
+                  : "Tüm yorumlar yüklendi"}
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsCsv()}>
+              Sonuçları CSV indir
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsExcel()}>
+              Sonuçları Excel indir
+            </Button>
+            <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsPdf()}>
+              Sonuçları PDF indir
             </Button>
           </div>
         </section>
