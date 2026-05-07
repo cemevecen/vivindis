@@ -599,6 +599,8 @@ async def _execute_review_fetch(
     fetch.started_at = datetime.now(UTC)
     fetch.error_message = None
     await session.flush()
+    # Make pending->running transition visible to polling UI immediately.
+    await session.commit()
 
     total_inserted = 0
     try:
@@ -613,6 +615,9 @@ async def _execute_review_fetch(
                 req_country=req_country,
                 limiter=limiter,
             )
+            fetch.review_count = total_inserted
+            await session.flush()
+            await session.commit()
         if app.platform in (AppPlatform.APP_STORE, AppPlatform.BOTH):
             total_inserted += await _scrape_app_store(
                 session,
@@ -624,6 +629,9 @@ async def _execute_review_fetch(
                 req_country=req_country,
                 limiter=limiter,
             )
+            fetch.review_count = total_inserted
+            await session.flush()
+            await session.commit()
 
         cnt_r = await session.execute(
             select(func.count()).select_from(Review).where(Review.fetch_id == fetch.id),
