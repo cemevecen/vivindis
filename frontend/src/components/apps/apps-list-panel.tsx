@@ -35,13 +35,27 @@ function AppsConnectedList() {
         method: "DELETE",
         getToken,
       }),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
-      toast.success(tApps("deleteSuccess"));
+    onMutate: async (deletedId) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.apps.all });
+      const previous = queryClient.getQueryData<AppDto[]>(queryKeys.apps.all);
+      if (previous) {
+        queryClient.setQueryData<AppDto[]>(
+          queryKeys.apps.all,
+          previous.filter((a) => a.id !== deletedId),
+        );
+      }
+      return { previous };
     },
-    onError: (error) => {
+    onError: (error, _deletedId, context) => {
+      if (context?.previous !== undefined) {
+        queryClient.setQueryData(queryKeys.apps.all, context.previous);
+      }
       const message = error instanceof ApiError ? error.message : tApps("deleteFailed");
       toast.error(message);
+    },
+    onSuccess: async () => {
+      await queryClient.refetchQueries({ queryKey: queryKeys.apps.all });
+      toast.success(tApps("deleteSuccess"));
     },
   });
 
