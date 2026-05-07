@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 
 export async function SiteFooter() {
   const t = await getTranslations("footer");
+  const tNav = await getTranslations("navigation");
 
   return (
     <footer className="shrink-0 border-t border-border bg-background/95">
@@ -23,6 +24,12 @@ export async function SiteFooter() {
           </Link>
           <p className="text-center text-sm text-muted-foreground sm:text-left">{t("rights")}</p>
         </div>
+        <Link
+          href="/about"
+          className="text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        >
+          {tNav("about")}
+        </Link>
         <BuildVersionBadge className="text-center" />
       </div>
     </footer>

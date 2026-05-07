@@ -3,7 +3,7 @@
 import { Suspense, type ReactNode } from "react";
 
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
-import { FileText, GitCompare, Info, Search, Smartphone, Store, Upload } from "lucide-react";
+import { FileText, GitCompare, Search, Smartphone, Store, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
@@ -43,7 +43,6 @@ function DashboardHeaderContent() {
   const links = [
     { href: "/analyze" as const, label: t("analyze"), Icon: Search },
     { href: "/apps" as const, label: t("apps"), Icon: Smartphone },
-    { href: "/about" as const, label: t("about"), Icon: Info },
   ];
 
   return (
