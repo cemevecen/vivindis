@@ -10,6 +10,7 @@ from typing import Any
 import httpx
 from google_play_scraper import Sort
 from google_play_scraper import reviews as gp_reviews
+from google_play_scraper import reviews_all as gp_reviews_all
 from google_play_scraper.exceptions import ExtraHTTPError, NotFoundError
 from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert
@@ -235,69 +236,56 @@ async def _scrape_google_play_baseline(
     inserted = 0
     loop = asyncio.get_running_loop()
     for lang, country in locales:
-        continuation = None
-        batches = 0
-        while batches < 120 and inserted < max_inserted:
-            await limiter.acquire()
-            cont = continuation
-            try:
-                def _sync():
-                    return gp_reviews(
-                        pkg,
-                        lang=lang,
-                        country=country,
-                        sort=Sort.NEWEST,
-                        count=200,
-                        continuation_token=cont,
-                    )
-
-                batch, next_tok = await loop.run_in_executor(None, _sync)
-            except Exception as exc:
-                log.warning("play_baseline_failed", pkg=pkg, lang=lang, country=country, error=str(exc))
-                break
-
-            if not batch:
-                break
-
-            batches += 1
-            continuation = next_tok
-            for rev in batch:
-                at = rev.get("at")
-                if isinstance(at, datetime) and at.tzinfo is None:
-                    at = at.replace(tzinfo=UTC)
-                if at and (at.date() < lo or at.date() > hi):
-                    if at.date() < lo:
-                        break
-                    continue
-
-                rid = str(rev.get("reviewId") or "")[:255]
-                if not rid:
-                    continue
-                await _upsert_review(
-                    session,
-                    app_id=app.id,
-                    fetch_id=fetch.id,
-                    platform=StorePlatform.GOOGLE_PLAY,
-                    store_review_id=rid,
-                    rating=int(rev.get("score") or 0),
-                    title=None,
-                    body=str(rev.get("content") or ""),
-                    author=str(rev.get("userName") or "") or None,
-                    author_uri=str(rev.get("userImage") or "") or None,
-                    app_version_label=str(rev.get("reviewCreatedVersion") or "") or None,
+        await limiter.acquire()
+        try:
+            def _sync_all():
+                return gp_reviews_all(
+                    pkg,
+                    sleep_milliseconds=0,
                     lang=lang,
-                    review_date=at.date() if at else lo,
-                    thumbs_up=int(rev.get("thumbsUpCount") or 0),
-                    developer_reply=str(rev.get("replyContent")) if rev.get("replyContent") else None,
-                    reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
+                    country=country,
+                    sort=Sort.NEWEST,
                 )
-                inserted += 1
-                if inserted >= max_inserted:
-                    break
 
-            await session.commit()
-            if continuation is None or getattr(continuation, "token", None) is None:
+            rows = await loop.run_in_executor(None, _sync_all)
+        except Exception as exc:
+            log.warning("play_baseline_failed", pkg=pkg, lang=lang, country=country, error=str(exc))
+            continue
+
+        for rev in rows:
+            at = rev.get("at")
+            if isinstance(at, datetime) and at.tzinfo is None:
+                at = at.replace(tzinfo=UTC)
+            if at and (at.date() < lo or at.date() > hi):
+                continue
+
+            rid = str(rev.get("reviewId") or "")[:255]
+            if not rid:
+                continue
+            await _upsert_review(
+                session,
+                app_id=app.id,
+                fetch_id=fetch.id,
+                platform=StorePlatform.GOOGLE_PLAY,
+                store_review_id=rid,
+                rating=int(rev.get("score") or 0),
+                title=None,
+                body=str(rev.get("content") or ""),
+                author=str(rev.get("userName") or "") or None,
+                author_uri=str(rev.get("userImage") or "") or None,
+                app_version_label=str(rev.get("reviewCreatedVersion") or "") or None,
+                lang=lang,
+                review_date=at.date() if at else lo,
+                thumbs_up=int(rev.get("thumbsUpCount") or 0),
+                developer_reply=str(rev.get("replyContent")) if rev.get("replyContent") else None,
+                reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
+            )
+            inserted += 1
+            if inserted >= max_inserted:
                 break
+        await session.commit()
+        if inserted >= max_inserted:
+            break
     return inserted
 
 
