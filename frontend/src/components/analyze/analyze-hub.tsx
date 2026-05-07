@@ -684,13 +684,9 @@ function AnalyzeHubConnected() {
 
   const runUnifiedAnalysis = useCallback(async () => {
     const appId = effectiveAppId;
-    const hasHydratedStorePool =
-      Boolean(storeFetchId) &&
-      fetchRowQuery.data?.status === "completed" &&
-      lastFetchHydratedToPoolRef.current === storeFetchId &&
-      hydratedReviews.length > 0;
+    const canAnalyzeExistingFetch = Boolean(storeFetchId) && fetchRowQuery.data?.status === "completed";
 
-    if ((fetchRowQuery.data?.status === "completed" && storeFetchId && poolLines.length === 0) || hasHydratedStorePool) {
+    if (canAnalyzeExistingFetch) {
       if (!appId) {
         toast.error(t("analyzeFooterNeedApp"));
         return;
@@ -742,7 +738,6 @@ function AnalyzeHubConnected() {
   }, [
     effectiveAppId,
     poolLines,
-    hydratedReviews.length,
     importMutation,
     afterImport,
     fetchRowQuery.data?.status,
