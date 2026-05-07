@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
 import { StartFetchForm } from "@/components/apps/start-fetch-form";
+import { CompareSplitReviewsSection } from "@/components/compare/compare-split-reviews-section";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch } from "@/lib/api";
@@ -79,11 +80,13 @@ function CompareAppSplitPane({
   app,
   fetchRow,
   analysisItems,
+  wideCharts,
 }: {
   title: string;
   app: AppDto;
   fetchRow: ReviewFetchDto | undefined;
   analysisItems: AnalysisDto[];
+  wideCharts: boolean;
 }) {
   const t = useTranslations("compare");
   const ta = useTranslations("analysis");
@@ -188,9 +191,11 @@ function CompareAppSplitPane({
         </div>
       ) : null}
 
+      {fetchRow ? <CompareSplitReviewsSection appId={app.id} fetchRow={fetchRow} /> : null}
+
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("splitChartsHeading")}</h3>
-        <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane />
+        <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane={!wideCharts} />
       </section>
 
       <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
@@ -217,6 +222,8 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     searchParams.get("split") === "true" ||
     searchParams.get("layout") === "split";
 
+  const chartsWide = searchParams.get("charts") === "wide";
+
   const setSplit = (on: boolean) => {
     const p = new URLSearchParams(searchParams.toString());
     if (on) {
@@ -225,6 +232,16 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     } else {
       p.delete("split");
       p.delete("layout");
+    }
+    router.push(`${pathname}?${p.toString()}`);
+  };
+
+  const setChartsWide = (wide: boolean) => {
+    const p = new URLSearchParams(searchParams.toString());
+    if (wide) {
+      p.set("charts", "wide");
+    } else {
+      p.delete("charts");
     }
     router.push(`${pathname}?${p.toString()}`);
   };
@@ -372,16 +389,42 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
         <p className="mt-1 text-sm text-muted-foreground">{t("pairSubtitle")}</p>
       </div>
 
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-        <div className="flex flex-wrap gap-2">
-          <Button type="button" size="sm" variant={splitOn ? "default" : "outline"} onClick={() => setSplit(true)}>
-            {t("splitViewOn")}
-          </Button>
-          <Button type="button" size="sm" variant={!splitOn ? "default" : "outline"} onClick={() => setSplit(false)}>
-            {t("splitViewOff")}
-          </Button>
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" size="sm" variant={splitOn ? "default" : "outline"} onClick={() => setSplit(true)}>
+              {t("splitViewOn")}
+            </Button>
+            <Button type="button" size="sm" variant={!splitOn ? "default" : "outline"} onClick={() => setSplit(false)}>
+              {t("splitViewOff")}
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground sm:max-w-xl">{t("splitViewHint")}</p>
         </div>
-        <p className="text-xs text-muted-foreground sm:max-w-xl">{t("splitViewHint")}</p>
+        {splitOn ? (
+          <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:flex-wrap sm:items-center">
+            <span className="text-xs font-medium text-foreground">{t("chartsLayoutLabel")}</span>
+            <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant={!chartsWide ? "default" : "outline"}
+                onClick={() => setChartsWide(false)}
+              >
+                {t("chartsLayoutCompact")}
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                variant={chartsWide ? "default" : "outline"}
+                onClick={() => setChartsWide(true)}
+              >
+                {t("chartsLayoutWide")}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground sm:ml-2 sm:max-w-md">{t("chartsLayoutHint")}</p>
+          </div>
+        ) : null}
       </div>
 
       {splitOn ? (
@@ -391,12 +434,14 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
             app={appA}
             fetchRow={fa}
             analysisItems={anaAq.data?.items ?? []}
+            wideCharts={chartsWide}
           />
           <CompareAppSplitPane
             title={t("slotB")}
             app={appB}
             fetchRow={fb}
             analysisItems={anaBq.data?.items ?? []}
+            wideCharts={chartsWide}
           />
         </div>
       ) : (

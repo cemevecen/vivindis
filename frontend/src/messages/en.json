@@ -210,7 +210,15 @@
     "splitViewHint": "Split view shows both apps side by side: start a review pull in each column, watch import status, run analysis, and read compact charts without leaving this page.",
     "splitFetchStatusHeading": "Latest import",
     "splitNoFetchYet": "No import yet — submit the form above to pull reviews.",
-    "splitChartsHeading": "Results preview"
+    "splitChartsHeading": "Results preview",
+    "splitReviewsHeading": "Review preview",
+    "splitReviewsFilterHint": "Filters apply to reviews already loaded below — use “Load more” to pull additional pages from the server.",
+    "splitReviewsEmpty": "No reviews match this filter in the loaded sample yet.",
+    "splitReviewsLoadError": "Could not load reviews for this import.",
+    "chartsLayoutLabel": "Charts in split view",
+    "chartsLayoutCompact": "Compact charts",
+    "chartsLayoutWide": "Wide charts",
+    "chartsLayoutHint": "Wide charts use the full analytics layout inside each column (taller, more detail). Compact keeps charts stacked for narrow panes."
   },
   "dashboard": {
     "title": "Dashboard",

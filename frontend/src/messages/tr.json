@@ -210,7 +210,15 @@
     "splitViewHint": "Bölünmüş görünümde iki uygulama yan yana: her sütunda yorum çekme, içe aktarım durumu, analiz başlatma ve kompakt grafikler — sayfadan çıkmadan.",
     "splitFetchStatusHeading": "Son içe aktarma",
     "splitNoFetchYet": "Henüz çekim yok — yukarıdaki formdan yorum çekin.",
-    "splitChartsHeading": "Sonuç önizlemesi"
+    "splitChartsHeading": "Sonuç önizlemesi",
+    "splitReviewsHeading": "Yorum önizlemesi",
+    "splitReviewsFilterHint": "Süzgeçler yalnızca aşağıda yüklenen yorumlara uygulanır — sunucudan daha fazlası için “Daha fazla göster”e basın.",
+    "splitReviewsEmpty": "Yüklenen örnekte bu süzgece uyan yorum yok.",
+    "splitReviewsLoadError": "Bu içe aktarma için yorumlar yüklenemedi.",
+    "chartsLayoutLabel": "Bölünmüş görünümde grafikler",
+    "chartsLayoutCompact": "Kompakt grafikler",
+    "chartsLayoutWide": "Geniş grafikler",
+    "chartsLayoutHint": "Geniş mod, her sütunda tam analiz düzenini kullanır (daha yüksek, daha ayrıntılı). Kompakt mod dar sütunlarda grafikleri dikey istifler."
   },
   "dashboard": {
     "title": "Panel",
