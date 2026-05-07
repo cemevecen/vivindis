@@ -1059,23 +1059,38 @@ function AnalyzeHubConnected() {
                   </div>
                 ) : null}
                 {sessionApp &&
-                (fetchRowQuery.data?.status === "pending" || fetchRowQuery.data?.status === "running") ? (
+                (storePullMutation.isPending ||
+                  (Boolean(storeFetchId) &&
+                    (fetchRowQuery.isPending ||
+                      fetchRowQuery.data?.status === "pending" ||
+                      fetchRowQuery.data?.status === "running" ||
+                      fetchRowQuery.data?.status === "completed"))) ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
                       <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
-                      <p className="text-sm font-semibold text-slate-700">%{fetchProgressPercent}</p>
+                      <p className="text-sm font-semibold text-slate-700">
+                        %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
+                      </p>
                     </div>
                     <div
                       className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200"
                       role="progressbar"
                       aria-valuemin={0}
                       aria-valuemax={100}
-                      aria-valuenow={fetchProgressPercent}
+                      aria-valuenow={fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
                       aria-label={t("fetchProgressLabel")}
                     >
                       <div
                         className="h-full rounded-full bg-orange-500 transition-[width] duration-700 ease-out"
-                        style={{ width: `${fetchProgressPercent}%` }}
+                        style={{
+                          width: `${
+                            fetchRowQuery.data?.status === "completed"
+                              ? 100
+                              : storePullMutation.isPending
+                                ? 8
+                                : fetchProgressPercent
+                          }%`,
+                        }}
                       />
                     </div>
                     <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
@@ -1085,7 +1100,9 @@ function AnalyzeHubConnected() {
                         Tahmini kalan:{" "}
                         {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
                           ? formatDuration(fetchEtaSec)
-                          : "--:--"}
+                          : fetchRowQuery.data?.status === "completed"
+                            ? "00:00"
+                            : "--:--"}
                       </p>
                       <p>Tahmini bitiş: {formatDuration(fetchElapsedSec + Math.max(0, fetchEtaSec ?? 0))}</p>
                     </div>
