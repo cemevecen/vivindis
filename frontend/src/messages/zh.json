@@ -135,6 +135,8 @@
     "sortRatingAsc": "评分最低",
     "noReviewsForFetch": "此导入没有可显示的评论。",
     "reviewCardRating": "| 评分：{rating}",
+    "reviewCardReviewer": "评论用户：{name}",
+    "reviewCardReviewerUnset": "评论用户：—",
     "expandShowMore": "展开 · 再显示 {count} 条评论",
     "allReviewsLoaded": "已加载全部评论",
     "exportResultsCsv": "下载结果为 CSV",

@@ -135,6 +135,8 @@
     "sortRatingAsc": "أدنى تقييم",
     "noReviewsForFetch": "لا مراجعات لعرضها لهذا الاستيراد.",
     "reviewCardRating": "| التقييم: {rating}",
+    "reviewCardReviewer": "المُقيِّم: {name}",
+    "reviewCardReviewerUnset": "المُقيِّم: —",
     "expandShowMore": "توسيع · عرض {count, plural, one {مراجعة إضافية} other {# مراجعات إضافية}}",
     "allReviewsLoaded": "تم تحميل كل المراجعات",
     "exportResultsCsv": "تنزيل النتائج CSV",

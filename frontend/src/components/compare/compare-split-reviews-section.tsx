@@ -159,6 +159,11 @@ export function CompareSplitReviewsSection({ appId, fetchRow }: Props) {
                 </p>
                 <p className="shrink-0">{row.review_date}</p>
               </div>
+              <p className="mt-0.5 text-[10px] text-muted-foreground">
+                {row.author
+                  ? ta("reviewCardReviewer", { name: row.author })
+                  : ta("reviewCardReviewerUnset")}
+              </p>
               <p className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground/80">
                 {row.platform === "google_play" ? tApps("platformGooglePlay") : tApps("platformAppStore")}
               </p>

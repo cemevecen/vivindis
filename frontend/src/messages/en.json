@@ -344,6 +344,8 @@
     "sortRatingAsc": "Lowest rating",
     "noReviewsForFetch": "No reviews to show for this import.",
     "reviewCardRating": "| score: {rating}",
+    "reviewCardReviewer": "Reviewer: {name}",
+    "reviewCardReviewerUnset": "Reviewer: —",
     "expandShowMore": "Expand · show {count, plural, one {# more review} other {# more reviews}}",
     "allReviewsLoaded": "All reviews loaded",
     "exportResultsCsv": "Download results as CSV",

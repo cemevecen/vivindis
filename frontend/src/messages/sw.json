@@ -135,6 +135,8 @@
     "sortRatingAsc": "Alama ya chini",
     "noReviewsForFetch": "Hakuna hakiki za kuonyesha kwa import hii.",
     "reviewCardRating": "| alama: {rating}",
+    "reviewCardReviewer": "Mwandishi: {name}",
+    "reviewCardReviewerUnset": "Mwandishi: —",
     "expandShowMore": "Panua · onyesha {count, plural, one {hakiki # zaidi} other {hakiki # zaidi}}",
     "allReviewsLoaded": "Hakiki zote zimepakiwa",
     "exportResultsCsv": "Pakua matokeo CSV",

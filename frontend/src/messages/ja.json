@@ -135,6 +135,8 @@
     "sortRatingAsc": "評価が低い順",
     "noReviewsForFetch": "このインポートに表示するレビューがありません。",
     "reviewCardRating": "| 評価: {rating}",
+    "reviewCardReviewer": "投稿者: {name}",
+    "reviewCardReviewerUnset": "投稿者: —",
     "expandShowMore": "展開 · あと {count} 件表示",
     "allReviewsLoaded": "すべてのレビューを読み込みました",
     "exportResultsCsv": "結果を CSV でダウンロード",

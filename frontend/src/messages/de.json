@@ -135,6 +135,8 @@
     "sortRatingAsc": "Niedrigste Bewertung",
     "noReviewsForFetch": "Keine Bewertungen für diesen Import.",
     "reviewCardRating": "| Punktzahl: {rating}",
+    "reviewCardReviewer": "Rezensent: {name}",
+    "reviewCardReviewerUnset": "Rezensent: —",
     "expandShowMore": "Mehr · {count, plural, one {# weitere Bewertung} other {# weitere Bewertungen}} anzeigen",
     "allReviewsLoaded": "Alle Bewertungen geladen",
     "exportResultsCsv": "Ergebnisse als CSV",

@@ -135,6 +135,8 @@
     "sortRatingAsc": "Низший рейтинг",
     "noReviewsForFetch": "Нет отзывов для этого импорта.",
     "reviewCardRating": "| оценка: {rating}",
+    "reviewCardReviewer": "Автор: {name}",
+    "reviewCardReviewerUnset": "Автор: —",
     "expandShowMore": "Развернуть · показать ещё {count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзывов}}",
     "allReviewsLoaded": "Все отзывы загружены",
     "exportResultsCsv": "Скачать результаты CSV",

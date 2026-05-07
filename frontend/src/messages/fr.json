@@ -135,6 +135,8 @@
     "sortRatingAsc": "Note la plus basse",
     "noReviewsForFetch": "Aucun avis à afficher pour cet import.",
     "reviewCardRating": "| note : {rating}",
+    "reviewCardReviewer": "Auteur : {name}",
+    "reviewCardReviewerUnset": "Auteur : —",
     "expandShowMore": "Développer · afficher {count, plural, one {# avis de plus} other {# avis de plus}}",
     "allReviewsLoaded": "Tous les avis sont chargés",
     "exportResultsCsv": "Télécharger les résultats (CSV)",

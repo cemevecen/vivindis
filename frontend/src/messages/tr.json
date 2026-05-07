@@ -344,6 +344,8 @@
     "sortRatingAsc": "Puan düşük",
     "noReviewsForFetch": "Bu içe aktarma için gösterilecek yorum yok.",
     "reviewCardRating": "| puan: {rating}",
+    "reviewCardReviewer": "Yorumcu: {name}",
+    "reviewCardReviewerUnset": "Yorumcu: —",
     "expandShowMore": "Genişlet · {count, plural, one {# yorum daha} other {# yorum daha}} göster",
     "allReviewsLoaded": "Tüm yorumlar yüklendi",
     "exportResultsCsv": "Sonuçları CSV indir",

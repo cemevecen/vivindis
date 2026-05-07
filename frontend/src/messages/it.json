@@ -135,6 +135,8 @@
     "sortRatingAsc": "Voto più basso",
     "noReviewsForFetch": "Nessuna recensione da mostrare per questo import.",
     "reviewCardRating": "| voto: {rating}",
+    "reviewCardReviewer": "Autore: {name}",
+    "reviewCardReviewerUnset": "Autore: —",
     "expandShowMore": "Espandi · mostra altre {count, plural, one {# recensione} other {# recensioni}}",
     "allReviewsLoaded": "Tutte le recensioni caricate",
     "exportResultsCsv": "Scarica risultati CSV",
