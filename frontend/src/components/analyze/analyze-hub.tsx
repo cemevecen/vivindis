@@ -120,6 +120,7 @@ function AnalyzeHubConnected() {
   const sessionAppRef = useRef<AppDto | null>(null);
   const pinnedPanelRef = useRef<HTMLDivElement>(null);
   const lastFetchHydratedToPoolRef = useRef<string | null>(null);
+  const hydrateRunTokenRef = useRef(0);
   const fetchCountSamplesRef = useRef<Array<{ ts: number; count: number }>>([]);
   const storeFetchFailedToastRef = useRef<string | null>(null);
   const storeFetchPollErrorToastRef = useRef<string | null>(null);
@@ -316,6 +317,7 @@ function AnalyzeHubConnected() {
     if (!sessionApp || !storeFetchId || row?.id !== storeFetchId || row.status !== "completed") {
       return;
     }
+    const runToken = ++hydrateRunTokenRef.current;
     let cancelled = false;
     const appId = sessionApp.id;
     void (async () => {
@@ -332,6 +334,7 @@ function AnalyzeHubConnected() {
         let offset = 0;
         const bodies: string[] = [];
         const reviewRows: HydratedReviewItem[] = [];
+        const seenIds = new Set<string>();
         let total = 0;
         for (;;) {
           const chunk = await apiFetch<ReviewListResponseDto>(
@@ -340,6 +343,10 @@ function AnalyzeHubConnected() {
           );
           total = chunk.total;
           for (const it of chunk.items) {
+            if (seenIds.has(it.id)) {
+              continue;
+            }
+            seenIds.add(it.id);
             reviewRows.push(it);
             const text = [it.title, it.body].filter(Boolean).join("\n").trim();
             if (text.length > 0) {
@@ -348,14 +355,14 @@ function AnalyzeHubConnected() {
           }
           setHydratedPoolCount(bodies.length);
           offset += chunk.items.length;
-          if (cancelled) {
+          if (cancelled || hydrateRunTokenRef.current != runToken) {
             return;
           }
           if (offset >= total || chunk.items.length === 0) {
             break;
           }
         }
-        if (cancelled) {
+        if (cancelled || hydrateRunTokenRef.current != runToken) {
           return;
         }
         setPoolLines(bodies);
@@ -373,7 +380,7 @@ function AnalyzeHubConnected() {
           toast.error(t("storeReviewsHydrateFailed", { detail }));
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && hydrateRunTokenRef.current == runToken) {
           setIsHydratingPool(false);
         }
       }
@@ -516,6 +523,7 @@ function AnalyzeHubConnected() {
     setHydratedReviews([]);
     setIsHydratingPool(false);
     setHydratedPoolCount(0);
+    hydrateRunTokenRef.current += 1;
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
