@@ -52,6 +52,17 @@ type FetchProgressEvent = {
 
 type HydratedReviewItem = ReviewListResponseDto["items"][number];
 
+function formatDuration(totalSec: number): string {
+  const safe = Math.max(0, Math.floor(totalSec));
+  const hh = Math.floor(safe / 3600);
+  const mm = Math.floor((safe % 3600) / 60);
+  const ss = safe % 60;
+  if (hh > 0) {
+    return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+  }
+  return `${String(mm).padStart(2, "0")}:${String(ss).padStart(2, "0")}`;
+}
+
 function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
   const tNav = useTranslations("navigation");
@@ -110,6 +121,7 @@ function AnalyzeHubConnected() {
   const sessionAppRef = useRef<AppDto | null>(null);
   const pinnedPanelRef = useRef<HTMLDivElement>(null);
   const lastFetchHydratedToPoolRef = useRef<string | null>(null);
+  const fetchCountSamplesRef = useRef<Array<{ ts: number; count: number }>>([]);
   const storeFetchFailedToastRef = useRef<string | null>(null);
   const storeFetchPollErrorToastRef = useRef<string | null>(null);
   const progressEventKeysRef = useRef<Set<string>>(new Set());
@@ -150,6 +162,12 @@ function AnalyzeHubConnected() {
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
   });
 
+  const appFetchesQuery = useQuery({
+    queryKey: sessionApp ? queryKeys.apps.fetches(sessionApp.id) : ["analyzeHub", "fetches", "idle"],
+    queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${sessionApp?.id}/fetches`, { getToken }),
+    enabled: Boolean(sessionApp?.id),
+  });
+
   const addFetchProgressEvent = useCallback((event: FetchProgressEvent) => {
     if (progressEventKeysRef.current.has(event.key)) {
       return;
@@ -161,6 +179,7 @@ function AnalyzeHubConnected() {
   const resetFetchProgressTimeline = useCallback(() => {
     progressEventKeysRef.current = new Set();
     lastRunningCountRef.current = 0;
+    fetchCountSamplesRef.current = [];
     setFetchProgressEvents([]);
   }, []);
 
@@ -497,16 +516,104 @@ function AnalyzeHubConnected() {
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
   const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
 
+  useEffect(() => {
+    const row = fetchRowQuery.data;
+    if (!row || !storeFetchId || row.id !== storeFetchId || row.status !== "running") {
+      return;
+    }
+    const now = Date.now();
+    const count = Math.max(0, row.review_count ?? 0);
+    const prev = fetchCountSamplesRef.current[fetchCountSamplesRef.current.length - 1];
+    if (prev && prev.count === count) {
+      return;
+    }
+    fetchCountSamplesRef.current.push({ ts: now, count });
+    if (fetchCountSamplesRef.current.length > 40) {
+      fetchCountSamplesRef.current.shift();
+    }
+  }, [fetchRowQuery.data, storeFetchId]);
+
+  const historicalAvgDurationSec = useMemo(() => {
+    const rows = appFetchesQuery.data ?? [];
+    const completed = rows
+      .filter((r) => r.status === "completed" && r.started_at && r.completed_at)
+      .slice(0, 10)
+      .map((r) => {
+        const s = Date.parse(r.started_at || "");
+        const e = Date.parse(r.completed_at || "");
+        return Number.isFinite(s) && Number.isFinite(e) ? Math.max(1, Math.floor((e - s) / 1000)) : 0;
+      })
+      .filter((v) => v > 0);
+    if (completed.length === 0) {
+      return 240;
+    }
+    return Math.max(45, Math.floor(completed.reduce((a, b) => a + b, 0) / completed.length));
+  }, [appFetchesQuery.data]);
+
+  const fetchElapsedSec = useMemo(() => {
+    const row = fetchRowQuery.data;
+    if (!row || !storeFetchId || row.id !== storeFetchId) {
+      return 0;
+    }
+    const start = Date.parse(row.started_at || row.created_at || "");
+    if (!Number.isFinite(start)) {
+      return 0;
+    }
+    const end =
+      row.status === "completed" || row.status === "failed" ? Date.parse(row.completed_at || "") : nowTick;
+    const safeEnd = Number.isFinite(end) ? end : nowTick;
+    return Math.max(0, Math.floor((safeEnd - start) / 1000));
+  }, [fetchRowQuery.data, nowTick, storeFetchId]);
+
+  const fetchEtaSec = useMemo(() => {
+    const row = fetchRowQuery.data;
+    if (!row || row.status !== "running" || !storeFetchId || row.id !== storeFetchId) {
+      return null;
+    }
+    const samples = fetchCountSamplesRef.current;
+    if (samples.length < 2) {
+      return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
+    }
+    const first = samples[0];
+    const last = samples[samples.length - 1];
+    const deltaCount = last.count - first.count;
+    const deltaSec = Math.max(1, Math.floor((last.ts - first.ts) / 1000));
+    const speed = deltaCount / deltaSec;
+    const currentCount = Math.max(0, row.review_count ?? 0);
+
+    if (speed <= 0.01) {
+      return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
+    }
+
+    const projectedTotalBySpeed = currentCount + speed * Math.max(30, historicalAvgDurationSec * 0.8);
+    const projectedTotal = Math.max(currentCount + 25, Math.floor(projectedTotalBySpeed));
+    const remaining = Math.max(0, projectedTotal - currentCount);
+    return Math.floor(remaining / speed);
+  }, [fetchElapsedSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
+
   const fetchProgressPercent = useMemo(() => {
     const row = fetchRowQuery.data;
-    if (!row || (row.status !== "pending" && row.status !== "running")) {
+    if (!row || !storeFetchId || row.id !== storeFetchId) {
       return 0;
     }
     if (row.status === "pending") {
-      return 25;
+      const p = Math.min(22, 8 + Math.floor(fetchElapsedSec / 4));
+      return p;
     }
-    return 65;
-  }, [fetchRowQuery.data]);
+    if (row.status === "running") {
+      const timeProgress = Math.min(92, Math.max(20, Math.floor((fetchElapsedSec / historicalAvgDurationSec) * 100)));
+      if (fetchEtaSec === null || fetchEtaSec <= 0) {
+        return timeProgress;
+      }
+      const total = fetchElapsedSec + fetchEtaSec;
+      const etaProgress = total > 0 ? Math.floor((fetchElapsedSec / total) * 100) : timeProgress;
+      return Math.min(96, Math.max(25, Math.floor((timeProgress + etaProgress) / 2)));
+    }
+    if (row.status === "completed") {
+      return 100;
+    }
+    return 0;
+  }, [fetchElapsedSec, fetchEtaSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
 
   const fetchDynamicHint = useMemo(() => {
     const row = fetchRowQuery.data;
@@ -541,24 +648,7 @@ function AnalyzeHubConnected() {
     });
   }, [fetchProgressEvents, locale]);
 
-  const fetchElapsedText = useMemo(() => {
-    if (!fetchTimeline.length) {
-      return "";
-    }
-    const startMs = Date.parse(fetchTimeline[0].at);
-    if (!Number.isFinite(startMs)) {
-      return "";
-    }
-    const endMs =
-      fetchRowQuery.data?.status === "completed" || fetchRowQuery.data?.status === "failed"
-        ? Date.parse(fetchRowQuery.data?.completed_at || "")
-        : nowTick;
-    const safeEnd = Number.isFinite(endMs) ? endMs : nowTick;
-    const sec = Math.max(0, Math.floor((safeEnd - startMs) / 1000));
-    const mm = String(Math.floor(sec / 60)).padStart(2, "0");
-    const ss = String(sec % 60).padStart(2, "0");
-    return `${mm}:${ss}`;
-  }, [fetchRowQuery.data?.completed_at, fetchRowQuery.data?.status, fetchTimeline, nowTick]);
+  const fetchElapsedText = useMemo(() => formatDuration(fetchElapsedSec), [fetchElapsedSec]);
 
   const effectiveAppId = useMemo(() => {
     const fromSelect = targetAppId.trim();
@@ -954,7 +1044,10 @@ function AnalyzeHubConnected() {
                 {sessionApp &&
                 (fetchRowQuery.data?.status === "pending" || fetchRowQuery.data?.status === "running") ? (
                   <div className="space-y-2">
-                    <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
+                      <p className="text-sm font-semibold text-slate-700">%{fetchProgressPercent}</p>
+                    </div>
                     <div
                       className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200"
                       role="progressbar"
@@ -969,9 +1062,16 @@ function AnalyzeHubConnected() {
                       />
                     </div>
                     <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
-                    {fetchElapsedText ? (
-                      <p className="text-xs font-medium text-slate-700">Gecen sure: {fetchElapsedText}</p>
-                    ) : null}
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-700">
+                      <p>Geçen süre: {fetchElapsedText}</p>
+                      <p>
+                        Tahmini kalan:{" "}
+                        {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
+                          ? formatDuration(fetchEtaSec)
+                          : "--:--"}
+                      </p>
+                      <p>Tahmini bitiş: {formatDuration(fetchElapsedSec + Math.max(0, fetchEtaSec ?? 0))}</p>
+                    </div>
                   </div>
                 ) : null}
                 {fetchTimeline.length > 0 ? (
