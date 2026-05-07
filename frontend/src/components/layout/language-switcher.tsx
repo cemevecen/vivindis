@@ -1,6 +1,8 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 
 import { usePathname, useRouter, routing } from "@/i18n/routing";
 
@@ -24,9 +26,10 @@ type LanguageSwitcherProps = {
   selectClassName?: string;
 };
 
-export function LanguageSwitcher({ selectClassName }: LanguageSwitcherProps) {
+function LanguageSwitcherImpl({ selectClassName }: LanguageSwitcherProps) {
   const locale = useLocale() as (typeof routing.locales)[number];
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const tCommon = useTranslations("common");
 
@@ -41,7 +44,9 @@ export function LanguageSwitcher({ selectClassName }: LanguageSwitcherProps) {
         value={locale}
         onChange={(e) => {
           const next = e.target.value as (typeof routing.locales)[number];
-          router.replace(pathname, { locale: next });
+          const qs = searchParams.toString();
+          const href = qs ? `${pathname}?${qs}` : pathname;
+          router.replace(href, { locale: next });
         }}
       >
         {routing.locales.map((loc) => (
@@ -51,5 +56,23 @@ export function LanguageSwitcher({ selectClassName }: LanguageSwitcherProps) {
         ))}
       </select>
     </label>
+  );
+}
+
+export function LanguageSwitcher(props: LanguageSwitcherProps) {
+  return (
+    <Suspense
+      fallback={
+        <div
+          className={
+            props.selectClassName ??
+            "h-9 w-[8.5rem] shrink-0 rounded-md border border-input bg-muted/40"
+          }
+          aria-hidden
+        />
+      }
+    >
+      <LanguageSwitcherImpl {...props} />
+    </Suspense>
   );
 }
