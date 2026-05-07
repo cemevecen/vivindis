@@ -36,47 +36,12 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   applicationName: "Vivindis",
   icons: {
+    /** SSR / ilk boyama: açık logo; site teması `ThemeFavicons` ile güncellenir. */
     icon: [
-      {
-        url: "/icons/icon-32-light.png",
-        sizes: "32x32",
-        type: "image/png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icons/icon-32-dark.png",
-        sizes: "32x32",
-        type: "image/png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icons/icon-16-light.png",
-        sizes: "16x16",
-        type: "image/png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icons/icon-16-dark.png",
-        sizes: "16x16",
-        type: "image/png",
-        media: "(prefers-color-scheme: dark)",
-      },
+      { url: "/icons/icon-32-light.png", sizes: "32x32", type: "image/png" },
+      { url: "/icons/icon-16-light.png", sizes: "16x16", type: "image/png" },
     ],
-    apple: [
-      {
-        url: "/icons/icon-180-light.png",
-        sizes: "180x180",
-        type: "image/png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icons/icon-180-dark.png",
-        sizes: "180x180",
-        type: "image/png",
-        media: "(prefers-color-scheme: dark)",
-      },
-    ],
-    shortcut: [{ url: "/favicon.ico" }],
+    apple: [{ url: "/icons/icon-180-light.png", sizes: "180x180", type: "image/png" }],
   },
 };
 

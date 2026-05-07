@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useEffect, useState, type ReactNode } from "react";
 import { Toaster } from "sonner";
 
+import { ThemeFavicons } from "@/components/providers/theme-favicons";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 
 function ThemedToaster() {
@@ -49,6 +50,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   return (
     <ThemeProvider>
+      <ThemeFavicons />
       <QueryClientProvider client={queryClient}>
         {children}
         <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-left" />
