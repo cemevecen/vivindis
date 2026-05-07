@@ -7,32 +7,20 @@ function norm(s: string): string {
 /**
  * Mağaza tarafındaki kimlik: aynı paket / bundle ile oluşturulmuş birden fazla `AppDto`
  * kaydını liste görünümünde bir kartta birleştirmek için kullanılır.
+ *
+ * Önemli: `platform: "google_play"` ile `"both"` aynı paket adına sahipse tek grupta birleşmeli;
+ * eski mantık `gp:x` vs `both:gp:x` ayrımı yüzünden aynı uygulama listede çoğalıyordu.
  */
 export function appStoreIdentityKey(app: AppDto): string {
   const pkg = norm(app.package_name || "");
   const bundle = norm(app.bundle_id || "");
-  switch (app.platform) {
-    case "google_play":
-      return pkg.length > 0 ? `gp:${pkg}` : `id:${app.id}`;
-    case "app_store":
-      if (bundle.length > 0) {
-        return `as:${bundle}`;
-      }
-      return pkg.length > 0 ? `as:pkg:${pkg}` : `id:${app.id}`;
-    case "both":
-      if (pkg.length > 0 && bundle.length > 0) {
-        return `both:${pkg}|${bundle}`;
-      }
-      if (pkg.length > 0) {
-        return `both:gp:${pkg}`;
-      }
-      if (bundle.length > 0) {
-        return `both:as:${bundle}`;
-      }
-      return `id:${app.id}`;
-    default:
-      return `id:${app.id}`;
+  if (pkg.length > 0) {
+    return `p:${pkg}`;
   }
+  if (bundle.length > 0) {
+    return `b:${bundle}`;
+  }
+  return `id:${app.id}`;
 }
 
 function pickCanonicalApp(group: AppDto[], preferAppId?: string | null): AppDto {
