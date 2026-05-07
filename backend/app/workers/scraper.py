@@ -164,8 +164,11 @@ async def _scrape_google_play(
     max_inserted = int(settings.scrape_max_reviews or 250000)
     lo, hi = fetch.from_date, fetch.to_date
     total_inserted = 0
-    loop = asyncio.get_running_loop()
-    sem = asyncio.Semaphore(35)
+    # NOTE: Her shard ayrı DB session açıyor; shard sayısı connection pool'u aşarsa
+    # Railway worker'da çoğu shard timeout verip çok az yorum kalabiliyor.
+    # Bu yüzden shard paralelliğini havuz limitinin altında tutuyoruz.
+    shard_parallelism = 8 if review_scope == "global" else 4
+    sem = asyncio.Semaphore(shard_parallelism)
 
     # Package variants for case-sensitivity: try original then lowercase if needed.
     pkg_variants = [pkg]
@@ -177,10 +180,11 @@ async def _scrape_google_play(
         factory = get_async_session_maker()
 
         async def _shard_task(l: str, c: str, s: int, v: str) -> int:
-            async with factory() as shard_session:
-                return await _scrape_locale_score(
-                    shard_session, l, c, s, v, limiter, lo, hi, app, fetch, max_inserted
-                )
+            async with sem:
+                async with factory() as shard_session:
+                    return await _scrape_locale_score(
+                        shard_session, l, c, s, v, limiter, lo, hi, app, fetch, max_inserted
+                    )
 
         tasks = [
             _shard_task(l, c, s, variant)
