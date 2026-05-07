@@ -6,6 +6,7 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { BuildVersionBadge } from "@/components/layout/build-version-badge";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Link, usePathname } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -59,8 +60,9 @@ export function DashboardHeader() {
         })}
       </nav>
 
-      <div className="flex shrink-0 items-center gap-3 sm:gap-4">
+      <div className="flex shrink-0 items-center gap-2 sm:gap-3">
         <BuildVersionBadge className="shrink-0 sm:hidden" />
+        <ThemeToggle />
         <LanguageSwitcher />
         {clerkEnabled ? (
           <UserButton afterSignOutUrl={`/${locale}`} />

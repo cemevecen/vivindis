@@ -3,7 +3,7 @@
 import { ExternalLink, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AppDto } from "@/types/app";
 import type { StoreSearchResultItem } from "@/types/store-search";
@@ -23,7 +23,7 @@ export function SegmentedTwo({
 }) {
   return (
     <div
-      className="flex rounded-2xl border border-slate-200/90 bg-slate-100/90 p-1 shadow-inner"
+      className="flex rounded-2xl border border-border bg-muted p-1 shadow-inner"
       role="group"
       aria-label={ariaLabel}
     >
@@ -32,8 +32,8 @@ export function SegmentedTwo({
         className={cn(
           "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
           value === "left"
-            ? "border border-orange-400 bg-orange-50 text-slate-900 shadow-sm"
-            : "text-slate-600 hover:bg-white/60",
+            ? "border border-primary/30 bg-card text-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-card/70",
         )}
         onClick={() => onChange("left")}
       >
@@ -44,8 +44,8 @@ export function SegmentedTwo({
         className={cn(
           "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
           value === "right"
-            ? "border border-orange-400 bg-orange-50 text-slate-900 shadow-sm"
-            : "text-slate-600 hover:bg-white/60",
+            ? "border border-primary/30 bg-card text-foreground shadow-sm"
+            : "text-muted-foreground hover:bg-card/70",
         )}
         onClick={() => onChange("right")}
       >
@@ -71,7 +71,7 @@ export function PinnedStoreAppCard({
   const t = useTranslations("analyzeHub");
   const title = app?.name ?? hit.name;
   return (
-    <div className="rounded-2xl border-2 border-orange-300/80 bg-gradient-to-br from-orange-50/95 to-amber-50/60 p-5 shadow-md sm:p-6">
+    <div className="rounded-2xl border-2 border-orange-200/80 bg-gradient-to-br from-orange-50/90 via-card to-amber-50/50 p-5 shadow-md dark:border-orange-900/45 dark:from-orange-950/35 dark:via-card dark:to-amber-950/20 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 gap-4">
           {hit.icon ? (
@@ -81,17 +81,21 @@ export function PinnedStoreAppCard({
               alt=""
               width={64}
               height={64}
-              className="size-16 shrink-0 rounded-2xl border border-orange-100 bg-white object-cover sm:size-20"
+              className="size-16 shrink-0 rounded-2xl border border-border bg-card object-cover sm:size-20"
             />
           ) : (
-            <div className="size-16 shrink-0 rounded-2xl border border-dashed border-orange-200 bg-white/80 sm:size-20" />
+            <div className="size-16 shrink-0 rounded-2xl border border-dashed border-border bg-muted/50 sm:size-20" />
           )}
           <div className="min-w-0 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-orange-800/90">{t("activeAppCardLabel")}</p>
-            <p className="truncate text-xl font-bold tracking-tight text-slate-900">{title}</p>
-            <p className="truncate font-mono text-sm text-slate-600">{hit.platform === "google_play" ? hit.id : `id ${hit.id}`}</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+              {t("activeAppCardLabel")}
+            </p>
+            <p className="truncate text-xl font-bold tracking-tight text-foreground">{title}</p>
+            <p className="truncate font-mono text-sm text-muted-foreground">
+              {hit.platform === "google_play" ? hit.id : `id ${hit.id}`}
+            </p>
             {isResolving ? (
-              <p className="text-sm font-medium text-orange-800">{t("storePinResolving")}</p>
+              <p className="text-sm font-medium text-orange-800 dark:text-orange-200">{t("storePinResolving")}</p>
             ) : null}
           </div>
         </div>
@@ -122,7 +126,7 @@ export function StoreResultCard({
 }) {
   const t = useTranslations("analyzeHub");
   return (
-    <li className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition-colors hover:border-slate-300">
+    <li className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/25">
       <div className="flex gap-3 p-4">
         {hit.icon ? (
           // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
@@ -131,22 +135,22 @@ export function StoreResultCard({
             alt=""
             width={56}
             height={56}
-            className="size-14 shrink-0 rounded-xl border border-slate-200 bg-slate-100 object-cover"
+            className="size-14 shrink-0 rounded-xl border border-border bg-muted object-cover"
           />
         ) : (
-          <div className="size-14 shrink-0 rounded-xl border border-dashed border-slate-200 bg-slate-100" />
+          <div className="size-14 shrink-0 rounded-xl border border-dashed border-border bg-muted" />
         )}
         <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate font-medium text-slate-900">{hit.name}</p>
-          <p className="truncate text-xs text-slate-500">
+          <p className="truncate font-medium text-foreground">{hit.name}</p>
+          <p className="truncate text-xs text-muted-foreground">
             {hit.platform === "google_play" ? hit.id : `id: ${hit.id}`}
           </p>
-          {hit.developer ? <p className="truncate text-xs text-slate-500">{hit.developer}</p> : null}
+          {hit.developer ? <p className="truncate text-xs text-muted-foreground">{hit.developer}</p> : null}
           {hit.rating != null ? (
-            <p className="text-xs font-medium text-slate-800">{t("ratingShort", { score: hit.rating.toFixed(1) })}</p>
+            <p className="text-xs font-medium text-foreground">{t("ratingShort", { score: hit.rating.toFixed(1) })}</p>
           ) : null}
           {hit.review_count != null ? (
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               {hit.review_count.toLocaleString()} {t("reviewsCount")}
             </p>
           ) : null}
@@ -155,7 +159,7 @@ export function StoreResultCard({
               href={hit.store_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-sky-700 underline-offset-4 hover:underline"
+              className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
             >
               {t("openStoreLink")}
               <ExternalLink className="size-3 shrink-0" aria-hidden />
@@ -163,10 +167,10 @@ export function StoreResultCard({
           ) : null}
         </div>
       </div>
-      <div className="border-t border-slate-100 bg-slate-50/80 px-3 py-3">
+      <div className="border-t border-border bg-muted/40 px-3 py-3">
         <Button
           type="button"
-          className="h-10 w-full rounded-lg bg-slate-900 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
+          className={cn(buttonVariants(), "h-10 w-full rounded-lg")}
           disabled={pinDisabled}
           onClick={() => onPin(hit)}
         >

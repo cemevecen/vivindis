@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -615,8 +616,11 @@ function AnalyzeHubConnected() {
     if (samples.length < 2) {
       return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
     }
-    const first = samples[0];
-    const last = samples[samples.length - 1];
+    const first = samples.at(0);
+    const last = samples.at(-1);
+    if (first === undefined || last === undefined) {
+      return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
+    }
     const deltaCount = last.count - first.count;
     const deltaSec = Math.max(1, Math.floor((last.ts - first.ts) / 1000));
     const speed = deltaCount / deltaSec;
@@ -645,8 +649,13 @@ function AnalyzeHubConnected() {
     let ema = 0;
     let seeded = false;
     for (let i = 1; i < samples.length; i += 1) {
-      const dc = samples[i].count - samples[i - 1].count;
-      const dt = Math.max(1, Math.floor((samples[i].ts - samples[i - 1].ts) / 1000));
+      const cur = samples[i];
+      const prev = samples[i - 1];
+      if (cur === undefined || prev === undefined) {
+        continue;
+      }
+      const dc = cur.count - prev.count;
+      const dt = Math.max(1, Math.floor((cur.ts - prev.ts) / 1000));
       const inst = dc / dt;
       if (!seeded) {
         ema = inst;
@@ -987,15 +996,15 @@ function AnalyzeHubConnected() {
   }, [selectedStoreHit, sessionApp, isPinningStore]);
 
   const shellBody = (
-    <div className="min-h-[60vh] space-y-6 bg-gradient-to-b from-sky-100/80 via-sky-50/50 to-slate-50 px-3 py-6 sm:px-6">
-      <div className="mx-auto max-w-[min(1240px,calc(100vw-1.5rem))] space-y-6 rounded-2xl border border-slate-200/80 bg-white/95 p-5 shadow-sm sm:p-8">
+    <div className="min-h-[60vh] space-y-6 bg-gradient-to-b from-muted/70 via-muted/35 to-background px-3 py-6 sm:px-6">
+      <div className="mx-auto max-w-[min(1240px,calc(100vw-1.5rem))] space-y-6 rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm sm:p-8">
         {mode === "store" ? (
           <section className="space-y-5" aria-labelledby="analyze-store-heading">
             <h2 id="analyze-store-heading" className="sr-only">
               {t("tabStore")}
             </h2>
             <div className="space-y-2">
-              <Label htmlFor="store-search" className="text-slate-800">
+              <Label htmlFor="store-search" className="text-foreground">
                 {t("searchLabel")}
               </Label>
               <Input
@@ -1012,12 +1021,12 @@ function AnalyzeHubConnected() {
                 }}
                 placeholder={t("searchPlaceholder")}
                 autoComplete="off"
-                className="rounded-xl border-slate-200 bg-white"
+                className="rounded-xl border-border bg-card"
               />
             </div>
 
             <div className="space-y-2">
-              <span className="block text-sm font-medium text-slate-800">{t("platformRowLabel")}</span>
+              <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
               <div className="flex flex-wrap gap-2">
                 <Button
                   type="button"
@@ -1025,7 +1034,7 @@ function AnalyzeHubConnected() {
                   size="sm"
                   className={cn(
                     "rounded-full",
-                    platform === "google_play" ? "bg-slate-900 text-white hover:bg-slate-800" : "",
+                    platform === "google_play" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
                   )}
                   onClick={() => setPlatform("google_play")}
                 >
@@ -1037,7 +1046,7 @@ function AnalyzeHubConnected() {
                   size="sm"
                   className={cn(
                     "rounded-full",
-                    platform === "app_store" ? "bg-slate-900 text-white hover:bg-slate-800" : "",
+                    platform === "app_store" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
                   )}
                   onClick={() => setPlatform("app_store")}
                 >
@@ -1049,7 +1058,7 @@ function AnalyzeHubConnected() {
                   size="sm"
                   className={cn(
                     "rounded-full",
-                    platform === "both" ? "bg-slate-900 text-white hover:bg-slate-800" : "",
+                    platform === "both" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
                   )}
                   onClick={() => setPlatform("both")}
                 >
@@ -1060,7 +1069,7 @@ function AnalyzeHubConnected() {
 
             <Button
               type="button"
-              className="h-12 w-full rounded-xl bg-slate-900 text-base font-semibold text-white hover:bg-slate-800"
+              className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90"
               onClick={() => {
                 if (requireSignedIn()) {
                   setActiveQuery(draftQuery.trim());
@@ -1072,7 +1081,7 @@ function AnalyzeHubConnected() {
             </Button>
 
             {!isPublicApiBaseUrlConfigured() ? (
-              <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-950">
+              <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100">
                 {t("apiUrlMissing")}
               </p>
             ) : null}
@@ -1080,7 +1089,7 @@ function AnalyzeHubConnected() {
             {selectedStoreHit && (sessionApp || isPinningStore) ? (
               <div
                 ref={pinnedPanelRef}
-                className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 sm:p-5"
+                className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 dark:border-orange-900/45 dark:bg-orange-950/20 sm:p-5"
               >
                 <PinnedStoreAppCard
                   hit={selectedStoreHit}
@@ -1091,7 +1100,7 @@ function AnalyzeHubConnected() {
                 />
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <Label htmlFor="store-fetch-date-preset" className="text-slate-800">
+                    <Label htmlFor="store-fetch-date-preset" className="text-foreground">
                       {t("dateRangeLabel")}
                     </Label>
                     <SelectNative
@@ -1108,7 +1117,7 @@ function AnalyzeHubConnected() {
                     </SelectNative>
                   </div>
                   <div className="space-y-2">
-                    <span className="block text-sm font-medium text-slate-800">{t("reviewScopeLabel")}</span>
+                    <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
                     <SegmentedTwo
                       ariaLabel={t("reviewScopeLabel")}
                       left={t("reviewScopeLocal")}
@@ -1120,7 +1129,7 @@ function AnalyzeHubConnected() {
                 </div>
                 <Button
                   type="button"
-                  className="h-12 w-full rounded-xl bg-gradient-to-b from-slate-800 to-slate-950 text-base font-semibold text-white shadow-md hover:from-slate-700 hover:to-slate-900 disabled:opacity-50"
+                  className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-md hover:bg-primary/90 disabled:opacity-50"
                   onClick={() => void handlePullStoreReviews()}
                   disabled={
                     !sessionApp ||
@@ -1156,13 +1165,13 @@ function AnalyzeHubConnected() {
                       fetchRowQuery.data?.status === "completed"))) ? (
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-slate-800">{t("fetchProgressLabel")}</p>
-                      <p className="rounded-full bg-orange-100 px-2.5 py-1 text-sm font-bold text-orange-900">
+                      <p className="text-sm font-medium text-foreground">{t("fetchProgressLabel")}</p>
+                      <p className="rounded-full bg-orange-100 dark:bg-orange-950/50 px-2.5 py-1 text-sm font-bold text-orange-900 dark:text-orange-100">
                         %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
                       </p>
                     </div>
                     <div
-                      className="h-2.5 w-full overflow-hidden rounded-full bg-slate-200"
+                      className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
                       role="progressbar"
                       aria-valuemin={0}
                       aria-valuemax={100}
@@ -1183,19 +1192,19 @@ function AnalyzeHubConnected() {
                       />
                     </div>
                     <div className="grid gap-2 sm:grid-cols-4">
-                      <div className="rounded-xl border border-orange-200 bg-orange-50/70 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-900/70">İlerleme</p>
-                        <p className="text-lg font-bold tabular-nums text-orange-950">
+                      <div className="rounded-xl border border-orange-200 bg-orange-50/70 px-3 py-2 dark:border-orange-900/50 dark:bg-orange-950/30">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-100/70">İlerleme</p>
+                        <p className="text-lg font-bold tabular-nums text-orange-950 dark:text-orange-50">
                           %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Geçen süre</p>
-                        <p className="text-lg font-bold tabular-nums text-slate-900">{fetchElapsedText}</p>
+                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Geçen süre</p>
+                        <p className="text-lg font-bold tabular-nums text-foreground">{fetchElapsedText}</p>
                       </div>
-                      <div className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Ortalama kalan</p>
-                        <p className="text-lg font-bold tabular-nums text-slate-900">
+                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ortalama kalan</p>
+                        <p className="text-lg font-bold tabular-nums text-foreground">
                           {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
                             ? formatDuration(fetchEtaSec)
                             : fetchRowQuery.data?.status === "completed"
@@ -1203,16 +1212,16 @@ function AnalyzeHubConnected() {
                               : "--:--"}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">Toplanan</p>
-                        <p className="text-lg font-bold tabular-nums text-slate-900">
+                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Toplanan</p>
+                        <p className="text-lg font-bold tabular-nums text-foreground">
                           {fetchRowQuery.data?.review_count ?? hydratedPoolCount}
                         </p>
                       </div>
                     </div>
-                    <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
-                    <p className="text-xs font-semibold text-slate-700">{fetchStageLabel}</p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-700">
+                    <p className="text-xs text-muted-foreground">{fetchDynamicHint}</p>
+                    <p className="text-xs font-semibold text-foreground">{fetchStageLabel}</p>
+                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-foreground">
                       <p>Geçen süre: {fetchElapsedText}</p>
                       <p>
                         Tahmini kalan:{" "}
@@ -1228,15 +1237,15 @@ function AnalyzeHubConnected() {
                   </div>
                 ) : null}
                 {fetchTimeline.length > 0 ? (
-                  <div className="space-y-2 rounded-xl border border-slate-200 bg-white/70 p-3">
-                    <p className="text-sm font-medium text-slate-800">Canli islem gunlugu</p>
+                  <div className="space-y-2 rounded-xl border border-border bg-card/70 p-3">
+                    <p className="text-sm font-medium text-foreground">Canli islem gunlugu</p>
                     <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
                       {fetchTimeline.map((ev) => (
-                        <div key={ev.key} className="rounded-md border border-slate-100 bg-slate-50/80 px-2 py-1.5">
-                          <p className="text-xs font-semibold text-slate-700">
+                        <div key={ev.key} className="rounded-md border border-border bg-muted/80 px-2 py-1.5">
+                          <p className="text-xs font-semibold text-foreground">
                             [{ev.time}] {ev.label}
                           </p>
-                          <p className="text-xs text-slate-600">{ev.reason}</p>
+                          <p className="text-xs text-muted-foreground">{ev.reason}</p>
                         </div>
                       ))}
                     </div>
@@ -1251,20 +1260,20 @@ function AnalyzeHubConnected() {
                   </p>
                 ) : null}
                 {isHydratingPool ? (
-                  <div className="space-y-2 rounded-xl border border-orange-200 bg-orange-50/70 p-3">
-                    <p className="text-sm font-semibold text-orange-900">Yorumlar havuza aktarılıyor...</p>
-                    <p className="text-xs text-orange-800">
+                  <div className="space-y-2 rounded-xl border border-orange-200 bg-orange-50/70 p-3 dark:border-orange-900/50 dark:bg-orange-950/30">
+                    <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">Yorumlar havuza aktarılıyor...</p>
+                    <p className="text-xs text-orange-800 dark:text-orange-200">
                       Aktarılan satır: {hydratedPoolCount}
                       {fetchRowQuery.data?.review_count ? ` / ${fetchRowQuery.data.review_count}` : ""}
                     </p>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100 dark:bg-orange-950/50">
                       <div className="h-full w-1/3 animate-pulse rounded-full bg-orange-500" />
                     </div>
                   </div>
                 ) : null}
                 {hydratedReviews.length > 0 ? (
-                  <details className="rounded-xl border border-slate-200 bg-white/80 p-3">
-                    <summary className="cursor-pointer select-none text-sm font-semibold text-slate-800">
+                  <details className="rounded-xl border border-border bg-card/80 p-3">
+                    <summary className="cursor-pointer select-none text-sm font-semibold text-foreground">
                       Yorumları incele ({hydratedReviews.length})
                     </summary>
                     <div className="mt-3 space-y-3">
@@ -1280,15 +1289,15 @@ function AnalyzeHubConnected() {
                       </div>
                       <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
                         {hydratedReviews.map((row, idx) => (
-                          <article key={row.id} className="rounded-xl border border-slate-200 bg-slate-50/80 px-3 py-2">
-                            <div className="flex items-center justify-between gap-2 text-xs text-slate-600">
+                          <article key={row.id} className="rounded-xl border border-border bg-muted/80 px-3 py-2">
+                            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                               <p>
                                 #{idx + 1} | puan: {row.rating}
                               </p>
                               <p>tarih: {formatReviewDate(row.review_date)}</p>
                             </div>
-                            {row.title ? <p className="mt-1 text-sm font-medium text-slate-800">{row.title}</p> : null}
-                            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-700">{row.body}</p>
+                            {row.title ? <p className="mt-1 text-sm font-medium text-foreground">{row.title}</p> : null}
+                            <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{row.body}</p>
                           </article>
                         ))}
                       </div>
@@ -1300,28 +1309,28 @@ function AnalyzeHubConnected() {
 
             {activeQuery.length >= 2 && !hideStoreResultGrid ? (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-slate-600">
+                <h3 className="text-sm font-medium text-muted-foreground">
                   {t("resultsHeading", { count: results.length })}
                 </h3>
                 {searchQuery.isPending ? (
-                  <p className="text-sm text-slate-500">{tCommon("loading")}</p>
+                  <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
                 ) : searchQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/50 p-3">
                     <p className="text-sm font-medium text-red-800">{t("searchFailed")}</p>
                     <p className="text-sm break-words text-red-800/90">{formatClientFetchError(searchQuery.error)}</p>
                     {isLikelyFetchNetworkError(searchQuery.error) ? (
-                      <p className="text-xs leading-relaxed text-slate-600">{t("searchNetworkHint")}</p>
+                      <p className="text-xs leading-relaxed text-muted-foreground">{t("searchNetworkHint")}</p>
                     ) : null}
                     <Button type="button" variant="outline" size="sm" onClick={() => void searchQuery.refetch()}>
                       {tCommon("retry")}
                     </Button>
                   </div>
                 ) : !results.length ? (
-                  <p className="text-sm text-slate-500">{t("noResults")}</p>
+                  <p className="text-sm text-muted-foreground">{t("noResults")}</p>
                 ) : platform === "both" ? (
                   <div className="space-y-8">
                     <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-slate-800">{t("platformAndroid")}</h4>
+                      <h4 className="text-sm font-semibold text-foreground">{t("platformAndroid")}</h4>
                       {androidHits.length ? (
                         <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
                           {androidHits.map((hit) => (
@@ -1335,11 +1344,11 @@ function AnalyzeHubConnected() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-sm text-slate-500">{t("noResultsGroup")}</p>
+                        <p className="text-sm text-muted-foreground">{t("noResultsGroup")}</p>
                       )}
                     </div>
                     <div className="space-y-3">
-                      <h4 className="text-sm font-semibold text-slate-800">{t("platformIos")}</h4>
+                      <h4 className="text-sm font-semibold text-foreground">{t("platformIos")}</h4>
                       {iosHits.length ? (
                         <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
                           {iosHits.map((hit) => (
@@ -1353,7 +1362,7 @@ function AnalyzeHubConnected() {
                           ))}
                         </ul>
                       ) : (
-                        <p className="text-sm text-slate-500">{t("noResultsGroup")}</p>
+                        <p className="text-sm text-muted-foreground">{t("noResultsGroup")}</p>
                       )}
                     </div>
                   </div>
@@ -1373,15 +1382,15 @@ function AnalyzeHubConnected() {
               </div>
             ) : null}
 
-            <p className="text-xs text-slate-500">{t("storeFooter")}</p>
+            <p className="text-xs text-muted-foreground">{t("storeFooter")}</p>
           </section>
         ) : null}
 
         {mode === "file" || mode === "text" ? (
           <section className="space-y-5">
-            <p className="text-sm text-slate-600">{t("fileTextIntro")}</p>
+            <p className="text-sm text-muted-foreground">{t("fileTextIntro")}</p>
             <div className="space-y-2">
-              <Label htmlFor="target-app" className="text-slate-800">
+              <Label htmlFor="target-app" className="text-foreground">
                 {t("targetAppLabel")}
               </Label>
               <SelectNative
@@ -1398,15 +1407,15 @@ function AnalyzeHubConnected() {
                 ))}
               </SelectNative>
               {sessionApp ? (
-                <p className="text-xs text-slate-500">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
+                <p className="text-xs text-muted-foreground">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
               ) : null}
               {appsQuery.isError ? <p className="text-xs text-red-600">{t("appsLoadError")}</p> : null}
               {!appsQuery.isPending && appChoices.length === 0 ? (
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-muted-foreground">
                   {t("noAppsYet")}{" "}
                   <button
                     type="button"
-                    className="font-medium text-orange-700 underline"
+                    className="font-medium text-orange-700 underline dark:text-orange-300"
                     onClick={() => router.push("/apps/new")}
                   >
                     {t("goCreateApp")}
@@ -1418,7 +1427,7 @@ function AnalyzeHubConnected() {
             {mode === "file" ? (
               <>
                 <div className="space-y-2">
-                  <Label className="text-slate-800">{t("filePickLabel")}</Label>
+                  <Label className="text-foreground">{t("filePickLabel")}</Label>
                   <input
                     ref={fileInputRef}
                     type="file"
@@ -1431,7 +1440,7 @@ function AnalyzeHubConnected() {
                     tabIndex={0}
                     className={cn(
                       "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70",
-                      fileDragOver ? "border-orange-500 bg-orange-50/60" : "border-slate-300 bg-slate-50/80",
+                      fileDragOver ? "border-orange-500 bg-orange-50/60" : "border-border bg-muted/80",
                     )}
                     onDragOver={(e) => {
                       e.preventDefault();
@@ -1452,18 +1461,18 @@ function AnalyzeHubConnected() {
                       }
                     }}
                   >
-                    <Upload className="size-8 text-slate-500" aria-hidden />
-                    <p className="text-sm font-medium text-slate-800">{t("fileDropHint")}</p>
-                    <p className="text-xs text-slate-600">{t("fileConstraints")}</p>
+                    <Upload className="size-8 text-muted-foreground" aria-hidden />
+                    <p className="text-sm font-medium text-foreground">{t("fileDropHint")}</p>
+                    <p className="text-xs text-muted-foreground">{t("fileConstraints")}</p>
                   </div>
-                  {fileLabel ? <p className="text-xs text-slate-500">{fileLabel}</p> : null}
+                  {fileLabel ? <p className="text-xs text-muted-foreground">{fileLabel}</p> : null}
                 </div>
-                <p className="text-xs text-slate-600">{t("filePoolFooterHint")}</p>
+                <p className="text-xs text-muted-foreground">{t("filePoolFooterHint")}</p>
               </>
             ) : (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="paste-reviews" className="text-slate-800">
+                  <Label htmlFor="paste-reviews" className="text-foreground">
                     {t("pasteReviewsLabel")}
                   </Label>
                   <textarea
@@ -1471,19 +1480,19 @@ function AnalyzeHubConnected() {
                     value={pastedText}
                     onChange={(e) => setPastedText(e.target.value)}
                     placeholder={t("textPlaceholder")}
-                    className="min-h-[160px] w-full rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 shadow-inner"
+                    className="min-h-[160px] w-full rounded-2xl border border-border bg-card px-3 py-2 text-sm text-foreground shadow-inner"
                   />
                 </div>
                 <Button
                   type="button"
                   variant="secondary"
-                  className="h-11 w-full rounded-xl bg-slate-900 text-white hover:bg-slate-800"
+                  className="h-11 w-full rounded-xl bg-primary text-primary-foreground hover:bg-primary/90"
                   disabled={!pastedText.trim()}
                   onClick={handleLoadTextIntoPool}
                 >
                   {t("loadTextToPool")}
                 </Button>
-                <p className="text-xs text-slate-600">{t("textPoolFooterHint")}</p>
+                <p className="text-xs text-muted-foreground">{t("textPoolFooterHint")}</p>
               </>
             )}
           </section>
@@ -1491,10 +1500,10 @@ function AnalyzeHubConnected() {
 
         {mode === "compare" ? (
           <section className="space-y-5">
-            <p className="text-sm text-slate-600">{t("compareHint")}</p>
+            <p className="text-sm text-muted-foreground">{t("compareHint")}</p>
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="space-y-3">
-                <Label className="text-slate-800">{t("compareApp1Label")}</Label>
+                <Label className="text-foreground">{t("compareApp1Label")}</Label>
                 <Input
                   value={compareDraftA}
                   onChange={(e) => setCompareDraftA(e.target.value)}
@@ -1505,7 +1514,7 @@ function AnalyzeHubConnected() {
                   type="button"
                   size="sm"
                   variant="secondary"
-                  className="bg-slate-900 text-white hover:bg-slate-800"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={() => {
                     if (requireSignedIn()) {
                       setActiveCompareA(compareDraftA.trim());
@@ -1530,7 +1539,7 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
               <div className="space-y-3">
-                <Label className="text-slate-800">{t("compareApp2Label")}</Label>
+                <Label className="text-foreground">{t("compareApp2Label")}</Label>
                 <Input
                   value={compareDraftB}
                   onChange={(e) => setCompareDraftB(e.target.value)}
@@ -1541,7 +1550,7 @@ function AnalyzeHubConnected() {
                   type="button"
                   size="sm"
                   variant="secondary"
-                  className="bg-slate-900 text-white hover:bg-slate-800"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={() => {
                     if (requireSignedIn()) {
                       setActiveCompareB(compareDraftB.trim());
@@ -1567,7 +1576,7 @@ function AnalyzeHubConnected() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="compare-date" className="text-slate-800">
+              <Label htmlFor="compare-date" className="text-foreground">
                 {t("compareDateLabel")}
               </Label>
               <SelectNative
@@ -1590,18 +1599,18 @@ function AnalyzeHubConnected() {
             >
               {t("startCompareCta")}
             </Button>
-            <p className="text-xs text-slate-500">{tNav("compare")}</p>
+            <p className="text-xs text-muted-foreground">{tNav("compare")}</p>
           </section>
         ) : null}
 
         {mode !== "compare" ? (
-          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border-2 border-orange-200/80 bg-gradient-to-b from-white to-orange-50/40 p-4 shadow-xl sm:p-6">
-            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-100 pb-3">
+          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border-2 border-orange-200/80 bg-gradient-to-b from-card to-orange-50/35 p-4 shadow-xl dark:border-orange-900/50 dark:from-card dark:to-orange-950/25 sm:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/60 dark:border-orange-900/40 pb-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/80">{t("poolBadgeTitle")}</p>
-                <p className="text-3xl font-bold tabular-nums text-slate-900">{poolDisplayCount}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-200/90">{t("poolBadgeTitle")}</p>
+                <p className="text-3xl font-bold tabular-nums text-foreground">{poolDisplayCount}</p>
                 {isHydratingPool ? (
-                  <p className="mt-1 text-xs font-medium text-orange-800">Havuza aktarım devam ediyor...</p>
+                  <p className="mt-1 text-xs font-medium text-orange-800 dark:text-orange-200">Havuza aktarım devam ediyor...</p>
                 ) : null}
               </div>
               {poolLines.length > 0 ? (
@@ -1609,7 +1618,7 @@ function AnalyzeHubConnected() {
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="text-slate-600"
+                  className="text-muted-foreground"
                   onClick={() => {
                     setPoolLines([]);
                     setHydratedReviews([]);
@@ -1622,7 +1631,7 @@ function AnalyzeHubConnected() {
               ) : null}
             </div>
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-900">{t("analysisModeSectionTitle")}</p>
+              <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
               <SegmentedTwo
                 ariaLabel={t("analysisModeLabel")}
                 left={t("analysisModeFast")}
@@ -1632,7 +1641,7 @@ function AnalyzeHubConnected() {
               />
             </div>
             {poolLines.length > 0 && !effectiveAppId ? (
-              <p className="text-center text-xs font-medium text-amber-900">{t("analyzeNeedAppForTextPool")}</p>
+              <p className="text-center text-xs font-medium text-amber-900 dark:text-amber-200">{t("analyzeNeedAppForTextPool")}</p>
             ) : null}
             <Button
               type="button"
@@ -1643,7 +1652,7 @@ function AnalyzeHubConnected() {
               {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
             </Button>
             {!canRunUnifiedAnalysis ? (
-              <p className="text-center text-xs text-slate-600">{t("analyzeFooterDisabledHint")}</p>
+              <p className="text-center text-xs text-muted-foreground">{t("analyzeFooterDisabledHint")}</p>
             ) : null}
           </div>
         ) : null}
@@ -1689,6 +1698,7 @@ function AnalyzeHubConnected() {
               >
                 {t("aboutLink")}
               </Link>
+              <ThemeToggle selectClassName="rounded-lg border border-white/25 bg-white/10 px-2 py-1.5 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" />
               <LanguageSwitcher selectClassName="rounded-lg border border-white/25 bg-white/10 px-2 py-1.5 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" />
             </div>
             <div className="flex flex-wrap gap-2" role="tablist" aria-label={t("tablistLabel")}>
@@ -1702,7 +1712,7 @@ function AnalyzeHubConnected() {
                   className={cn(
                     "inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors sm:flex-none",
                     mode === id
-                      ? "border-indigo-200/80 bg-white text-slate-900 shadow-md"
+                      ? "border-white/35 bg-white text-neutral-900 shadow-md"
                       : "border-white/20 bg-white/10 text-white hover:bg-white/20",
                   )}
                 >

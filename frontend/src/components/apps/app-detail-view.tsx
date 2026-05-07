@@ -156,7 +156,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
           </div>
         </div>
       ) : pairValid && pairAppQuery.isError ? (
-        <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950">
+        <div className="rounded-lg border border-amber-200 bg-amber-50/80 p-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
           {tCommon("error")}
         </div>
       ) : null}

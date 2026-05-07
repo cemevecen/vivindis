@@ -528,7 +528,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                             ? "bg-emerald-500"
                             : reviewTone(row.rating) === "negative"
                               ? "bg-red-500"
-                              : "bg-slate-400",
+                              : "bg-muted-foreground/45",
                         )}
                         aria-hidden
                       />
@@ -548,7 +548,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           <div className="mt-3 grid gap-2 sm:grid-cols-4">
             <Button
               type="button"
-              className="bg-slate-900 text-white hover:bg-slate-800"
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
               size="sm"
               disabled={reviewsLoading || reviewOffset >= reviewTotal}
               onClick={() => void loadReviewChunk(reviewOffset, false)}

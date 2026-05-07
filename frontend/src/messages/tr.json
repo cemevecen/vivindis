@@ -15,7 +15,11 @@
     "error": "Bir hata oluştu",
     "empty": "Henüz veri yok",
     "retry": "Yeniden dene",
-    "toastNetwork": "Ağ hatası. Bağlantınızı ve API adresini kontrol edin."
+    "toastNetwork": "Ağ hatası. Bağlantınızı ve API adresini kontrol edin.",
+    "themeLabel": "Görünüm",
+    "themeLight": "Açık",
+    "themeDark": "Koyu",
+    "themeSystem": "Sistem"
   },
   "analyzeHub": {
     "title": "Yorum analizi",

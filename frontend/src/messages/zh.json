@@ -15,7 +15,11 @@
     "error": "出错了",
     "empty": "暂无数据",
     "retry": "Try again",
-    "toastNetwork": "Network error. Check your connection and API URL."
+    "toastNetwork": "Network error. Check your connection and API URL.",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
   },
   "apps": {
     "title": "Apps",

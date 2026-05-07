@@ -15,7 +15,11 @@
     "error": "Hitilafu imetokea",
     "empty": "Bado hakuna data",
     "retry": "Try again",
-    "toastNetwork": "Network error. Check your connection and API URL."
+    "toastNetwork": "Network error. Check your connection and API URL.",
+    "themeLabel": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System"
   },
   "apps": {
     "title": "Apps",
