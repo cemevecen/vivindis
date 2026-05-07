@@ -13,7 +13,7 @@ export async function SiteFooter() {
         <p className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">{t("rights")}</p>
         <Link
           href="/about"
-          className="shrink-0 whitespace-nowrap text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+          className="shrink-0 whitespace-nowrap text-sm font-semibold text-foreground underline-offset-4 decoration-foreground/40 underline transition-colors hover:text-primary hover:decoration-primary hover:underline"
         >
           {tNav("about")}
         </Link>
