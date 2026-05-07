@@ -35,6 +35,7 @@ import {
 import { parseReviewFile } from "@/lib/parse-review-file";
 import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
+import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
 import type { AppDto, ReviewFetchDto, ReviewImportResponseDto, ReviewListResponseDto } from "@/types/app";
@@ -80,12 +81,10 @@ function AnalyzeHubConnected() {
 
   const dateRange = useMemo(() => rangeFromPreset(datePreset), [datePreset]);
 
-  const { searchLang, searchCountry } = useMemo(() => {
-    const lc = typeof locale === "string" ? locale : "tr";
-    const lang = lc.length >= 2 ? lc.split("-")[0]?.slice(0, 2) ?? "tr" : "tr";
-    const country = lang === "zh" ? "cn" : lang;
-    return { searchLang: lang, searchCountry: country };
-  }, [locale]);
+  const { lang: searchLang, country: searchCountry } = useMemo(
+    () => storeLocaleFromUiLocale(locale),
+    [locale],
+  );
 
   const [platform, setPlatform] = useState<SearchPlatform>("google_play");
   const [draftQuery, setDraftQuery] = useState("");
@@ -228,8 +227,7 @@ function AnalyzeHubConnected() {
           from_date: dateRange.from,
           to_date: dateRange.to,
           review_scope: reviewScope,
-          lang: searchLang,
-          country: searchCountry,
+          ...(reviewScope === "local" ? { lang: searchLang, country: searchCountry } : {}),
         },
         getToken,
       });
