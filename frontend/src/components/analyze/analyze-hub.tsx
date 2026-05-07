@@ -687,28 +687,13 @@ function AnalyzeHubConnected() {
 
   const runUnifiedAnalysis = useCallback(async () => {
     const appId = effectiveAppId;
-    if (poolLines.length > 0) {
-      if (!appId) {
-        toast.error(t("analyzeNeedAppForTextPool"));
-        return;
-      }
-      setAnalysisKickoffBusy(true);
-      try {
-        const res = await importMutation.mutateAsync({
-          appId,
-          items: poolLines.map((body) => ({ body })),
-        });
-        setPoolLines([]);
-        await afterImport(res.fetch_id, appId);
-      } catch (e) {
-        const msg = e instanceof ApiError ? e.message : tCommon("error");
-        toast.error(msg);
-      } finally {
-        setAnalysisKickoffBusy(false);
-      }
-      return;
-    }
-    if (fetchRowQuery.data?.status === "completed" && storeFetchId) {
+    const hasHydratedStorePool =
+      Boolean(storeFetchId) &&
+      fetchRowQuery.data?.status === "completed" &&
+      lastFetchHydratedToPoolRef.current === storeFetchId &&
+      hydratedReviews.length > 0;
+
+    if ((fetchRowQuery.data?.status === "completed" && storeFetchId && poolLines.length === 0) || hasHydratedStorePool) {
       if (!appId) {
         toast.error(t("analyzeFooterNeedApp"));
         return;
@@ -730,6 +715,28 @@ function AnalyzeHubConnected() {
       }
       return;
     }
+
+    if (poolLines.length > 0) {
+      if (!appId) {
+        toast.error(t("analyzeNeedAppForTextPool"));
+        return;
+      }
+      setAnalysisKickoffBusy(true);
+      try {
+        const res = await importMutation.mutateAsync({
+          appId,
+          items: poolLines.map((body) => ({ body })),
+        });
+        setPoolLines([]);
+        await afterImport(res.fetch_id, appId);
+      } catch (e) {
+        const msg = e instanceof ApiError ? e.message : tCommon("error");
+        toast.error(msg);
+      } finally {
+        setAnalysisKickoffBusy(false);
+      }
+      return;
+    }
     if (!appId) {
       toast.error(t("analyzeFooterNeedApp"));
       return;
@@ -738,6 +745,7 @@ function AnalyzeHubConnected() {
   }, [
     effectiveAppId,
     poolLines,
+    hydratedReviews.length,
     importMutation,
     afterImport,
     fetchRowQuery.data?.status,
