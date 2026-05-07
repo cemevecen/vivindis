@@ -338,7 +338,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       {fetch.status === "completed" ? (
         <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between gap-3">
-            <h2 className="text-sm font-semibold">Yorum listesi</h2>
+            <h2 className="text-sm font-semibold">Analiz edilen yorumlar</h2>
             <p className="text-xs text-muted-foreground">
               {reviewItems.length}/{reviewTotal}
             </p>
@@ -355,6 +355,9 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                     </p>
                     <p>{row.review_date}</p>
                   </div>
+                  <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground/80">
+                    {row.platform === "google_play" ? "Google Play" : "App Store"}
+                  </p>
                   {row.title ? <p className="mt-1 text-sm font-medium">{row.title}</p> : null}
                   <p className="mt-1 whitespace-pre-wrap text-sm">{row.body}</p>
                 </article>
