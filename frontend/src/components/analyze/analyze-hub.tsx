@@ -633,61 +633,6 @@ function AnalyzeHubConnected() {
     return Math.floor(remaining / speed);
   }, [fetchElapsedSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
 
-  const fetchSpeedPerSec = useMemo(() => {
-    const row = fetchRowQuery.data;
-    if (!row || row.status !== "running" || !storeFetchId || row.id !== storeFetchId) {
-      return 0;
-    }
-    const samples = fetchCountSamplesRef.current;
-    if (samples.length < 2) {
-      return 0;
-    }
-    // Exponential smoothing over sample deltas to reduce ETA jitter.
-    let ema = 0;
-    let seeded = false;
-    for (let i = 1; i < samples.length; i += 1) {
-      const cur = samples[i];
-      const prev = samples[i - 1];
-      if (cur === undefined || prev === undefined) {
-        continue;
-      }
-      const dc = cur.count - prev.count;
-      const dt = Math.max(1, Math.floor((cur.ts - prev.ts) / 1000));
-      const inst = dc / dt;
-      if (!seeded) {
-        ema = inst;
-        seeded = true;
-      } else {
-        ema = 0.35 * inst + 0.65 * ema;
-      }
-    }
-    return Math.max(0, ema);
-  }, [fetchRowQuery.data, storeFetchId]);
-
-  const fetchProgressPercent = useMemo(() => {
-    const row = fetchRowQuery.data;
-    if (!row || !storeFetchId || row.id !== storeFetchId) {
-      return 0;
-    }
-    if (row.status === "pending") {
-      const p = Math.min(22, 8 + Math.floor(fetchElapsedSec / 4));
-      return p;
-    }
-    if (row.status === "running") {
-      const timeProgress = Math.min(92, Math.max(20, Math.floor((fetchElapsedSec / historicalAvgDurationSec) * 100)));
-      if (fetchEtaSec === null || fetchEtaSec <= 0) {
-        return timeProgress;
-      }
-      const total = fetchElapsedSec + fetchEtaSec;
-      const etaProgress = total > 0 ? Math.floor((fetchElapsedSec / total) * 100) : timeProgress;
-      return Math.min(96, Math.max(25, Math.floor((timeProgress + etaProgress) / 2)));
-    }
-    if (row.status === "completed") {
-      return 100;
-    }
-    return 0;
-  }, [fetchElapsedSec, fetchEtaSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
-
   const fetchDynamicHint = useMemo(() => {
     const row = fetchRowQuery.data;
     if (!row || !storeFetchId) {
@@ -1256,42 +1201,8 @@ function AnalyzeHubConnected() {
                       fetchRowQuery.data?.status === "running" ||
                       fetchRowQuery.data?.status === "completed"))) ? (
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="text-sm font-medium text-foreground">{t("fetchProgressLabel")}</p>
-                      <p className="rounded-full bg-orange-100 dark:bg-orange-950/50 px-2.5 py-1 text-sm font-bold text-orange-900 dark:text-orange-100">
-                        %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
-                      </p>
-                    </div>
-                    <div
-                      className="h-2.5 w-full overflow-hidden rounded-full bg-muted"
-                      role="progressbar"
-                      aria-valuemin={0}
-                      aria-valuemax={100}
-                      aria-valuenow={fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
-                      aria-label={t("fetchProgressLabel")}
-                    >
-                      <div
-                        className="h-full rounded-full bg-orange-500 transition-[width] duration-700 ease-out"
-                        style={{
-                          width: `${
-                            fetchRowQuery.data?.status === "completed"
-                              ? 100
-                              : storePullMutation.isPending
-                                ? 8
-                                : fetchProgressPercent
-                          }%`,
-                        }}
-                      />
-                    </div>
-                    <div className="grid gap-2 sm:grid-cols-4">
-                      <div className="rounded-xl border border-orange-200 bg-orange-50/70 px-3 py-2 dark:border-orange-900/50 dark:bg-orange-950/30">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-100/70">
-                          {t("progressSectionProgress")}
-                        </p>
-                        <p className="text-lg font-bold tabular-nums text-orange-950 dark:text-orange-50">
-                          %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
-                        </p>
-                      </div>
+                    <p className="text-sm font-medium text-foreground">{t("fetchProgressLabel")}</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
                       <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {t("progressSectionElapsed")}
@@ -1303,47 +1214,25 @@ function AnalyzeHubConnected() {
                           {t("progressSectionEta")}
                         </p>
                         <p className="text-lg font-bold tabular-nums text-foreground">
-                          {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
+                          {fetchRowQuery.data?.status === "running" && fetchEtaSec !== null
                             ? formatDuration(fetchEtaSec)
-                            : fetchRowQuery.data?.status === "completed"
-                              ? formatDuration(0)
-                              : t("progressPlaceholderUnknown")}
+                            : t("progressPlaceholderUnknown")}
                         </p>
                       </div>
-                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
+                    </div>
+                    {(fetchRowQuery.data?.review_count ?? 0) > 0 ||
+                    fetchRowQuery.data?.status === "completed" ? (
+                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2 sm:max-w-md">
                         <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                           {t("progressSectionCollected")}
                         </p>
                         <p className="text-lg font-bold tabular-nums text-foreground">
-                          {fetchRowQuery.data?.review_count ?? hydratedPoolCount}
+                          {fetchRowQuery.data?.review_count ?? 0}
                         </p>
                       </div>
-                    </div>
+                    ) : null}
                     <p className="text-xs text-muted-foreground">{fetchDynamicHint}</p>
                     <p className="text-xs font-semibold text-foreground">{fetchStageLabel}</p>
-                    <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-foreground">
-                      <p>{t("progressElapsedInline", { value: fetchElapsedText })}</p>
-                      <p>
-                        {t("progressEtaInline", {
-                          value:
-                            fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
-                              ? formatDuration(fetchEtaSec)
-                              : fetchRowQuery.data?.status === "completed"
-                                ? formatDuration(0)
-                                : t("progressPlaceholderUnknown"),
-                        })}
-                      </p>
-                      <p>
-                        {t("progressFinishInline", {
-                          value: formatDuration(fetchElapsedSec + Math.max(0, fetchEtaSec ?? 0)),
-                        })}
-                      </p>
-                      <p>
-                        {fetchSpeedPerSec > 0
-                          ? t("progressSpeedPerSec", { rate: fetchSpeedPerSec.toFixed(1) })
-                          : t("progressSpeedMeasuring")}
-                      </p>
-                    </div>
                   </div>
                 ) : null}
                 {fetchTimeline.length > 0 ? (

@@ -12,7 +12,7 @@ from google_play_scraper import Sort
 from google_play_scraper import reviews as gp_reviews
 from google_play_scraper import reviews_all as gp_reviews_all
 from google_play_scraper.exceptions import ExtraHTTPError, NotFoundError
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import selectinload
 
@@ -33,6 +33,15 @@ from app.workers.runtime import run_async_db
 ensure_play_request_user_agents()
 
 log = get_logger(__name__)
+
+
+async def _commit_reviews_and_sync_fetch_count(session: Any, fetch_id: uuid.UUID) -> None:
+    """Yorum satırlarını kalıcı yap, ardından fetch.review_count'u DB'deki gerçek sayıma eşitle (polling UI)."""
+    await session.commit()
+    cnt_r = await session.execute(select(func.count()).select_from(Review).where(Review.fetch_id == fetch_id))
+    n = int(cnt_r.scalar_one())
+    await session.execute(update(ReviewFetch).where(ReviewFetch.id == fetch_id).values(review_count=n))
+    await session.commit()
 
 
 def _in_range(at: datetime | None, lo: date, hi: date) -> bool:
@@ -283,7 +292,7 @@ async def _scrape_google_play_baseline(
             inserted += 1
             if inserted >= max_inserted:
                 break
-        await session.commit()
+        await _commit_reviews_and_sync_fetch_count(session, fetch.id)
         if inserted >= max_inserted:
             break
     return inserted
@@ -331,7 +340,7 @@ async def _scrape_locale_score(
             
             if at and (at.date() < lo or at.date() > hi):
                 if at.date() < lo:
-                    await session.commit()
+                    await _commit_reviews_and_sync_fetch_count(session, fetch.id)
                     return inserted
                 continue
             
@@ -357,7 +366,7 @@ async def _scrape_locale_score(
             )
             inserted += 1
         
-        await session.commit()
+        await _commit_reviews_and_sync_fetch_count(session, fetch.id)
         if continuation is None or getattr(continuation, "token", None) is None:
             break
             
