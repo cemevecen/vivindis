@@ -367,7 +367,18 @@
     "csvHeaderReviewDate": "yorum_tarihi",
     "csvHeaderAuthor": "yazar",
     "csvHeaderTitle": "başlık",
-    "csvHeaderBody": "metin"
+    "csvHeaderBody": "metin",
+    "timelineSectionHeading": "Çekilen yorumlar — zaman ve yıldızlar",
+    "timelineBucketDay": "Günlük",
+    "timelineBucketWeek": "Haftalık",
+    "timelineBucketMonth": "Aylık",
+    "timelineVolumeTitle": "Dönem başına yorum sayısı",
+    "timelineStarsStackTitle": "Dönem başına yıldız dağılımı (1–5)",
+    "timelineAvgRatingTitle": "Dönem başına ortalama puan",
+    "timelineEmpty": "Bu dilim için veri yok.",
+    "timelineStarLabel": "{star} yıldız",
+    "timelineTruncatedHint": "Grafikler toplam {total} yorumdan en fazla {loaded} tanesine göre (performans sınırı).",
+    "timelineLoadError": "Zaman çizelgesi için yorumlar yüklenemedi."
   },
   "about": {
     "title": "Vivindis hakkında",

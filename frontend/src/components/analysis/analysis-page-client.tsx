@@ -3,10 +3,11 @@
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
 
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
+import { ReviewTimelineCharts } from "@/components/analysis/review-timeline-charts";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
@@ -72,12 +73,15 @@ type Props = {
   clerkEnabled: boolean;
 };
 
+const TIMELINE_REVIEW_CAP = 20_000;
+
 export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const t = useTranslations("analysis");
   const tAnalyzeHub = useTranslations("analyzeHub");
   const tDash = useTranslations("dashboard");
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const exportBase = t("exportFileBase");
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
@@ -87,6 +91,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<"all" | "positive" | "neutral" | "negative">("all");
   const [reviewSort, setReviewSort] = useState<"newest" | "oldest" | "rating_desc" | "rating_asc">("newest");
+  const [timelineReviews, setTimelineReviews] = useState<ReviewListItemDto[] | null>(null);
+  const [timelineLoadState, setTimelineLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
@@ -306,6 +312,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     setReviewItems([]);
     setReviewTotal(0);
     setReviewOffset(0);
+    setTimelineReviews(null);
+    setTimelineLoadState("idle");
   }, [fetchId]);
 
   useEffect(() => {
@@ -314,6 +322,53 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     }
     void loadReviewChunk(0, true);
   }, [fetchId, fetchQuery.data?.status, loadReviewChunk]);
+
+  useEffect(() => {
+    if (!fetchId || !clerkEnabled || fetchQuery.data?.status !== "completed") {
+      return;
+    }
+    const total = fetchQuery.data.review_count;
+    if (total <= 0) {
+      setTimelineReviews([]);
+      setTimelineLoadState("ready");
+      return;
+    }
+    let cancelled = false;
+    setTimelineLoadState("loading");
+    void (async () => {
+      try {
+        const all: ReviewListItemDto[] = [];
+        let offset = 0;
+        const cap = Math.min(total, TIMELINE_REVIEW_CAP);
+        for (;;) {
+          const chunk = await apiFetch<ReviewListResponseDto>(
+            `/api/v1/apps/${appId}/reviews?fetch_id=${encodeURIComponent(fetchId)}&limit=100&offset=${offset}`,
+            { getToken },
+          );
+          all.push(...chunk.items);
+          offset += chunk.items.length;
+          if (cancelled) {
+            return;
+          }
+          if (offset >= cap || offset >= chunk.total || chunk.items.length === 0) {
+            break;
+          }
+        }
+        if (!cancelled) {
+          setTimelineReviews(all);
+          setTimelineLoadState("ready");
+        }
+      } catch {
+        if (!cancelled) {
+          setTimelineLoadState("error");
+          setTimelineReviews(null);
+        }
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [appId, clerkEnabled, fetchId, fetchQuery.data?.review_count, fetchQuery.data?.status, getToken]);
 
   if (!clerkEnabled) {
     return (
@@ -509,7 +564,40 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         </section>
       ) : null}
 
-      <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} />
+      {fetch.status === "completed" && fetch.review_count > 0 ? (
+        timelineLoadState === "loading" || timelineLoadState === "idle" ? (
+          <div className="space-y-3 rounded-2xl border border-border bg-muted/20 p-6" aria-busy="true">
+            <div className="h-5 w-48 animate-pulse rounded bg-muted" />
+            <div className="h-[300px] animate-pulse rounded-xl bg-muted" />
+          </div>
+        ) : timelineLoadState === "error" ? (
+          <p className="text-sm text-muted-foreground">{t("timelineLoadError")}</p>
+        ) : timelineReviews ? (
+          <ReviewTimelineCharts
+            reviews={timelineReviews}
+            locale={locale}
+            isPartial={timelineReviews.length < fetch.review_count}
+            totalExpected={fetch.review_count}
+            labels={{
+              sectionHeading: t("timelineSectionHeading"),
+              bucketDay: t("timelineBucketDay"),
+              bucketWeek: t("timelineBucketWeek"),
+              bucketMonth: t("timelineBucketMonth"),
+              volumeTitle: t("timelineVolumeTitle"),
+              starsStackTitle: t("timelineStarsStackTitle"),
+              avgRatingTitle: t("timelineAvgRatingTitle"),
+              empty: t("timelineEmpty"),
+              starShort: (n) => t("timelineStarLabel", { star: n }),
+              truncatedHint: t("timelineTruncatedHint", {
+                loaded: timelineReviews.length,
+                total: fetch.review_count,
+              }),
+            }}
+          />
+        ) : null
+      ) : null}
+
+      <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} chartLayout="featured" />
 
       {fetch.status === "completed" ? (
         <section className="rounded-lg border border-border bg-card p-4 shadow-sm">

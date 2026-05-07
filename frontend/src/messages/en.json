@@ -367,7 +367,18 @@
     "csvHeaderReviewDate": "review_date",
     "csvHeaderAuthor": "author",
     "csvHeaderTitle": "title",
-    "csvHeaderBody": "body"
+    "csvHeaderBody": "body",
+    "timelineSectionHeading": "Imported reviews — timeline & star ratings",
+    "timelineBucketDay": "Daily",
+    "timelineBucketWeek": "Weekly",
+    "timelineBucketMonth": "Monthly",
+    "timelineVolumeTitle": "Review volume by period",
+    "timelineStarsStackTitle": "Star mix by period (1–5)",
+    "timelineAvgRatingTitle": "Average rating by period",
+    "timelineEmpty": "No data for this range.",
+    "timelineStarLabel": "{star} stars",
+    "timelineTruncatedHint": "Charts use up to {loaded} of {total} reviews (performance cap).",
+    "timelineLoadError": "Could not load reviews for timeline charts."
   },
   "about": {
     "title": "About Vivindis",
