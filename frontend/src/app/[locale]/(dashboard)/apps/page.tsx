@@ -17,7 +17,7 @@ export default async function AppsPage() {
           <p className="mt-1 text-sm text-muted-foreground">{t("listSubtitle")}</p>
         </div>
         {clerkEnabled ? (
-          <Link href="/apps/new" className={cn(buttonVariants())}>
+          <Link href="/analyze?mode=store" className={cn(buttonVariants())}>
             {t("addNew")}
           </Link>
         ) : null}

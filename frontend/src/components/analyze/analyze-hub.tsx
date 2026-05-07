@@ -1570,7 +1570,7 @@ function AnalyzeHubConnected() {
                   <button
                     type="button"
                     className="font-medium text-orange-700 underline dark:text-orange-300"
-                    onClick={() => router.push("/apps/new")}
+                    onClick={() => router.push("/analyze?mode=store")}
                   >
                     {t("goCreateApp")}
                   </button>
