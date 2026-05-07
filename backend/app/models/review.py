@@ -32,7 +32,12 @@ if TYPE_CHECKING:
 class Review(Base):
     __tablename__ = "reviews"
     __table_args__ = (
-        UniqueConstraint("platform", "store_review_id", name="uq_reviews_platform_store_id"),
+        UniqueConstraint(
+            "fetch_id",
+            "platform",
+            "store_review_id",
+            name="uq_reviews_fetch_platform_store_id",
+        ),
         CheckConstraint("rating >= 1 AND rating <= 5", name="ck_reviews_rating_range"),
     )
 

@@ -92,7 +92,7 @@ async def _upsert_review(
             developer_reply=developer_reply,
             reply_date=reply_date,
         )
-        .on_conflict_do_nothing(constraint="uq_reviews_platform_store_id")
+        .on_conflict_do_nothing(constraint="uq_reviews_fetch_platform_store_id")
     )
     await session.execute(stmt)
 
