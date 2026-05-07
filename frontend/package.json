@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "clean": "rm -rf .next",
-    "i18n:fill": "node scripts/translate-locale-strings.mjs",
+    "dev:clean": "npm run clean && npm run dev",
+    "i18n:fill": "node scripts/translate-locale-strings.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.4.1",

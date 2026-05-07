@@ -828,14 +828,23 @@ function AnalyzeHubConnected() {
     const { lines, errorKey } = await parseReviewFile(file);
     if (errorKey === "parseFailed") {
       toast.error(t("fileParseFailed"));
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       return;
     }
     if (errorKey === "parseEmpty" || lines.length === 0) {
       toast.error(t("fileParseEmpty"));
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
       return;
     }
     setPoolLines((prev) => [...prev, ...lines]);
     toast.success(t("poolAppended", { count: lines.length }));
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   };
 
   const handleLoadTextIntoPool = () => {
@@ -1436,6 +1445,54 @@ function AnalyzeHubConnected() {
         {mode === "file" || mode === "text" ? (
           <section className="space-y-5">
             <p className="text-sm text-muted-foreground">{t("fileTextIntro")}</p>
+
+            {mode === "file" ? (
+              <>
+                <div className="space-y-2">
+                  <Label className="text-foreground">{t("filePickLabel")}</Label>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    className="sr-only"
+                    accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                    onChange={(e) => void processFile(e.target.files?.[0] ?? null)}
+                  />
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    className={cn(
+                      "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70",
+                      fileDragOver ? "border-orange-500 bg-orange-50/60" : "border-border bg-muted/80",
+                    )}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setFileDragOver(true);
+                    }}
+                    onDragLeave={() => setFileDragOver(false)}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      setFileDragOver(false);
+                      const f = e.dataTransfer.files[0];
+                      void processFile(f ?? null);
+                    }}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        e.preventDefault();
+                        fileInputRef.current?.click();
+                      }
+                    }}
+                  >
+                    <Upload className="size-8 text-muted-foreground" aria-hidden />
+                    <p className="text-sm font-medium text-foreground">{t("fileDropHint")}</p>
+                    <p className="text-xs text-muted-foreground">{t("fileConstraints")}</p>
+                  </div>
+                  {fileLabel ? <p className="text-xs text-muted-foreground">{fileLabel}</p> : null}
+                </div>
+                <p className="text-xs text-muted-foreground">{t("filePoolFooterHint")}</p>
+              </>
+            ) : null}
+
             <div className="relative space-y-2">
               <Label htmlFor="target-app-picker" className="text-foreground">
                 {t("targetAppLabel")}
@@ -1521,52 +1578,7 @@ function AnalyzeHubConnected() {
               ) : null}
             </div>
 
-            {mode === "file" ? (
-              <>
-                <div className="space-y-2">
-                  <Label className="text-foreground">{t("filePickLabel")}</Label>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    className="sr-only"
-                    accept=".csv,.txt,.tsv,.xlsx,.xls,text/csv,text/plain,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
-                    onChange={(e) => void processFile(e.target.files?.[0] ?? null)}
-                  />
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    className={cn(
-                      "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70",
-                      fileDragOver ? "border-orange-500 bg-orange-50/60" : "border-border bg-muted/80",
-                    )}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      setFileDragOver(true);
-                    }}
-                    onDragLeave={() => setFileDragOver(false)}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      setFileDragOver(false);
-                      const f = e.dataTransfer.files[0];
-                      void processFile(f ?? null);
-                    }}
-                    onClick={() => fileInputRef.current?.click()}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        fileInputRef.current?.click();
-                      }
-                    }}
-                  >
-                    <Upload className="size-8 text-muted-foreground" aria-hidden />
-                    <p className="text-sm font-medium text-foreground">{t("fileDropHint")}</p>
-                    <p className="text-xs text-muted-foreground">{t("fileConstraints")}</p>
-                  </div>
-                  {fileLabel ? <p className="text-xs text-muted-foreground">{fileLabel}</p> : null}
-                </div>
-                <p className="text-xs text-muted-foreground">{t("filePoolFooterHint")}</p>
-              </>
-            ) : (
+            {mode === "text" ? (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="paste-reviews" className="text-foreground">
@@ -1591,7 +1603,7 @@ function AnalyzeHubConnected() {
                 </Button>
                 <p className="text-xs text-muted-foreground">{t("textPoolFooterHint")}</p>
               </>
-            )}
+            ) : null}
           </section>
         ) : null}
 
