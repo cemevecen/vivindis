@@ -8,7 +8,6 @@ const intlMiddleware = createMiddleware(routing);
 const clerkPublishableKey = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim() ?? "";
 
 const isProtectedRoute = createRouteMatcher([
-  "/:locale/dashboard(.*)",
   "/:locale/apps(.*)",
   "/:locale/compare(.*)",
 ]);

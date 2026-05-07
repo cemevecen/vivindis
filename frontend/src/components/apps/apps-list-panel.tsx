@@ -1,13 +1,14 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 
 import { AppList } from "@/components/apps/app-list";
 import { AppsSkeleton } from "@/components/apps/apps-skeleton";
 import { Button } from "@/components/ui/button";
-import { apiFetch } from "@/lib/api";
+import { ApiError, apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import type { AppDto } from "@/types/app";
 
@@ -18,12 +19,38 @@ type Props = {
 function AppsConnectedList() {
   const { getToken } = useAuth();
   const tDash = useTranslations("dashboard");
+  const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
+  const queryClient = useQueryClient();
 
   const query = useQuery({
     queryKey: queryKeys.apps.all,
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (appId: string) =>
+      apiFetch<void>(`/api/v1/apps/${appId}`, {
+        method: "DELETE",
+        getToken,
+      }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
+      toast.success(tApps("deleteSuccess"));
+    },
+    onError: (error) => {
+      const message = error instanceof ApiError ? error.message : tApps("deleteFailed");
+      toast.error(message);
+    },
+  });
+
+  const handleDeleteApp = (app: AppDto) => {
+    const confirmed = window.confirm(tApps("deleteConfirm", { name: app.name || tApps("detailTitle") }));
+    if (!confirmed) {
+      return;
+    }
+    deleteMutation.mutate(app.id);
+  };
 
   if (query.isPending) {
     return <AppsSkeleton />;
@@ -42,7 +69,13 @@ function AppsConnectedList() {
     );
   }
 
-  return <AppList apps={query.data ?? []} />;
+  return (
+    <AppList
+      apps={query.data ?? []}
+      deletingAppId={deleteMutation.isPending ? deleteMutation.variables ?? null : null}
+      onDeleteApp={handleDeleteApp}
+    />
+  );
 }
 
 export function AppsListPanel({ clerkEnabled }: Props) {

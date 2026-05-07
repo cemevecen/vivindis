@@ -20,13 +20,43 @@ type Props = {
 function DashboardConnected() {
   const t = useTranslations("dashboard");
   const tApps = useTranslations("apps");
+  const tAnalyze = useTranslations("analyzeHub");
   const tCommon = useTranslations("common");
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
 
   const query = useQuery({
     queryKey: queryKeys.apps.all,
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
+    enabled: isLoaded && Boolean(isSignedIn),
   });
+
+  if (!isLoaded) {
+    return <AppsSkeleton />;
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <div className="bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)/0.14),transparent_34rem)] p-6 sm:p-8">
+          <div className="max-w-3xl space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              Vivindis
+            </p>
+            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">{tAnalyze("title")}</h2>
+            <p className="text-sm leading-6 text-muted-foreground sm:text-base">{tAnalyze("subtitle")}</p>
+          </div>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Link href="/analyze" className={cn(buttonVariants())}>
+              {tAnalyze("searchCatalogCta")}
+            </Link>
+            <Link href="/apps/new" className={cn(buttonVariants({ variant: "outline" }))}>
+              {tApps("addNew")}
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (query.isPending) {
     return <AppsSkeleton />;

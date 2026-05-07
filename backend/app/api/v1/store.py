@@ -8,6 +8,8 @@
 from __future__ import annotations
 
 import asyncio
+import re
+from functools import lru_cache
 from typing import Annotated, Any
 
 import httpx
@@ -32,6 +34,33 @@ _PLAY_SEARCH_APP_ID_ALIASES: dict[tuple[str, str], str] = {
     ("sofascore: canlı skor", "sofascore"): "com.sofascore.results",
     ("sofascore: live sports scores", "sofascore"): "com.sofascore.results",
 }
+
+
+@lru_cache(maxsize=256)
+def _resolve_play_app_id_from_web_search(title: str, developer: str, lang: str, country: str) -> str:
+    query = " ".join(part for part in (title.strip(), developer.strip()) if part)
+    if not query:
+        return ""
+    try:
+        resp = httpx.get(
+            "https://play.google.com/store/search",
+            params={"q": query, "c": "apps", "hl": lang.lower(), "gl": country.upper()},
+            headers={"User-Agent": "Mozilla/5.0"},
+            timeout=8.0,
+        )
+        resp.raise_for_status()
+    except Exception as exc:  # noqa: BLE001
+        log.warning("google_play_web_resolve_failed", query=query[:80], error=repr(exc))
+        return ""
+
+    seen: set[str] = set()
+    for match in re.finditer(r"/store/apps/details\?id=([A-Za-z0-9_\.]+)", resp.text):
+        candidate = match.group(1)
+        if candidate in seen:
+            continue
+        seen.add(candidate)
+        return candidate
+    return ""
 
 
 def _infer_play_app_id(row: dict[str, Any]) -> str:
@@ -60,7 +89,7 @@ def _google_play_fetch_raw(query: str, lang: str, country: str, num: int) -> lis
     return raw
 
 
-def _google_play_rows_from_raw(raw: list[dict[str, Any]]) -> list[StoreSearchResultItem]:
+def _google_play_rows_from_raw(raw: list[dict[str, Any]], lang: str, country: str) -> list[StoreSearchResultItem]:
     """Satır bazlı try/except: Google HTML değişince tek kötü satır tüm aramayı düşürmez."""
     out: list[StoreSearchResultItem] = []
     for row in raw:
@@ -68,6 +97,13 @@ def _google_play_rows_from_raw(raw: list[dict[str, Any]]) -> list[StoreSearchRes
             continue
         try:
             app_id = _infer_play_app_id(row)
+            if not app_id:
+                app_id = _resolve_play_app_id_from_web_search(
+                    str(row.get("title") or ""),
+                    str(row.get("developer") or ""),
+                    lang,
+                    country,
+                )
             if not app_id:
                 continue
             score = row.get("score")
@@ -113,7 +149,7 @@ def _google_play_search_sync(query: str, lang: str, country: str, num: int) -> l
                 error=repr(exc),
             )
             continue
-        items = _google_play_rows_from_raw(raw)
+        items = _google_play_rows_from_raw(raw, attempt_lang, attempt_country)
         if items or not raw:
             return items
 

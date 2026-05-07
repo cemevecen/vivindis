@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   apps: AppDto[];
+  deletingAppId?: string | null;
+  onDeleteApp?: (app: AppDto) => void;
 };
 
-export function AppList({ apps }: Props) {
+export function AppList({ apps, deletingAppId = null, onDeleteApp }: Props) {
   const t = useTranslations("apps");
 
   if (apps.length === 0) {
@@ -33,7 +35,7 @@ export function AppList({ apps }: Props) {
     <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {apps.map((app) => (
         <li key={app.id}>
-          <AppCard app={app} />
+          <AppCard app={app} onDelete={onDeleteApp} isDeleting={deletingAppId === app.id} />
         </li>
       ))}
     </ul>

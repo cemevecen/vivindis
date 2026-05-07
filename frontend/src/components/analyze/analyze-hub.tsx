@@ -67,7 +67,7 @@ function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
   const tNav = useTranslations("navigation");
   const tCommon = useTranslations("common");
-  const { getToken } = useAuth();
+  const { getToken, isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
   const locale = useLocale();
   const queryClient = useQueryClient();
@@ -127,6 +127,17 @@ function AnalyzeHubConnected() {
   const progressEventKeysRef = useRef<Set<string>>(new Set());
   const lastRunningCountRef = useRef<number>(0);
 
+  const requireSignedIn = useCallback(() => {
+    if (!isLoaded) {
+      return false;
+    }
+    if (!isSignedIn) {
+      router.push("/sign-in");
+      return false;
+    }
+    return true;
+  }, [isLoaded, isSignedIn, router]);
+
   const searchQuery = useQuery({
     queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
     queryFn: () =>
@@ -134,7 +145,7 @@ function AnalyzeHubConnected() {
         `/api/v1/store/search?q=${encodeURIComponent(activeQuery)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=20`,
         { getToken },
       ),
-    enabled: activeQuery.length >= 2,
+    enabled: activeQuery.length >= 2 && Boolean(isSignedIn),
   });
 
   const searchQueryA = useQuery({
@@ -144,7 +155,7 @@ function AnalyzeHubConnected() {
         `/api/v1/store/search?q=${encodeURIComponent(activeCompareA)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
         { getToken },
       ),
-    enabled: activeCompareA.length >= 2,
+    enabled: activeCompareA.length >= 2 && Boolean(isSignedIn),
   });
 
   const searchQueryB = useQuery({
@@ -154,18 +165,19 @@ function AnalyzeHubConnected() {
         `/api/v1/store/search?q=${encodeURIComponent(activeCompareB)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
         { getToken },
       ),
-    enabled: activeCompareB.length >= 2,
+    enabled: activeCompareB.length >= 2 && Boolean(isSignedIn),
   });
 
   const appsQuery = useQuery({
     queryKey: queryKeys.apps.all,
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
+    enabled: Boolean(isSignedIn),
   });
 
   const appFetchesQuery = useQuery({
     queryKey: sessionApp ? queryKeys.apps.fetches(sessionApp.id) : ["analyzeHub", "fetches", "idle"],
     queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${sessionApp?.id}/fetches`, { getToken }),
-    enabled: Boolean(sessionApp?.id),
+    enabled: Boolean(sessionApp?.id && isSignedIn),
   });
 
   const addFetchProgressEvent = useCallback((event: FetchProgressEvent) => {
@@ -244,7 +256,7 @@ function AnalyzeHubConnected() {
   const fetchRowQuery = useQuery({
     queryKey: storeFetchId ? queryKeys.reviews.fetchById(storeFetchId) : ["analyzeHub", "fetch", "idle"],
     queryFn: () => apiFetch<ReviewFetchDto>(`/api/v1/fetches/${storeFetchId}`, { getToken }),
-    enabled: Boolean(storeFetchId && storeFetchId.length > 0),
+    enabled: Boolean(storeFetchId && storeFetchId.length > 0 && isSignedIn),
     retry: (failureCount, err) =>
       failureCount < 4 && err instanceof ApiError && err.status === 404,
     retryDelay: (attempt) => 200 * (attempt + 1),
@@ -471,6 +483,9 @@ function AnalyzeHubConnected() {
 
   const pinStoreHit = useCallback(
     async (hit: StoreSearchResultItem) => {
+      if (!requireSignedIn()) {
+        return;
+      }
       const token = ++pinRequestRef.current;
       setIsPinningStore(true);
       setSelectedStoreHit(hit);
@@ -504,10 +519,13 @@ function AnalyzeHubConnected() {
         }
       }
     },
-    [getToken, queryClient, t, tCommon],
+    [getToken, queryClient, requireSignedIn, t, tCommon],
   );
 
   const handlePullStoreReviews = useCallback(() => {
+    if (!requireSignedIn()) {
+      return;
+    }
     if (!sessionApp) {
       return;
     }
@@ -530,6 +548,7 @@ function AnalyzeHubConnected() {
     storePullMutation.mutate(sessionApp.id);
   }, [
     addFetchProgressEvent,
+    requireSignedIn,
     resetFetchProgressTimeline,
     sessionApp,
     storePullMutation,
@@ -740,6 +759,9 @@ function AnalyzeHubConnected() {
   }, [poolLines.length, effectiveAppId, fetchRowQuery.data?.status, storeFetchId]);
 
   const runUnifiedAnalysis = useCallback(async () => {
+    if (!requireSignedIn()) {
+      return;
+    }
     const appId = effectiveAppId;
     const canAnalyzeExistingFetch = Boolean(storeFetchId) && fetchRowQuery.data?.status === "completed";
 
@@ -801,6 +823,7 @@ function AnalyzeHubConnected() {
     storeFetchId,
     getToken,
     queryClient,
+    requireSignedIn,
     router,
     runAnalysisTypes,
     t,
@@ -861,6 +884,9 @@ function AnalyzeHubConnected() {
   };
 
   const handleCompareStart = async () => {
+    if (!requireSignedIn()) {
+      return;
+    }
     if (!compareHitA || !compareHitB) {
       return;
     }
@@ -979,7 +1005,9 @@ function AnalyzeHubConnected() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter") {
                     e.preventDefault();
-                    setActiveQuery(draftQuery.trim());
+                    if (requireSignedIn()) {
+                      setActiveQuery(draftQuery.trim());
+                    }
                   }
                 }}
                 placeholder={t("searchPlaceholder")}
@@ -1033,8 +1061,12 @@ function AnalyzeHubConnected() {
             <Button
               type="button"
               className="h-12 w-full rounded-xl bg-slate-900 text-base font-semibold text-white hover:bg-slate-800"
-              onClick={() => setActiveQuery(draftQuery.trim())}
-              disabled={draftQuery.trim().length < 2}
+              onClick={() => {
+                if (requireSignedIn()) {
+                  setActiveQuery(draftQuery.trim());
+                }
+              }}
+              disabled={!isLoaded || draftQuery.trim().length < 2}
             >
               {t("searchCatalogCta")}
             </Button>
@@ -1474,8 +1506,12 @@ function AnalyzeHubConnected() {
                   size="sm"
                   variant="secondary"
                   className="bg-slate-900 text-white hover:bg-slate-800"
-                  onClick={() => setActiveCompareA(compareDraftA.trim())}
-                  disabled={compareDraftA.trim().length < 2}
+                  onClick={() => {
+                    if (requireSignedIn()) {
+                      setActiveCompareA(compareDraftA.trim());
+                    }
+                  }}
+                  disabled={!isLoaded || compareDraftA.trim().length < 2}
                 >
                   <Search className="mr-2 size-4" aria-hidden />
                   {t("searchAction")}
@@ -1506,8 +1542,12 @@ function AnalyzeHubConnected() {
                   size="sm"
                   variant="secondary"
                   className="bg-slate-900 text-white hover:bg-slate-800"
-                  onClick={() => setActiveCompareB(compareDraftB.trim())}
-                  disabled={compareDraftB.trim().length < 2}
+                  onClick={() => {
+                    if (requireSignedIn()) {
+                      setActiveCompareB(compareDraftB.trim());
+                    }
+                  }}
+                  disabled={!isLoaded || compareDraftB.trim().length < 2}
                 >
                   <Search className="mr-2 size-4" aria-hidden />
                   {t("searchAction")}

@@ -188,7 +188,11 @@
     "pairBannerTitle": "Eşleştirilmiş uygulama",
     "pairBannerIntro": "Bu uygulamayı {name} ile birlikte oluşturdunuz. İkinciyi açın veya karşılaştırma görünümüne gidin.",
     "pairBannerOpenPartner": "İkinci uygulamayı aç",
-    "pairBannerCompare": "Karşılaştırma görünümü"
+    "pairBannerCompare": "Karşılaştırma görünümü",
+    "deleteApp": "Uygulamayı sil",
+    "deleteConfirm": "“{name}” uygulamasını silmek istiyor musunuz? Bu işlem yorumları ve analizleri de kaldırır.",
+    "deleteSuccess": "Uygulama silindi",
+    "deleteFailed": "Uygulama silinemedi."
   },
   "analysis": {
     "startAnalysis": "Analizi başlat",
