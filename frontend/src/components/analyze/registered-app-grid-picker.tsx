@@ -155,28 +155,24 @@ export function RegisteredAppGridPicker({
           aria-labelledby={id}
           className="absolute left-0 right-0 z-50 mt-1 max-h-72 overflow-y-auto rounded-xl border border-border bg-popover p-2 text-popover-foreground shadow-lg"
         >
+          {value ? (
+            <div className="mb-2 flex justify-center border-b border-border pb-2">
+              <button
+                type="button"
+                className="text-xs font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-ring"
+                onClick={() => {
+                  onChange(null);
+                  setOpen(false);
+                }}
+              >
+                {clearLabel}
+              </button>
+            </div>
+          ) : null}
           <div
             className="grid gap-2"
             style={{ gridTemplateColumns: "repeat(auto-fill, minmax(4.5rem, 1fr))" }}
           >
-            <button
-              type="button"
-              role="option"
-              aria-selected={value === null}
-              className={cn(
-                "flex flex-col items-center gap-1 rounded-lg border border-dashed border-muted-foreground/35 bg-muted/30 p-2 text-center outline-none transition-colors",
-                "hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
-              )}
-              onClick={() => {
-                onChange(null);
-                setOpen(false);
-              }}
-            >
-              <span className="flex size-10 items-center justify-center rounded-xl text-lg leading-none text-muted-foreground">
-                —
-              </span>
-              <span className="text-[10px] font-medium leading-tight text-muted-foreground">{clearLabel}</span>
-            </button>
             {apps.map((app) => (
               <button
                 key={app.id}
