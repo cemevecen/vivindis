@@ -2,7 +2,7 @@
 
 import { Suspense, type ReactNode } from "react";
 
-import { UserButton } from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { FileText, GitCompare, Info, LayoutDashboard, Search, Smartphone, Store, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -12,6 +12,7 @@ import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Link, usePathname } from "@/i18n/routing";
 import { parseAnalyzeHubMode, type AnalyzeHubMode } from "@/lib/analyze-hub-utils";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const clerkEnabled =
@@ -34,6 +35,7 @@ function DashboardHeaderContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const t = useTranslations("navigation");
+  const tAuth = useTranslations("auth");
   const tAnalyze = useTranslations("analyzeHub");
 
   const analyzeMode = parseAnalyzeHubMode(searchParams.get("mode"));
@@ -86,7 +88,19 @@ function DashboardHeaderContent() {
           <ThemeToggle />
           <LanguageSwitcher />
           {clerkEnabled ? (
-            <UserButton afterSignOutUrl={`/${locale}`} />
+            <>
+              <SignedIn>
+                <UserButton afterSignOutUrl={`/${locale}`} />
+              </SignedIn>
+              <SignedOut>
+                <Link
+                  href="/sign-in"
+                  className={cn(buttonVariants({ size: "sm" }), "shrink-0")}
+                >
+                  {tAuth("signIn")}
+                </Link>
+              </SignedOut>
+            </>
           ) : null}
         </div>
       </div>
