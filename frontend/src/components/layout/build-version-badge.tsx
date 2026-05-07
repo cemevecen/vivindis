@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 
 /**
- * `NEXT_PUBLIC_APP_VERSION` + `NEXT_PUBLIC_BUILD_SHA` are set at build time in `next.config.mjs`.
+ * Shown in `SiteFooter`. `NEXT_PUBLIC_APP_VERSION` + `NEXT_PUBLIC_BUILD_SHA` are injected at build time in `next.config.mjs` (package version + CI/git short SHA).
  */
 export function BuildVersionBadge({ className }: { className?: string }) {
   const version = process.env.NEXT_PUBLIC_APP_VERSION?.trim() || "0.0.0";

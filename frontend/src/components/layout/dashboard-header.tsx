@@ -7,7 +7,6 @@ import { FileText, GitCompare, Info, Search, Smartphone, Store, Upload } from "l
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
-import { BuildVersionBadge } from "@/components/layout/build-version-badge";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Link, usePathname } from "@/i18n/routing";
@@ -54,7 +53,6 @@ function DashboardHeaderContent() {
           <Link href="/" className="shrink-0 text-lg font-semibold tracking-tight">
             Vivindis
           </Link>
-          <BuildVersionBadge className="hidden min-w-0 truncate sm:inline" />
         </div>
 
         <nav
@@ -85,7 +83,6 @@ function DashboardHeaderContent() {
         </nav>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <BuildVersionBadge className="shrink-0 sm:hidden" />
           <ThemeToggle />
           <LanguageSwitcher />
           {clerkEnabled ? (
