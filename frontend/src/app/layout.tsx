@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { headers } from "next/headers";
 import "./globals.css";
@@ -18,6 +18,13 @@ const geistMono = localFont({
   weight: "100 900",
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f8f9fa" },
+    { media: "(prefers-color-scheme: dark)", color: "#141b2d" },
+  ],
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
   title: {
@@ -26,6 +33,51 @@ export const metadata: Metadata = {
   },
   description:
     "Google Play ve App Store yorumlarını toplu çekip analiz eden SaaS platformu.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "Vivindis",
+  icons: {
+    icon: [
+      {
+        url: "/icons/icon-32-light.png",
+        sizes: "32x32",
+        type: "image/png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icons/icon-32-dark.png",
+        sizes: "32x32",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
+      },
+      {
+        url: "/icons/icon-16-light.png",
+        sizes: "16x16",
+        type: "image/png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icons/icon-16-dark.png",
+        sizes: "16x16",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+    apple: [
+      {
+        url: "/icons/icon-180-light.png",
+        sizes: "180x180",
+        type: "image/png",
+        media: "(prefers-color-scheme: light)",
+      },
+      {
+        url: "/icons/icon-180-dark.png",
+        sizes: "180x180",
+        type: "image/png",
+        media: "(prefers-color-scheme: dark)",
+      },
+    ],
+    shortcut: [{ url: "/favicon.ico" }],
+  },
 };
 
 /**
