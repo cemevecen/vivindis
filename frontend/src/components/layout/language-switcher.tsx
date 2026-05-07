@@ -1,6 +1,6 @@
 "use client";
 
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 
 import { usePathname, useRouter, routing } from "@/i18n/routing";
 
@@ -28,10 +28,11 @@ export function LanguageSwitcher({ selectClassName }: LanguageSwitcherProps) {
   const locale = useLocale() as (typeof routing.locales)[number];
   const pathname = usePathname();
   const router = useRouter();
+  const tCommon = useTranslations("common");
 
   return (
     <label className="flex items-center gap-2 text-sm text-muted-foreground">
-      <span className="sr-only">Language</span>
+      <span className="sr-only">{tCommon("languageLabel")}</span>
       <select
         className={
           selectClassName ??

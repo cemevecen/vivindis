@@ -52,6 +52,16 @@ function reviewTone(rating: number): "positive" | "neutral" | "negative" {
   return "neutral";
 }
 
+function reviewToneMessageKey(rating: number): "tonePositive" | "toneNeutral" | "toneNegative" {
+  if (rating >= 4) {
+    return "tonePositive";
+  }
+  if (rating <= 2) {
+    return "toneNegative";
+  }
+  return "toneNeutral";
+}
+
 function csvEscape(value: string): string {
   return `"${value.replace(/"/g, "\"\"")}"`;
 }
@@ -67,6 +77,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const tDash = useTranslations("dashboard");
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
+  const exportBase = t("exportFileBase");
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const [reviewItems, setReviewItems] = useState<ReviewListItemDto[]>([]);
@@ -187,12 +198,21 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     try {
       const rows = await loadAllReviews();
       const csvRows = [
-        ["index", "platform", "rating", "sentiment", "review_date", "author", "title", "body"],
+        [
+          t("csvHeaderIndex"),
+          t("csvHeaderPlatform"),
+          t("csvHeaderRating"),
+          t("csvHeaderSentiment"),
+          t("csvHeaderReviewDate"),
+          t("csvHeaderAuthor"),
+          t("csvHeaderTitle"),
+          t("csvHeaderBody"),
+        ],
         ...rows.map((row, idx) => [
           String(idx + 1),
           row.platform,
           String(row.rating),
-          reviewTone(row.rating),
+          t(reviewToneMessageKey(row.rating)),
           row.review_date,
           row.author ?? "",
           row.title ?? "",
@@ -204,13 +224,13 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `analiz-edilen-yorumlar-${fetchId ?? "export"}.csv`;
+      a.download = `${exportBase}-${fetchId ?? "export"}.csv`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (e) {
       toast.error(formatClientFetchError(e));
     }
-  }, [fetchId, loadAllReviews]);
+  }, [exportBase, fetchId, loadAllReviews, t]);
 
   const exportReviewsExcel = useCallback(async () => {
     try {
@@ -218,47 +238,59 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       const XLSX = await import("xlsx");
       const worksheet = XLSX.utils.json_to_sheet(
         rows.map((row, idx) => ({
-          index: idx + 1,
-          platform: row.platform,
-          rating: row.rating,
-          sentiment: reviewTone(row.rating),
-          review_date: row.review_date,
-          author: row.author ?? "",
-          title: row.title ?? "",
-          body: row.body ?? "",
+          [t("csvHeaderIndex")]: idx + 1,
+          [t("csvHeaderPlatform")]: row.platform,
+          [t("csvHeaderRating")]: row.rating,
+          [t("csvHeaderSentiment")]: t(reviewToneMessageKey(row.rating)),
+          [t("csvHeaderReviewDate")]: row.review_date,
+          [t("csvHeaderAuthor")]: row.author ?? "",
+          [t("csvHeaderTitle")]: row.title ?? "",
+          [t("csvHeaderBody")]: row.body ?? "",
         })),
       );
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "yorumlar");
-      XLSX.writeFile(workbook, `analiz-edilen-yorumlar-${fetchId ?? "export"}.xlsx`);
+      XLSX.utils.book_append_sheet(workbook, worksheet, t("exportSheetName"));
+      XLSX.writeFile(workbook, `${exportBase}-${fetchId ?? "export"}.xlsx`);
     } catch (e) {
       toast.error(formatClientFetchError(e));
     }
-  }, [fetchId, loadAllReviews]);
+  }, [exportBase, fetchId, loadAllReviews, t]);
 
   const exportReviewsPdf = useCallback(async () => {
     try {
       const rows = await loadAllReviews();
       const html = rows
-        .map(
-          (row, idx) =>
-            `<article style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:10px 0;">
-              <p style="font-size:12px;color:#64748b;">#${idx + 1} | ${row.platform} | puan: ${row.rating} | ${row.review_date} | ${reviewTone(row.rating)}</p>
+        .map((row, idx) => {
+          const platformLabel =
+            row.platform === "google_play" ? tApps("platformGooglePlay") : tApps("platformAppStore");
+          const meta = t("pdfReviewMeta", {
+            index: idx + 1,
+            platform: platformLabel,
+            ratingLabel: t("ratingLabel"),
+            rating: row.rating,
+            date: row.review_date,
+            tone: t(reviewToneMessageKey(row.rating)),
+          });
+          return `<article style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:10px 0;">
+              <p style="font-size:12px;color:#64748b;">${meta}</p>
               ${row.title ? `<h3 style="font-size:14px;margin:6px 0;">${row.title}</h3>` : ""}
               <p style="font-size:13px;white-space:pre-wrap;">${row.body}</p>
-            </article>`,
-        )
+            </article>`;
+        })
         .join("");
       const win = window.open("", "_blank");
       if (!win) {
-        toast.error("PDF penceresi açılamadı.");
+        toast.error(t("pdfWindowError"));
         return;
       }
+      const docTitle = t("pdfDocumentTitle");
+      const heading = t("pdfHeading");
+      const totalLine = t("pdfTotalReviews", { count: rows.length });
       win.document.write(`
-        <html><head><title>Analiz edilen yorumlar</title></head>
+        <html><head><title>${docTitle}</title></head>
         <body style="font-family:Arial,sans-serif;padding:24px;">
-          <h1>Analiz edilen yorumlar</h1>
-          <p>Toplam yorum: ${rows.length}</p>
+          <h1>${heading}</h1>
+          <p>${totalLine}</p>
           ${html}
         </body></html>
       `);
@@ -267,7 +299,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     } catch (e) {
       toast.error(formatClientFetchError(e));
     }
-  }, [loadAllReviews]);
+  }, [loadAllReviews, t, tApps]);
 
   useEffect(() => {
     setReviewItems([]);
@@ -339,12 +371,12 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const ai = latestByType(items, "ai");
   const liveStatusHint =
     fetch.status === "pending"
-      ? "Kuyruga alindi, scraper worker bekleniyor..."
+      ? t("liveStatusPending")
       : fetch.status === "running"
-        ? `Yorumlar hizli cekiliyor... (${fetch.review_count} toplandi)`
+        ? t("liveStatusRunning", { count: fetch.review_count })
         : busy
-          ? "Gemini yapay zekasi analiz ediyor..."
-          : "Analiz sonuclari hazir.";
+          ? t("liveStatusAnalyzing")
+          : t("liveStatusReady");
 
   const chartLabels = {
     sentiment: t("chartSentiment"),
@@ -404,9 +436,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           {tApps("reviews")}: {fetch.review_count}
         </p>
         {fetch.status === "completed" && fetch.review_count === 0 ? (
-          <p className="mt-2 text-xs text-amber-700">
-            Bu aralık/kaynak için yorum bulunamadı. Tarih aralığını genişletin veya kaynak seçimini değiştirin.
-          </p>
+          <p className="mt-2 text-xs text-amber-700">{t("noReviewsInRange")}</p>
         ) : null}
         {fetch.status === "failed" && fetch.error_message ? (
           <p className="mt-2 text-xs text-destructive">{fetch.error_message}</p>
@@ -482,9 +512,13 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
           <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h2 className="text-sm font-semibold">Analiz edilen yorumlar</h2>
+              <h2 className="text-sm font-semibold">{t("analyzedReviewsHeading")}</h2>
               <p className="text-xs text-muted-foreground">
-                Yüklenen: {reviewItems.length}/{reviewTotal} · Görünen: {visibleReviewItems.length}
+                {t("reviewsLoadedMeta", {
+                  loaded: reviewItems.length,
+                  total: reviewTotal,
+                  visible: visibleReviewItems.length,
+                })}
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -492,28 +526,28 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 value={reviewFilter}
                 onChange={(e) => setReviewFilter(e.target.value as typeof reviewFilter)}
                 className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-                aria-label="Yorum duygu filtresi"
+                aria-label={t("reviewsFilterAria")}
               >
-                <option value="all">Tümü</option>
-                <option value="positive">Pozitif</option>
-                <option value="neutral">Nötr</option>
-                <option value="negative">Negatif</option>
+                <option value="all">{t("filterAll")}</option>
+                <option value="positive">{t("filterPositive")}</option>
+                <option value="neutral">{t("filterNeutral")}</option>
+                <option value="negative">{t("filterNegative")}</option>
               </select>
               <select
                 value={reviewSort}
                 onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
                 className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-                aria-label="Yorum sıralama"
+                aria-label={t("reviewsSortAria")}
               >
-                <option value="newest">En yeni</option>
-                <option value="oldest">En eski</option>
-                <option value="rating_desc">Puan yüksek</option>
-                <option value="rating_asc">Puan düşük</option>
+                <option value="newest">{t("sortNewest")}</option>
+                <option value="oldest">{t("sortOldest")}</option>
+                <option value="rating_desc">{t("sortRatingDesc")}</option>
+                <option value="rating_asc">{t("sortRatingAsc")}</option>
               </select>
             </div>
           </div>
           {reviewItems.length === 0 && !reviewsLoading ? (
-            <p className="text-sm text-muted-foreground">Bu fetch için gösterilecek yorum yok.</p>
+            <p className="text-sm text-muted-foreground">{t("noReviewsForFetch")}</p>
           ) : (
             <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
               {visibleReviewItems.map((row, idx) => (
@@ -532,12 +566,12 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                         )}
                         aria-hidden
                       />
-                      <span>| puan: {row.rating}</span>
+                      <span>{t("reviewCardRating", { rating: row.rating })}</span>
                     </p>
                     <p>{row.review_date}</p>
                   </div>
                   <p className="mt-1 text-[11px] uppercase tracking-wide text-muted-foreground/80">
-                    {row.platform === "google_play" ? "Google Play" : "App Store"}
+                    {row.platform === "google_play" ? tApps("platformGooglePlay") : tApps("platformAppStore")}
                   </p>
                   {row.title ? <p className="mt-1 text-sm font-medium">{row.title}</p> : null}
                   <p className="mt-1 whitespace-pre-wrap text-sm">{row.body}</p>
@@ -556,17 +590,17 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               {reviewsLoading
                 ? tCommon("loading")
                 : reviewOffset < reviewTotal
-                  ? `Genişlet · ${reviewTotal - reviewOffset} yorum daha göster`
-                  : "Tüm yorumlar yüklendi"}
+                  ? t("expandShowMore", { count: reviewTotal - reviewOffset })
+                  : t("allReviewsLoaded")}
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsCsv()}>
-              Sonuçları CSV indir
+              {t("exportResultsCsv")}
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsExcel()}>
-              Sonuçları Excel indir
+              {t("exportResultsExcel")}
             </Button>
             <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsPdf()}>
-              Sonuçları PDF indir
+              {t("exportResultsPdf")}
             </Button>
           </div>
         </section>

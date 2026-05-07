@@ -239,8 +239,8 @@ function AnalyzeHubConnected() {
       addFetchProgressEvent({
         key: `${row.id}:created`,
         at: new Date().toISOString(),
-        label: "Fetch kaydı oluşturuldu",
-        reason: "İstek API tarafından alındı, worker kuyruğa gönderiliyor.",
+        label: t("fetchEventCreatedLabel"),
+        reason: t("fetchEventCreatedReason"),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
     },
@@ -282,8 +282,8 @@ function AnalyzeHubConnected() {
       addFetchProgressEvent({
         key: `${storeFetchId}:pending`,
         at: row.created_at || isoNow,
-        label: "Kuyruğa alındı",
-        reason: "Worker bu fetch görevini alana kadar bekleniyor.",
+        label: t("fetchEventPendingLabel"),
+        reason: t("fetchEventPendingReason"),
       });
       return;
     }
@@ -291,8 +291,8 @@ function AnalyzeHubConnected() {
       addFetchProgressEvent({
         key: `${storeFetchId}:running`,
         at: row.started_at || isoNow,
-        label: "Worker görevi başlattı",
-        reason: "Mağaza API çağrıları ile yorumlar toplanıyor.",
+        label: t("fetchEventWorkerStartedLabel"),
+        reason: t("fetchEventWorkerStartedReason"),
       });
       const count = row.review_count ?? 0;
       if (count > 0 && count !== lastRunningCountRef.current) {
@@ -300,8 +300,8 @@ function AnalyzeHubConnected() {
         addFetchProgressEvent({
           key: `${storeFetchId}:running-count:${count}`,
           at: isoNow,
-          label: `${count} yorum toplandı`,
-          reason: "Scraper yeni yorumları havuza eklemeye devam ediyor.",
+          label: t("fetchEventReviewsCountLabel", { count }),
+          reason: t("fetchEventReviewsCountReason"),
         });
       }
       return;
@@ -310,8 +310,8 @@ function AnalyzeHubConnected() {
       addFetchProgressEvent({
         key: `${storeFetchId}:completed`,
         at: row.completed_at || isoNow,
-        label: `Fetch tamamlandı (${row.review_count} yorum)`,
-        reason: "Mağaza çekimi bitti; analiz adımına geçebilirsiniz.",
+        label: t("fetchEventCompletedLabel", { count: row.review_count ?? 0 }),
+        reason: t("fetchEventCompletedReason"),
       });
       return;
     }
@@ -319,11 +319,11 @@ function AnalyzeHubConnected() {
       addFetchProgressEvent({
         key: `${storeFetchId}:failed`,
         at: row.completed_at || isoNow,
-        label: "Fetch başarısız",
-        reason: row.error_message || "Worker hata döndürdü, log kontrol edilmeli.",
+        label: t("fetchEventFailedLabel"),
+        reason: row.error_message || t("fetchEventFailedDefaultReason"),
       });
     }
-  }, [addFetchProgressEvent, fetchRowQuery.data, storeFetchId]);
+  }, [addFetchProgressEvent, fetchRowQuery.data, storeFetchId, t]);
 
   useEffect(() => {
     const row = fetchRowQuery.data;
@@ -340,8 +340,8 @@ function AnalyzeHubConnected() {
         addFetchProgressEvent({
           key: `${storeFetchId}:hydrate-start`,
           at: new Date().toISOString(),
-          label: "Yorumlar arayüze aktarılıyor",
-          reason: "Review listesi sayfalı çekilip havuz sayacına yazılıyor.",
+          label: t("fetchEventHydrateStartLabel"),
+          reason: t("fetchEventHydrateStartReason"),
         });
         const limit = 100;
         let offset = 0;
@@ -384,8 +384,8 @@ function AnalyzeHubConnected() {
         addFetchProgressEvent({
           key: `${storeFetchId}:hydrate-complete`,
           at: new Date().toISOString(),
-          label: `Arayüz havuzu güncellendi (${bodies.length} satır)`,
-          reason: "Artık analiz butonuyla bir sonraki adıma geçebilirsiniz.",
+          label: t("fetchEventHydrateCompleteLabel", { count: bodies.length }),
+          reason: t("fetchEventHydrateCompleteReason"),
         });
       } catch (e) {
         if (!cancelled) {
@@ -534,8 +534,8 @@ function AnalyzeHubConnected() {
     addFetchProgressEvent({
       key: `${sessionApp.id}:request-start`,
       at: new Date().toISOString(),
-      label: "Çekim isteği gönderildi",
-      reason: "API kaydı oluşturup worker kuyruğuna yazana kadar bekleniyor.",
+      label: t("fetchEventRequestSentLabel"),
+      reason: t("fetchEventRequestSentReason"),
     });
     setStoreFetchId(null);
     setPoolLines([]);
@@ -547,13 +547,7 @@ function AnalyzeHubConnected() {
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
     storePullMutation.mutate(sessionApp.id);
-  }, [
-    addFetchProgressEvent,
-    requireSignedIn,
-    resetFetchProgressTimeline,
-    sessionApp,
-    storePullMutation,
-  ]);
+  }, [addFetchProgressEvent, requireSignedIn, resetFetchProgressTimeline, sessionApp, storePullMutation, t]);
 
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
   const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
@@ -697,19 +691,19 @@ function AnalyzeHubConnected() {
       return "";
     }
     if (row.status === "pending") {
-      return "Kuyruga alindi, worker bekleniyor...";
+      return t("fetchHintPending");
     }
     if (row.status === "running") {
       const count = row.review_count ?? 0;
       return count > 0
-        ? `Magazadan yorumlar cekiliyor... (${count} yorum toplandi)`
-        : "Google Play ve App Store yorumlari cekiliyor...";
+        ? t("fetchHintRunningWithCount", { count })
+        : t("fetchHintRunningNoCount");
     }
     if (row.status === "completed") {
-      return `Yorum cekimi tamamlandi (${row.review_count} yorum). Simdi analiz baslatabilirsiniz.`;
+      return t("fetchHintCompleted", { count: row.review_count ?? 0 });
     }
     return row.error_message ?? "";
-  }, [fetchRowQuery.data, storeFetchId]);
+  }, [fetchRowQuery.data, storeFetchId, t]);
 
   const fetchStageLabel = useMemo(() => {
     const row = fetchRowQuery.data;
@@ -717,22 +711,22 @@ function AnalyzeHubConnected() {
       return "";
     }
     if (row.status === "pending") {
-      return "Aşama 1/4 · Kuyruğa alındı";
+      return t("fetchStage1");
     }
     if (row.status === "running" && (row.review_count ?? 0) === 0) {
-      return "Aşama 2/4 · Mağaza bağlantıları kuruluyor";
+      return t("fetchStage2");
     }
     if (row.status === "running") {
-      return "Aşama 3/4 · Yorumlar toplanıyor";
+      return t("fetchStage3");
     }
     if (row.status === "completed" && isHydratingPool) {
-      return "Aşama 4/4 · Yorumlar havuza aktarılıyor";
+      return t("fetchStage4");
     }
     if (row.status === "completed") {
-      return "Tamamlandı";
+      return t("fetchStageDone");
     }
-    return "İşlem sonlandı";
-  }, [fetchRowQuery.data, isHydratingPool, storeFetchId]);
+    return t("fetchStageEnded");
+  }, [fetchRowQuery.data, isHydratingPool, storeFetchId, t]);
 
   const fetchTimeline = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
@@ -941,12 +935,20 @@ function AnalyzeHubConnected() {
 
   const downloadReviewsCsv = useCallback(() => {
     if (hydratedReviews.length === 0) {
-      toast.info("İndirilecek yorum bulunamadı.");
+      toast.info(t("noReviewsToExport"));
       return;
     }
     const quote = (v: string) => `"${v.replace(/"/g, "\"\"")}"`;
     const rows = [
-      ["index", "platform", "rating", "review_date", "author", "title", "body"],
+      [
+        t("csvHeaderIndex"),
+        t("csvHeaderPlatform"),
+        t("csvHeaderRating"),
+        t("csvHeaderReviewDate"),
+        t("csvHeaderAuthor"),
+        t("csvHeaderTitle"),
+        t("csvHeaderBody"),
+      ],
       ...hydratedReviews.map((r, idx) => [
         String(idx + 1),
         r.platform,
@@ -962,31 +964,31 @@ function AnalyzeHubConnected() {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `reviews-${storeFetchId ?? "export"}.csv`;
+    anchor.download = `${t("exportSheetReviews")}-${storeFetchId ?? "export"}.csv`;
     anchor.click();
     URL.revokeObjectURL(url);
-  }, [hydratedReviews, storeFetchId]);
+  }, [hydratedReviews, storeFetchId, t]);
 
   const downloadReviewsExcel = useCallback(async () => {
     if (hydratedReviews.length === 0) {
-      toast.info("İndirilecek yorum bulunamadı.");
+      toast.info(t("noReviewsToExport"));
       return;
     }
     const XLSX = await import("xlsx");
     const rows = hydratedReviews.map((r, idx) => ({
-      index: idx + 1,
-      platform: r.platform,
-      rating: r.rating,
-      review_date: r.review_date,
-      author: r.author ?? "",
-      title: r.title ?? "",
-      body: r.body ?? "",
+      [t("csvHeaderIndex")]: idx + 1,
+      [t("csvHeaderPlatform")]: r.platform,
+      [t("csvHeaderRating")]: r.rating,
+      [t("csvHeaderReviewDate")]: r.review_date,
+      [t("csvHeaderAuthor")]: r.author ?? "",
+      [t("csvHeaderTitle")]: r.title ?? "",
+      [t("csvHeaderBody")]: r.body ?? "",
     }));
     const worksheet = XLSX.utils.json_to_sheet(rows);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "reviews");
-    XLSX.writeFile(workbook, `reviews-${storeFetchId ?? "export"}.xlsx`);
-  }, [hydratedReviews, storeFetchId]);
+    XLSX.utils.book_append_sheet(workbook, worksheet, t("exportSheetReviews"));
+    XLSX.writeFile(workbook, `${t("exportSheetReviews")}-${storeFetchId ?? "export"}.xlsx`);
+  }, [hydratedReviews, storeFetchId, t]);
 
   useEffect(() => {
     if (!selectedStoreHit || (!sessionApp && !isPinningStore)) {
@@ -1193,27 +1195,35 @@ function AnalyzeHubConnected() {
                     </div>
                     <div className="grid gap-2 sm:grid-cols-4">
                       <div className="rounded-xl border border-orange-200 bg-orange-50/70 px-3 py-2 dark:border-orange-900/50 dark:bg-orange-950/30">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-100/70">İlerleme</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-100/70">
+                          {t("progressSectionProgress")}
+                        </p>
                         <p className="text-lg font-bold tabular-nums text-orange-950 dark:text-orange-50">
                           %{fetchRowQuery.data?.status === "completed" ? 100 : fetchProgressPercent}
                         </p>
                       </div>
                       <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Geçen süre</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t("progressSectionElapsed")}
+                        </p>
                         <p className="text-lg font-bold tabular-nums text-foreground">{fetchElapsedText}</p>
                       </div>
                       <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Ortalama kalan</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t("progressSectionEta")}
+                        </p>
                         <p className="text-lg font-bold tabular-nums text-foreground">
                           {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
                             ? formatDuration(fetchEtaSec)
                             : fetchRowQuery.data?.status === "completed"
-                              ? "00:00"
-                              : "--:--"}
+                              ? formatDuration(0)
+                              : t("progressPlaceholderUnknown")}
                         </p>
                       </div>
                       <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
-                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Toplanan</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t("progressSectionCollected")}
+                        </p>
                         <p className="text-lg font-bold tabular-nums text-foreground">
                           {fetchRowQuery.data?.review_count ?? hydratedPoolCount}
                         </p>
@@ -1222,23 +1232,33 @@ function AnalyzeHubConnected() {
                     <p className="text-xs text-muted-foreground">{fetchDynamicHint}</p>
                     <p className="text-xs font-semibold text-foreground">{fetchStageLabel}</p>
                     <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-foreground">
-                      <p>Geçen süre: {fetchElapsedText}</p>
+                      <p>{t("progressElapsedInline", { value: fetchElapsedText })}</p>
                       <p>
-                        Tahmini kalan:{" "}
-                        {fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
-                          ? formatDuration(fetchEtaSec)
-                          : fetchRowQuery.data?.status === "completed"
-                            ? "00:00"
-                            : "--:--"}
+                        {t("progressEtaInline", {
+                          value:
+                            fetchEtaSec !== null && fetchRowQuery.data?.status === "running"
+                              ? formatDuration(fetchEtaSec)
+                              : fetchRowQuery.data?.status === "completed"
+                                ? formatDuration(0)
+                                : t("progressPlaceholderUnknown"),
+                        })}
                       </p>
-                      <p>Tahmini bitiş: {formatDuration(fetchElapsedSec + Math.max(0, fetchEtaSec ?? 0))}</p>
-                      <p>Hız: {fetchSpeedPerSec > 0 ? `${fetchSpeedPerSec.toFixed(1)} yorum/sn` : "ölçülüyor..."}</p>
+                      <p>
+                        {t("progressFinishInline", {
+                          value: formatDuration(fetchElapsedSec + Math.max(0, fetchEtaSec ?? 0)),
+                        })}
+                      </p>
+                      <p>
+                        {fetchSpeedPerSec > 0
+                          ? t("progressSpeedPerSec", { rate: fetchSpeedPerSec.toFixed(1) })
+                          : t("progressSpeedMeasuring")}
+                      </p>
                     </div>
                   </div>
                 ) : null}
                 {fetchTimeline.length > 0 ? (
                   <div className="space-y-2 rounded-xl border border-border bg-card/70 p-3">
-                    <p className="text-sm font-medium text-foreground">Canli islem gunlugu</p>
+                    <p className="text-sm font-medium text-foreground">{t("fetchLiveLogTitle")}</p>
                     <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
                       {fetchTimeline.map((ev) => (
                         <div key={ev.key} className="rounded-md border border-border bg-muted/80 px-2 py-1.5">
@@ -1261,10 +1281,14 @@ function AnalyzeHubConnected() {
                 ) : null}
                 {isHydratingPool ? (
                   <div className="space-y-2 rounded-xl border border-orange-200 bg-orange-50/70 p-3 dark:border-orange-900/50 dark:bg-orange-950/30">
-                    <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">Yorumlar havuza aktarılıyor...</p>
+                    <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">{t("hydratePoolTitle")}</p>
                     <p className="text-xs text-orange-800 dark:text-orange-200">
-                      Aktarılan satır: {hydratedPoolCount}
-                      {fetchRowQuery.data?.review_count ? ` / ${fetchRowQuery.data.review_count}` : ""}
+                      {fetchRowQuery.data?.review_count
+                        ? t("hydratePoolRowsTotal", {
+                            loaded: hydratedPoolCount,
+                            total: fetchRowQuery.data.review_count,
+                          })
+                        : t("hydratePoolRows", { loaded: hydratedPoolCount })}
                     </p>
                     <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100 dark:bg-orange-950/50">
                       <div className="h-full w-1/3 animate-pulse rounded-full bg-orange-500" />
@@ -1274,17 +1298,17 @@ function AnalyzeHubConnected() {
                 {hydratedReviews.length > 0 ? (
                   <details className="rounded-xl border border-border bg-card/80 p-3">
                     <summary className="cursor-pointer select-none text-sm font-semibold text-foreground">
-                      Yorumları incele ({hydratedReviews.length})
+                      {t("inspectReviewsSummary", { count: hydratedReviews.length })}
                     </summary>
                     <div className="mt-3 space-y-3">
                       <div className="flex flex-wrap gap-2">
                         <Button type="button" variant="outline" size="sm" onClick={downloadReviewsCsv}>
                           <Download className="mr-2 size-4" aria-hidden />
-                          CSV indir
+                          {t("downloadCsv")}
                         </Button>
                         <Button type="button" variant="outline" size="sm" onClick={() => void downloadReviewsExcel()}>
                           <Download className="mr-2 size-4" aria-hidden />
-                          Excel indir
+                          {t("downloadExcel")}
                         </Button>
                       </div>
                       <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
@@ -1292,9 +1316,9 @@ function AnalyzeHubConnected() {
                           <article key={row.id} className="rounded-xl border border-border bg-muted/80 px-3 py-2">
                             <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                               <p>
-                                #{idx + 1} | puan: {row.rating}
+                                #{idx + 1} | {t("hubReviewLineRating", { rating: row.rating })}
                               </p>
-                              <p>tarih: {formatReviewDate(row.review_date)}</p>
+                              <p>{t("hubReviewLineDate", { date: formatReviewDate(row.review_date) })}</p>
                             </div>
                             {row.title ? <p className="mt-1 text-sm font-medium text-foreground">{row.title}</p> : null}
                             <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{row.body}</p>
