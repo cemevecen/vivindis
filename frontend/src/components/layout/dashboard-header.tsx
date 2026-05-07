@@ -7,6 +7,7 @@ import { FileText, GitCompare, Search, Smartphone, Store, Upload } from "lucide-
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 
+import { BrandHomeLink } from "@/components/layout/brand-home-link";
 import { LanguageSwitcher } from "@/components/layout/language-switcher";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Link, usePathname } from "@/i18n/routing";
@@ -49,9 +50,7 @@ function DashboardHeaderContent() {
     <header className="sticky top-0 z-30 shrink-0 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
       <div className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 px-3 py-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-3">
-          <Link href="/" className="shrink-0 text-lg font-semibold tracking-tight">
-            Vivindis
-          </Link>
+          <BrandHomeLink wordmarkClassName="text-lg" iconSize="md" />
         </div>
 
         <nav

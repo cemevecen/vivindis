@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
 import { BuildVersionBadge } from "@/components/layout/build-version-badge";
-import { FooterBrandLink } from "@/components/layout/footer-brand-link";
 import { Link } from "@/i18n/routing";
 
 export async function SiteFooter() {
@@ -12,7 +11,6 @@ export async function SiteFooter() {
     <footer className="shrink-0 border-t border-border bg-background/95">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-center gap-3 px-4 py-6">
         <div className="flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6">
-          <FooterBrandLink />
           <p className="text-center text-sm text-muted-foreground sm:text-left">{t("rights")}</p>
         </div>
         <Link
