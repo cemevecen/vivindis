@@ -190,6 +190,7 @@
     "pairBannerOpenPartner": "İkinci uygulamayı aç",
     "pairBannerCompare": "Karşılaştırma görünümü",
     "deleteApp": "Uygulamayı sil",
+    "deleteShort": "Sil",
     "deleteConfirm": "“{name}” uygulamasını silmek istiyor musunuz? Bu işlem yorumları ve analizleri de kaldırır.",
     "deleteSuccess": "Uygulama silindi",
     "deleteFailed": "Uygulama silinemedi."

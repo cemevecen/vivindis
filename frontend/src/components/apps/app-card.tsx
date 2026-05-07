@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/button";
@@ -29,12 +29,9 @@ export function AppCard({ app, onDelete, isDeleting = false }: Props) {
 
   return (
     <div className="group relative rounded-lg border border-border bg-card shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/30">
-      <Link href={`/apps/${app.id}`} className="block p-4 pr-11">
+      <Link href={`/apps/${app.id}`} className="block p-4 pr-24">
         <div className="space-y-1">
-          <div className="flex items-start justify-between gap-2">
-            <h2 className="font-semibold leading-tight tracking-tight">{app.name || t("detailTitle")}</h2>
-            <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" aria-hidden />
-          </div>
+          <h2 className="font-semibold leading-tight tracking-tight">{app.name || t("detailTitle")}</h2>
           <p className="text-xs text-muted-foreground">{platformLabel(app, t)}</p>
           {app.package_name ? (
             <p className="truncate font-mono text-xs text-muted-foreground">{app.package_name}</p>
@@ -44,9 +41,9 @@ export function AppCard({ app, onDelete, isDeleting = false }: Props) {
       {onDelete ? (
         <Button
           type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="absolute right-2 top-2 rounded-full text-muted-foreground opacity-70 hover:bg-destructive/10 hover:text-destructive group-hover:opacity-100"
+          variant="outline"
+          size="xs"
+          className="absolute right-3 top-3 z-10 rounded-full border-destructive/25 bg-background px-2 text-xs font-semibold text-destructive shadow-sm hover:bg-destructive hover:text-destructive-foreground"
           aria-label={t("deleteApp")}
           disabled={isDeleting}
           onClick={(event) => {
@@ -55,7 +52,8 @@ export function AppCard({ app, onDelete, isDeleting = false }: Props) {
             onDelete(app);
           }}
         >
-          <X className="size-3.5" aria-hidden />
+          <X className="size-3" aria-hidden />
+          {t("deleteShort")}
         </Button>
       ) : null}
     </div>

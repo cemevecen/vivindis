@@ -190,6 +190,7 @@
     "pairBannerOpenPartner": "Open partner app",
     "pairBannerCompare": "Open compare view",
     "deleteApp": "Delete app",
+    "deleteShort": "Delete",
     "deleteConfirm": "Delete “{name}”? This also removes its reviews and analyses.",
     "deleteSuccess": "App deleted",
     "deleteFailed": "Could not delete app."
