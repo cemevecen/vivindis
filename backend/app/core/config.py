@@ -68,6 +68,7 @@ class Settings(BaseSettings):
     scrape_app_store_country: str = Field(default="tr", validation_alias="SCRAPE_APP_STORE_COUNTRY")
     scrape_play_sleep_seconds: float = Field(default=1.5, validation_alias="SCRAPE_PLAY_SLEEP_SECONDS")
     scrape_app_store_sleep_seconds: int = Field(default=2, validation_alias="SCRAPE_APP_STORE_SLEEP_SECONDS")
+    scrape_app_store_max_pages: int = Field(default=250, validation_alias="SCRAPE_APP_STORE_MAX_PAGES")
     scrape_max_reviews: int = Field(default=5000, validation_alias="SCRAPE_MAX_REVIEWS")
     scrape_requests_per_second: float = Field(
         default=7.0,

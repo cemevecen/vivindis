@@ -330,17 +330,20 @@ async def _scrape_app_store(
     ]
 
     countries = [req_country or "tr", "us"] if review_scope == "local" else APP_STORE_COUNTRIES
-    max_inserted = int(settings.scrape_max_reviews or 10000)
+    max_inserted = int(settings.scrape_max_reviews or 250000)
+    max_pages_per_country = max(1, int(getattr(settings, "scrape_app_store_max_pages", 250) or 250))
+    country_parallelism = 2 if review_scope == "local" else 6
     lo, hi = fetch.from_date, fetch.to_date
     total_inserted = 0
     rss_404_countries: set[str] = set()
+    country_sem = asyncio.Semaphore(country_parallelism)
 
-    async def _fetch_rss_page(country: str, page: int) -> int:
+    async def _fetch_rss_page(client: httpx.AsyncClient, country: str, page: int) -> tuple[int, bool]:
         nonlocal total_inserted
         if total_inserted >= max_inserted:
-            return 0
+            return 0, True
         if country in rss_404_countries:
-            return 0
+            return 0, True
 
         url = (
             f"https://itunes.apple.com/{country}/rss/customerreviews/page={page}/id={numeric_id}/"
@@ -348,16 +351,15 @@ async def _scrape_app_store(
         )
         await limiter.acquire()
         try:
-            async with httpx.AsyncClient(timeout=15.0) as client:
-                resp = await client.get(
-                    url,
-                    headers={
-                        "User-Agent": pick_user_agent(),
-                        "Accept": "application/json,text/plain,*/*",
-                    },
-                )
+            resp = await client.get(
+                url,
+                headers={
+                    "User-Agent": pick_user_agent(),
+                    "Accept": "application/json,text/plain,*/*",
+                },
+            )
         except Exception:
-            return 0
+            return 0, True
 
         if resp.status_code == 404:
             rss_404_countries.add(country)
@@ -368,7 +370,7 @@ async def _scrape_app_store(
                 page=page,
                 bundle_id=numeric_id,
             )
-            return 0
+            return 0, True
 
         if resp.status_code != 200:
             log.warning(
@@ -378,23 +380,28 @@ async def _scrape_app_store(
                 page=page,
                 status=resp.status_code,
             )
-            return 0
+            return 0, True
 
         try:
             data = resp.json()
         except Exception:
-            return 0
+            return 0, True
 
         entries = data.get("feed", {}).get("entry", [])
         if not isinstance(entries, list):
             entries = [entries] if entries else []
+        if not entries:
+            return 0, True
 
         inserted = 0
+        saw_older_than_range = False
+        has_review_entries = False
         for entry in entries:
             if not isinstance(entry, dict):
                 continue
             if "author" not in entry or total_inserted >= max_inserted:
                 continue
+            has_review_entries = True
             try:
                 rid = _rss_label(entry, "id") or ""
                 if not rid:
@@ -403,6 +410,8 @@ async def _scrape_app_store(
                 at = datetime.fromisoformat(date_str.replace("Z", "+00:00"))
                 rd = at.date()
                 if not (lo <= rd <= hi):
+                    if rd < lo:
+                        saw_older_than_range = True
                     continue
 
                 author_block = entry.get("author")
@@ -439,10 +448,36 @@ async def _scrape_app_store(
                 total_inserted += 1
             except Exception:
                 continue
-        return inserted
+        should_stop = saw_older_than_range or (not has_review_entries)
+        return inserted, should_stop
 
-    tasks = [_fetch_rss_page(c, p) for c in countries for p in range(1, 11)]
-    await asyncio.gather(*tasks)
+    async def _fetch_country(country: str) -> int:
+        nonlocal total_inserted
+        country_total = 0
+        page = 1
+        async with country_sem:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                while page <= max_pages_per_country and total_inserted < max_inserted:
+                    inserted, should_stop = await _fetch_rss_page(client, country, page)
+                    country_total += inserted
+                    if should_stop:
+                        break
+                    page += 1
+        return country_total
+
+    async def _fetch_country_group(country_list: list[str]) -> int:
+        unique_countries = list(dict.fromkeys(country_list))
+        counts = await asyncio.gather(*[_fetch_country(c) for c in unique_countries])
+        return sum(counts)
+
+    total_inserted = await _fetch_country_group(countries)
+
+    # App Store RSS, ülke başına sınırlı sayfa döndürebildiğinden "local" modda
+    # düşük hacim kalırsa ek ülkelerle otomatik genişletme yap.
+    if review_scope == "local" and total_inserted < 1500 and total_inserted < max_inserted:
+        overflow_countries = [c for c in APP_STORE_COUNTRIES if c not in set(countries)]
+        if overflow_countries:
+            await _fetch_country_group(overflow_countries)
     return total_inserted
 
 
