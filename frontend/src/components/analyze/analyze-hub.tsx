@@ -2,19 +2,18 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Download, FileText, GitCompare, Search, Store, Upload } from "lucide-react";
+import { Download, Search, Upload } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
-import { LanguageSwitcher } from "@/components/layout/language-switcher";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectNative } from "@/components/ui/select-native";
-import { Link, useRouter } from "@/i18n/routing";
+import { useRouter } from "@/i18n/routing";
 import {
   ApiError,
   apiFetch,
@@ -23,11 +22,10 @@ import {
   isPublicApiBaseUrlConfigured,
 } from "@/lib/api";
 import {
-  MASTHEAD_PLUS_PATTERN,
   appBodyFromHit,
+  parseAnalyzeHubMode,
   rangeFromPreset,
   type AnalysisMode,
-  type AnalyzeHubMode,
   type DatePresetId,
   type ReviewScope,
   type SearchPlatform,
@@ -74,7 +72,8 @@ function AnalyzeHubConnected() {
   const locale = useLocale();
   const queryClient = useQueryClient();
 
-  const [mode, setMode] = useState<AnalyzeHubMode>("store");
+  const searchParams = useSearchParams();
+  const mode = useMemo(() => parseAnalyzeHubMode(searchParams.get("mode")), [searchParams]);
   const [datePreset, setDatePreset] = useState<DatePresetId>("30d");
   const [reviewScope, setReviewScope] = useState<ReviewScope>("global");
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
@@ -834,17 +833,6 @@ function AnalyzeHubConnected() {
   const results = useMemo(() => searchQuery.data?.results ?? [], [searchQuery.data?.results]);
   const androidHits = useMemo(() => results.filter((r) => r.platform === "google_play"), [results]);
   const iosHits = useMemo(() => results.filter((r) => r.platform === "app_store"), [results]);
-
-  const tabs = useMemo(
-    () =>
-      [
-        { id: "store" as const, label: t("tabStore"), Icon: Store },
-        { id: "file" as const, label: t("tabFile"), Icon: Upload },
-        { id: "text" as const, label: t("tabText"), Icon: FileText },
-        { id: "compare" as const, label: t("tabCompare"), Icon: GitCompare },
-      ] as const,
-    [t],
-  );
 
   const appChoices = useMemo(() => {
     const list = appsQuery.data ?? [];
@@ -1682,73 +1670,7 @@ function AnalyzeHubConnected() {
     </div>
   );
 
-  return (
-    <div className="-mx-4 -mt-4 sm:-mx-6 sm:-mt-6">
-      <div
-        className="relative overflow-hidden rounded-b-[22px] border-b border-black/15 shadow-[0_10px_32px_rgba(48,8,16,0.28)]"
-        style={{
-          background: "linear-gradient(102deg, #120608 0%, #1f0a0e 18%, #3a0f18 40%, #5c1524 62%, #7a1f30 82%, #8f2840 100%)",
-        }}
-      >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage: MASTHEAD_PLUS_PATTERN,
-            backgroundSize: "24px 24px",
-          }}
-        />
-        <div className="relative z-10 flex flex-col gap-4 px-4 py-4 md:flex-row md:items-center md:justify-between md:px-6">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element -- küçük statik logo */}
-            <img
-              src="/analyze-masthead-logo.png"
-              alt=""
-              width={40}
-              height={40}
-              className="h-10 w-10 shrink-0 rounded-lg bg-white/95 object-contain p-0.5 shadow"
-            />
-            <div>
-              <p className="text-lg font-semibold tracking-tight text-white">{t("mastheadTitle")}</p>
-              <p className="text-xs text-white/70">{t("mastheadSubtitle")}</p>
-            </div>
-          </div>
-          <div className="flex flex-col items-stretch gap-3 sm:items-end">
-            <div className="flex flex-wrap items-center justify-end gap-2 text-white/90 [&_label]:text-white/80">
-              <Link
-                href="/about"
-                className="rounded-full border border-white/25 px-3 py-1.5 text-sm text-white transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40"
-              >
-                {t("aboutLink")}
-              </Link>
-              <ThemeToggle selectClassName="rounded-lg border border-white/25 bg-white/10 px-2 py-1.5 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" />
-              <LanguageSwitcher selectClassName="rounded-lg border border-white/25 bg-white/10 px-2 py-1.5 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40" />
-            </div>
-            <div className="flex flex-wrap gap-2" role="tablist" aria-label={t("tablistLabel")}>
-              {tabs.map(({ id, label, Icon }) => (
-                <button
-                  key={id}
-                  type="button"
-                  role="tab"
-                  aria-selected={mode === id}
-                  onClick={() => setMode(id)}
-                  className={cn(
-                    "inline-flex min-h-[44px] min-w-[7rem] flex-1 items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors sm:flex-none",
-                    mode === id
-                      ? "border-white/35 bg-white text-neutral-900 shadow-md"
-                      : "border-white/20 bg-white/10 text-white hover:bg-white/20",
-                  )}
-                >
-                  <Icon className="size-4 shrink-0 opacity-90" aria-hidden />
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-      {shellBody}
-    </div>
-  );
+  return shellBody;
 }
 
 export function AnalyzeHub({ clerkEnabled }: Props) {

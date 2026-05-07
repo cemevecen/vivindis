@@ -20,7 +20,7 @@ const localeLabels: Record<(typeof routing.locales)[number], string> = {
 };
 
 type LanguageSwitcherProps = {
-  /** Örn. koyu masthead üzerinde kontrast için */
+  /** Özel yüzeylerde kontrast için (ör. koyu arka plan) */
   selectClassName?: string;
 };
 

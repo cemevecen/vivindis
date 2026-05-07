@@ -2,13 +2,17 @@ import type { StoreSearchResultItem } from "@/types/store-search";
 
 /** Mağaza arama + dosya/yapıştırma + karşılaştırma sekmeleri. */
 export type AnalyzeHubMode = "store" | "file" | "text" | "compare";
+
+export function parseAnalyzeHubMode(raw: string | null): AnalyzeHubMode {
+  if (raw === "store" || raw === "file" || raw === "text" || raw === "compare") {
+    return raw;
+  }
+  return "store";
+}
 export type SearchPlatform = "google_play" | "app_store" | "both";
 export type DatePresetId = "7d" | "30d" | "90d" | "365d";
 export type ReviewScope = "local" | "global";
 export type AnalysisMode = "fast" | "rich";
-
-export const MASTHEAD_PLUS_PATTERN =
-  "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z'/%3E%3C/svg%3E\")";
 
 export function isoDate(d: Date): string {
   return d.toISOString().slice(0, 10);
