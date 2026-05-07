@@ -43,7 +43,7 @@ export function AppCard({ app, onDelete, isDeleting = false }: Props) {
           type="button"
           variant="outline"
           size="xs"
-          className="absolute right-3 top-3 z-10 rounded-full border-destructive/25 bg-background px-2 text-xs font-semibold text-destructive shadow-sm hover:bg-destructive hover:text-destructive-foreground"
+          className="absolute right-3 top-3 z-10 rounded-full border-destructive/25 bg-background px-2 text-xs font-semibold text-destructive shadow-sm hover:bg-destructive hover:text-destructive-foreground [&_svg]:text-current"
           aria-label={t("deleteApp")}
           disabled={isDeleting}
           onClick={(event) => {
