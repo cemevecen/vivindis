@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -14,7 +15,7 @@ import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto } from "@/types/analysis";
-import type { FetchStatus, ReviewFetchDto } from "@/types/app";
+import type { FetchStatus, ReviewFetchDto, ReviewListItemDto, ReviewListResponseDto } from "@/types/app";
 
 function analysesForFetch(items: AnalysisDto[], fetchId: string) {
   return items.filter((a) => a.fetch_id === fetchId);
@@ -54,6 +55,10 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const tCommon = useTranslations("common");
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
+  const [reviewItems, setReviewItems] = useState<ReviewListItemDto[]>([]);
+  const [reviewTotal, setReviewTotal] = useState(0);
+  const [reviewOffset, setReviewOffset] = useState(0);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
@@ -97,6 +102,42 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       toast.error(err instanceof ApiError ? err.message : t("analysisError"));
     },
   });
+
+  const loadReviewChunk = useCallback(
+    async (nextOffset: number, reset: boolean) => {
+      if (!fetchId) {
+        return;
+      }
+      setReviewsLoading(true);
+      try {
+        const chunk = await apiFetch<ReviewListResponseDto>(
+          `/api/v1/apps/${appId}/reviews?fetch_id=${encodeURIComponent(fetchId)}&limit=100&offset=${nextOffset}`,
+          { getToken },
+        );
+        setReviewTotal(chunk.total);
+        setReviewOffset(nextOffset + chunk.items.length);
+        setReviewItems((prev) => (reset ? chunk.items : [...prev, ...chunk.items]));
+      } catch (e) {
+        toast.error(formatClientFetchError(e));
+      } finally {
+        setReviewsLoading(false);
+      }
+    },
+    [appId, fetchId, getToken],
+  );
+
+  useEffect(() => {
+    setReviewItems([]);
+    setReviewTotal(0);
+    setReviewOffset(0);
+  }, [fetchId]);
+
+  useEffect(() => {
+    if (!fetchId || fetchQuery.data?.status !== "completed") {
+      return;
+    }
+    void loadReviewChunk(0, true);
+  }, [fetchId, fetchQuery.data?.status, loadReviewChunk]);
 
   if (!clerkEnabled) {
     return (
@@ -219,6 +260,11 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         <p className="mt-2 text-xs text-muted-foreground">
           {tApps("reviews")}: {fetch.review_count}
         </p>
+        {fetch.status === "completed" && fetch.review_count === 0 ? (
+          <p className="mt-2 text-xs text-amber-700">
+            Bu aralık/kaynak için yorum bulunamadı. Tarih aralığını genişletin veya kaynak seçimini değiştirin.
+          </p>
+        ) : null}
         {fetch.status === "failed" && fetch.error_message ? (
           <p className="mt-2 text-xs text-destructive">{fetch.error_message}</p>
         ) : null}
@@ -288,6 +334,46 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       ) : null}
 
       <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} />
+
+      {fetch.status === "completed" ? (
+        <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold">Yorum listesi</h2>
+            <p className="text-xs text-muted-foreground">
+              {reviewItems.length}/{reviewTotal}
+            </p>
+          </div>
+          {reviewItems.length === 0 && !reviewsLoading ? (
+            <p className="text-sm text-muted-foreground">Bu fetch için gösterilecek yorum yok.</p>
+          ) : (
+            <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
+              {reviewItems.map((row, idx) => (
+                <article key={row.id} className="rounded-lg border border-border bg-muted/20 p-3">
+                  <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                    <p>
+                      #{idx + 1} | puan: {row.rating}
+                    </p>
+                    <p>{row.review_date}</p>
+                  </div>
+                  {row.title ? <p className="mt-1 text-sm font-medium">{row.title}</p> : null}
+                  <p className="mt-1 whitespace-pre-wrap text-sm">{row.body}</p>
+                </article>
+              ))}
+            </div>
+          )}
+          <div className="mt-3 flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled={reviewsLoading || reviewOffset >= reviewTotal}
+              onClick={() => void loadReviewChunk(reviewOffset, false)}
+            >
+              {reviewsLoading ? tCommon("loading") : "Daha fazla yorum yükle"}
+            </Button>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }
