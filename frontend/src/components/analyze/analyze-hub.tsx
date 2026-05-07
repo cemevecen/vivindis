@@ -605,6 +605,32 @@ function AnalyzeHubConnected() {
     return Math.floor(remaining / speed);
   }, [fetchElapsedSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
 
+  const fetchSpeedPerSec = useMemo(() => {
+    const row = fetchRowQuery.data;
+    if (!row || row.status !== "running" || !storeFetchId || row.id !== storeFetchId) {
+      return 0;
+    }
+    const samples = fetchCountSamplesRef.current;
+    if (samples.length < 2) {
+      return 0;
+    }
+    // Exponential smoothing over sample deltas to reduce ETA jitter.
+    let ema = 0;
+    let seeded = false;
+    for (let i = 1; i < samples.length; i += 1) {
+      const dc = samples[i].count - samples[i - 1].count;
+      const dt = Math.max(1, Math.floor((samples[i].ts - samples[i - 1].ts) / 1000));
+      const inst = dc / dt;
+      if (!seeded) {
+        ema = inst;
+        seeded = true;
+      } else {
+        ema = 0.35 * inst + 0.65 * ema;
+      }
+    }
+    return Math.max(0, ema);
+  }, [fetchRowQuery.data, storeFetchId]);
+
   const fetchProgressPercent = useMemo(() => {
     const row = fetchRowQuery.data;
     if (!row || !storeFetchId || row.id !== storeFetchId) {
@@ -648,6 +674,29 @@ function AnalyzeHubConnected() {
     }
     return row.error_message ?? "";
   }, [fetchRowQuery.data, storeFetchId]);
+
+  const fetchStageLabel = useMemo(() => {
+    const row = fetchRowQuery.data;
+    if (!row || !storeFetchId || row.id !== storeFetchId) {
+      return "";
+    }
+    if (row.status === "pending") {
+      return "Aşama 1/4 · Kuyruğa alındı";
+    }
+    if (row.status === "running" && (row.review_count ?? 0) === 0) {
+      return "Aşama 2/4 · Mağaza bağlantıları kuruluyor";
+    }
+    if (row.status === "running") {
+      return "Aşama 3/4 · Yorumlar toplanıyor";
+    }
+    if (row.status === "completed" && isHydratingPool) {
+      return "Aşama 4/4 · Yorumlar havuza aktarılıyor";
+    }
+    if (row.status === "completed") {
+      return "Tamamlandı";
+    }
+    return "İşlem sonlandı";
+  }, [fetchRowQuery.data, isHydratingPool, storeFetchId]);
 
   const fetchTimeline = useMemo(() => {
     const fmt = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
@@ -1094,6 +1143,7 @@ function AnalyzeHubConnected() {
                       />
                     </div>
                     <p className="text-xs text-slate-600">{fetchDynamicHint}</p>
+                    <p className="text-xs font-semibold text-slate-700">{fetchStageLabel}</p>
                     <div className="flex flex-wrap items-center gap-3 text-xs font-medium text-slate-700">
                       <p>Geçen süre: {fetchElapsedText}</p>
                       <p>
@@ -1105,6 +1155,7 @@ function AnalyzeHubConnected() {
                             : "--:--"}
                       </p>
                       <p>Tahmini bitiş: {formatDuration(fetchElapsedSec + Math.max(0, fetchEtaSec ?? 0))}</p>
+                      <p>Hız: {fetchSpeedPerSec > 0 ? `${fetchSpeedPerSec.toFixed(1)} yorum/sn` : "ölçülüyor..."}</p>
                     </div>
                   </div>
                 ) : null}
