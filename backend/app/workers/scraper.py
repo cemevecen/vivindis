@@ -23,6 +23,7 @@ from app.models.app import App
 from app.models.enums import AnalysisStatus, AnalysisType, AppPlatform, FetchStatus, StorePlatform
 from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
+from app.db.session import get_async_session_maker
 from app.services.async_rate_limiter import AsyncTokenBucketRateLimiter
 from app.services.play_scraper_headers import ensure_play_request_user_agents
 from app.services.user_agents import pick_user_agent
@@ -173,18 +174,21 @@ async def _scrape_google_play(
 
     # Try variants sequentially: first original case, then lowercase if 0 found.
     for variant in pkg_variants:
-        from app.workers.runtime import async_session
+        factory = get_async_session_maker()
 
-        async def _shard_task(l, c, s, v):
-            async with async_session() as shard_session:
-                return await _scrape_locale_score(shard_session, l, c, s, v, limiter, lo, hi, app, fetch, max_inserted)
+        async def _shard_task(l: str, c: str, s: int, v: str) -> int:
+            async with factory() as shard_session:
+                return await _scrape_locale_score(
+                    shard_session, l, c, s, v, limiter, lo, hi, app, fetch, max_inserted
+                )
 
         tasks = [
             _shard_task(l, c, s, variant)
             for (l, c) in locale_candidates
             for s in (1, 2, 3, 4, 5)
         ]
-        await asyncio.gather(*tasks)
+        counts = await asyncio.gather(*tasks)
+        total_inserted = sum(counts)
         if total_inserted > 0:
             break
 
