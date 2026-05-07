@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { headers } from "next/headers";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppProviders } from "@/components/providers/app-providers";
 import { VivindisClerkProvider } from "@/components/providers/clerk-provider";
+import { getSiteUrl } from "@/lib/site-url";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -17,6 +19,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
   title: {
     default: "Vivindis",
     template: "%s | Vivindis",
@@ -26,15 +29,20 @@ export const metadata: Metadata = {
 };
 
 /**
- * Kök düzen: `lang` / `dir` varsayılanı; gerçek locale için `LocaleHtmlAttributes` (Oturum 5).
+ * Kök düzen: `lang` / `dir` istek başlıklarından (middleware); yoksa TR.
+ * `LocaleHtmlAttributes` istemci geçişlerinde eşitler.
  */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const h = headers();
+  const locale = h.get("x-vivindis-locale") ?? "tr";
+  const dir = locale === "ar" ? "rtl" : "ltr";
+
   return (
-    <html lang="tr" suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <body
         className={cn(
           geistSans.variable,
