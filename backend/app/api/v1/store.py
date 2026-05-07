@@ -73,10 +73,15 @@ def _google_play_rows_from_raw(raw: list[dict[str, Any]]) -> list[StoreSearchRes
 
 
 def _google_play_search_sync(query: str, lang: str, country: str, num: int) -> list[StoreSearchResultItem]:
-    """Önce istenen dil/ülke; hata veya parse edilemeyen yanıtta en/us (Play şablonu / IP farkları)."""
-    attempts: list[tuple[str, str]] = [(lang, country)]
-    if (lang, country) != ("en", "us"):
-        attempts.append(("en", "us"))
+    """Önce istenen dil/ülke; sonuç zayıfsa bölgesel fallback denemeleri.
+
+    Play arama sonuçları ülke/language'e çok duyarlı olduğu için tek deneme
+    Android kullanıcı deneyimiyle birebir örtüşmeyebiliyor.
+    """
+    attempts: list[tuple[str, str]] = [(lang, country), (lang, "tr"), ("tr", "tr"), ("en", "us")]
+    # Preserve order, deduplicate.
+    seen: set[tuple[str, str]] = set()
+    attempts = [a for a in attempts if not (a in seen or seen.add(a))]
 
     last_exc: BaseException | None = None
     for attempt_lang, attempt_country in attempts:

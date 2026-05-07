@@ -80,14 +80,11 @@ function AnalyzeHubConnected() {
   const dateRange = useMemo(() => rangeFromPreset(datePreset), [datePreset]);
 
   const { searchLang, searchCountry } = useMemo(() => {
-    if (reviewScope === "global") {
-      return { searchLang: "en", searchCountry: "us" };
-    }
     const lc = typeof locale === "string" ? locale : "tr";
     const lang = lc.length >= 2 ? lc.split("-")[0]?.slice(0, 2) ?? "tr" : "tr";
     const country = lang === "zh" ? "cn" : lang;
     return { searchLang: lang, searchCountry: country };
-  }, [locale, reviewScope]);
+  }, [locale]);
 
   const [platform, setPlatform] = useState<SearchPlatform>("google_play");
   const [draftQuery, setDraftQuery] = useState("");
