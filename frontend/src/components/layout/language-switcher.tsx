@@ -4,7 +4,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
-import { usePathname, useRouter, routing } from "@/i18n/routing";
+import { usePathname, routing } from "@/i18n/routing";
 
 const localeLabels: Record<(typeof routing.locales)[number], string> = {
   tr: "Türkçe",
@@ -30,7 +30,6 @@ function LanguageSwitcherImpl({ selectClassName }: LanguageSwitcherProps) {
   const locale = useLocale() as (typeof routing.locales)[number];
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
   const tCommon = useTranslations("common");
 
   return (
@@ -44,9 +43,14 @@ function LanguageSwitcherImpl({ selectClassName }: LanguageSwitcherProps) {
         value={locale}
         onChange={(e) => {
           const next = e.target.value as (typeof routing.locales)[number];
+          if (!routing.locales.includes(next)) {
+            return;
+          }
           const qs = searchParams.toString();
-          const href = qs ? `${pathname}?${qs}` : pathname;
-          router.replace(href, { locale: next });
+          const pathSegment = !pathname || pathname === "/" ? "" : pathname;
+          const search = qs ? `?${qs}` : "";
+          /** Tam sayfa geçişi: istemci ağacı + RSC aynı locale mesajlarıyla yeniden yüklenir (soft replace bazen metinleri güncellemez). */
+          window.location.assign(`/${next}${pathSegment}${search}`);
         }}
       >
         {routing.locales.map((loc) => (
