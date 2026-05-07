@@ -121,6 +121,7 @@
     "compareSelectedSummaryLabel": "Seçilen",
     "compareRegisteredSelectLabel": "Kayıtlı uygulama (isteğe bağlı)",
     "compareRegisteredSelectPlaceholder": "Uygulamalarınızdan seçin…",
+    "compareRegisteredPickerClear": "Yok",
     "compareRegisteredListTitle": "Kayıtlı uygulamalar — hızlı seçim",
     "compareRegisteredListHint": "Sütun 1 veya 2 kutusunu işaretleyerek yukarıdaki slota atayın (açılır liste ile aynı).",
     "compareRegisteredCol1": "Sütun 1",

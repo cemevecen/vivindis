@@ -9,6 +9,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
+import { RegisteredAppGridPicker, RegisteredAppTileVisual } from "@/components/analyze/registered-app-grid-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -37,7 +38,7 @@ import { queryKeys } from "@/lib/query-keys";
 import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
-import type { AppDto, ReviewFetchDto, ReviewImportResponseDto, ReviewListResponseDto } from "@/types/app";
+import type { AppDto, AppPlatform, ReviewFetchDto, ReviewImportResponseDto, ReviewListResponseDto } from "@/types/app";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
 type Props = {
@@ -190,6 +191,12 @@ function AnalyzeHubConnected() {
   const registeredAppsDeduped = useMemo(
     () => dedupeAppsForList(appsQuery.data ?? []),
     [appsQuery.data],
+  );
+
+  const registryPlatformLabel = useCallback(
+    (p: AppPlatform) =>
+      p === "google_play" ? t("platformAndroid") : p === "app_store" ? t("platformIos") : t("platformBoth"),
+    [t],
   );
 
   const appFetchesQuery = useQuery({
@@ -1575,31 +1582,21 @@ function AnalyzeHubConnected() {
                 <Label htmlFor="compare-reg-a" className="text-foreground">
                   {t("compareRegisteredSelectLabel")}
                 </Label>
-                <SelectNative
+                <RegisteredAppGridPicker
                   id="compare-reg-a"
-                  value={compareRegistryAppA?.id ?? ""}
-                  onChange={(e) => {
-                    const v = e.target.value.trim();
-                    if (!v) {
-                      setCompareRegistryAppA(null);
-                      return;
-                    }
-                    const app = appsQuery.data?.find((a) => a.id === v);
+                  apps={registeredAppsDeduped}
+                  value={compareRegistryAppA}
+                  onChange={(app) => {
+                    setCompareRegistryAppA(app);
                     if (app) {
-                      setCompareRegistryAppA(app);
                       setCompareHitA(null);
                     }
                   }}
-                  className="rounded-xl"
                   disabled={!registeredAppsDeduped.length}
-                >
-                  <option value="">{t("compareRegisteredSelectPlaceholder")}</option>
-                  {registeredAppsDeduped.map((app) => (
-                    <option key={app.id} value={app.id}>
-                      {app.name}
-                    </option>
-                  ))}
-                </SelectNative>
+                  placeholder={t("compareRegisteredSelectPlaceholder")}
+                  clearLabel={t("compareRegisteredPickerClear")}
+                  getPlatformLabel={registryPlatformLabel}
+                />
                 <Label className="text-foreground">{t("compareApp1Label")}</Label>
                 <div className="space-y-2">
                   <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
@@ -1765,31 +1762,21 @@ function AnalyzeHubConnected() {
                 <Label htmlFor="compare-reg-b" className="text-foreground">
                   {t("compareRegisteredSelectLabel")}
                 </Label>
-                <SelectNative
+                <RegisteredAppGridPicker
                   id="compare-reg-b"
-                  value={compareRegistryAppB?.id ?? ""}
-                  onChange={(e) => {
-                    const v = e.target.value.trim();
-                    if (!v) {
-                      setCompareRegistryAppB(null);
-                      return;
-                    }
-                    const app = appsQuery.data?.find((a) => a.id === v);
+                  apps={registeredAppsDeduped}
+                  value={compareRegistryAppB}
+                  onChange={(app) => {
+                    setCompareRegistryAppB(app);
                     if (app) {
-                      setCompareRegistryAppB(app);
                       setCompareHitB(null);
                     }
                   }}
-                  className="rounded-xl"
                   disabled={!registeredAppsDeduped.length}
-                >
-                  <option value="">{t("compareRegisteredSelectPlaceholder")}</option>
-                  {registeredAppsDeduped.map((app) => (
-                    <option key={app.id} value={app.id}>
-                      {app.name}
-                    </option>
-                  ))}
-                </SelectNative>
+                  placeholder={t("compareRegisteredSelectPlaceholder")}
+                  clearLabel={t("compareRegisteredPickerClear")}
+                  getPlatformLabel={registryPlatformLabel}
+                />
                 <Label className="text-foreground">{t("compareApp2Label")}</Label>
                 <div className="space-y-2">
                   <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
@@ -1956,47 +1943,43 @@ function AnalyzeHubConnected() {
               <div className="space-y-2 rounded-2xl border border-border bg-card p-4 sm:p-5">
                 <p className="text-sm font-semibold text-foreground">{t("compareRegisteredListTitle")}</p>
                 <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
-                <ul className="max-h-56 divide-y divide-border overflow-y-auto rounded-xl border border-border">
-                  {registeredAppsDeduped.map((app) => (
-                    <li key={app.id} className="flex flex-wrap items-center justify-between gap-3 px-3 py-2.5">
-                      <div className="flex min-w-0 flex-1 items-center gap-2">
-                        {app.icon_url ? (
-                          // eslint-disable-next-line @next/next/no-img-element -- app icon URL
-                          <img
-                            src={app.icon_url}
-                            alt=""
-                            width={36}
-                            height={36}
-                            className="size-9 shrink-0 rounded-lg border border-border object-cover"
-                          />
-                        ) : (
-                          <div className="size-9 shrink-0 rounded-lg border border-dashed border-border bg-muted/50" />
-                        )}
-                        <span className="truncate text-sm font-medium text-foreground">{app.name}</span>
+                <div className="max-h-[22rem] overflow-y-auto rounded-xl border border-border p-2">
+                  <div
+                    className="grid gap-2"
+                    style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
+                  >
+                    {registeredAppsDeduped.map((app) => (
+                      <div
+                        key={app.id}
+                        className="flex flex-col items-center gap-1.5 rounded-lg border border-border/80 bg-card/40 p-2"
+                      >
+                        <div className="flex w-full flex-col items-center gap-1">
+                          <RegisteredAppTileVisual app={app} platformLabel={registryPlatformLabel(app.platform)} />
+                        </div>
+                        <div className="flex w-full flex-col gap-1 border-t border-border/60 pt-1.5">
+                          <label className="flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-foreground">
+                            <input
+                              type="checkbox"
+                              className="size-3.5 shrink-0 rounded border-border accent-primary"
+                              checked={compareRegistryAppA?.id === app.id}
+                              onChange={(e) => onRegistrySlotCheckbox("a", app, e.target.checked)}
+                            />
+                            <span className="leading-tight">{t("compareRegisteredCol1")}</span>
+                          </label>
+                          <label className="flex cursor-pointer items-center gap-1.5 text-[10px] font-medium text-foreground">
+                            <input
+                              type="checkbox"
+                              className="size-3.5 shrink-0 rounded border-border accent-primary"
+                              checked={compareRegistryAppB?.id === app.id}
+                              onChange={(e) => onRegistrySlotCheckbox("b", app, e.target.checked)}
+                            />
+                            <span className="leading-tight">{t("compareRegisteredCol2")}</span>
+                          </label>
+                        </div>
                       </div>
-                      <div className="flex flex-wrap gap-4">
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-                          <input
-                            type="checkbox"
-                            className="size-4 rounded border-border accent-primary"
-                            checked={compareRegistryAppA?.id === app.id}
-                            onChange={(e) => onRegistrySlotCheckbox("a", app, e.target.checked)}
-                          />
-                          {t("compareRegisteredCol1")}
-                        </label>
-                        <label className="flex cursor-pointer items-center gap-2 text-sm text-foreground">
-                          <input
-                            type="checkbox"
-                            className="size-4 rounded border-border accent-primary"
-                            checked={compareRegistryAppB?.id === app.id}
-                            onChange={(e) => onRegistrySlotCheckbox("b", app, e.target.checked)}
-                          />
-                          {t("compareRegisteredCol2")}
-                        </label>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : null}
             <div className="space-y-2">
