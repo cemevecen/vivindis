@@ -19,6 +19,9 @@ const clerkEnabled =
   typeof process !== "undefined" &&
   Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY?.trim());
 
+/** Üst menüdeki «Karşılaştır» (/compare) tekrarını gizler; canlı akış Analiz → uygulama karşılaştır. Onay sonrası bu sabiti ve ilgili filtreyi tamamen kaldırın. */
+const SHOW_TOP_NAV_COMPARE_LINK = false;
+
 const analyzeSourceTabs: { id: AnalyzeHubMode; labelKey: "tabStore" | "tabFile" | "tabText" | "tabCompare"; Icon: typeof Store }[] = [
   { id: "store", labelKey: "tabStore", Icon: Store },
   { id: "file", labelKey: "tabFile", Icon: Upload },
@@ -45,7 +48,9 @@ function DashboardHeaderContent() {
     { href: "/dashboard" as const, label: t("dashboard"), Icon: LayoutDashboard },
     { href: "/analyze" as const, label: t("analyze"), Icon: Search },
     { href: "/apps" as const, label: t("apps"), Icon: Smartphone },
-    { href: "/compare" as const, label: t("compare"), Icon: GitCompare },
+    ...(SHOW_TOP_NAV_COMPARE_LINK
+      ? [{ href: "/compare" as const, label: t("compare"), Icon: GitCompare }]
+      : []),
     { href: "/about" as const, label: t("about"), Icon: Info },
   ];
 
@@ -64,7 +69,10 @@ function DashboardHeaderContent() {
           className="order-last -mx-3 flex w-[calc(100%+1.5rem)] gap-1 overflow-x-auto px-3 sm:order-none sm:mx-0 sm:w-auto sm:flex-1 sm:justify-center sm:px-0"
         >
           {links.map(({ href, label, Icon }) => {
-            const active = pathname === href || pathname.startsWith(`${href}/`);
+            const active =
+              pathname === href ||
+              pathname.startsWith(`${href}/`) ||
+              (href === "/analyze" && pathname === "/compare");
             return (
               <Link
                 key={href}
