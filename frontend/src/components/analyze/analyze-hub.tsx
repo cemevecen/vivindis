@@ -2253,7 +2253,7 @@ function AnalyzeHubConnected() {
             </div>
             <Button
               type="button"
-              className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-500/70 to-orange-600/75 text-base font-semibold text-white shadow-sm disabled:opacity-50"
+              className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-500 to-orange-600 text-base font-semibold text-white shadow-sm hover:from-amber-600 hover:to-orange-700 disabled:opacity-50"
               disabled={!canStartCompare || compareBusy}
               onClick={() => void handleCompareStart()}
             >
@@ -2320,7 +2320,7 @@ function AnalyzeHubConnected() {
                 </Button>
                 <Button
                   type="button"
-                  className="h-11 rounded-xl bg-gradient-to-r from-amber-500/68 to-orange-600/72 px-6 text-sm font-semibold text-white shadow-sm hover:from-amber-500/78 hover:to-orange-600/82 disabled:opacity-50"
+                  className="h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 text-sm font-semibold text-white shadow-sm ring-1 ring-amber-600/25 hover:from-amber-600 hover:to-orange-700 hover:ring-amber-700/30 disabled:opacity-50 dark:ring-amber-400/20"
                   disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
                   onClick={() => void runUnifiedAnalysis()}
                 >
