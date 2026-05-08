@@ -1839,7 +1839,7 @@ function AnalyzeHubConnected() {
                     </p>
                   </div>
                 ) : null}
-                {activeCompareA.length >= 2 && searchQueryA.data ? (
+                {!compareRegistryAppA && !compareHitA && activeCompareA.length >= 2 && searchQueryA.data ? (
                   <ul className="grid gap-2">
                     {searchQueryA.data.results.map((hit) => (
                       <StoreResultCard
@@ -1848,6 +1848,8 @@ function AnalyzeHubConnected() {
                         onPin={() => {
                           setCompareRegistryAppA(null);
                           setCompareHitA(hit);
+                          setActiveCompareA("");
+                          setCompareDraftA("");
                         }}
                         selectLabel={t("comparePickSlotA")}
                       />
@@ -2043,7 +2045,7 @@ function AnalyzeHubConnected() {
                     </p>
                   </div>
                 ) : null}
-                {activeCompareB.length >= 2 && searchQueryB.data ? (
+                {!compareRegistryAppB && !compareHitB && activeCompareB.length >= 2 && searchQueryB.data ? (
                   <ul className="grid gap-2">
                     {searchQueryB.data.results.map((hit) => (
                       <StoreResultCard
@@ -2052,6 +2054,8 @@ function AnalyzeHubConnected() {
                         onPin={() => {
                           setCompareRegistryAppB(null);
                           setCompareHitB(hit);
+                          setActiveCompareB("");
+                          setCompareDraftB("");
                         }}
                         selectLabel={t("comparePickSlotB")}
                       />
