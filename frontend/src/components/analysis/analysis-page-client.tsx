@@ -485,8 +485,11 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.reviews.fetchById(String(created.id)) });
       toast.success(
-        created.status === "waiting_approval" ? tApps("fetchWaitingApprovalToast") : t("globalQueued"),
+        created.status === "waiting_approval"
+          ? tApps("fetchWaitingApprovalToast")
+          : t("deepResearchToastNewImportStarted"),
       );
       router.push(`/apps/${appId}/analysis?fetchId=${created.id}&deep=1`);
     },
@@ -1249,6 +1252,23 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 )}
               />
             </div>
+          </div>
+          <div className="mt-4 space-y-3 rounded-lg border border-border/80 bg-muted/15 p-3 text-xs leading-relaxed text-muted-foreground">
+            <p>{t("deepResearchSeparateImportsHint")}</p>
+            <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
+              <Link
+                href={`/apps/${appId}`}
+                className="font-medium text-primary underline-offset-4 hover:underline"
+              >
+                {t("deepResearchImportHistoryCta")}
+              </Link>
+            </p>
+            {(appQuery.data?.platform === "app_store" || appQuery.data?.platform === "both") &&
+            fetch.status === "completed" ? (
+              <p className="border-t border-border/60 pt-3 text-amber-900/90 dark:text-amber-100/90">
+                {t("deepResearchAppStoreFeedHint")}
+              </p>
+            ) : null}
           </div>
         </section>
       ) : null}
