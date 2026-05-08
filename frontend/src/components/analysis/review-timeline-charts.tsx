@@ -119,6 +119,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
+                  cursor={false}
                   contentStyle={tooltipStyle}
                   labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
                 />
@@ -141,6 +142,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
+                  cursor={false}
                   contentStyle={tooltipStyle}
                   labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
                 />
@@ -172,6 +174,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
                 <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} width={32} />
                 <Tooltip
+                  cursor={false}
                   contentStyle={tooltipStyle}
                   formatter={(v) => [
                     typeof v === "number" && Number.isFinite(v) ? v.toFixed(2) : "—",

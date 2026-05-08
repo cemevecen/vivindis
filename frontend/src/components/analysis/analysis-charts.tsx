@@ -93,7 +93,7 @@ function SentimentCard({
                 <Cell key={entry.name} fill={SENTIMENT_COLORS[entry.name] ?? "hsl(var(--muted-foreground))"} />
               ))}
             </Pie>
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip cursor={false} contentStyle={tooltipStyle} />
             <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: featured ? 12 : 11, paddingTop: 8 }} />
           </PieChart>
         </ResponsiveContainer>
@@ -129,7 +129,7 @@ function RatingsDistCard({
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="rating" tick={{ fontSize: featured ? 12 : 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: featured ? 12 : 11 }} width={featured ? 40 : 32} />
-            <Tooltip contentStyle={tooltipStyle} />
+            <Tooltip cursor={false} contentStyle={tooltipStyle} />
             <Bar dataKey="count" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -172,7 +172,7 @@ function TopicsCard({
                 tick={{ fontSize: featured ? 11 : 10 }}
                 tickFormatter={(v: string) => (v.length > (featured ? 22 : 14) ? `${v.slice(0, featured ? 20 : 14)}…` : v)}
               />
-              <Tooltip contentStyle={tooltipStyle} />
+              <Tooltip cursor={false} contentStyle={tooltipStyle} />
               <Bar dataKey="count" fill="var(--chart-2)" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
