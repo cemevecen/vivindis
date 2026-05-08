@@ -329,27 +329,6 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     },
   });
 
-  if (queries.some((q) => q.isPending)) {
-    return <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>;
-  }
-
-  if (queries.some((q) => q.isError)) {
-    return (
-      <div className="space-y-3">
-        <p className="text-sm text-destructive">{t("loadPairFailed")}</p>
-        <Link href="/compare" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-          {t("clearCompare")}
-        </Link>
-      </div>
-    );
-  }
-
-  const appA = appAq.data;
-  const appB = appBq.data;
-  if (!appA || !appB) {
-    return null;
-  }
-
   const latestFetch = (rows: ReviewFetchDto[] | undefined) =>
     rows && rows.length
       ? [...rows].sort((a, b) => b.created_at.localeCompare(a.created_at))[0]
@@ -397,6 +376,27 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     fb,
     bootstrapFetchMutation,
   ]);
+
+  if (queries.some((q) => q.isPending)) {
+    return <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>;
+  }
+
+  if (queries.some((q) => q.isError)) {
+    return (
+      <div className="space-y-3">
+        <p className="text-sm text-destructive">{t("loadPairFailed")}</p>
+        <Link href="/compare" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+          {t("clearCompare")}
+        </Link>
+      </div>
+    );
+  }
+
+  const appA = appAq.data;
+  const appB = appBq.data;
+  if (!appA || !appB) {
+    return null;
+  }
 
   const latestHeuristic = (items: AnalysisListDto | undefined) =>
     (items?.items ?? []).filter((x) => x.type === "heuristic" && x.status === "completed").sort((a, b) =>
