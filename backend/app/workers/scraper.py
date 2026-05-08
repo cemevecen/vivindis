@@ -169,7 +169,8 @@ async def _scrape_google_play(
             ("en", "us"),
         ]
     else:
-        locale_candidates = PLAY_STORE_MATRIX
+        max_global_locales = max(2, int(getattr(settings, "scrape_play_global_locale_limit", 12) or 12))
+        locale_candidates = PLAY_STORE_MATRIX[:max_global_locales]
 
     max_inserted = int(settings.scrape_max_reviews or 250000)
     lo, hi = fetch.from_date, fetch.to_date
@@ -430,7 +431,14 @@ async def _scrape_app_store(
         "ch",
     ]
 
-    countries = [req_country or "tr", "us"] if review_scope == "local" else APP_STORE_COUNTRIES
+    if review_scope == "local":
+        countries = [req_country or "tr", "us"]
+    else:
+        max_global_countries = max(
+            4,
+            int(getattr(settings, "scrape_app_store_global_country_limit", 16) or 16),
+        )
+        countries = APP_STORE_COUNTRIES[:max_global_countries]
     max_inserted = int(settings.scrape_max_reviews or 250000)
     max_pages_per_country = max(1, int(getattr(settings, "scrape_app_store_max_pages", 250) or 250))
     country_parallelism = 2 if review_scope == "local" else 6
