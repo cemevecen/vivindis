@@ -13,6 +13,11 @@ import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link, useRouter } from "@/i18n/routing";
 import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
+import {
+  buildFullAnalysisPdfHtml,
+  openHtmlPrintWindow,
+  type AnalysisPdfLocaleStrings,
+} from "@/lib/analysis-pdf-html";
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
@@ -197,6 +202,105 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     return alerts.filter((a) => a.severity === insightAlertFilter);
   }, [insightAlertFilter, insightsQuery.data?.alerts]);
 
+  const analysisPdfCopy = useMemo((): AnalysisPdfLocaleStrings | null => {
+    const f = fetchQuery.data;
+    if (!f) {
+      return null;
+    }
+    const truncatedNote =
+      timelineReviews !== null &&
+      timelineReviews.length > 0 &&
+      timelineReviews.length < f.review_count
+        ? t("timelineTruncatedHint", { loaded: timelineReviews.length, total: f.review_count })
+        : "";
+    return {
+      docTitle: t("pdfFullReportDocTitle"),
+      reportHeading: t("pdfReportHeading"),
+      timelineTruncatedNote: truncatedNote,
+      labelApp: t("pdfLabelApp"),
+      labelImportRange: t("pdfLabelImportRange"),
+      labelTotalInImport: t("pdfLabelTotalInImport"),
+      labelPageUrl: t("pdfLabelPageUrl"),
+      labelGenerated: t("pdfLabelGenerated"),
+      sectionTimeline: t("timelineSectionHeading"),
+      sectionHeuristic: t("heuristic"),
+      sectionAi: t("ai"),
+      sectionInsights: t("insightsTitle"),
+      sectionReviewDetails: t("pdfSectionReviewList"),
+      timelineBucketDay: t("timelineBucketDay"),
+      timelineBucketWeek: t("timelineBucketWeek"),
+      timelineBucketMonth: t("timelineBucketMonth"),
+      colPeriod: t("pdfColPeriod"),
+      colCount: t("pdfColCount"),
+      colAvgRating: t("pdfColAvgRating"),
+      colStars: t("pdfColStars"),
+      chartSentiment: t("chartSentiment"),
+      chartRatings: t("chartRatings"),
+      chartTopics: t("chartTopics"),
+      overallScore: t("overallScore"),
+      colSharePct: t("pdfColSharePct"),
+      analysisPending: t("pdfAnalysisPending"),
+      analysisRunning: t("pdfAnalysisRunning"),
+      analysisFailed: t("analysisError"),
+      analysisEmpty: t("noAnalysisYet"),
+      modelLabel: t("pdfModelLabel"),
+      yes: t("pdfYes"),
+      no: t("pdfNo"),
+      insightsRelease: t("insightsReleaseTitle"),
+      insightsSegments: t("insightsSegmentsTitle"),
+      insightsAvgRating: t("insightsAvgRating"),
+      insightsActions: t("insightsActionsTitle"),
+      insightsAlertsTitle: t("insightsAlertsTitle"),
+      totalReviews: t("pdfTotalReviews"),
+      ratingLabel: t("ratingLabel"),
+      tonePositive: t("tonePositive"),
+      toneNeutral: t("toneNeutral"),
+      toneNegative: t("toneNegative"),
+      platformGooglePlay: tApps("platformGooglePlay"),
+      platformAppStore: tApps("platformAppStore"),
+      insightColMetric: t("pdfInsightColMetric"),
+      insightColValue: t("pdfInsightColValue"),
+      insightColDelta: t("pdfInsightColDelta"),
+      insightColTitle: t("pdfInsightColTitle"),
+      insightColSev: t("pdfInsightColSev"),
+      insightColOn: t("pdfInsightColOn"),
+      insightColDetail: t("pdfInsightColDetail"),
+      insightColP: t("pdfInsightColP"),
+      insightColProblem: t("pdfInsightColProblem"),
+      insightColReco: t("pdfInsightColReco"),
+      insightColSegment: t("pdfInsightColSegment"),
+      insightColReviews: t("pdfInsightColReviews"),
+      insightBenchmarkScores: t("pdfInsightBenchmarkScores"),
+    };
+  }, [fetchQuery.data, timelineReviews, t, tApps]);
+
+  const copyAnalysisPageLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success(t("shareLinkCopied"));
+    } catch {
+      toast.error(t("shareCopyFailed"));
+    }
+  }, [t]);
+
+  const shareAnalysisPage = useCallback(async () => {
+    if (!navigator.share) {
+      return;
+    }
+    try {
+      await navigator.share({
+        title: t("pageTitle"),
+        text: t("shareNativeBody", { name: appQuery.data?.name ?? "" }),
+        url: window.location.href,
+      });
+    } catch (e) {
+      if (e instanceof Error && e.name === "AbortError") {
+        return;
+      }
+      toast.error(t("shareFailed"));
+    }
+  }, [appQuery.data?.name, t]);
+
   const startMutation = useMutation({
     mutationFn: async () => {
       if (!fetchId) {
@@ -371,50 +475,54 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     }
   }, [exportBase, fetchId, loadAllReviews, t]);
 
-  const exportReviewsPdf = useCallback(async () => {
+  const exportFullAnalysisPdf = useCallback(async () => {
+    const f = fetchQuery.data;
+    if (!f || !fetchId || !analysisPdfCopy || !appQuery.data) {
+      toast.error(tCommon("error"));
+      return;
+    }
     try {
       const rows = await loadAllReviews();
-      const html = rows
-        .map((row, idx) => {
-          const platformLabel =
-            row.platform === "google_play" ? tApps("platformGooglePlay") : tApps("platformAppStore");
-          const meta = t("pdfReviewMeta", {
-            index: idx + 1,
-            platform: platformLabel,
-            ratingLabel: t("ratingLabel"),
-            rating: row.rating,
-            date: row.review_date,
-            tone: t(reviewToneMessageKey(row.rating)),
-          });
-          return `<article style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:10px 0;">
-              <p style="font-size:12px;color:#64748b;">${meta}</p>
-              ${row.title ? `<h3 style="font-size:14px;margin:6px 0;">${row.title}</h3>` : ""}
-              <p style="font-size:13px;white-space:pre-wrap;">${row.body}</p>
-            </article>`;
-        })
-        .join("");
-      const win = window.open("", "_blank");
+      const items = analysesForFetch(analysesQuery.data?.items ?? [], fetchId);
+      const heur = latestByType(items, "heuristic");
+      const aiRow = latestByType(items, "ai");
+      const generatedAtLabel = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
+        dateStyle: "full",
+        timeStyle: "short",
+      }).format(new Date());
+      const html = buildFullAnalysisPdfHtml({
+        copy: analysisPdfCopy,
+        appName: appQuery.data.name,
+        fetch: f,
+        pageUrl: window.location.href,
+        generatedAtLabel,
+        timelineReviews,
+        timelineLocale: locale,
+        heuristic: heur,
+        ai: aiRow,
+        insights: insightsQuery.data,
+        reviewRows: rows,
+      });
+      const win = openHtmlPrintWindow(html);
       if (!win) {
         toast.error(t("pdfWindowError"));
-        return;
       }
-      const docTitle = t("pdfDocumentTitle");
-      const heading = t("pdfHeading");
-      const totalLine = t("pdfTotalReviews", { count: rows.length });
-      win.document.write(`
-        <html><head><title>${docTitle}</title></head>
-        <body style="font-family:Arial,sans-serif;padding:24px;">
-          <h1>${heading}</h1>
-          <p>${totalLine}</p>
-          ${html}
-        </body></html>
-      `);
-      win.document.close();
-      win.print();
     } catch (e) {
       toast.error(formatClientFetchError(e));
     }
-  }, [loadAllReviews, t, tApps]);
+  }, [
+    analysisPdfCopy,
+    analysesQuery.data,
+    appQuery.data,
+    fetchId,
+    fetchQuery.data,
+    insightsQuery.data,
+    loadAllReviews,
+    locale,
+    t,
+    tCommon,
+    timelineReviews,
+  ]);
 
   useEffect(() => {
     setReviewItems([]);
@@ -563,6 +671,19 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
           <p className="text-sm text-muted-foreground">{liveStatusHint}</p>
+        </div>
+        <div className="flex min-w-[12rem] flex-col gap-2 sm:items-end">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("shareHeading")}</p>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={() => void copyAnalysisPageLink()}>
+              {t("shareCopyLink")}
+            </Button>
+            {typeof navigator !== "undefined" && typeof navigator.share === "function" ? (
+              <Button type="button" variant="outline" size="sm" onClick={() => void shareAnalysisPage()}>
+                {t("shareNative")}
+              </Button>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -1008,7 +1129,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsExcel()}>
               {t("exportResultsExcel")}
             </Button>
-            <Button type="button" variant="outline" size="sm" onClick={() => void exportReviewsPdf()}>
+            <Button type="button" variant="outline" size="sm" onClick={() => void exportFullAnalysisPdf()}>
               {t("exportResultsPdf")}
             </Button>
           </div>
