@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
 import { ReviewTimelineCharts } from "@/components/analysis/review-timeline-charts";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link, useRouter } from "@/i18n/routing";
 import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
 import {
@@ -19,6 +21,7 @@ import {
   type AnalysisPdfLocaleStrings,
 } from "@/lib/analysis-pdf-html";
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
+import { GLOBAL_SCAN_LANG_CODES, MAX_GLOBAL_FETCH_LANGS } from "@/lib/global-scan-langs";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto, InsightsDto } from "@/types/analysis";
@@ -98,38 +101,7 @@ type Props = {
 };
 
 const TIMELINE_REVIEW_CAP = 20_000;
-const GLOBAL_TOP_30_LANGS = [
-  "en",
-  "es",
-  "pt",
-  "fr",
-  "de",
-  "it",
-  "tr",
-  "ru",
-  "ar",
-  "ja",
-  "ko",
-  "zh",
-  "nl",
-  "pl",
-  "hi",
-  "id",
-  "th",
-  "vi",
-  "ms",
-  "ro",
-  "cs",
-  "sv",
-  "da",
-  "no",
-  "fi",
-  "el",
-  "he",
-  "hu",
-  "uk",
-  "bn",
-] as const;
+const GLOBAL_FETCH_META_PREFIX = "vivindis:globalFetchMeta:";
 
 export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const t = useTranslations("analysis");
@@ -152,6 +124,12 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const [timelineReviews, setTimelineReviews] = useState<ReviewListItemDto[] | null>(null);
   const [timelineLoadState, setTimelineLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [insightAlertFilter, setInsightAlertFilter] = useState<"all" | "triggered" | "high" | "medium" | "low">("all");
+  const [deepFrom, setDeepFrom] = useState("");
+  const [deepTo, setDeepTo] = useState("");
+  const [deepLangs, setDeepLangs] = useState<Set<string>>(() => new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)));
+  const [globalScanMeta, setGlobalScanMeta] = useState<{ from: string; to: string; langs: string[] } | null>(null);
+
+  const deepParam = searchParams.get("deep") === "1";
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
@@ -191,6 +169,49 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     enabled: Boolean(clerkEnabled && appId && fetchId && fetchQuery.data?.status === "completed"),
   });
 
+  useEffect(() => {
+    const f = fetchQuery.data;
+    if (!f) {
+      return;
+    }
+    setDeepFrom(f.from_date);
+    setDeepTo(f.to_date);
+    // Sync when fetch id or server import range changes (not every query refetch)
+  }, [fetchQuery.data?.id, fetchQuery.data?.from_date, fetchQuery.data?.to_date]); // eslint-disable-line react-hooks/exhaustive-deps -- see above
+
+  useEffect(() => {
+    if (!fetchQuery.data?.id) {
+      return;
+    }
+    setDeepLangs(new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)));
+  }, [fetchQuery.data?.id]); // eslint-disable-line react-hooks/exhaustive-deps -- only when fetch id changes
+
+  useEffect(() => {
+    if (!deepParam || !fetchId) {
+      setGlobalScanMeta(null);
+      return;
+    }
+    try {
+      const raw = sessionStorage.getItem(`${GLOBAL_FETCH_META_PREFIX}${fetchId}`);
+      if (!raw) {
+        setGlobalScanMeta(null);
+        return;
+      }
+      const parsed = JSON.parse(raw) as { from?: string; to?: string; langs?: string[] };
+      if (typeof parsed.from === "string" && typeof parsed.to === "string" && Array.isArray(parsed.langs)) {
+        setGlobalScanMeta({
+          from: parsed.from,
+          to: parsed.to,
+          langs: parsed.langs.filter((c): c is string => typeof c === "string"),
+        });
+      } else {
+        setGlobalScanMeta(null);
+      }
+    } catch {
+      setGlobalScanMeta(null);
+    }
+  }, [deepParam, fetchId]);
+
   const filteredInsightAlerts = useMemo(() => {
     const alerts = insightsQuery.data?.alerts ?? [];
     if (insightAlertFilter === "all") {
@@ -201,6 +222,19 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     }
     return alerts.filter((a) => a.severity === insightAlertFilter);
   }, [insightAlertFilter, insightsQuery.data?.alerts]);
+
+  const langOptions = useMemo(() => {
+    let dn: Intl.DisplayNames;
+    try {
+      dn = new Intl.DisplayNames([locale, "en"], { type: "language" });
+    } catch {
+      dn = new Intl.DisplayNames(["en"], { type: "language" });
+    }
+    return GLOBAL_SCAN_LANG_CODES.map((code) => ({
+      code,
+      label: dn.of(code) ?? code,
+    }));
+  }, [locale]);
 
   const analysisPdfCopy = useMemo((): AnalysisPdfLocaleStrings | null => {
     const f = fetchQuery.data;
@@ -328,24 +362,67 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     },
   });
 
+  const toggleDeepLang = useCallback(
+    (code: string) => {
+      setDeepLangs((prev) => {
+        const next = new Set(prev);
+        if (next.has(code)) {
+          next.delete(code);
+        } else {
+          if (next.size >= MAX_GLOBAL_FETCH_LANGS) {
+            toast.error(t("deepResearchLangLimitToast"));
+            return prev;
+          }
+          next.add(code);
+        }
+        return next;
+      });
+    },
+    [t],
+  );
+
+  const selectFirst24DeepLangs = useCallback(() => {
+    setDeepLangs(new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)));
+  }, []);
+
+  const clearDeepLangs = useCallback(() => {
+    setDeepLangs(new Set());
+  }, []);
+
   const deepResearchMutation = useMutation({
     mutationFn: async () => {
       if (!fetchId || !fetchQuery.data) {
         throw new Error("fetchId");
       }
+      const langs = Array.from(deepLangs).sort();
+      if (langs.length < 1) {
+        throw new Error("lang");
+      }
       const created = await apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
         method: "POST",
         body: {
-          from_date: fetchQuery.data.from_date,
-          to_date: fetchQuery.data.to_date,
+          from_date: deepFrom,
+          to_date: deepTo,
           review_scope: "global",
-          global_langs: [...GLOBAL_TOP_30_LANGS],
+          global_langs: langs,
         },
         getToken,
       });
       return created;
     },
     onSuccess: async (created) => {
+      try {
+        sessionStorage.setItem(
+          `${GLOBAL_FETCH_META_PREFIX}${created.id}`,
+          JSON.stringify({
+            from: deepFrom,
+            to: deepTo,
+            langs: Array.from(deepLangs).sort(),
+          }),
+        );
+      } catch {
+        /* storage full or unavailable */
+      }
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
       toast.success(t("globalQueued"));
@@ -355,6 +432,18 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       toast.error(err instanceof ApiError ? err.message : tCommon("error"));
     },
   });
+
+  const runDeepResearch = useCallback(() => {
+    if (deepLangs.size < 1) {
+      toast.error(t("deepResearchNeedOneLang"));
+      return;
+    }
+    if (!deepFrom || !deepTo || deepFrom > deepTo) {
+      toast.error(t("deepResearchInvalidRange"));
+      return;
+    }
+    deepResearchMutation.mutate();
+  }, [deepFrom, deepTo, deepLangs, deepResearchMutation, t]);
 
   const loadReviewChunk = useCallback(
     async (nextOffset: number, reset: boolean) => {
@@ -645,7 +734,6 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
   const items = analysesForFetch(analysesQuery.data?.items ?? [], fetchId);
   const busy = items.some((a) => a.status === "pending" || a.status === "running");
-  const isDeepResearchFlow = searchParams.get("deep") === "1";
 
   const heuristic = latestByType(items, "heuristic");
   const ai = latestByType(items, "ai");
@@ -802,15 +890,90 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           >
             <Globe className="h-6 w-6" strokeWidth={2} />
           </div>
-          <div className="min-w-0 flex-1 space-y-1">
-            <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
-            <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
-            <p className="pt-1 text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
+          <div className="min-w-0 flex-1 space-y-3">
+            {!deepParam ? (
+              <>
+                <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
+                <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
+              </>
+            ) : (
+              <>
+                <p className="text-base font-semibold tracking-tight text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
+                <p className="text-sm text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
+              </>
+            )}
+            <p className="text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
+
+            <div className="space-y-4 rounded-xl border border-white/40 bg-background/60 p-4 dark:border-white/10 dark:bg-background/40">
+              <p className="text-sm font-semibold text-foreground">{t("deepResearchPrepTitle")}</p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label htmlFor="deep-from">{t("deepResearchDateFromLabel")}</Label>
+                  <Input
+                    id="deep-from"
+                    type="date"
+                    value={deepFrom}
+                    max={deepTo || undefined}
+                    onChange={(e) => setDeepFrom(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label htmlFor="deep-to">{t("deepResearchDateToLabel")}</Label>
+                  <Input
+                    id="deep-to"
+                    type="date"
+                    value={deepTo}
+                    min={deepFrom || undefined}
+                    onChange={(e) => setDeepTo(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>{t("globalLangsLabel")}</Label>
+                <p className="text-xs text-muted-foreground">{t("globalLangsHint")}</p>
+                <p className="text-xs text-amber-800 dark:text-amber-200">{t("deepResearchLangCapHint")}</p>
+                <p className="text-xs text-muted-foreground">{t("deepResearchWiderHint")}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={selectFirst24DeepLangs}>
+                    {t("deepResearchSelectAll24")}
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" onClick={clearDeepLangs}>
+                    {t("deepResearchClearLangs")}
+                  </Button>
+                  <span className="text-xs text-muted-foreground">
+                    {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
+                  </span>
+                </div>
+                <div className="max-h-40 overflow-y-auto rounded-md border border-border bg-card/50 p-2">
+                  {langOptions.map(({ code, label }) => (
+                    <label
+                      key={code}
+                      className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-muted/60"
+                    >
+                      <input
+                        type="checkbox"
+                        className="size-4 rounded border-border"
+                        checked={deepLangs.has(code)}
+                        onChange={() => {
+                          toggleDeepLang(code);
+                        }}
+                      />
+                      <span>
+                        {label} <span className="text-muted-foreground">({code})</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+
             <Button
               type="button"
               size="lg"
-              className="mt-4 w-full rounded-xl font-semibold shadow-sm sm:w-auto"
-              onClick={() => deepResearchMutation.mutate()}
+              className="w-full rounded-xl font-semibold shadow-sm sm:w-auto"
+              onClick={() => {
+                runDeepResearch();
+              }}
               disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
             >
               {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
@@ -819,7 +982,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         </div>
       </section>
 
-      {isDeepResearchFlow ? (
+      {deepParam ? (
         <section className="rounded-lg border border-border bg-card p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-semibold text-foreground">{t("deepResearchStatusTitle")}</p>
@@ -845,6 +1008,24 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 ? t("deepResearchStatusCompleted")
                 : t("deepResearchStatusFailed")}
           </p>
+          {globalScanMeta ? (
+            <div className="mt-3 rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
+              <p className="font-semibold text-foreground">{t("deepResearchPlannedParams")}</p>
+              <p className="mt-1">{t("deepResearchParamRange", { from: globalScanMeta.from, to: globalScanMeta.to })}</p>
+              <p className="mt-1 break-words">
+                {t("deepResearchParamLangs", {
+                  count: globalScanMeta.langs.length,
+                  list:
+                    [...globalScanMeta.langs].slice(0, 14).join(", ") +
+                    (globalScanMeta.langs.length > 14 ? "…" : ""),
+                })}
+              </p>
+            </div>
+          ) : (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {t("deepResearchParamRange", { from: fetch.from_date, to: fetch.to_date })}
+            </p>
+          )}
           <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
             <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
               <span>{t("deepResearchCollectedLabel")}</span>
