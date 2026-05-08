@@ -504,6 +504,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       toast.error(t("deepResearchInvalidRange"));
       return;
     }
+    setDeepSettingsOpen(false);
     deepResearchMutation.mutate();
   }, [deepFrom, deepTo, deepLangs, deepResearchMutation, t]);
 
@@ -999,52 +1000,58 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             <Globe className="h-6 w-6" strokeWidth={2} />
           </div>
           <div className="min-w-0 flex-1 space-y-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0 space-y-1">
-                {!deepParam ? (
-                  <>
-                    <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
-                    <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
-                  </>
-                ) : (
-                  <>
-                    <p className="text-base font-semibold tracking-tight text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
-                    <p className="text-sm text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
-                  </>
-                )}
-              </div>
-              {deepFetchBusy ? (
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="-mr-1 size-9 shrink-0 text-muted-foreground hover:text-foreground"
-                  aria-expanded={deepSettingsOpen}
-                  aria-label={
-                    deepSettingsOpen ? t("deepResearchSettingsCollapseAria") : t("deepResearchSettingsExpandAria")
-                  }
-                  onClick={() => {
-                    setDeepSettingsOpen((open) => !open);
-                  }}
-                >
-                  <ChevronDown
-                    className={cn("size-5 transition-transform duration-200", deepSettingsOpen && "rotate-180")}
-                    aria-hidden
-                  />
-                </Button>
-              ) : null}
+            <div className="min-w-0 space-y-1">
+              {!deepParam ? (
+                <>
+                  <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
+                  <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-base font-semibold tracking-tight text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
+                  <p className="text-sm text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
+                </>
+              )}
             </div>
+
+            <button
+              type="button"
+              id="deep-global-scan-trigger"
+              className={cn(
+                "flex w-full items-center justify-between gap-3 rounded-lg px-1 py-2 text-left",
+                "text-sm font-semibold text-foreground outline-none transition-colors",
+                "hover:bg-background/50 focus-visible:ring-2 focus-visible:ring-ring",
+              )}
+              aria-expanded={deepSettingsOpen}
+              aria-controls="deep-global-scan-panel"
+              onClick={() => {
+                setDeepSettingsOpen((open) => !open);
+              }}
+            >
+              <span className="min-w-0">{t("deepResearchPrepTitle")}</span>
+              <ChevronDown
+                className={cn(
+                  "size-5 shrink-0 text-muted-foreground transition-transform duration-200",
+                  deepSettingsOpen && "rotate-180",
+                )}
+                aria-hidden
+              />
+            </button>
 
             {deepFetchBusy && !deepSettingsOpen ? (
               <p className="text-xs text-muted-foreground">{t("deepResearchSettingsRunningCollapsedHint")}</p>
             ) : null}
 
-            {(!deepFetchBusy || deepSettingsOpen) && (
-              <>
+            {deepSettingsOpen ? (
+              <div
+                id="deep-global-scan-panel"
+                role="region"
+                aria-labelledby="deep-global-scan-trigger"
+                className="space-y-3"
+              >
                 <p className="text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
 
                 <div className="space-y-4 rounded-xl border border-white/40 bg-background/60 p-4 dark:border-white/10 dark:bg-background/40">
-              <p className="text-sm font-semibold text-foreground">{t("deepResearchPrepTitle")}</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5 sm:col-span-2">
                   <Label htmlFor="deep-date-preset">{tAnalyzeHub("dateRangeLabel")}</Label>
@@ -1169,8 +1176,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 >
                   {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
                 </Button>
-              </>
-            )}
+              </div>
+            ) : null}
           </div>
         </div>
       </section>
