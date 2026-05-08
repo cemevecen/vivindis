@@ -478,9 +478,7 @@
     "datePresetAll": "كل الأوقات",
     "localFirstHint": "أول عملية سحب تعمل في سوقك المحلي. يمكنك بدء البحث العالمي بعد التحليل.",
     "reviewSampleLimitLabel": "حد العيّنة",
-    "reviewSampleLimitAll": "الكل (بدون حد أقصى)",
-    "reviewVolumeInRange": "حجم التقييمات في هذه الفترة",
-    "reviewVolumeNoData": "لا بيانات يومية لهذا النطاق بعد"
+    "reviewSampleLimitAll": "الكل (بدون حد أقصى)"
   },
   "about": {
     "title": "حول فيفينديس",

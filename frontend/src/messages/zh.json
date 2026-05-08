@@ -478,9 +478,7 @@
     "datePresetAll": "全部时间",
     "localFirstHint": "首次拉取在本地市场运行。分析后可开始全球调研。",
     "reviewSampleLimitLabel": "样本上限",
-    "reviewSampleLimitAll": "全部（不限）",
-    "reviewVolumeInRange": "该日期范围内的评论量",
-    "reviewVolumeNoData": "该范围尚无每日体量数据"
+    "reviewSampleLimitAll": "全部（不限）"
   },
   "about": {
     "title": "关于维文迪斯",

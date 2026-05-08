@@ -479,9 +479,7 @@
     "datePresetAll": "Gesamte Zeit",
     "localFirstHint": "Der erste Abruf läuft in Ihrem lokalen Markt. Sie können nach der Analyse globale Recherche starten.",
     "reviewSampleLimitLabel": "Stichprobenlimit",
-    "reviewSampleLimitAll": "Alle (ohne Obergrenze)",
-    "reviewVolumeInRange": "Bewertungsvolumen in diesem Zeitraum",
-    "reviewVolumeNoData": "Für diesen Zeitraum noch kein tägliches Volumen"
+    "reviewSampleLimitAll": "Alle (ohne Obergrenze)"
   },
   "about": {
     "title": "Über Vivindis",

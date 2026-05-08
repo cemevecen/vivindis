@@ -478,9 +478,7 @@
     "datePresetAll": "全期間",
     "localFirstHint": "最初の取得はローカル市場で行われます。分析後にグローバル調査を開始できます。",
     "reviewSampleLimitLabel": "サンプル上限",
-    "reviewSampleLimitAll": "すべて（上限なし）",
-    "reviewVolumeInRange": "この期間のレビュー件数",
-    "reviewVolumeNoData": "この期間の日次データはまだありません"
+    "reviewSampleLimitAll": "すべて（上限なし）"
   },
   "about": {
     "title": "ビビンディスについて",

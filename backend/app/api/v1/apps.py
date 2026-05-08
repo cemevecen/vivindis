@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import uuid
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, datetime, timezone
 from typing import Annotated
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, Response, status
@@ -21,7 +21,6 @@ from app.models.review_fetch import ReviewFetch
 from app.models.user import User
 from app.schemas.analysis import AnalysisListResponse, AnalysisResponse
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
-from app.schemas.app_stats import AppReviewVolumeStats, ReviewVolumeDay
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse
 from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
@@ -89,39 +88,6 @@ async def get_app(
     app: Annotated[App, Depends(require_app_owned)],
 ) -> App:
     return app
-
-
-@router.get("/{app_id}/stats", response_model=AppReviewVolumeStats)
-async def app_review_volume_stats(
-    app: Annotated[App, Depends(require_app_owned)],
-    session: Annotated[AsyncSession, Depends(get_async_session)],
-    from_date: Annotated[date, Query(description="Aralık başlangıcı (YYYY-MM-DD)")],
-    to_date: Annotated[date, Query(description="Aralık sonu (YYYY-MM-DD)")],
-) -> AppReviewVolumeStats:
-    """Seçilen aralıkta günlük yorum sayısı (grafik önizlemesi için hafif sorgu)."""
-    if from_date > to_date:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="from_date, to_date'den sonra olamaz.")
-    stmt = (
-        select(Review.review_date, func.count())
-        .where(Review.app_id == app.id)
-        .where(Review.review_date >= from_date)
-        .where(Review.review_date <= to_date)
-        .group_by(Review.review_date)
-        .order_by(Review.review_date)
-    )
-    result = await session.execute(stmt)
-    rows = result.all()
-    counts: dict[date, int] = {}
-    for r_date, r_count in rows:
-        if r_date is None:
-            continue
-        counts[r_date] = int(r_count)
-    points: list[ReviewVolumeDay] = []
-    d = from_date
-    while d <= to_date:
-        points.append(ReviewVolumeDay(date=d, count=counts.get(d, 0)))
-        d += timedelta(days=1)
-    return AppReviewVolumeStats(points=points)
 
 
 @router.put("/{app_id}", response_model=AppResponse)

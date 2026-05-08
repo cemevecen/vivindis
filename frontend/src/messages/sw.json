@@ -478,9 +478,7 @@
     "datePresetAll": "Wakati wote",
     "localFirstHint": "Uchimbaji wa kwanza unatumia soko lako la ndani. Unaweza kuanza utafiti wa kimataifa baada ya uchambuzi.",
     "reviewSampleLimitLabel": "Kikomo cha sampuli",
-    "reviewSampleLimitAll": "Zote (bila kikomo)",
-    "reviewVolumeInRange": "Kiasi cha ukaguzi katika kipindi hiki",
-    "reviewVolumeNoData": "Hakuna data ya kila siku kwa kipindi hiki bado"
+    "reviewSampleLimitAll": "Zote (bila kikomo)"
   },
   "about": {
     "title": "Kuhusu Vivindis",

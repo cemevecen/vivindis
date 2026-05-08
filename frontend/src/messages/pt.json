@@ -478,9 +478,7 @@
     "datePresetAll": "Todo o período",
     "localFirstHint": "A primeira recolha corre no seu mercado local. Pode iniciar pesquisa global após a análise.",
     "reviewSampleLimitLabel": "Limite da amostra",
-    "reviewSampleLimitAll": "Todos (sem teto)",
-    "reviewVolumeInRange": "Volume de avaliações neste intervalo",
-    "reviewVolumeNoData": "Ainda sem volume diário neste intervalo"
+    "reviewSampleLimitAll": "Todos (sem teto)"
   },
   "about": {
     "title": "Sobre Vivindis",

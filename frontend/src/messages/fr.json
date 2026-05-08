@@ -478,9 +478,7 @@
     "datePresetAll": "Tout",
     "localFirstHint": "Le premier import utilise votre marché local. Vous pourrez lancer une recherche mondiale après l’analyse.",
     "reviewSampleLimitLabel": "Limite d'échantillon",
-    "reviewSampleLimitAll": "Tout (sans plafond)",
-    "reviewVolumeInRange": "Volume d'avis sur cette période",
-    "reviewVolumeNoData": "Pas encore de volume quotidien pour cette période"
+    "reviewSampleLimitAll": "Tout (sans plafond)"
   },
   "about": {
     "title": "À propos de Vivindis",

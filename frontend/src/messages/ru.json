@@ -478,9 +478,7 @@
     "datePresetAll": "За всё время",
     "localFirstHint": "Первый импорт выполняется для локального рынка. После анализа можно запустить глобальное исследование.",
     "reviewSampleLimitLabel": "Лимит выборки",
-    "reviewSampleLimitAll": "Все (без ограничения)",
-    "reviewVolumeInRange": "Объём отзывов за период",
-    "reviewVolumeNoData": "Пока нет дневных данных за этот период"
+    "reviewSampleLimitAll": "Все (без ограничения)"
   },
   "about": {
     "title": "О Вивиндис",

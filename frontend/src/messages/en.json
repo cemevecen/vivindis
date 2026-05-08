@@ -87,8 +87,6 @@
     "storeFooter": "Everything stays on this page: pick a result, pull reviews, then start analysis from the bottom bar.",
     "reviewSampleLimitLabel": "Sample limit",
     "reviewSampleLimitAll": "All (no cap)",
-    "reviewVolumeInRange": "Review volume in this date range",
-    "reviewVolumeNoData": "No daily volume for this range yet",
     "dateRangeLabel": "Date range",
     "datePresetLast7": "Last 7 days",
     "datePresetLast30": "Last 30 days",

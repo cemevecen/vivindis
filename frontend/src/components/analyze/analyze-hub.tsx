@@ -10,7 +10,6 @@ import { toast } from "sonner";
 
 import { AnimatedPoolCount } from "@/components/analyze/animated-pool-count";
 import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
-import { ReviewVolumeSparkline } from "@/components/analyze/review-volume-sparkline";
 import { RegisteredAppGridPicker, RegisteredAppTileVisual } from "@/components/analyze/registered-app-grid-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,14 +33,12 @@ import {
   type SearchPlatform,
 } from "@/lib/analyze-hub-utils";
 import { dedupeAppsForList } from "@/lib/app-dedupe";
-import { buildDailyVolumePointsForRange } from "@/lib/daily-volume-points";
 import { parseReviewFile } from "@/lib/parse-review-file";
 import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
 import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
-import type { AppReviewVolumeStatsDto } from "@/types/app-stats";
 import type { AppDto, AppPlatform, ReviewFetchDto, ReviewImportResponseDto, ReviewListResponseDto } from "@/types/app";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
@@ -197,37 +194,6 @@ function AnalyzeHubConnected() {
     queryFn: () => apiFetch<AppDto[]>("/api/v1/apps", { getToken }),
     enabled: Boolean(isSignedIn),
   });
-
-  const statsQuery = useQuery({
-    queryKey: queryKeys.apps.reviewVolume(sessionApp?.id ?? "", dateRange.from, dateRange.to),
-    queryFn: () =>
-      apiFetch<AppReviewVolumeStatsDto>(
-        `/api/v1/apps/${sessionApp!.id}/stats?from_date=${encodeURIComponent(dateRange.from)}&to_date=${encodeURIComponent(dateRange.to)}`,
-        { getToken },
-      ),
-    enabled: Boolean(isSignedIn && sessionApp?.id),
-  });
-
-  const statsPoints = statsQuery.data?.points;
-  const hasServerReviewVolume = useMemo(
-    () => (statsPoints ?? []).some((p) => p.count > 0),
-    [statsPoints],
-  );
-
-  const clientVolumePoints = useMemo(
-    () => buildDailyVolumePointsForRange(hydratedReviews, dateRange.from, dateRange.to),
-    [hydratedReviews, dateRange.from, dateRange.to],
-  );
-  const hasClientReviewVolume = useMemo(
-    () => clientVolumePoints.some((p) => p.count > 0),
-    [clientVolumePoints],
-  );
-
-  const reviewVolumeDisplayPoints = hasServerReviewVolume && statsPoints ? statsPoints : clientVolumePoints;
-  const hasReviewVolumeToShow = hasServerReviewVolume || hasClientReviewVolume;
-  const showStoreReviewVolumeBlock = Boolean(
-    sessionApp && (statsQuery.isFetching || hasReviewVolumeToShow),
-  );
 
   const registeredAppsDeduped = useMemo(
     () => dedupeAppsForList(appsQuery.data ?? []),
@@ -1328,18 +1294,6 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 </div>
-                {showStoreReviewVolumeBlock ? (
-                  <div className="space-y-2 pt-2">
-                    <p className="text-xs text-muted-foreground">{t("reviewVolumeInRange")}</p>
-                    <ReviewVolumeSparkline
-                      points={reviewVolumeDisplayPoints}
-                      isLoading={
-                        statsQuery.isFetching && !hasServerReviewVolume && !hasClientReviewVolume
-                      }
-                      emptyLabel={t("reviewVolumeNoData")}
-                    />
-                  </div>
-                ) : null}
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
                     <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
