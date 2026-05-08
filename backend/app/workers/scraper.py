@@ -162,6 +162,22 @@ async def _scrape_google_play(
         ("zh", "hk"),
         ("id", "id"),
         ("th", "th"),
+        ("pl", "pl"),
+        ("hi", "in"),
+        ("vi", "vn"),
+        ("ms", "my"),
+        ("ro", "ro"),
+        ("cs", "cz"),
+        ("sv", "se"),
+        ("da", "dk"),
+        ("no", "no"),
+        ("fi", "fi"),
+        ("el", "gr"),
+        ("he", "il"),
+        ("hu", "hu"),
+        ("sk", "sk"),
+        ("hr", "hr"),
+        ("sr", "rs"),
     ]
 
     if review_scope == "local":
@@ -528,16 +544,22 @@ async def _scrape_app_store(
             f"https://itunes.apple.com/{country}/rss/customerreviews/page={page}/id={numeric_id}/"
             "sortBy=mostRecent/json"
         )
-        await limiter.acquire()
-        try:
-            resp = await client.get(
-                url,
-                headers={
-                    "User-Agent": pick_user_agent(),
-                    "Accept": "application/json,text/plain,*/*",
-                },
-            )
-        except Exception:
+        for attempt in range(4):
+            await limiter.acquire()
+            try:
+                resp = await client.get(
+                    url,
+                    headers={
+                        "User-Agent": pick_user_agent(),
+                        "Accept": "application/json,text/plain,*/*",
+                    },
+                )
+                break
+            except Exception:
+                if attempt == 3:
+                    return 0, True
+                await asyncio.sleep(0.5 * (attempt + 1))
+        else:
             return 0, True
 
         if resp.status_code == 404:
@@ -635,7 +657,8 @@ async def _scrape_app_store(
         country_total = 0
         page = 1
         async with country_sem:
-            async with httpx.AsyncClient(timeout=15.0) as client:
+            req_timeout = float(getattr(settings, "scrape_http_timeout_seconds", 60.0) or 60.0)
+            async with httpx.AsyncClient(timeout=max(20.0, req_timeout)) as client:
                 while page <= max_pages_per_country and total_inserted < max_inserted:
                     inserted, should_stop = await _fetch_rss_page(client, country, page)
                     country_total += inserted

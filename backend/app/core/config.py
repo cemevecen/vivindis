@@ -71,14 +71,19 @@ class Settings(BaseSettings):
     scrape_app_store_max_pages: int = Field(default=250, validation_alias="SCRAPE_APP_STORE_MAX_PAGES")
     scrape_max_reviews: int = Field(default=5000, validation_alias="SCRAPE_MAX_REVIEWS")
     scrape_play_global_locale_limit: int = Field(
-        default=12,
+        default=30,
         validation_alias="SCRAPE_PLAY_GLOBAL_LOCALE_LIMIT",
         description="Global Play taramasında kullanılacak azami locale sayısı (hız/kaplama dengesi).",
     )
     scrape_app_store_global_country_limit: int = Field(
-        default=16,
+        default=30,
         validation_alias="SCRAPE_APP_STORE_GLOBAL_COUNTRY_LIMIT",
         description="Global App Store taramasında kullanılacak azami ülke sayısı (hız/kaplama dengesi).",
+    )
+    scrape_http_timeout_seconds: float = Field(
+        default=60.0,
+        validation_alias="SCRAPE_HTTP_TIMEOUT_SECONDS",
+        description="Store HTTP istek timeout süresi (saniye). Uzun global taramalarda artırılabilir.",
     )
     scrape_requests_per_second: float = Field(
         default=7.0,

@@ -394,7 +394,8 @@
     "deepResearchCta": "Derin araştırma yap",
     "globalQueued": "Global tarama ve analiz kuyruğa alındı.",
     "globalLangsLabel": "Global tarama dilleri",
-    "globalLangsHint": "Bir veya daha fazla dil seçin. Seçtiğiniz dillere göre global mağaza yorumları çekilir."
+    "globalLangsHint": "Bir veya daha fazla dil seçin. Seçtiğiniz dillere göre global mağaza yorumları çekilir.",
+    "globalTop30Hint": "Derin araştırma globalde en önemli 30 dili tarar; işlem uzun sürebilir ama kapsam geniş tutulur."
   },
   "about": {
     "title": "Vivindis hakkında",

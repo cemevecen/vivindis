@@ -177,7 +177,8 @@
     "deepResearchCta": "Run deep research",
     "globalQueued": "Global scan and analysis have been queued.",
     "globalLangsLabel": "Global scan languages",
-    "globalLangsHint": "Select one or more languages. Global store reviews will focus on these languages."
+    "globalLangsHint": "Select one or more languages. Global store reviews will focus on these languages.",
+    "globalTop30Hint": "Deep research scans the top 30 global languages; it may take longer to complete for full coverage."
   },
   "auth": {
     "signIn": "ログイン",
