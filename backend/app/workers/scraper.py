@@ -165,7 +165,15 @@ async def _scrape_google_play(
     ]
 
     if review_scope == "local":
-        locale_candidates = [(req_lang or "tr", req_country or "tr")]
+        target_lang = (req_lang or "tr").strip().lower()
+        preferred_country = (req_country or "tr").strip().lower()
+        lang_locales = [pair for pair in PLAY_STORE_MATRIX if pair[0] == target_lang]
+        if not lang_locales:
+            lang_locales = [(target_lang, preferred_country)]
+        locale_candidates = sorted(
+            dict.fromkeys(lang_locales),
+            key=lambda pair: (0 if pair[1] == preferred_country else 1, pair[1]),
+        )
     else:
         max_global_locales = max(2, int(getattr(settings, "scrape_play_global_locale_limit", 12) or 12))
         requested_langs = {x.strip().lower() for x in (global_langs or []) if x and x.strip()}
@@ -441,7 +449,34 @@ async def _scrape_app_store(
     ]
 
     if review_scope == "local":
-        countries = [req_country or "tr"]
+        target_lang = (req_lang or "tr").strip().lower()
+        preferred_country = (req_country or "tr").strip().lower()
+        lang_country_map = {
+            "tr": ["tr"],
+            "en": ["us", "gb", "ca", "au"],
+            "de": ["de", "at", "ch"],
+            "fr": ["fr", "ca", "be"],
+            "es": ["es", "mx"],
+            "it": ["it"],
+            "pt": ["br", "pt"],
+            "ru": ["ru", "kz"],
+            "ar": ["sa", "ae", "eg"],
+            "ja": ["jp"],
+            "ko": ["kr"],
+            "zh": ["hk", "tw"],
+            "nl": ["nl", "be"],
+            "sv": ["se"],
+            "no": ["no"],
+            "da": ["dk"],
+        }
+        by_lang = [c for c in lang_country_map.get(target_lang, []) if c in APP_STORE_COUNTRIES]
+        if not by_lang:
+            countries = [preferred_country]
+        else:
+            countries = sorted(
+                dict.fromkeys(by_lang),
+                key=lambda c: (0 if c == preferred_country else 1, c),
+            )
     else:
         max_global_countries = max(
             4,
