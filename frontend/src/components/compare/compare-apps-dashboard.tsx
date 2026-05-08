@@ -42,6 +42,8 @@ function statusClass(status: FetchStatus): string {
       return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
     case "running":
       return "bg-sky-500/15 text-sky-700 dark:text-sky-400";
+    case "waiting_approval":
+      return "bg-amber-500/15 text-amber-800 dark:text-amber-200";
     case "failed":
       return "bg-destructive/15 text-destructive";
     default:
@@ -151,16 +153,18 @@ function CompareAppSplitPane({
                 statusClass(fetchRow.status),
               )}
             >
-              {fetchRow.status === "pending"
-                ? tApps("statusPending")
-                : fetchRow.status === "running"
-                  ? tApps("statusRunning")
-                  : fetchRow.status === "completed"
-                    ? tApps("statusCompleted")
-                    : tApps("statusFailed")}
+              {fetchRow.status === "waiting_approval"
+                ? tApps("statusWaitingApproval")
+                : fetchRow.status === "pending"
+                  ? tApps("statusPending")
+                  : fetchRow.status === "running"
+                    ? tApps("statusRunning")
+                    : fetchRow.status === "completed"
+                      ? tApps("statusCompleted")
+                      : tApps("statusFailed")}
             </span>
           </div>
-          {fetchRow.status === "pending" || fetchRow.status === "running" ? null : (
+          {fetchRow.status === "waiting_approval" || fetchRow.status === "pending" || fetchRow.status === "running" ? null : (
             <p className="mt-2 text-xs text-muted-foreground">
               {tApps("reviews")}: {fetchRow.review_count}
             </p>
@@ -268,7 +272,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
         enabled: true,
         refetchInterval: (q: { state: { data: ReviewFetchDto[] | undefined } }) => {
           const rows = q.state.data ?? [];
-          return rows.some((r) => r.status === "pending" || r.status === "running") ? 3000 : false;
+          return rows.some((r) => ["pending", "running", "waiting_approval"].includes(r.status)) ? 3000 : false;
         },
       },
       {
@@ -277,7 +281,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
         enabled: true,
         refetchInterval: (q: { state: { data: ReviewFetchDto[] | undefined } }) => {
           const rows = q.state.data ?? [];
-          return rows.some((r) => r.status === "pending" || r.status === "running") ? 3000 : false;
+          return rows.some((r) => ["pending", "running", "waiting_approval"].includes(r.status)) ? 3000 : false;
         },
       },
       {
@@ -314,6 +318,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
               from_date: args.fromDate,
               to_date: args.toDate,
               review_scope: "global",
+              review_limit: 1000,
             },
             getToken,
           }),
@@ -423,7 +428,8 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       <h2 className="mt-1 text-xl font-semibold tracking-tight">{app.name}</h2>
       <p className="mt-1 font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
       <dl className="mt-4 space-y-2 text-sm">
-        {fetchRow && (fetchRow.status === "pending" || fetchRow.status === "running") ? null : (
+        {fetchRow &&
+        (fetchRow.status === "waiting_approval" || fetchRow.status === "pending" || fetchRow.status === "running") ? null : (
           <div className="flex justify-between gap-2">
             <dt className="text-muted-foreground">{tApps("reviews")}</dt>
             <dd>{fetchRow?.review_count ?? "—"}</dd>
@@ -431,7 +437,21 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
         )}
         <div className="flex justify-between gap-2">
           <dt className="text-muted-foreground">{tApps("status")}</dt>
-          <dd>{fetchRow ? fetchRow.status : "—"}</dd>
+          <dd>
+            {fetchRow
+              ? fetchRow.status === "waiting_approval"
+                ? tApps("statusWaitingApproval")
+                : fetchRow.status === "pending"
+                  ? tApps("statusPending")
+                  : fetchRow.status === "running"
+                    ? tApps("statusRunning")
+                    : fetchRow.status === "completed"
+                      ? tApps("statusCompleted")
+                      : fetchRow.status === "failed"
+                        ? tApps("statusFailed")
+                        : fetchRow.status
+              : "—"}
+          </dd>
         </div>
       </dl>
       <div className="mt-4 flex flex-wrap gap-2">

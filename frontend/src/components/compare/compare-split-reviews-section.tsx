@@ -38,7 +38,9 @@ export function CompareSplitReviewsSection({ appId, fetchRow }: Props) {
   const [reviewSort, setReviewSort] = useState<"newest" | "oldest" | "rating_desc" | "rating_asc">("newest");
 
   const pollWhileImport =
-    fetchRow.status === "pending" || fetchRow.status === "running" ? 4000 : false;
+    fetchRow.status === "pending" || fetchRow.status === "running" || fetchRow.status === "waiting_approval"
+      ? 4000
+      : false;
 
   const q = useInfiniteQuery({
     queryKey: ["compare", "split-reviews", appId, fetchId],

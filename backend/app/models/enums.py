@@ -25,6 +25,7 @@ class StorePlatform(StrEnum):
 
 
 class FetchStatus(StrEnum):
+    WAITING_APPROVAL = "waiting_approval"
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"

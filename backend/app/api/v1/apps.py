@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import secrets
 import uuid
 from datetime import date, datetime, timezone
 from typing import Annotated
@@ -11,6 +12,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import get_current_user, require_app_owned
+from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db.session import get_async_session
 from app.models.analysis import Analysis
@@ -24,10 +26,40 @@ from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse, ReviewFetchWithAppNameResponse
 from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
+from app.services.fetch_approval import (
+    hash_approval_token,
+    pending_enqueue_json_from_create,
+    review_fetch_requires_admin_approval,
+    send_telegram_to_admins,
+)
 from app.workers.scraper import review_fetch_task
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 log = get_logger(__name__)
+
+
+def _notify_telegram_fetch_approval_needed(
+    *,
+    fetch_id: str,
+    app_name: str,
+    user_email: str,
+    review_limit: int | None,
+    approve_url: str,
+) -> None:
+    settings = get_settings()
+    limit_txt = "limitsiz (sunucu tavanı)" if review_limit is None else str(review_limit)
+    text = (
+        "Vivindis — çekim onayı gerekli\n"
+        f"Fetch ID: {fetch_id}\n"
+        f"Uygulama: {app_name}\n"
+        f"Kullanıcı: {user_email}\n"
+        f"İstenen üst sınır: {limit_txt}\n"
+        f"Onayla: {approve_url}"
+    )
+    try:
+        send_telegram_to_admins(settings=settings, text=text)
+    except Exception:
+        log.exception("telegram_fetch_approval_notify_failed", fetch_id=fetch_id)
 
 
 def _enqueue_review_fetch(
@@ -144,7 +176,58 @@ async def create_fetch(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     background_tasks: BackgroundTasks,
 ) -> ReviewFetch:
+    settings = get_settings()
     scope = "local" if body.review_scope == "local" else "global"
+    owner = await session.get(User, app.user_id)
+    user_email = owner.email if owner is not None else "—"
+
+    if review_fetch_requires_admin_approval(body, settings):
+        if not settings.telegram_bot_token.strip() or not settings.telegram_admin_chat_ids.strip():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail=(
+                    "Büyük hacimli çekim için yönetici bildirimi yapılandırılmamış "
+                    "(TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_IDS)."
+                ),
+            )
+        if not settings.public_api_base_url.strip():
+            raise HTTPException(
+                status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+                detail="Onay linki için PUBLIC_API_BASE_URL ayarlanmalı.",
+            )
+        raw_token = secrets.token_urlsafe(32)
+        fetch = ReviewFetch(
+            app_id=app.id,
+            status=FetchStatus.WAITING_APPROVAL,
+            from_date=body.from_date,
+            to_date=body.to_date,
+            review_limit=body.review_limit,
+            review_scope=scope,
+            review_count=0,
+            approval_token_hash=hash_approval_token(raw_token),
+            pending_enqueue_json=pending_enqueue_json_from_create(body),
+        )
+        session.add(fetch)
+        await session.flush()
+        log.info(
+            "review_fetch_waiting_approval",
+            fetch_id=str(fetch.id),
+            app_id=str(app.id),
+            review_limit=body.review_limit,
+        )
+        await session.commit()
+        base = settings.public_api_base_url.strip().rstrip("/")
+        approve_url = f"{base}/api/v1/fetch-approvals/approve?token={raw_token}"
+        background_tasks.add_task(
+            _notify_telegram_fetch_approval_needed,
+            fetch_id=str(fetch.id),
+            app_name=app.name or "",
+            user_email=user_email,
+            review_limit=body.review_limit,
+            approve_url=approve_url,
+        )
+        return fetch
+
     fetch = ReviewFetch(
         app_id=app.id,
         status=FetchStatus.PENDING,
@@ -157,8 +240,6 @@ async def create_fetch(
     session.add(fetch)
     await session.flush()
     log.info("review_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
-    # Commit hemen: istemci polling GET'i yanıt dönmeden önce çalıştırabilir; ayrıca Celery worker
-    # ayrı bağlantıda kaydı görmeli (dependency sonundaki commit bazen yanıttan sonra kalır).
     await session.commit()
     background_tasks.add_task(
         _enqueue_review_fetch,

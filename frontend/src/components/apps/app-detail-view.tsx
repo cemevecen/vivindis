@@ -39,6 +39,8 @@ function statusClass(status: FetchStatus): string {
       return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
     case "running":
       return "bg-sky-500/15 text-sky-700 dark:text-sky-400";
+    case "waiting_approval":
+      return "bg-amber-500/15 text-amber-800 dark:text-amber-200";
     case "failed":
       return "bg-destructive/15 text-destructive";
     default:
@@ -111,6 +113,10 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
         queryKey: queryKeys.apps.fetches(effectiveAppId),
         queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${effectiveAppId}/fetches`, { getToken }),
         enabled: clerkEnabled && Boolean(effectiveAppId),
+        refetchInterval: (q: { state: { data: ReviewFetchDto[] | undefined } }) => {
+          const rows = q.state.data ?? [];
+          return rows.some((r) => ["pending", "running", "waiting_approval"].includes(r.status)) ? 4000 : false;
+        },
       },
     ],
   });
@@ -380,7 +386,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
                           {scope === "local" ? t("researchKindLocal") : t("researchKindDeep")}
                         </span>
                       </div>
-                      {row.status === "pending" || row.status === "running" ? null : (
+                      {row.status === "waiting_approval" || row.status === "pending" || row.status === "running" ? null : (
                         <p className="text-muted-foreground">
                           {t("reviews")}: {row.review_count}
                         </p>
@@ -398,13 +404,15 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
                           statusClass(row.status),
                         )}
                       >
-                        {row.status === "pending"
-                          ? t("statusPending")
-                          : row.status === "running"
-                            ? t("statusRunning")
-                            : row.status === "completed"
-                              ? t("statusCompleted")
-                              : t("statusFailed")}
+                        {row.status === "waiting_approval"
+                          ? t("statusWaitingApproval")
+                          : row.status === "pending"
+                            ? t("statusPending")
+                            : row.status === "running"
+                              ? t("statusRunning")
+                              : row.status === "completed"
+                                ? t("statusCompleted")
+                                : t("statusFailed")}
                       </span>
                       <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
                         {ta("viewAnalytics")}

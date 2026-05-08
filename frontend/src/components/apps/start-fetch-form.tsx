@@ -59,6 +59,7 @@ export function StartFetchForm({ appId }: Props) {
         from_date: values.from_date,
         to_date: values.to_date,
         review_scope: "global" as const,
+        review_limit: 1000,
       };
       return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
         method: "POST",
@@ -66,10 +67,10 @@ export function StartFetchForm({ appId }: Props) {
         getToken,
       });
     },
-    onSuccess: async () => {
+    onSuccess: async (row) => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
-      toast.success(t("fetchStarted"));
+      toast.success(row.status === "waiting_approval" ? t("fetchWaitingApprovalToast") : t("fetchStarted"));
       form.reset(defaultDateRange());
     },
     onError: (err) => {

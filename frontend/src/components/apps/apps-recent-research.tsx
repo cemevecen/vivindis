@@ -26,6 +26,8 @@ function statusClass(status: RecentReviewFetchDto["status"]): string {
       return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
     case "running":
       return "bg-sky-500/15 text-sky-700 dark:text-sky-400";
+    case "waiting_approval":
+      return "bg-amber-500/15 text-amber-800 dark:text-amber-200";
     case "failed":
       return "bg-destructive/15 text-destructive";
     default:
@@ -133,13 +135,15 @@ export function AppsRecentResearch({ clerkEnabled }: Props) {
                       statusClass(row.status),
                     )}
                   >
-                    {row.status === "pending"
-                      ? t("statusPending")
-                      : row.status === "running"
-                        ? t("statusRunning")
-                        : row.status === "completed"
-                          ? t("statusCompleted")
-                          : t("statusFailed")}
+                    {row.status === "waiting_approval"
+                      ? t("statusWaitingApproval")
+                      : row.status === "pending"
+                        ? t("statusPending")
+                        : row.status === "running"
+                          ? t("statusRunning")
+                          : row.status === "completed"
+                            ? t("statusCompleted")
+                            : t("statusFailed")}
                   </span>
                   <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
                     {t("recentResearchOpen")}

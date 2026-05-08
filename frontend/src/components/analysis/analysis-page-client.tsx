@@ -47,6 +47,8 @@ function statusClass(status: FetchStatus): string {
       return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
     case "running":
       return "bg-sky-500/15 text-sky-700 dark:text-sky-400";
+    case "waiting_approval":
+      return "bg-amber-500/15 text-amber-800 dark:text-amber-200";
     case "failed":
       return "bg-destructive/15 text-destructive";
     default:
@@ -141,7 +143,10 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     enabled: Boolean(clerkEnabled && fetchId),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
-      return s === "pending" || s === "running" ? 1000 : false;
+      if (s === "pending" || s === "running") {
+        return 1000;
+      }
+      return s === "waiting_approval" ? 5000 : false;
     },
   });
 
@@ -458,6 +463,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           to_date: deepTo,
           review_scope: "global",
           global_langs: langs,
+          review_limit: 5000,
         },
         getToken,
       });
@@ -479,7 +485,9 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
-      toast.success(t("globalQueued"));
+      toast.success(
+        created.status === "waiting_approval" ? tApps("fetchWaitingApprovalToast") : t("globalQueued"),
+      );
       router.push(`/apps/${appId}/analysis?fetchId=${created.id}&deep=1`);
     },
     onError: (err) => {
@@ -792,13 +800,15 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const heuristic = latestByType(items, "heuristic");
   const ai = latestByType(items, "ai");
   const liveStatusHint =
-    fetch.status === "pending"
-      ? t("liveStatusPending")
-      : fetch.status === "running"
-        ? tAnalyzeHub("fetchHintRunningNoCount")
-        : busy
-          ? t("liveStatusAnalyzing")
-          : t("liveStatusReady");
+    fetch.status === "waiting_approval"
+      ? t("liveStatusWaitingApproval")
+      : fetch.status === "pending"
+        ? t("liveStatusPending")
+        : fetch.status === "running"
+          ? tAnalyzeHub("fetchHintRunningNoCount")
+          : busy
+            ? t("liveStatusAnalyzing")
+            : t("liveStatusReady");
 
   const chartLabels = {
     sentiment: t("chartSentiment"),
@@ -931,22 +941,27 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               statusClass(fetch.status),
             )}
           >
-            {fetch.status === "pending"
-              ? tApps("statusPending")
-              : fetch.status === "running"
-                ? tApps("statusRunning")
-                : fetch.status === "completed"
-                  ? tApps("statusCompleted")
-                  : tApps("statusFailed")}
+            {fetch.status === "waiting_approval"
+              ? tApps("statusWaitingApproval")
+              : fetch.status === "pending"
+                ? tApps("statusPending")
+                : fetch.status === "running"
+                  ? tApps("statusRunning")
+                  : fetch.status === "completed"
+                    ? tApps("statusCompleted")
+                    : tApps("statusFailed")}
           </span>
         </div>
-        {fetch.status === "pending" || fetch.status === "running" ? null : (
+        {fetch.status === "waiting_approval" || fetch.status === "pending" || fetch.status === "running" ? null : (
           <p className="mt-2 text-xs text-muted-foreground">
             {tApps("reviews")}: {fetch.review_count}
           </p>
         )}
         {fetch.status === "completed" && fetch.review_count === 0 ? (
           <p className="mt-2 text-xs text-amber-700">{t("noReviewsInRange")}</p>
+        ) : null}
+        {fetch.status === "waiting_approval" ? (
+          <p className="mt-2 text-xs text-amber-800 dark:text-amber-200">{t("liveStatusWaitingApproval")}</p>
         ) : null}
         {fetch.status === "failed" && fetch.error_message ? (
           <p className="mt-2 text-xs text-destructive">{fetch.error_message}</p>
@@ -1170,21 +1185,25 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 statusClass(fetch.status),
               )}
             >
-              {fetch.status === "pending"
-                ? tApps("statusPending")
-                : fetch.status === "running"
-                  ? tApps("statusRunning")
-                  : fetch.status === "completed"
-                    ? tApps("statusCompleted")
-                    : tApps("statusFailed")}
+              {fetch.status === "waiting_approval"
+                ? tApps("statusWaitingApproval")
+                : fetch.status === "pending"
+                  ? tApps("statusPending")
+                  : fetch.status === "running"
+                    ? tApps("statusRunning")
+                    : fetch.status === "completed"
+                      ? tApps("statusCompleted")
+                      : tApps("statusFailed")}
             </span>
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
-            {fetch.status === "pending" || fetch.status === "running"
-              ? t("deepResearchStatusRunning")
-              : fetch.status === "completed"
-                ? t("deepResearchStatusCompleted")
-                : t("deepResearchStatusFailed")}
+            {fetch.status === "waiting_approval"
+              ? t("deepResearchStatusWaitingApproval")
+              : fetch.status === "pending" || fetch.status === "running"
+                ? t("deepResearchStatusRunning")
+                : fetch.status === "completed"
+                  ? t("deepResearchStatusCompleted")
+                  : t("deepResearchStatusFailed")}
           </p>
           {globalScanMeta ? (
             <div className="mt-3 rounded-lg border border-border bg-muted/20 p-3 text-xs text-muted-foreground">
@@ -1217,7 +1236,9 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                     ? "w-full bg-destructive/80"
                     : fetch.status === "completed"
                       ? "w-full bg-emerald-500"
-                      : "w-1/3 animate-pulse bg-primary",
+                      : fetch.status === "waiting_approval"
+                        ? "w-1/4 bg-amber-500"
+                        : "w-1/3 animate-pulse bg-primary",
                 )}
               />
             </div>

@@ -91,6 +91,28 @@ class Settings(BaseSettings):
         description="Play/App Store HTTP için token-bucket hızı (5–10 önerilir).",
     )
 
+    fetch_approval_disabled: bool = Field(
+        default=False,
+        validation_alias="FETCH_APPROVAL_DISABLED",
+        description="True ise büyük çekimler için yönetici onayı devre dışı (yerel geliştirme).",
+    )
+    fetch_approval_review_threshold: int = Field(
+        default=1000,
+        validation_alias="FETCH_APPROVAL_REVIEW_THRESHOLD",
+        description="review_limit bu değerden büyükse veya limitsiz (null) ise onay gerekir.",
+    )
+    telegram_bot_token: str = Field(default="", validation_alias="TELEGRAM_BOT_TOKEN")
+    telegram_admin_chat_ids: str = Field(
+        default="",
+        validation_alias="TELEGRAM_ADMIN_CHAT_IDS",
+        description="Virgülle ayrılmış Telegram chat id’leri.",
+    )
+    public_api_base_url: str = Field(
+        default="",
+        validation_alias="PUBLIC_API_BASE_URL",
+        description="Onay linki için API kökü (örn. https://api.vivindis.com), sondaki / olmadan.",
+    )
+
     @field_validator("database_url", mode="before")
     @classmethod
     def normalize_database_url_field(cls, v: object) -> object:

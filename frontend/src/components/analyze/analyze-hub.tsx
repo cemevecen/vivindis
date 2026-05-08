@@ -310,7 +310,10 @@ function AnalyzeHubConnected() {
     retryDelay: (attempt) => 300 * (attempt + 1),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
-      return s === "pending" || s === "running" ? 1000 : false;
+      if (s === "pending" || s === "running") {
+        return 1000;
+      }
+      return s === "waiting_approval" ? 5000 : false;
     },
   });
 
@@ -325,6 +328,15 @@ function AnalyzeHubConnected() {
       return;
     }
     const isoNow = new Date().toISOString();
+    if (row.status === "waiting_approval") {
+      addFetchProgressEvent({
+        key: `${storeFetchId}:waiting-approval`,
+        at: row.created_at || isoNow,
+        label: t("fetchEventWaitingApprovalLabel"),
+        reason: t("fetchEventWaitingApprovalReason"),
+      });
+      return;
+    }
     if (row.status === "pending") {
       addFetchProgressEvent({
         key: `${storeFetchId}:pending`,

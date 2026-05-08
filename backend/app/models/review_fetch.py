@@ -47,6 +47,8 @@ class ReviewFetch(Base):
     )
     review_count: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approval_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    pending_enqueue_json: Mapped[str | None] = mapped_column(Text, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

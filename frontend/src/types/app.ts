@@ -2,7 +2,7 @@
 
 export type AppPlatform = "google_play" | "app_store" | "both";
 
-export type FetchStatus = "pending" | "running" | "completed" | "failed";
+export type FetchStatus = "waiting_approval" | "pending" | "running" | "completed" | "failed";
 
 export type AppDto = {
   id: string;
