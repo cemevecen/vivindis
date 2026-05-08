@@ -9,15 +9,15 @@ export async function SiteFooter() {
 
   return (
     <footer className="shrink-0 border-t border-border bg-neutral-100/95 dark:bg-zinc-900/95">
-      <div className="mx-auto flex max-w-6xl flex-nowrap items-center justify-center gap-x-4 overflow-x-auto px-4 py-6 sm:gap-x-8">
-        <p className="shrink-0 whitespace-nowrap text-sm text-muted-foreground">{t("rights")}</p>
+      <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-center gap-x-4 gap-y-2 px-4 py-6 sm:gap-x-8">
+        <p className="text-center text-sm text-muted-foreground">{t("rights")}</p>
         <Link
           href="/about"
-          className="shrink-0 whitespace-nowrap text-sm font-semibold text-foreground underline-offset-4 decoration-foreground/40 underline transition-colors hover:text-primary hover:decoration-primary hover:underline"
+          className="text-sm font-semibold text-foreground underline-offset-4 decoration-foreground/40 underline transition-colors hover:text-primary hover:decoration-primary hover:underline"
         >
           {tNav("about")}
         </Link>
-        <BuildVersionBadge className="shrink-0 whitespace-nowrap" />
+        <BuildVersionBadge className="whitespace-nowrap" />
       </div>
     </footer>
   );

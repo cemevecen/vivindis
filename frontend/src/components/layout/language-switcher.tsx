@@ -70,7 +70,7 @@ export function LanguageSwitcher(props: LanguageSwitcherProps) {
         <div
           className={
             props.selectClassName ??
-            "h-9 w-[8.5rem] shrink-0 rounded-md border border-input bg-muted/40"
+            "h-9 w-full min-w-[6.75rem] max-w-[8.5rem] shrink-0 rounded-md border border-input bg-muted/40"
           }
           aria-hidden
         />

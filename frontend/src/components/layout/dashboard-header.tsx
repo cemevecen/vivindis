@@ -57,7 +57,7 @@ function DashboardHeaderContent() {
 
         <nav
           aria-label={t("sidebarNav")}
-          className="order-last -mx-3 flex w-[calc(100%+1.5rem)] gap-1 overflow-x-auto px-3 sm:order-none sm:mx-0 sm:w-auto sm:flex-1 sm:justify-center sm:px-0"
+          className="order-last flex w-full min-w-0 gap-1 overflow-x-auto pb-0.5 sm:order-none sm:flex-1 sm:justify-center"
         >
           {links.map(({ href, label, Icon }) => {
             const active =
@@ -106,7 +106,7 @@ function DashboardHeaderContent() {
       {isAnalyzePage ? (
         <nav
           aria-label={tAnalyze("tablistLabel")}
-          className="-mx-0 flex gap-1 overflow-x-auto border-t border-border px-3 py-2 sm:justify-center sm:px-4"
+          className="flex min-w-0 gap-1 overflow-x-auto border-t border-border px-2 py-2 sm:justify-center sm:px-4"
         >
           {analyzeSourceTabs.map(({ id, labelKey, Icon }) => {
             const active = analyzeMode === id;
