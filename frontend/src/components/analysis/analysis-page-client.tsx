@@ -17,6 +17,7 @@ import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto, InsightsDto } from "@/types/analysis";
+import type { AppDto } from "@/types/app";
 import type { FetchStatus, ReviewFetchDto, ReviewListItemDto, ReviewListResponseDto } from "@/types/app";
 
 function analysesForFetch(items: AnalysisDto[], fetchId: string) {
@@ -168,6 +169,12 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       const items = analysesForFetch(q.state.data?.items ?? [], fetchId);
       return items.some((a) => a.status === "pending" || a.status === "running") ? 1000 : false;
     },
+  });
+
+  const appQuery = useQuery({
+    queryKey: queryKeys.apps.detail(appId),
+    queryFn: () => apiFetch<AppDto>(`/api/v1/apps/${appId}`, { getToken }),
+    enabled: Boolean(clerkEnabled && appId),
   });
 
   const insightsQuery = useQuery({
@@ -558,6 +565,40 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           <p className="text-sm text-muted-foreground">{liveStatusHint}</p>
         </div>
       </div>
+
+      {appQuery.data ? (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("activeAppLabel")}</p>
+          <div className="mt-2 flex items-center gap-3">
+            {appQuery.data.icon_url ? (
+              // eslint-disable-next-line @next/next/no-img-element -- external app icon URL
+              <img
+                src={appQuery.data.icon_url}
+                alt=""
+                width={44}
+                height={44}
+                className="size-11 rounded-lg border border-border bg-muted/30 object-cover"
+              />
+            ) : (
+              <div className="size-11 rounded-lg border border-dashed border-border bg-muted/40" />
+            )}
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold text-foreground">{appQuery.data.name}</p>
+              <p className="truncate text-xs text-muted-foreground">
+                {appQuery.data.platform === "google_play"
+                  ? tApps("platformGooglePlay")
+                  : appQuery.data.platform === "app_store"
+                    ? tApps("platformAppStore")
+                    : tApps("platformBoth")}
+                {" · "}
+                {appQuery.data.platform === "app_store"
+                  ? appQuery.data.bundle_id || "—"
+                  : appQuery.data.package_name || "—"}
+              </p>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {analysesQuery.isError ? (
         <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-sm">

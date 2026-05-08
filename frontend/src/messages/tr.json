@@ -414,7 +414,8 @@
     "insightsFilterHigh": "Yüksek",
     "insightsFilterMedium": "Orta",
     "insightsFilterLow": "Düşük",
-    "insightsNoAlertsInFilter": "Bu filtre için uyarı yok."
+    "insightsNoAlertsInFilter": "Bu filtre için uyarı yok.",
+    "activeAppLabel": "Aktif uygulama"
   },
   "about": {
     "title": "Vivindis hakkında",

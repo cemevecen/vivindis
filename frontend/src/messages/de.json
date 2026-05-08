@@ -197,7 +197,8 @@
     "insightsFilterHigh": "High",
     "insightsFilterMedium": "Medium",
     "insightsFilterLow": "Low",
-    "insightsNoAlertsInFilter": "No alerts for this filter."
+    "insightsNoAlertsInFilter": "No alerts for this filter.",
+    "activeAppLabel": "Active app"
   },
   "auth": {
     "signIn": "Anmelden",
