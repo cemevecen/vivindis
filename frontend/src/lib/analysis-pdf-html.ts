@@ -9,7 +9,12 @@ import {
   sentimentFromResult,
   topicsFromResult,
 } from "@/lib/analysis-result";
-import { buildReviewTimeline, type ReviewTimeBucketMode } from "@/lib/review-time-buckets";
+import { defaultTimelineBucket } from "@/lib/timeline-bucket-defaults";
+import {
+  buildReviewTimeline,
+  type ReviewTimeBucketMode,
+  type ReviewTimelineRow,
+} from "@/lib/review-time-buckets";
 import type { AnalysisDto, InsightsDto } from "@/types/analysis";
 import type { ReviewFetchDto, ReviewListItemDto } from "@/types/app";
 
@@ -41,6 +46,12 @@ export type AnalysisPdfLocaleStrings = {
   timelineBucketWeek: string;
   timelineBucketMonth: string;
   timelineBucketYear: string;
+  timelineVolumeTitle: string;
+  timelineStarsStackTitle: string;
+  timelineAvgRatingTitle: string;
+  pdfChartsDeckTitle: string;
+  pdfAppendixDetails: string;
+  pdfTableSubtitle: string;
   colPeriod: string;
   colCount: string;
   colAvgRating: string;
@@ -134,52 +145,206 @@ function verticalBarsSvg(rows: { label: string; value: number }[], maxBar: numbe
   return svg;
 }
 
-function analysisRunBlock(
+const PDF_TIMELINE_STAR_FILLS = ["#dc2626", "#ea580c", "#ca8a04", "#16a34a", "#2563eb"] as const;
+
+function samplePdfTimelineRows<T>(rows: T[], max: number): T[] {
+  if (rows.length <= max) {
+    return rows;
+  }
+  const out: T[] = [];
+  const step = (rows.length - 1) / (max - 1);
+  for (let i = 0; i < max; i++) {
+    out.push(rows[Math.min(rows.length - 1, Math.round(i * step))]!);
+  }
+  return out;
+}
+
+function bucketPdfLabel(mode: ReviewTimeBucketMode, copy: AnalysisPdfLocaleStrings): string {
+  if (mode === "day") {
+    return copy.timelineBucketDay;
+  }
+  if (mode === "week") {
+    return copy.timelineBucketWeek;
+  }
+  if (mode === "month") {
+    return copy.timelineBucketMonth;
+  }
+  return copy.timelineBucketYear;
+}
+
+function pdfTimelineVolumeBarsSvg(rows: ReviewTimelineRow[], w: number, h: number): string {
+  const n = rows.length;
+  if (n === 0) {
+    return `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><text x="4" y="${h / 2}" font-size="11" fill="#64748b">—</text></svg>`;
+  }
+  const maxC = Math.max(1, ...rows.map((r) => r.count));
+  const bottom = h - 18;
+  const gap = 4;
+  const barW = Math.max(5, (w - gap * (n + 1)) / n);
+  let s = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`;
+  rows.forEach((row, i) => {
+    const bh = (row.count / maxC) * (bottom - 8);
+    const bx = gap + i * (barW + gap);
+    const by = bottom - bh;
+    s += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${barW.toFixed(1)}" height="${bh.toFixed(1)}" fill="#3b82f6" rx="2"><title>${escapeHtml(row.label)}: ${row.count}</title></rect>`;
+  });
+  s += "</svg>";
+  return s;
+}
+
+function pdfTimelineStackedStarsSvg(rows: ReviewTimelineRow[], w: number, h: number): string {
+  const n = rows.length;
+  if (n === 0) {
+    return "";
+  }
+  const maxC = Math.max(1, ...rows.map((r) => r.count));
+  const bottom = h - 14;
+  const topPad = 6;
+  const stackMaxH = bottom - topPad;
+  const gap = 4;
+  const barW = Math.max(5, (w - gap * (n + 1)) / n);
+  let s = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`;
+  rows.forEach((row, i) => {
+    const bx = gap + i * (barW + gap);
+    const stackH = row.count > 0 ? (row.count / maxC) * stackMaxH : 0;
+    let y = bottom;
+    const parts: [number, string][] = [
+      [row.r5, PDF_TIMELINE_STAR_FILLS[4]],
+      [row.r4, PDF_TIMELINE_STAR_FILLS[3]],
+      [row.r3, PDF_TIMELINE_STAR_FILLS[2]],
+      [row.r2, PDF_TIMELINE_STAR_FILLS[1]],
+      [row.r1, PDF_TIMELINE_STAR_FILLS[0]],
+    ];
+    for (const [cnt, fill] of parts) {
+      if (cnt <= 0 || row.count <= 0) {
+        continue;
+      }
+      const segH = (cnt / row.count) * stackH;
+      y -= segH;
+      s += `<rect x="${bx.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${segH.toFixed(1)}" fill="${fill}"/>`;
+    }
+  });
+  s += "</svg>";
+  return s;
+}
+
+function pdfTimelineAvgLineSvg(rows: ReviewTimelineRow[], w: number, h: number): string {
+  if (rows.length === 0) {
+    return "";
+  }
+  const padT = 12;
+  const padB = 10;
+  const innerH = h - padT - padB;
+  const pts = rows.map((r, i) => {
+    const x = rows.length === 1 ? w / 2 : 6 + (i / (rows.length - 1)) * (w - 12);
+    const y = padT + innerH * (1 - r.avgRating / 5);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  });
+  const dots = rows
+    .map((r, i) => {
+      const x = rows.length === 1 ? w / 2 : 6 + (i / (rows.length - 1)) * (w - 12);
+      const y = padT + innerH * (1 - r.avgRating / 5);
+      return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" fill="#2563eb"><title>${r.avgRating.toFixed(2)}</title></circle>`;
+    })
+    .join("");
+  return `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg"><polyline fill="none" stroke="#2563eb" stroke-width="2" points="${pts.join(
+    " ",
+  )}"/>${dots}</svg>`;
+}
+
+function timelineChartsSection(
+  reviews: ReviewListItemDto[] | null,
+  locale: string,
+  copy: AnalysisPdfLocaleStrings,
+  fetchFromDate: string,
+  fetchToDate: string,
+): string {
+  if (!reviews || reviews.length === 0) {
+    return "";
+  }
+  const { defaultMode } = defaultTimelineBucket(fetchFromDate, fetchToDate);
+  const bucketTitle = bucketPdfLabel(defaultMode, copy);
+  let rows = buildReviewTimeline(reviews, defaultMode, locale);
+  rows = samplePdfTimelineRows(rows, 52);
+  const chartW = 760;
+  const note = copy.timelineTruncatedNote
+    ? `<p style="font-size:11px;color:#b45309;margin:0 0 10px;">${escapeHtml(copy.timelineTruncatedNote)}</p>`
+    : "";
+  return `<section style="margin:18px 0;padding:14px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
+    <h3 style="margin:0 0 6px;font-size:16px;">${escapeHtml(copy.sectionTimeline)} <span style="color:#64748b;font-weight:600;">(${escapeHtml(bucketTitle)})</span></h3>
+    ${note}
+    <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineVolumeTitle)}</h4>
+    ${pdfTimelineVolumeBarsSvg(rows, chartW, 130)}
+    <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineStarsStackTitle)}</h4>
+    ${pdfTimelineStackedStarsSvg(rows, chartW, 150)}
+    <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineAvgRatingTitle)}</h4>
+    ${pdfTimelineAvgLineSvg(rows, chartW, 110)}
+  </section>`;
+}
+
+function splitAnalysisRun(
   title: string,
   analysis: AnalysisDto | undefined,
   copy: AnalysisPdfLocaleStrings,
-): string {
-  let body: string;
+): { chartsSection: string; tablesSection: string } {
+  const wrapCharts = (inner: string) =>
+    `<section style="margin:18px 0;padding:16px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
+    <h3 style="margin:0 0 12px;font-size:16px;">${escapeHtml(title)}</h3>
+    ${inner}
+  </section>`;
+
   if (!analysis) {
-    body = `<p style="color:#64748b;">${escapeHtml(copy.analysisEmpty)}</p>`;
-  } else if (analysis.status === "failed") {
-    body = `<p style="color:#b91c1c;">${escapeHtml(copy.analysisFailed)}</p>`;
+    return { chartsSection: wrapCharts(`<p style="color:#64748b;">${escapeHtml(copy.analysisEmpty)}</p>`), tablesSection: "" };
+  }
+  if (analysis.status === "failed") {
+    let body = `<p style="color:#b91c1c;">${escapeHtml(copy.analysisFailed)}</p>`;
     if (analysis.error_message) {
       body += `<p style="font-size:12px;color:#64748b;">${escapeHtml(analysis.error_message)}</p>`;
     }
-  } else if (analysis.status === "pending") {
-    body = `<p style="color:#64748b;">${escapeHtml(copy.analysisPending)}</p>`;
-  } else if (analysis.status === "running") {
-    body = `<p style="color:#64748b;">${escapeHtml(copy.analysisRunning)}</p>`;
-  } else if (analysis.status !== "completed" || !analysis.result) {
-    body = `<p style="color:#64748b;">${escapeHtml(copy.analysisEmpty)}</p>`;
-  } else {
-    const result = analysis.result;
-    const score = overallScoreFromResult(result);
-    const sentiment = sentimentFromResult(result);
-    const ratings = ratingsFromResult(result);
-    const topics = topicsFromResult(result, 12);
-    const sTotal = sentiment.reduce((a, b) => a + b.value, 0);
-    const sentPct = sentiment.map((r) => ({
-      label: r.name,
-      value: r.value,
-      fill: r.name === "positive" ? "#16a34a" : r.name === "negative" ? "#dc2626" : "#64748b",
-    }));
-    const rMax = Math.max(1, ...ratings.map((r) => r.count));
-    const ratingBars = ratings.map((r) => ({ label: r.rating, value: r.count }));
-    const tMax = Math.max(1, ...topics.map((t) => t.count));
-    const topicBars = topics.map((t) => ({ label: t.topic.slice(0, 14), value: t.count }));
+    return { chartsSection: wrapCharts(body), tablesSection: "" };
+  }
+  if (analysis.status === "pending") {
+    return {
+      chartsSection: wrapCharts(`<p style="color:#64748b;">${escapeHtml(copy.analysisPending)}</p>`),
+      tablesSection: "",
+    };
+  }
+  if (analysis.status === "running") {
+    return {
+      chartsSection: wrapCharts(`<p style="color:#64748b;">${escapeHtml(copy.analysisRunning)}</p>`),
+      tablesSection: "",
+    };
+  }
+  if (analysis.status !== "completed" || !analysis.result) {
+    return { chartsSection: wrapCharts(`<p style="color:#64748b;">${escapeHtml(copy.analysisEmpty)}</p>`), tablesSection: "" };
+  }
 
-    const scoreLine =
-      score !== null
-        ? `<p style="margin:0 0 12px;font-size:14px;"><strong>${escapeHtml(copy.overallScore)}:</strong> ${score.toFixed(1)}${
-            analysis.model_used
-              ? ` <span style="color:#64748b;">(${escapeHtml(copy.modelLabel)}: ${escapeHtml(analysis.model_used)})</span>`
-              : ""
-          }</p>`
-        : "";
+  const result = analysis.result;
+  const score = overallScoreFromResult(result);
+  const sentiment = sentimentFromResult(result);
+  const ratings = ratingsFromResult(result);
+  const topics = topicsFromResult(result, 12);
+  const sTotal = sentiment.reduce((a, b) => a + b.value, 0);
+  const sentPct = sentiment.map((r) => ({
+    label: r.name,
+    value: r.value,
+    fill: r.name === "positive" ? "#16a34a" : r.name === "negative" ? "#dc2626" : "#64748b",
+  }));
+  const rMax = Math.max(1, ...ratings.map((r) => r.count));
+  const ratingBars = ratings.map((r) => ({ label: r.rating, value: r.count }));
+  const tMax = Math.max(1, ...topics.map((t) => t.count));
+  const topicBars = topics.map((t) => ({ label: t.topic.slice(0, 14), value: t.count }));
 
-    const sentTable = `
+  const scoreLine =
+    score !== null
+      ? `<p style="margin:0 0 12px;font-size:14px;"><strong>${escapeHtml(copy.overallScore)}:</strong> ${score.toFixed(1)}${
+          analysis.model_used
+            ? ` <span style="color:#64748b;">(${escapeHtml(copy.modelLabel)}: ${escapeHtml(analysis.model_used)})</span>`
+            : ""
+        }</p>`
+      : "";
+
+  const sentTable = `
       <table style="width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;">
         <thead><tr><th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">${escapeHtml(copy.chartSentiment)}</th>
         <th style="text-align:right;border-bottom:1px solid #e2e8f0;padding:6px;">${escapeHtml(copy.colCount)}</th>
@@ -194,9 +359,9 @@ function analysisRunBlock(
           .join("")}
         </tbody></table>`;
 
-    const sentBar = stackedBarSvg(sentPct, 420, 28);
+  const sentBar = stackedBarSvg(sentPct, 420, 28);
 
-    const ratTable = `
+  const ratTable = `
       <table style="width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;">
         <thead><tr><th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">${escapeHtml(copy.chartRatings)}</th>
         <th style="text-align:right;border-bottom:1px solid #e2e8f0;padding:6px;">${escapeHtml(copy.colCount)}</th></tr></thead>
@@ -208,46 +373,49 @@ function analysisRunBlock(
           )
           .join("")}
         </tbody></table>`;
-    const ratSvg = verticalBarsSvg(ratingBars, rMax, 420, 100);
+  const ratSvg = verticalBarsSvg(ratingBars, rMax, 420, 100);
 
-    const topTable =
-      topics.length > 0
-        ? `
+  const topicTableOnly =
+    topics.length > 0
+      ? `
       <table style="width:100%;border-collapse:collapse;font-size:12px;margin:8px 0;">
         <thead><tr><th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">${escapeHtml(copy.chartTopics)}</th>
         <th style="text-align:right;border-bottom:1px solid #e2e8f0;padding:6px;">${escapeHtml(copy.colCount)}</th></tr></thead>
         <tbody>
         ${topics.map((r) => `<tr><td style="padding:4px 6px;">${escapeHtml(r.topic)}</td><td style="text-align:right;padding:4px 6px;">${r.count}</td></tr>`).join("")}
-        </tbody></table>
-        ${verticalBarsSvg(topicBars, tMax, 420, 120)}`
-        : `<p style="color:#64748b;font-size:12px;">—</p>`;
+        </tbody></table>`
+      : `<p style="color:#64748b;font-size:12px;">—</p>`;
 
-    body = `
+  const topicSvg = topics.length > 0 ? verticalBarsSvg(topicBars, tMax, 420, 120) : "";
+
+  const chartsInner = `
       ${scoreLine}
       <h4 style="margin:16px 0 6px;font-size:13px;">${escapeHtml(copy.chartSentiment)}</h4>
       ${sentBar}
-      ${sentTable}
       <h4 style="margin:16px 0 6px;font-size:13px;">${escapeHtml(copy.chartRatings)}</h4>
       ${ratSvg}
-      ${ratTable}
       <h4 style="margin:16px 0 6px;font-size:13px;">${escapeHtml(copy.chartTopics)}</h4>
-      ${topTable}`;
-  }
+      ${topicSvg || `<p style="color:#64748b;font-size:12px;">—</p>`}`;
 
-  return `<section style="margin:20px 0;padding:16px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
-    <h3 style="margin:0 0 12px;font-size:16px;">${escapeHtml(title)}</h3>
-    ${body}
+  const tablesInner = `${sentTable}${ratTable}${topicTableOnly}`;
+
+  const tablesSection = `<section style="margin:16px 0;padding:14px;border:1px solid #e5e7eb;border-radius:12px;page-break-inside:avoid;">
+    <h4 style="margin:0 0 10px;font-size:14px;color:#334155;">${escapeHtml(title)} — ${escapeHtml(copy.pdfTableSubtitle)}</h4>
+    ${tablesInner}
   </section>`;
+
+  return { chartsSection: wrapCharts(chartsInner), tablesSection };
 }
 
-function timelineSection(
+/** Tüm zaman dilimlerinde tablolar (PDF ek bölümü). */
+function timelineTablesAppendix(
   reviews: ReviewListItemDto[] | null,
   locale: string,
   copy: AnalysisPdfLocaleStrings,
   fetchFromDate: string,
 ): string {
   if (!reviews || reviews.length === 0) {
-    return `<section style="margin:20px 0;"><h2 style="font-size:18px;">${escapeHtml(copy.sectionTimeline)}</h2>
+    return `<section style="margin:20px 0;"><h3 style="font-size:17px;">${escapeHtml(copy.sectionTimeline)}</h3>
       <p style="color:#64748b;">—</p></section>`;
   }
   const modes: { mode: ReviewTimeBucketMode; label: string }[] = [
@@ -289,7 +457,7 @@ function timelineSection(
     .join("");
 
   return `<section style="margin:20px 0;page-break-inside:avoid;">
-    <h2 style="font-size:18px;margin-bottom:8px;">${escapeHtml(copy.sectionTimeline)}</h2>
+    <h3 style="font-size:17px;margin-bottom:8px;">${escapeHtml(copy.sectionTimeline)}</h3>
     ${note}
     ${tables}
   </section>`;
@@ -297,7 +465,7 @@ function timelineSection(
 
 function insightsSection(insights: InsightsDto | undefined, copy: AnalysisPdfLocaleStrings): string {
   if (!insights) {
-    return `<section style="margin:20px 0;"><h2 style="font-size:18px;">${escapeHtml(copy.sectionInsights)}</h2>
+    return `<section style="margin:20px 0;"><h3 style="font-size:17px;">${escapeHtml(copy.sectionInsights)}</h3>
       <p style="color:#64748b;">—</p></section>`;
   }
   const scoresRows = insights.benchmark.scores
@@ -344,7 +512,7 @@ function insightsSection(insights: InsightsDto | undefined, copy: AnalysisPdfLoc
   const rel = insights.release_impact;
 
   return `<section style="margin:20px 0;page-break-inside:avoid;">
-    <h2 style="font-size:18px;margin-bottom:12px;">${escapeHtml(copy.sectionInsights)}</h2>
+    <h3 style="font-size:17px;margin-bottom:12px;">${escapeHtml(copy.sectionInsights)}</h3>
     <p style="font-size:12px;color:#64748b;">${escapeHtml(insights.benchmark.app_name)} · ${escapeHtml(insights.benchmark.category)} (n=${insights.benchmark.category_sample_apps})</p>
     <h4 style="margin:14px 0 6px;">${escapeHtml(copy.insightBenchmarkScores)}</h4>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
@@ -422,9 +590,10 @@ export function buildFullAnalysisPdfHtml(p: BuildFullAnalysisPdfParams): string 
       <p style="margin:4px 0 0;"><strong>${escapeHtml(copy.labelGenerated)}</strong> ${escapeHtml(generatedAtLabel)}</p>
     </div>`;
 
-  const timeline = timelineSection(timelineReviews, timelineLocale, copy, fetch.from_date);
-  const heur = analysisRunBlock(copy.sectionHeuristic, heuristic, copy);
-  const aiBlock = analysisRunBlock(copy.sectionAi, ai, copy);
+  const timelineCharts = timelineChartsSection(timelineReviews, timelineLocale, copy, fetch.from_date, fetch.to_date);
+  const heurParts = splitAnalysisRun(copy.sectionHeuristic, heuristic, copy);
+  const aiParts = splitAnalysisRun(copy.sectionAi, ai, copy);
+  const timelineTables = timelineTablesAppendix(timelineReviews, timelineLocale, copy, fetch.from_date);
   const ins = insightsSection(insights, copy);
 
   const listHeading = `<h2 style="font-size:18px;margin:24px 0 8px;">${escapeHtml(copy.sectionReviewDetails)}</h2>
@@ -432,16 +601,29 @@ export function buildFullAnalysisPdfHtml(p: BuildFullAnalysisPdfParams): string 
 
   const articles = reviewArticles(reviewRows, copy);
 
+  const chartsDeck = `<section style="margin:8px 0 24px;">
+    <h2 style="font-size:18px;margin:0 0 14px;">${escapeHtml(copy.pdfChartsDeckTitle)}</h2>
+    ${timelineCharts}
+    ${heurParts.chartsSection}
+    ${aiParts.chartsSection}
+  </section>`;
+
+  const appendix = `<section style="margin:28px 0 12px;">
+    <h2 style="font-size:18px;margin:0 0 14px;">${escapeHtml(copy.pdfAppendixDetails)}</h2>
+    ${timelineTables}
+    ${heurParts.tablesSection}
+    ${aiParts.tablesSection}
+    ${ins}
+  </section>`;
+
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${escapeHtml(copy.docTitle)}</title></head>
   <body style="font-family:Arial,Helvetica,sans-serif;padding:24px;color:#0f172a;max-width:900px;margin:0 auto;">
-    <h1 style="font-size:22px;margin:0 0 8px;">${escapeHtml(copy.reportHeading)}</h1>
-    ${meta}
-    ${timeline}
-    ${heur}
-    ${aiBlock}
-    ${ins}
+    <h1 style="font-size:22px;margin:0 0 16px;">${escapeHtml(copy.reportHeading)}</h1>
+    ${chartsDeck}
     ${listHeading}
     ${articles}
+    ${meta}
+    ${appendix}
   </body></html>`;
 }
 
