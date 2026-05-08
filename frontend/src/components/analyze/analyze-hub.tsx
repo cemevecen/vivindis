@@ -1128,7 +1128,7 @@ function AnalyzeHubConnected() {
 
             <div className="space-y-2">
               <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2 md:gap-3">
                 <Button
                   type="button"
                   variant={platform === "google_play" ? "default" : "outline"}
@@ -1165,24 +1165,20 @@ function AnalyzeHubConnected() {
                 >
                   {t("platformBoth")}
                 </Button>
+                <Button
+                  type="button"
+                  className="h-10 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
+                  onClick={() => {
+                    if (requireSignedIn()) {
+                      setActiveQuery(draftQuery.trim());
+                    }
+                  }}
+                  disabled={!isLoaded || draftQuery.trim().length < 2}
+                >
+                  <Search className="mr-2 size-4" aria-hidden />
+                  {t("searchCatalogCta")}
+                </Button>
               </div>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <Button
-                type="button"
-                className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
-                onClick={() => {
-                  if (requireSignedIn()) {
-                    setActiveQuery(draftQuery.trim());
-                  }
-                }}
-                disabled={!isLoaded || draftQuery.trim().length < 2}
-              >
-                <Search className="mr-2 size-4" aria-hidden />
-                {t("searchCatalogCta")}
-              </Button>
-              <p className="text-xs text-muted-foreground">{t("searchHint")}</p>
             </div>
 
             {!isPublicApiBaseUrlConfigured() ? (
