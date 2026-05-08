@@ -1199,8 +1199,8 @@ function AnalyzeHubConnected() {
                   onClear={clearStorePin}
                   onSearchAnother={dismissStorePinCard}
                 />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-start">
-                  <div className="flex min-w-0 flex-col gap-2">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
+                  <div className="flex min-w-0 flex-1 flex-col gap-2">
                     <Label htmlFor="store-fetch-date-preset" className="text-foreground">
                       {t("dateRangeLabel")}
                     </Label>
@@ -1221,19 +1221,21 @@ function AnalyzeHubConnected() {
                       <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                    <span className="inline-flex h-11 min-w-[7rem] items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                  <div className="flex w-full max-w-[5.5rem] shrink-0 flex-col gap-2 sm:w-[5.5rem]">
+                    <span className="block text-sm font-medium leading-tight text-foreground">
+                      {t("reviewScopeLabel")}
+                    </span>
+                    <span className="inline-flex h-11 w-full max-w-[3.75rem] items-center justify-center self-start rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                       {t("reviewScopeLocal")}
                     </span>
                   </div>
-                  <div className="flex flex-col gap-2 sm:min-w-0">
+                  <div className="flex min-w-0 flex-[1.35] flex-col gap-2">
                     <span className="invisible block select-none text-sm font-medium text-foreground" aria-hidden>
                       &nbsp;
                     </span>
                     <Button
                       type="button"
-                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 sm:w-auto"
+                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 sm:min-h-11 sm:px-6 sm:text-base"
                       onClick={() => void handlePullStoreReviews()}
                       disabled={
                         !sessionApp ||
