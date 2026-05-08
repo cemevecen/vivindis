@@ -1,4 +1,4 @@
-"""Büyük hacimli yorum çekimleri için yönetici onayı (WhatsApp/Twilio veya Telegram + tek kullanımlık token)."""
+"""Büyük hacimli yorum çekimleri için yönetici onayı (Telegram + tek kullanımlık token)."""
 
 from __future__ import annotations
 
@@ -56,64 +56,6 @@ def parse_pending_enqueue(payload_json: str | None) -> tuple[str, str | None, st
         (str(country).strip().lower()[:8] or None) if country is not None and str(country).strip() else None
     )
     return review_scope, lang_n, country_n, langs
-
-
-def _whatsapp_e164_address(raw: str) -> str:
-    """Twilio Body.From / To: whatsapp:+90... biçimi."""
-    s = raw.strip()
-    if s.lower().startswith("whatsapp:"):
-        return s
-    rest = s.removeprefix("whatsapp:").strip()
-    if rest.startswith("+"):
-        return f"whatsapp:{rest}"
-    digits = "".join(c for c in rest if c.isdigit())
-    if not digits:
-        return s
-    return f"whatsapp:+{digits}"
-
-
-def _twilio_whatsapp_configured(settings: Settings) -> bool:
-    return bool(
-        settings.twilio_account_sid.strip()
-        and settings.twilio_auth_token.strip()
-        and settings.twilio_whatsapp_from.strip()
-        and settings.twilio_whatsapp_to.strip()
-    )
-
-
-def _telegram_configured(settings: Settings) -> bool:
-    return bool(settings.telegram_bot_token.strip() and settings.telegram_admin_chat_ids.strip())
-
-
-def fetch_approval_notify_configured(settings: Settings) -> bool:
-    """Büyük çekim onayı için en az bir bildirim kanalı (Twilio WA veya Telegram) hazır mı?"""
-    return _twilio_whatsapp_configured(settings) or _telegram_configured(settings)
-
-
-def send_whatsapp_twilio(*, settings: Settings, body: str) -> None:
-    sid = settings.twilio_account_sid.strip()
-    token = settings.twilio_auth_token.strip()
-    url = f"https://api.twilio.com/2010-04-01/Accounts/{sid}/Messages.json"
-    from_addr = _whatsapp_e164_address(settings.twilio_whatsapp_from)
-    to_addr = _whatsapp_e164_address(settings.twilio_whatsapp_to)
-    resp = httpx.post(
-        url,
-        auth=(sid, token),
-        data={"From": from_addr, "To": to_addr, "Body": body},
-        timeout=25.0,
-    )
-    resp.raise_for_status()
-
-
-def send_fetch_approval_admin_notification(*, settings: Settings, text: str) -> None:
-    """Önce Twilio WhatsApp; yoksa Telegram."""
-    if _twilio_whatsapp_configured(settings):
-        send_whatsapp_twilio(settings=settings, body=text)
-        return
-    if _telegram_configured(settings):
-        send_telegram_to_admins(settings=settings, text=text)
-        return
-    raise RuntimeError("fetch approval: bildirim kanalı yapılandırılmamış")
 
 
 def send_telegram_to_admins(*, settings: Settings, text: str) -> None:

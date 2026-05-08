@@ -107,26 +107,6 @@ class Settings(BaseSettings):
         validation_alias="TELEGRAM_ADMIN_CHAT_IDS",
         description="Virgülle ayrılmış Telegram chat id’leri.",
     )
-    twilio_account_sid: str = Field(
-        default="",
-        validation_alias="TWILIO_ACCOUNT_SID",
-        description="Twilio WhatsApp: Account SID (onay bildirimi için).",
-    )
-    twilio_auth_token: str = Field(
-        default="",
-        validation_alias="TWILIO_AUTH_TOKEN",
-        description="Twilio WhatsApp: Auth Token.",
-    )
-    twilio_whatsapp_from: str = Field(
-        default="",
-        validation_alias="TWILIO_WHATSAPP_FROM",
-        description="Twilio sandbox/onaylı gönderici, örn. whatsapp:+14155238886",
-    )
-    twilio_whatsapp_to: str = Field(
-        default="",
-        validation_alias="TWILIO_WHATSAPP_TO",
-        description="Yönetici alıcı, örn. whatsapp:+905551234567 (E.164, whatsapp: öneki opsiyonel).",
-    )
     public_api_base_url: str = Field(
         default="",
         validation_alias="PUBLIC_API_BASE_URL",

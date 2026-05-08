@@ -27,11 +27,10 @@ from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse, ReviewFetchWithAppNameResponse
 from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
 from app.services.fetch_approval import (
-    fetch_approval_notify_configured,
     hash_approval_token,
     pending_enqueue_json_from_create,
     review_fetch_requires_admin_approval,
-    send_fetch_approval_admin_notification,
+    send_telegram_to_admins,
 )
 from app.workers.scraper import review_fetch_task
 
@@ -58,7 +57,7 @@ def _notify_fetch_approval_needed(
         f"Onayla: {approve_url}"
     )
     try:
-        send_fetch_approval_admin_notification(settings=settings, text=text)
+        send_telegram_to_admins(settings=settings, text=text)
     except Exception:
         log.exception("fetch_approval_notify_failed", fetch_id=fetch_id)
 
@@ -183,14 +182,12 @@ async def create_fetch(
     user_email = owner.email if owner is not None else "—"
 
     if review_fetch_requires_admin_approval(body, settings):
-        if not fetch_approval_notify_configured(settings):
+        if not settings.telegram_bot_token.strip() or not settings.telegram_admin_chat_ids.strip():
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail=(
-                    "Büyük hacimli çekim için yönetici bildirimi yapılandırılmamış. "
-                    "Twilio WhatsApp: TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN, "
-                    "TWILIO_WHATSAPP_FROM, TWILIO_WHATSAPP_TO — veya Telegram: "
-                    "TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_IDS."
+                    "Büyük hacimli çekim için yönetici bildirimi yapılandırılmamış "
+                    "(TELEGRAM_BOT_TOKEN, TELEGRAM_ADMIN_CHAT_IDS)."
                 ),
             )
         if not settings.public_api_base_url.strip():
