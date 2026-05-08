@@ -2273,12 +2273,12 @@ function AnalyzeHubConnected() {
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
-              <div className="grid gap-2 md:grid-cols-3">
+              <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,3fr)]">
                 <Button
                   type="button"
                   variant={analysisMode === "fast" ? "default" : "outline"}
                   className={cn(
-                    "h-11 rounded-xl text-sm font-semibold",
+                    "h-11 w-full min-w-0 shrink-0 rounded-xl px-2 text-xs font-semibold leading-tight sm:px-3 sm:text-sm",
                     analysisMode === "fast" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
                   )}
                   onClick={() => setAnalysisMode("fast")}
@@ -2289,7 +2289,7 @@ function AnalyzeHubConnected() {
                   type="button"
                   variant={analysisMode === "rich" ? "default" : "outline"}
                   className={cn(
-                    "h-11 rounded-xl text-sm font-semibold",
+                    "h-11 w-full min-w-0 shrink-0 rounded-xl px-2 text-xs font-semibold leading-tight sm:px-3 sm:text-sm",
                     analysisMode === "rich" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
                   )}
                   onClick={() => setAnalysisMode("rich")}
@@ -2298,7 +2298,7 @@ function AnalyzeHubConnected() {
                 </Button>
                 <Button
                   type="button"
-                  className="h-11 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-6 text-sm font-semibold text-white shadow-sm ring-1 ring-amber-600/25 hover:from-amber-600 hover:to-orange-700 hover:ring-amber-700/30 disabled:opacity-50 dark:ring-amber-400/20"
+                  className="h-11 w-full min-w-0 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 px-4 text-sm font-semibold text-white shadow-sm ring-1 ring-amber-600/25 hover:from-amber-600 hover:to-orange-700 hover:ring-amber-700/30 disabled:opacity-50 dark:ring-amber-400/20 sm:px-6"
                   disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
                   onClick={() => void runUnifiedAnalysis()}
                 >
