@@ -171,7 +171,11 @@
     "timelineEmpty": "この範囲のデータはありません。",
     "timelineStarLabel": "{star}星",
     "timelineTruncatedHint": "チャートは最大で使用します{loaded}の{total}レビュー（パフォーマンスの上限）。",
-    "timelineLoadError": "タイムライン チャートのレビューを読み込めませんでした。"
+    "timelineLoadError": "タイムライン チャートのレビューを読み込めませんでした。",
+    "localResultNotice": "These results belong to your local market.",
+    "globalUpsellHint": "You can get broader insights with a global scan.",
+    "deepResearchCta": "Run deep research",
+    "globalQueued": "Global scan and analysis have been queued."
   },
   "auth": {
     "signIn": "ログイン",
@@ -391,7 +395,8 @@
     "datePresetLast180": "Last 6 months",
     "datePresetLast2y": "Last 2 years",
     "datePresetLast5y": "Last 5 years",
-    "datePresetAll": "All time"
+    "datePresetAll": "All time",
+    "localFirstHint": "The first pull runs in your local market. You can start global research after analysis."
   },
   "about": {
     "title": "ビビンディスについて",

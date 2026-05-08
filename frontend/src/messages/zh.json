@@ -171,7 +171,11 @@
     "timelineEmpty": "没有该范围的数据。",
     "timelineStarLabel": "{star}星星",
     "timelineTruncatedHint": "图表最多可使用{loaded}的{total}评论（绩效上限）。",
-    "timelineLoadError": "无法加载时间线图表的评论。"
+    "timelineLoadError": "无法加载时间线图表的评论。",
+    "localResultNotice": "These results belong to your local market.",
+    "globalUpsellHint": "You can get broader insights with a global scan.",
+    "deepResearchCta": "Run deep research",
+    "globalQueued": "Global scan and analysis have been queued."
   },
   "auth": {
     "signIn": "登录",
@@ -391,7 +395,8 @@
     "datePresetLast180": "Last 6 months",
     "datePresetLast2y": "Last 2 years",
     "datePresetLast5y": "Last 5 years",
-    "datePresetAll": "All time"
+    "datePresetAll": "All time",
+    "localFirstHint": "The first pull runs in your local market. You can start global research after analysis."
   },
   "about": {
     "title": "关于维文迪斯",

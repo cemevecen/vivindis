@@ -10,7 +10,7 @@ import { AnalysisCharts } from "@/components/analysis/analysis-charts";
 import { ReviewTimelineCharts } from "@/components/analysis/review-timeline-charts";
 import { Button } from "@/components/ui/button";
 import { buttonVariants } from "@/components/ui/button";
-import { Link } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
@@ -101,6 +101,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const locale = useLocale();
   const exportBase = t("exportFileBase");
   const { getToken } = useAuth();
+  const router = useRouter();
   const queryClient = useQueryClient();
   const [reviewItems, setReviewItems] = useState<ReviewListItemDto[]>([]);
   const [reviewTotal, setReviewTotal] = useState(0);
@@ -151,6 +152,38 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : t("analysisError"));
+    },
+  });
+
+  const deepResearchMutation = useMutation({
+    mutationFn: async () => {
+      if (!fetchId || !fetchQuery.data) {
+        throw new Error("fetchId");
+      }
+      const created = await apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
+        method: "POST",
+        body: {
+          from_date: fetchQuery.data.from_date,
+          to_date: fetchQuery.data.to_date,
+          review_scope: "global",
+        },
+        getToken,
+      });
+      await apiFetch<AnalysisDto[]>(`/api/v1/fetches/${created.id}/analyze`, {
+        method: "POST",
+        body: { types: ["heuristic", "ai"] },
+        getToken,
+      });
+      return created;
+    },
+    onSuccess: async (created) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
+      toast.success(t("globalQueued"));
+      router.push(`/apps/${appId}/analysis?fetchId=${created.id}`);
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : tCommon("error"));
     },
   });
 
@@ -530,6 +563,20 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           <span className="text-sm text-muted-foreground">{t("fetchNotCompleted")}</span>
         ) : null}
       </div>
+
+      <section className="rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <p className="text-sm font-medium text-foreground">{t("localResultNotice")}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("globalUpsellHint")}</p>
+        <Button
+          type="button"
+          className="mt-3"
+          variant="outline"
+          onClick={() => deepResearchMutation.mutate()}
+          disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
+        >
+          {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
+        </Button>
+      </section>
 
       {((heuristic?.status === "completed" && heuristic.result) ||
         (ai?.status === "completed" && ai.result)) &&

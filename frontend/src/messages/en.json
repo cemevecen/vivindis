@@ -201,7 +201,8 @@
     "datePresetLast180": "Last 6 months",
     "datePresetLast2y": "Last 2 years",
     "datePresetLast5y": "Last 5 years",
-    "datePresetAll": "All time"
+    "datePresetAll": "All time",
+    "localFirstHint": "The first pull runs in your local market. You can start global research after analysis."
   },
   "compare": {
     "emptyTitle": "Compare apps",
@@ -387,7 +388,11 @@
     "timelineEmpty": "No data for this range.",
     "timelineStarLabel": "{star} stars",
     "timelineTruncatedHint": "Charts use up to {loaded} of {total} reviews (performance cap).",
-    "timelineLoadError": "Could not load reviews for timeline charts."
+    "timelineLoadError": "Could not load reviews for timeline charts.",
+    "localResultNotice": "These results belong to your local market.",
+    "globalUpsellHint": "You can get broader insights with a global scan.",
+    "deepResearchCta": "Run deep research",
+    "globalQueued": "Global scan and analysis have been queued."
   },
   "about": {
     "title": "About Vivindis",

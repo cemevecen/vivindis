@@ -201,7 +201,8 @@
     "datePresetLast180": "son 6 ay",
     "datePresetLast2y": "son 2 sene",
     "datePresetLast5y": "son 5 sene",
-    "datePresetAll": "tümü"
+    "datePresetAll": "tümü",
+    "localFirstHint": "İlk çekim yerel pazarda yapılır. Global araştırmayı analiz sonrası başlatabilirsiniz."
   },
   "compare": {
     "emptyTitle": "Uygulamaları karşılaştır",
@@ -387,7 +388,11 @@
     "timelineEmpty": "Bu dilim için veri yok.",
     "timelineStarLabel": "{star} yıldız",
     "timelineTruncatedHint": "Grafikler toplam {total} yorumdan en fazla {loaded} tanesine göre (performans sınırı).",
-    "timelineLoadError": "Zaman çizelgesi için yorumlar yüklenemedi."
+    "timelineLoadError": "Zaman çizelgesi için yorumlar yüklenemedi.",
+    "localResultNotice": "Bu sonuçlar yerel pazarınıza aittir.",
+    "globalUpsellHint": "Global tarama ile daha geniş içgörü alabilirsiniz.",
+    "deepResearchCta": "Derin araştırma yap",
+    "globalQueued": "Global tarama ve analiz kuyruğa alındı."
   },
   "about": {
     "title": "Vivindis hakkında",

@@ -171,7 +171,11 @@
     "timelineEmpty": "Não há dados para este intervalo.",
     "timelineStarLabel": "{star}estrelas",
     "timelineTruncatedHint": "Os gráficos usam até{loaded}de{total}avaliações (limite de desempenho).",
-    "timelineLoadError": "Não foi possível carregar as avaliações dos gráficos da linha do tempo."
+    "timelineLoadError": "Não foi possível carregar as avaliações dos gráficos da linha do tempo.",
+    "localResultNotice": "These results belong to your local market.",
+    "globalUpsellHint": "You can get broader insights with a global scan.",
+    "deepResearchCta": "Run deep research",
+    "globalQueued": "Global scan and analysis have been queued."
   },
   "auth": {
     "signIn": "Entrar",
@@ -391,7 +395,8 @@
     "datePresetLast180": "Last 6 months",
     "datePresetLast2y": "Last 2 years",
     "datePresetLast5y": "Last 5 years",
-    "datePresetAll": "All time"
+    "datePresetAll": "All time",
+    "localFirstHint": "The first pull runs in your local market. You can start global research after analysis."
   },
   "about": {
     "title": "Sobre Vivindis",

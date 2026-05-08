@@ -84,7 +84,7 @@ function AnalyzeHubConnected() {
   const searchParams = useSearchParams();
   const mode = useMemo(() => parseAnalyzeHubMode(searchParams.get("mode")), [searchParams]);
   const [datePreset, setDatePreset] = useState<DatePresetId>("30d");
-  const [reviewScope, setReviewScope] = useState<ReviewScope>("global");
+  const reviewScope: ReviewScope = "local";
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
 
   const dateRange = useMemo(() => rangeFromPreset(datePreset), [datePreset]);
@@ -1223,13 +1223,10 @@ function AnalyzeHubConnected() {
                   </div>
                   <div className="space-y-2">
                     <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                    <SegmentedTwo
-                      ariaLabel={t("reviewScopeLabel")}
-                      left={t("reviewScopeLocal")}
-                      right={t("reviewScopeGlobal")}
-                      value={reviewScope === "local" ? "left" : "right"}
-                      onChange={(v) => setReviewScope(v === "left" ? "local" : "global")}
-                    />
+                    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm font-medium text-foreground">
+                      {t("reviewScopeLocal")}
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t("localFirstHint")}</p>
                   </div>
                 </div>
                 <Button
