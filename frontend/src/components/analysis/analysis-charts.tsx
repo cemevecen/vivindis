@@ -73,14 +73,21 @@ function SentimentCard({
       </h4>
       <div className={cn(featured ? "h-[300px]" : "")} style={featured ? undefined : { minHeight: chartH }}>
         <ResponsiveContainer width="100%" height={featured ? "100%" : chartH}>
-          <PieChart>
-            <Pie dataKey="value" data={sentiment} nameKey="name" cx="50%" cy="50%" outerRadius={featured ? 88 : pieR}>
+          <PieChart margin={{ top: featured ? 8 : 4, right: 8, left: 8, bottom: featured ? 8 : 0 }}>
+            <Pie
+              dataKey="value"
+              data={sentiment}
+              nameKey="name"
+              cx="50%"
+              cy={featured ? "50%" : "43%"}
+              outerRadius={featured ? 88 : pieR}
+            >
               {sentiment.map((entry) => (
                 <Cell key={entry.name} fill={SENTIMENT_COLORS[entry.name] ?? "hsl(var(--muted-foreground))"} />
               ))}
             </Pie>
             <Tooltip />
-            <Legend />
+            <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: featured ? 12 : 11, paddingTop: 8 }} />
           </PieChart>
         </ResponsiveContainer>
       </div>
@@ -111,7 +118,7 @@ function RatingsDistCard({
       </h4>
       <div className={cn(featured ? "h-[280px]" : "")} style={featured ? undefined : { minHeight: chartH }}>
         <ResponsiveContainer width="100%" height={featured ? "100%" : chartH}>
-          <BarChart data={ratings}>
+          <BarChart data={ratings} margin={{ top: 8, right: 12, left: 0, bottom: 8 }}>
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="rating" tick={{ fontSize: featured ? 12 : 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: featured ? 12 : 11 }} width={featured ? 40 : 32} />
@@ -148,7 +155,7 @@ function TopicsCard({
       <div className={cn(featured ? "h-[320px]" : "")} style={featured ? undefined : { minHeight: chartH }}>
         {topics.length > 0 ? (
           <ResponsiveContainer width="100%" height={featured ? "100%" : chartH}>
-            <BarChart data={topics} layout="vertical" margin={{ left: featured ? 8 : 4, right: 8 }}>
+            <BarChart data={topics} layout="vertical" margin={{ top: 8, left: featured ? 8 : 2, right: 8, bottom: 8 }}>
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" horizontal={false} />
               <XAxis type="number" allowDecimals={false} tick={{ fontSize: featured ? 12 : 11 }} />
               <YAxis
@@ -206,8 +213,8 @@ function ChartBlock({ title, analysis, labels, compact = false, featured = false
   const ratings = ratingsFromResult(result);
   const topics = topicsFromResult(result, 8);
   const score = overallScoreFromResult(result);
-  const chartH = compact ? 160 : 200;
-  const pieR = compact ? 52 : 70;
+  const chartH = compact ? 200 : 200;
+  const pieR = compact ? 44 : 70;
   const useFeatured = featured && !compact;
 
   const header = (
@@ -239,13 +246,13 @@ function ChartBlock({ title, analysis, labels, compact = false, featured = false
     <section className="space-y-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:p-5">
       {header}
       <div className={compact ? "grid grid-cols-1 gap-4" : "grid gap-6 lg:grid-cols-3"}>
-        <div className={compact ? "min-h-[180px]" : "min-h-[220px]"}>
+        <div className={compact ? "min-h-[220px]" : "min-h-[220px]"}>
           <SentimentCard sentiment={sentiment} labels={labels} chartH={chartH} pieR={pieR} featured={false} />
         </div>
-        <div className={compact ? "min-h-[180px]" : "min-h-[220px] lg:col-span-1"}>
+        <div className={compact ? "min-h-[220px]" : "min-h-[220px] lg:col-span-1"}>
           <RatingsDistCard ratings={ratings} labels={labels} chartH={chartH} featured={false} />
         </div>
-        <div className={compact ? "min-h-[180px]" : "min-h-[220px] lg:col-span-1"}>
+        <div className={compact ? "min-h-[220px]" : "min-h-[220px] lg:col-span-1"}>
           <TopicsCard topics={topics} labels={labels} chartH={chartH} featured={false} />
         </div>
       </div>
