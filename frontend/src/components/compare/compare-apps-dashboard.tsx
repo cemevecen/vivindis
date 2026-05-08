@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
@@ -215,6 +216,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const ta = useTranslations("analysis");
   const tCommon = useTranslations("common");
   const { getToken } = useAuth();
+  const queryClient = useQueryClient();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -300,6 +302,32 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   });
 
   const [appAq, appBq, fetchAq, fetchBq, anaAq, anaBq] = queries;
+  const bootstrapFetchKeyRef = useRef<string>("");
+
+  const bootstrapFetchMutation = useMutation({
+    mutationFn: async (args: { appIds: string[]; fromDate: string; toDate: string }) => {
+      await Promise.all(
+        args.appIds.map((id) =>
+          apiFetch<ReviewFetchDto>(`/api/v1/apps/${id}/fetch`, {
+            method: "POST",
+            body: {
+              from_date: args.fromDate,
+              to_date: args.toDate,
+              review_scope: "global",
+            },
+            getToken,
+          }),
+        ),
+      );
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdA) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdB) });
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : tCommon("error"));
+    },
+  });
 
   if (queries.some((q) => q.isPending)) {
     return <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>;
@@ -329,6 +357,46 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
 
   const fa = latestFetch(fetchAq.data);
   const fb = latestFetch(fetchBq.data);
+
+  useEffect(() => {
+    if (!splitOn || queries.some((q) => q.isPending) || queries.some((q) => q.isError)) {
+      return;
+    }
+    const missingIds: string[] = [];
+    if ((fetchAq.data ?? []).length === 0) {
+      missingIds.push(appIdA);
+    }
+    if ((fetchBq.data ?? []).length === 0) {
+      missingIds.push(appIdB);
+    }
+    if (missingIds.length === 0 || bootstrapFetchMutation.isPending) {
+      return;
+    }
+
+    const sourceRange = fa ?? fb;
+    const fallbackTo = new Date();
+    const fallbackFrom = new Date();
+    fallbackFrom.setDate(fallbackFrom.getDate() - 30);
+    const fromDate = sourceRange?.from_date ?? fallbackFrom.toISOString().slice(0, 10);
+    const toDate = sourceRange?.to_date ?? fallbackTo.toISOString().slice(0, 10);
+
+    const reqKey = `${missingIds.sort().join(",")}|${fromDate}|${toDate}`;
+    if (bootstrapFetchKeyRef.current === reqKey) {
+      return;
+    }
+    bootstrapFetchKeyRef.current = reqKey;
+    bootstrapFetchMutation.mutate({ appIds: missingIds, fromDate, toDate });
+  }, [
+    splitOn,
+    queries,
+    fetchAq.data,
+    fetchBq.data,
+    appIdA,
+    appIdB,
+    fa,
+    fb,
+    bootstrapFetchMutation,
+  ]);
 
   const latestHeuristic = (items: AnalysisListDto | undefined) =>
     (items?.items ?? []).filter((x) => x.type === "heuristic" && x.status === "completed").sort((a, b) =>
