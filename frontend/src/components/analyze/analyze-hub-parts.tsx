@@ -71,9 +71,9 @@ export function PinnedStoreAppCard({
   const t = useTranslations("analyzeHub");
   const title = app?.name ?? hit.name;
   return (
-    <div className="rounded-2xl border border-orange-200/30 bg-gradient-to-br from-orange-50/25 via-card to-amber-50/15 p-5 shadow-sm dark:border-orange-800/25 dark:from-orange-950/12 dark:via-card dark:to-amber-950/8 sm:p-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="flex min-w-0 flex-1 gap-4">
+    <div className="rounded-2xl border border-orange-200/30 bg-gradient-to-br from-orange-50/25 via-card to-amber-50/15 p-4 shadow-sm dark:border-orange-800/25 dark:from-orange-950/12 dark:via-card dark:to-amber-950/8 sm:p-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
+        <div className="flex min-w-0 gap-3 sm:flex-1 sm:gap-4">
           {hit.icon ? (
             // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
             <img
@@ -81,17 +81,19 @@ export function PinnedStoreAppCard({
               alt=""
               width={64}
               height={64}
-              className="size-16 shrink-0 rounded-2xl border border-border bg-card object-cover sm:size-20"
+              className="size-14 shrink-0 rounded-2xl border border-border bg-card object-cover sm:size-20"
             />
           ) : (
-            <div className="size-16 shrink-0 rounded-2xl border border-dashed border-border bg-muted/50 sm:size-20" />
+            <div className="size-14 shrink-0 rounded-2xl border border-dashed border-border bg-muted/50 sm:size-20" />
           )}
-          <div className="min-w-0 space-y-1">
+          <div className="min-w-0 flex-1 space-y-1">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t("activeAppCardLabel")}
             </p>
-            <p className="truncate text-xl font-bold tracking-tight text-foreground">{title}</p>
-            <p className="truncate font-mono text-sm text-muted-foreground">
+            <p className="break-words text-lg font-bold leading-snug tracking-tight text-foreground sm:truncate sm:text-xl">
+              {title}
+            </p>
+            <p className="break-all font-mono text-sm text-muted-foreground sm:truncate sm:break-normal">
               {hit.platform === "google_play" ? hit.id : `id ${hit.id}`}
             </p>
             {isResolving ? (
@@ -99,11 +101,23 @@ export function PinnedStoreAppCard({
             ) : null}
           </div>
         </div>
-        <div className="flex shrink-0 flex-wrap gap-2">
-          <Button type="button" variant="outline" size="sm" onClick={onSearchAnother}>
+        <div className="flex w-full min-w-0 flex-col gap-2 sm:w-auto sm:shrink-0 sm:flex-row sm:flex-wrap sm:justify-end">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-10 w-full justify-center sm:w-auto"
+            onClick={onSearchAnother}
+          >
             {t("searchAnotherApp")}
           </Button>
-          <Button type="button" variant="outline" size="sm" className="gap-1" onClick={onClear}>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="h-10 w-full justify-center gap-1 sm:w-auto"
+            onClick={onClear}
+          >
             <X className="size-3.5" aria-hidden />
             {t("clearPinnedSelection")}
           </Button>
