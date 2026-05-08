@@ -63,6 +63,23 @@ function reviewToneMessageKey(rating: number): "tonePositive" | "toneNeutral" | 
   return "toneNeutral";
 }
 
+function ratingTierClasses(rating: number): { dot: string; text: string } {
+  const safe = Math.max(1, Math.min(5, Math.round(rating)));
+  if (safe <= 1) {
+    return { dot: "bg-red-500", text: "text-red-600 dark:text-red-400" };
+  }
+  if (safe === 2) {
+    return { dot: "bg-orange-500", text: "text-orange-600 dark:text-orange-400" };
+  }
+  if (safe === 3) {
+    return { dot: "bg-yellow-500", text: "text-yellow-600 dark:text-yellow-400" };
+  }
+  if (safe === 4) {
+    return { dot: "bg-lime-500", text: "text-lime-600 dark:text-lime-400" };
+  }
+  return { dot: "bg-emerald-500", text: "text-emerald-600 dark:text-emerald-400" };
+}
+
 function csvEscape(value: string): string {
   return `"${value.replace(/"/g, "\"\"")}"`;
 }
@@ -641,23 +658,17 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             <p className="text-sm text-muted-foreground">{t("noReviewsForFetch")}</p>
           ) : (
             <div className="max-h-[520px] space-y-2 overflow-y-auto pr-1">
-              {visibleReviewItems.map((row, idx) => (
+              {visibleReviewItems.map((row, idx) => {
+                const ratingClasses = ratingTierClasses(row.rating);
+                return (
                 <article key={row.id} className="rounded-lg border border-border bg-muted/20 p-3">
                   <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
                     <p className="inline-flex items-center gap-2">
                       #{idx + 1}
-                      <span
-                        className={cn(
-                          "inline-flex size-2 rounded-full",
-                          reviewTone(row.rating) === "positive"
-                            ? "bg-emerald-500"
-                            : reviewTone(row.rating) === "negative"
-                              ? "bg-red-500"
-                              : "bg-muted-foreground/45",
-                        )}
-                        aria-hidden
-                      />
-                      <span>{t("reviewCardRating", { rating: row.rating })}</span>
+                      <span className={cn("inline-flex size-2 rounded-full", ratingClasses.dot)} aria-hidden />
+                      <span className={cn("font-semibold", ratingClasses.text)}>
+                        {t("reviewCardRating", { rating: row.rating })}
+                      </span>
                     </p>
                     <p>{row.review_date}</p>
                   </div>
@@ -672,7 +683,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                   {row.title ? <p className="mt-1 text-sm font-medium">{row.title}</p> : null}
                   <p className="mt-1 whitespace-pre-wrap text-sm">{row.body}</p>
                 </article>
-              ))}
+                );
+              })}
             </div>
           )}
           <div className="mt-3 grid gap-2 sm:grid-cols-4">
