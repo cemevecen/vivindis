@@ -259,6 +259,7 @@
     "shareLinkCopied": "Lien de la page d'analyse copié.",
     "shareCopyFailed": "Impossible de copier le lien.",
     "shareNative": "Partager via l'appareil…",
+    "shareEmailAria": "Ouvrir un e-mail avec le lien vers cette analyse",
     "shareNativeBody": "Analyse des avis : {name}",
     "shareFailed": "Le partage a été annulé ou a échoué."
   },

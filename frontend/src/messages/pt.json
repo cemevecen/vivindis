@@ -259,6 +259,7 @@
     "shareLinkCopied": "Ligação da página de análise copiada.",
     "shareCopyFailed": "Não foi possível copiar a ligação.",
     "shareNative": "Partilhar pelo dispositivo…",
+    "shareEmailAria": "Abrir e-mail com ligação para esta página de análise",
     "shareNativeBody": "Análise de avaliações: {name}",
     "shareFailed": "A partilha foi cancelada ou falhou."
   },

@@ -478,6 +478,7 @@
     "shareLinkCopied": "Analysis page link copied.",
     "shareCopyFailed": "Could not copy the link.",
     "shareNative": "Share via device…",
+    "shareEmailAria": "Open email with a link to this analysis page",
     "shareNativeBody": "Review analytics: {name}",
     "shareFailed": "Sharing was cancelled or failed."
   },

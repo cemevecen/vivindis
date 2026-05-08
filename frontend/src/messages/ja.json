@@ -259,6 +259,7 @@
     "shareLinkCopied": "分析ページのリンクをコピーしました。",
     "shareCopyFailed": "リンクをコピーできませんでした。",
     "shareNative": "端末から共有…",
+    "shareEmailAria": "この分析ページへのリンク付きメールを開く",
     "shareNativeBody": "レビュー分析: {name}",
     "shareFailed": "共有がキャンセルされたか失敗しました。"
   },

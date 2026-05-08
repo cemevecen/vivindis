@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, Globe } from "lucide-react";
+import { ChevronDown, Globe, Link2, Mail, Printer, Share2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -362,6 +362,15 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       }
       toast.error(t("shareFailed"));
     }
+  }, [appQuery.data?.name, t]);
+
+  const shareAnalysisByEmail = useCallback(() => {
+    const subjectRaw = appQuery.data?.name
+      ? `${t("pageTitle")} — ${appQuery.data.name}`
+      : t("pageTitle");
+    const subject = encodeURIComponent(subjectRaw);
+    const body = encodeURIComponent(window.location.href);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   }, [appQuery.data?.name, t]);
 
   const startMutation = useMutation({
@@ -805,17 +814,56 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
           <p className="text-sm text-muted-foreground">{liveStatusHint}</p>
         </div>
-        <div className="flex min-w-[12rem] flex-col gap-2 sm:items-end">
+        <div className="flex min-w-0 flex-col gap-2 sm:items-end">
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("shareHeading")}</p>
-          <div className="flex flex-wrap justify-end gap-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => void copyAnalysisPageLink()}>
-              {t("shareCopyLink")}
+          <div className="flex flex-wrap justify-end gap-1">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              title={t("shareCopyLink")}
+              aria-label={t("shareCopyLink")}
+              onClick={() => void copyAnalysisPageLink()}
+            >
+              <Link2 className="size-4" aria-hidden />
             </Button>
             {typeof navigator !== "undefined" && typeof navigator.share === "function" ? (
-              <Button type="button" variant="outline" size="sm" onClick={() => void shareAnalysisPage()}>
-                {t("shareNative")}
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                title={t("shareNative")}
+                aria-label={t("shareNative")}
+                onClick={() => void shareAnalysisPage()}
+              >
+                <Share2 className="size-4" aria-hidden />
               </Button>
             ) : null}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              title={t("shareEmailAria")}
+              aria-label={t("shareEmailAria")}
+              onClick={() => {
+                shareAnalysisByEmail();
+              }}
+            >
+              <Mail className="size-4" aria-hidden />
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              title={t("exportResultsPdf")}
+              aria-label={t("exportResultsPdf")}
+              disabled={
+                fetch.status !== "completed" || analysisPdfCopy === null || appQuery.data === undefined
+              }
+              onClick={() => void exportFullAnalysisPdf()}
+            >
+              <Printer className="size-4" aria-hidden />
+            </Button>
           </div>
         </div>
       </div>

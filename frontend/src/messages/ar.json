@@ -259,6 +259,7 @@
     "shareLinkCopied": "تم نسخ رابط صفحة التحليل.",
     "shareCopyFailed": "تعذر نسخ الرابط.",
     "shareNative": "مشاركة عبر الجهاز…",
+    "shareEmailAria": "فتح بريد مع رابط صفحة التحليل هذه",
     "shareNativeBody": "تحليل التقييمات: {name}",
     "shareFailed": "أُلغيت المشاركة أو فشلت."
   },

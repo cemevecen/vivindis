@@ -478,6 +478,7 @@
     "shareLinkCopied": "Analiz sayfası bağlantısı kopyalandı.",
     "shareCopyFailed": "Bağlantı kopyalanamadı.",
     "shareNative": "Cihaz üzerinden paylaş…",
+    "shareEmailAria": "Bu analiz sayfasının bağlantısıyla e-posta aç",
     "shareNativeBody": "Yorum analizi: {name}",
     "shareFailed": "Paylaşım iptal edildi veya başarısız."
   },
