@@ -1223,8 +1223,10 @@ function AnalyzeHubConnected() {
                   </div>
                   <div className="space-y-2">
                     <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                    <div className="rounded-xl border border-border bg-muted/40 px-3 py-2 text-sm font-medium text-foreground">
-                      {t("reviewScopeLocal")}
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        {t("reviewScopeLocal")}
+                      </span>
                     </div>
                     <p className="text-xs text-muted-foreground">{t("localFirstHint")}</p>
                   </div>
