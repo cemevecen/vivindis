@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboard": "Panel",
-    "apps": "Apps",
+    "apps": "Aplicaciones",
     "compare": "Comparar",
     "sidebarNav": "Menú principal",
     "analyze": "Analizar",
@@ -26,7 +26,7 @@
     "languageLabel": "Idioma"
   },
   "apps": {
-    "title": "Apps",
+    "title": "Aplicaciones",
     "addNew": "Agregar aplicación",
     "listSubtitle": "Administra las conexiones de Google Play y App Store.",
     "platform": "Plataforma",
@@ -49,7 +49,7 @@
     "validationFrom": "Elija una fecha de inicio.",
     "validationTo": "Elija una fecha de finalización.",
     "validationDates": "La fecha de finalización debe ser igual o posterior a la fecha de inicio.",
-    "detailTitle": "App",
+    "detailTitle": "Aplicación",
     "backToApps": "Volver a aplicaciones",
     "fetchSection": "Nueva importación de reseñas",
     "fromDate": "De",
@@ -127,7 +127,7 @@
     "reviewsSortAria": "Ordenar reseñas",
     "filterAll": "Todas",
     "filterPositive": "Positivo",
-    "filterNeutral": "Neutral",
+    "filterNeutral": "Neutro",
     "filterNegative": "Negativo",
     "sortNewest": "Más recientes",
     "sortOldest": "Más antiguas",
@@ -149,7 +149,7 @@
     "pdfReviewMeta": "#{index} | {platform} | {ratingLabel}: {rating} | {date} | {tone}",
     "ratingLabel": "puntuación",
     "tonePositive": "positivo",
-    "toneNeutral": "neutral",
+    "toneNeutral": "neutro",
     "toneNegative": "negativo",
     "exportFileBase": "resenas-analizadas",
     "exportSheetName": "resenas",
@@ -246,7 +246,7 @@
     "title": "Panel",
     "subtitle": "Descripción general de sus aplicaciones conectadas y reseñas de importaciones.",
     "appsHeading": "Tus aplicaciones",
-    "appsCount": "{count, plural, =0 {Sin apps aún} one {# app} other {# apps}}",
+    "appsCount": "{count, plural, =0 {Sin aplicaciones} one {# aplicación} other {# aplicaciones}}",
     "openApps": "Abrir aplicaciones",
     "noClerk": "Agregue NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY e inicie sesión para usar la API desde este panel.",
     "loadError": "No se pudieron cargar aplicaciones."

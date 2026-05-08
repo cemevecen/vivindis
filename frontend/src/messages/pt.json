@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboard": "Painel",
-    "apps": "Apps",
+    "apps": "Aplicativos",
     "compare": "Comparar",
     "sidebarNav": "Menu principal",
     "analyze": "Analisar",
@@ -26,7 +26,7 @@
     "languageLabel": "Idioma"
   },
   "apps": {
-    "title": "Apps",
+    "title": "Aplicativos",
     "addNew": "Adicionar aplicativo",
     "listSubtitle": "Gerencie conexões do Google Play e da App Store.",
     "platform": "Plataforma",
@@ -49,7 +49,7 @@
     "validationFrom": "Escolha uma data de início.",
     "validationTo": "Escolha uma data de término.",
     "validationDates": "A data de término deve ser igual ou posterior à data de início.",
-    "detailTitle": "App",
+    "detailTitle": "Aplicativo",
     "backToApps": "Voltar para aplicativos",
     "fetchSection": "Nova importação de avaliação",
     "fromDate": "De",
@@ -246,7 +246,7 @@
     "title": "Painel",
     "subtitle": "Visão geral dos seus aplicativos conectados e analise as importações.",
     "appsHeading": "Seus aplicativos",
-    "appsCount": "{count, plural, =0 {Sem apps ainda} one {# app} other {# apps}}",
+    "appsCount": "{count, plural, =0 {Sem aplicativos} one {# aplicativo} other {# aplicativos}}",
     "openApps": "Abrir aplicativos",
     "noClerk": "Adicione NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY e faça login para usar a API deste painel.",
     "loadError": "Não foi possível carregar aplicativos."
