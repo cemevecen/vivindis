@@ -427,14 +427,20 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     return GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS).every((c) => deepLangs.has(c));
   }, [deepLangs]);
 
+  /** Listedeki tüm diller seçili mi (sunucu üst sınırı 24 olduğu için pratikte mümkün değil). */
+  const allGlobalLangsSelected = useMemo(
+    () => GLOBAL_SCAN_LANG_CODES.every((c) => deepLangs.has(c)),
+    [deepLangs],
+  );
+
   const deepLangSelectAllRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const el = deepLangSelectAllRef.current;
     if (!el) {
       return;
     }
-    el.indeterminate = deepLangs.size > 0 && !isDeepLangsFirst24Preset;
-  }, [deepLangs, isDeepLangsFirst24Preset]);
+    el.indeterminate = deepLangs.size > 0 && !allGlobalLangsSelected;
+  }, [deepLangs, allGlobalLangsSelected]);
 
   const deepResearchMutation = useMutation({
     mutationFn: async () => {
@@ -1103,7 +1109,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                         ref={deepLangSelectAllRef}
                         type="checkbox"
                         className="size-4 rounded border-border"
-                        checked={isDeepLangsFirst24Preset}
+                        checked={allGlobalLangsSelected}
                         onChange={() => {
                           if (isDeepLangsFirst24Preset) {
                             clearDeepLangs();

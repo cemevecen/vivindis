@@ -417,7 +417,7 @@
     "deepResearchInvalidRange": "Geçerli bir aralık girin: bitiş tarihi başlangıçtan önce olamaz.",
     "deepResearchSelectAll24": "Önerilen 24 dil",
     "deepResearchClearLangs": "Tümünü temizle",
-    "deepResearchLangCheckboxAll": "Tümü",
+    "deepResearchLangCheckboxAll": "Önerilen 24 dil (tümü değil; tekrar tıklayınca temizle)",
     "deepResearchPlannedParams": "Bu tarama",
     "deepResearchParamRange": "Tarih aralığı: {from} → {to}",
     "deepResearchParamLangs": "{count} dil: {list}",

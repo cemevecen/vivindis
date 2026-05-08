@@ -198,7 +198,7 @@
     "deepResearchInvalidRange": "نطاق غير صالح: يجب أن يكون تاريخ الانتهاء في أو بعد تاريخ البدء.",
     "deepResearchSelectAll24": "24 لغة مقترحة",
     "deepResearchClearLangs": "مسح الكل",
-    "deepResearchLangCheckboxAll": "الكل",
+    "deepResearchLangCheckboxAll": "إعداد 24 لغة مسبقًا (ليس القائمة كاملة؛ انقر مجددًا للمسح)",
     "deepResearchPlannedParams": "هذا المسح",
     "deepResearchParamRange": "نطاق التاريخ: {from} → {to}",
     "deepResearchParamLangs": "{count} لغات: {list}",

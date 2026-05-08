@@ -198,7 +198,7 @@
     "deepResearchInvalidRange": "Rango no válido: la fecha final debe ser igual o posterior a la inicial.",
     "deepResearchSelectAll24": "24 idiomas sugeridos",
     "deepResearchClearLangs": "Borrar todo",
-    "deepResearchLangCheckboxAll": "Todos",
+    "deepResearchLangCheckboxAll": "Preajuste de 24 idiomas (no toda la lista; clic de nuevo para vaciar)",
     "deepResearchPlannedParams": "Este escaneo",
     "deepResearchParamRange": "Rango de fechas: {from} → {to}",
     "deepResearchParamLangs": "{count} idiomas: {list}",

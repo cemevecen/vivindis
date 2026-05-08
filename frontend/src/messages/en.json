@@ -417,7 +417,7 @@
     "deepResearchInvalidRange": "Enter a valid range: end date on or after start date.",
     "deepResearchSelectAll24": "Suggested 24 languages",
     "deepResearchClearLangs": "Clear all",
-    "deepResearchLangCheckboxAll": "All",
+    "deepResearchLangCheckboxAll": "Suggested 24 (not all languages; click again to clear)",
     "deepResearchPlannedParams": "This scan",
     "deepResearchParamRange": "Date range: {from} → {to}",
     "deepResearchParamLangs": "{count} languages: {list}",

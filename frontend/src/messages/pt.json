@@ -198,7 +198,7 @@
     "deepResearchInvalidRange": "Intervalo inválido: a data final deve ser igual ou posterior à inicial.",
     "deepResearchSelectAll24": "24 idiomas sugeridos",
     "deepResearchClearLangs": "Limpar tudo",
-    "deepResearchLangCheckboxAll": "Todos",
+    "deepResearchLangCheckboxAll": "Predefinição de 24 idiomas (não a lista completa; clique de novo para limpar)",
     "deepResearchPlannedParams": "Esta varredura",
     "deepResearchParamRange": "Intervalo de datas: {from} → {to}",
     "deepResearchParamLangs": "{count} idiomas: {list}",

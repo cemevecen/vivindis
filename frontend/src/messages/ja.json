@@ -198,7 +198,7 @@
     "deepResearchInvalidRange": "有効な期間を入力してください。終了日は開始日以降である必要があります。",
     "deepResearchSelectAll24": "推奨 24 言語",
     "deepResearchClearLangs": "すべてクリア",
-    "deepResearchLangCheckboxAll": "すべて",
+    "deepResearchLangCheckboxAll": "24言語プリセット（全言語ではありません。もう一度クリックで解除）",
     "deepResearchPlannedParams": "このスキャン",
     "deepResearchParamRange": "期間: {from} → {to}",
     "deepResearchParamLangs": "{count} 言語: {list}",
