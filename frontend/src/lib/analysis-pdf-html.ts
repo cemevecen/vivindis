@@ -270,7 +270,7 @@ function timelineChartsSection(
   const note = copy.timelineTruncatedNote
     ? `<p style="font-size:11px;color:#b45309;margin:0 0 10px;">${escapeHtml(copy.timelineTruncatedNote)}</p>`
     : "";
-  return `<section style="margin:18px 0;padding:14px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
+  return `<section style="margin:12px 0;padding:12px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
     <h3 style="margin:0 0 6px;font-size:16px;">${escapeHtml(copy.sectionTimeline)} <span style="color:#64748b;font-weight:600;">(${escapeHtml(bucketTitle)})</span></h3>
     ${note}
     <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineVolumeTitle)}</h4>
@@ -288,8 +288,8 @@ function splitAnalysisRun(
   copy: AnalysisPdfLocaleStrings,
 ): { chartsSection: string; tablesSection: string } {
   const wrapCharts = (inner: string) =>
-    `<section style="margin:18px 0;padding:16px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
-    <h3 style="margin:0 0 12px;font-size:16px;">${escapeHtml(title)}</h3>
+    `<section style="margin:12px 0;padding:12px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
+    <h3 style="margin:0 0 10px;font-size:16px;">${escapeHtml(title)}</h3>
     ${inner}
   </section>`;
 
@@ -399,8 +399,8 @@ function splitAnalysisRun(
 
   const tablesInner = `${sentTable}${ratTable}${topicTableOnly}`;
 
-  const tablesSection = `<section style="margin:16px 0;padding:14px;border:1px solid #e5e7eb;border-radius:12px;page-break-inside:avoid;">
-    <h4 style="margin:0 0 10px;font-size:14px;color:#334155;">${escapeHtml(title)} — ${escapeHtml(copy.pdfTableSubtitle)}</h4>
+  const tablesSection = `<section style="margin:12px 0;padding:12px;border:1px solid #e5e7eb;border-radius:12px;page-break-inside:avoid;">
+    <h4 style="margin:0 0 8px;font-size:14px;color:#334155;">${escapeHtml(title)} — ${escapeHtml(copy.pdfTableSubtitle)}</h4>
     ${tablesInner}
   </section>`;
 
@@ -415,8 +415,7 @@ function timelineTablesAppendix(
   fetchFromDate: string,
 ): string {
   if (!reviews || reviews.length === 0) {
-    return `<section style="margin:20px 0;"><h3 style="font-size:17px;">${escapeHtml(copy.sectionTimeline)}</h3>
-      <p style="color:#64748b;">—</p></section>`;
+    return "";
   }
   const modes: { mode: ReviewTimeBucketMode; label: string }[] = [
     { mode: "day", label: copy.timelineBucketDay },
@@ -456,8 +455,8 @@ function timelineTablesAppendix(
     })
     .join("");
 
-  return `<section style="margin:20px 0;page-break-inside:avoid;">
-    <h3 style="font-size:17px;margin-bottom:8px;">${escapeHtml(copy.sectionTimeline)}</h3>
+  return `<section style="margin:12px 0;page-break-inside:avoid;">
+    <h3 style="font-size:17px;margin:0 0 8px;">${escapeHtml(copy.sectionTimeline)}</h3>
     ${note}
     ${tables}
   </section>`;
@@ -465,8 +464,7 @@ function timelineTablesAppendix(
 
 function insightsSection(insights: InsightsDto | undefined, copy: AnalysisPdfLocaleStrings): string {
   if (!insights) {
-    return `<section style="margin:20px 0;"><h3 style="font-size:17px;">${escapeHtml(copy.sectionInsights)}</h3>
-      <p style="color:#64748b;">—</p></section>`;
+    return "";
   }
   const scoresRows = insights.benchmark.scores
     .map(
@@ -511,8 +509,8 @@ function insightsSection(insights: InsightsDto | undefined, copy: AnalysisPdfLoc
 
   const rel = insights.release_impact;
 
-  return `<section style="margin:20px 0;page-break-inside:avoid;">
-    <h3 style="font-size:17px;margin-bottom:12px;">${escapeHtml(copy.sectionInsights)}</h3>
+  return `<section style="margin:12px 0;page-break-inside:avoid;">
+    <h3 style="font-size:17px;margin:0 0 10px;">${escapeHtml(copy.sectionInsights)}</h3>
     <p style="font-size:12px;color:#64748b;">${escapeHtml(insights.benchmark.app_name)} · ${escapeHtml(insights.benchmark.category)} (n=${insights.benchmark.category_sample_apps})</p>
     <h4 style="margin:14px 0 6px;">${escapeHtml(copy.insightBenchmarkScores)}</h4>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
@@ -555,7 +553,7 @@ function reviewArticles(rows: ReviewListItemDto[], copy: AnalysisPdfLocaleString
       const platformLabel =
         row.platform === "google_play" ? copy.platformGooglePlay : copy.platformAppStore;
       const meta = `#${idx + 1} | ${escapeHtml(platformLabel)} | ${escapeHtml(copy.ratingLabel)}: ${row.rating} | ${escapeHtml(row.review_date)} | ${escapeHtml(reviewToneLabel(row.rating, copy))}`;
-      return `<article style="border:1px solid #e5e7eb;border-radius:12px;padding:12px;margin:10px 0;page-break-inside:avoid;">
+      return `<article style="border:1px solid #e5e7eb;border-radius:12px;padding:10px;margin:8px 0;page-break-inside:avoid;">
         <p style="font-size:12px;color:#64748b;">${meta}</p>
         ${row.title ? `<h3 style="font-size:14px;margin:6px 0;">${escapeHtml(row.title)}</h3>` : ""}
         <p style="font-size:13px;white-space:pre-wrap;">${escapeHtml(row.body)}</p>
@@ -582,43 +580,47 @@ export function buildFullAnalysisPdfHtml(p: BuildFullAnalysisPdfParams): string 
   const { copy, appName, fetch, pageUrl, generatedAtLabel, timelineReviews, timelineLocale, heuristic, ai, insights, reviewRows } = p;
 
   const meta = `
-    <div style="margin-bottom:20px;padding:14px;background:#f8fafc;border-radius:12px;font-size:12px;line-height:1.6;">
+    <div style="margin:14px 0;padding:12px;background:#f8fafc;border-radius:12px;font-size:12px;line-height:1.55;">
       <p style="margin:0;"><strong>${escapeHtml(copy.labelApp)}</strong> ${escapeHtml(appName)}</p>
-      <p style="margin:4px 0 0;"><strong>${escapeHtml(copy.labelImportRange)}</strong> ${escapeHtml(fetch.from_date)} → ${escapeHtml(fetch.to_date)}</p>
-      <p style="margin:4px 0 0;"><strong>${escapeHtml(copy.labelTotalInImport)}</strong> ${fetch.review_count}</p>
-      <p style="margin:4px 0 0;"><strong>${escapeHtml(copy.labelPageUrl)}</strong> <a href="${escapeHtml(pageUrl)}">${escapeHtml(pageUrl)}</a></p>
-      <p style="margin:4px 0 0;"><strong>${escapeHtml(copy.labelGenerated)}</strong> ${escapeHtml(generatedAtLabel)}</p>
+      <p style="margin:3px 0 0;"><strong>${escapeHtml(copy.labelImportRange)}</strong> ${escapeHtml(fetch.from_date)} → ${escapeHtml(fetch.to_date)}</p>
+      <p style="margin:3px 0 0;"><strong>${escapeHtml(copy.labelTotalInImport)}</strong> ${fetch.review_count}</p>
+      <p style="margin:3px 0 0;"><strong>${escapeHtml(copy.labelPageUrl)}</strong> <a href="${escapeHtml(pageUrl)}">${escapeHtml(pageUrl)}</a></p>
+      <p style="margin:3px 0 0;"><strong>${escapeHtml(copy.labelGenerated)}</strong> ${escapeHtml(generatedAtLabel)}</p>
     </div>`;
 
   const timelineCharts = timelineChartsSection(timelineReviews, timelineLocale, copy, fetch.from_date, fetch.to_date);
   const heurParts = splitAnalysisRun(copy.sectionHeuristic, heuristic, copy);
-  const aiParts = splitAnalysisRun(copy.sectionAi, ai, copy);
+  const aiHasResult = Boolean(ai?.status === "completed" && ai.result);
+  const aiParts = aiHasResult ? splitAnalysisRun(copy.sectionAi, ai, copy) : { chartsSection: "", tablesSection: "" };
   const timelineTables = timelineTablesAppendix(timelineReviews, timelineLocale, copy, fetch.from_date);
   const ins = insightsSection(insights, copy);
 
-  const listHeading = `<h2 style="font-size:18px;margin:24px 0 8px;">${escapeHtml(copy.sectionReviewDetails)}</h2>
-    <p style="font-size:13px;margin-bottom:12px;">${escapeHtml(copy.totalReviews.replace("{count}", String(reviewRows.length)))}</p>`;
+  const listHeading = `<h2 style="font-size:18px;margin:18px 0 6px;">${escapeHtml(copy.sectionReviewDetails)}</h2>
+    <p style="font-size:13px;margin:0 0 10px;">${escapeHtml(copy.totalReviews.replace("{count}", String(reviewRows.length)))}</p>`;
 
   const articles = reviewArticles(reviewRows, copy);
 
-  const chartsDeck = `<section style="margin:8px 0 24px;">
-    <h2 style="font-size:18px;margin:0 0 14px;">${escapeHtml(copy.pdfChartsDeckTitle)}</h2>
-    ${timelineCharts}
-    ${heurParts.chartsSection}
-    ${aiParts.chartsSection}
-  </section>`;
+  const chartPieces = [timelineCharts, heurParts.chartsSection, aiParts.chartsSection].filter((s) => s.length > 0);
+  const chartsDeck =
+    chartPieces.length > 0
+      ? `<section style="margin:4px 0 16px;">
+    <h2 style="font-size:18px;margin:0 0 10px;">${escapeHtml(copy.pdfChartsDeckTitle)}</h2>
+    ${chartPieces.join("")}
+  </section>`
+      : "";
 
-  const appendix = `<section style="margin:28px 0 12px;">
-    <h2 style="font-size:18px;margin:0 0 14px;">${escapeHtml(copy.pdfAppendixDetails)}</h2>
-    ${timelineTables}
-    ${heurParts.tablesSection}
-    ${aiParts.tablesSection}
-    ${ins}
-  </section>`;
+  const appendixPieces = [timelineTables, heurParts.tablesSection, aiParts.tablesSection, ins].filter((s) => s.length > 0);
+  const appendix =
+    appendixPieces.length > 0
+      ? `<section style="margin:16px 0 8px;">
+    <h2 style="font-size:18px;margin:0 0 10px;">${escapeHtml(copy.pdfAppendixDetails)}</h2>
+    ${appendixPieces.join("")}
+  </section>`
+      : "";
 
   return `<!DOCTYPE html><html><head><meta charset="utf-8"/><title>${escapeHtml(copy.docTitle)}</title></head>
-  <body style="font-family:Arial,Helvetica,sans-serif;padding:24px;color:#0f172a;max-width:900px;margin:0 auto;">
-    <h1 style="font-size:22px;margin:0 0 16px;">${escapeHtml(copy.reportHeading)}</h1>
+  <body style="font-family:Arial,Helvetica,sans-serif;padding:16px 20px;color:#0f172a;max-width:900px;margin:0 auto;">
+    <h1 style="font-size:22px;margin:0 0 12px;">${escapeHtml(copy.reportHeading)}</h1>
     ${chartsDeck}
     ${listHeading}
     ${articles}
