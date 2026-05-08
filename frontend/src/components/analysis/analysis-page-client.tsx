@@ -16,7 +16,7 @@ import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
-import type { AnalysisDto, AnalysisListDto } from "@/types/analysis";
+import type { AnalysisDto, AnalysisListDto, InsightsDto } from "@/types/analysis";
 import type { FetchStatus, ReviewFetchDto, ReviewListItemDto, ReviewListResponseDto } from "@/types/app";
 
 function analysesForFetch(items: AnalysisDto[], fetchId: string) {
@@ -167,6 +167,15 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       const items = analysesForFetch(q.state.data?.items ?? [], fetchId);
       return items.some((a) => a.status === "pending" || a.status === "running") ? 1000 : false;
     },
+  });
+
+  const insightsQuery = useQuery({
+    queryKey: ["analysis", "insights", appId, fetchId],
+    queryFn: () =>
+      apiFetch<InsightsDto>(`/api/v1/apps/${appId}/insights?fetch_id=${encodeURIComponent(fetchId ?? "")}`, {
+        getToken,
+      }),
+    enabled: Boolean(clerkEnabled && appId && fetchId && fetchQuery.data?.status === "completed"),
   });
 
   const startMutation = useMutation({
@@ -741,6 +750,82 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       ) : null}
 
       <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} chartLayout="featured" />
+
+      {insightsQuery.data ? (
+        <section className="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <h2 className="text-base font-semibold">{t("insightsTitle")}</h2>
+          <div className="grid gap-3 md:grid-cols-3">
+            {insightsQuery.data.benchmark.scores.map((s) => (
+              <article key={s.label} className="rounded-lg border border-border bg-muted/20 p-3">
+                <p className="text-xs uppercase tracking-wide text-muted-foreground">{s.label}</p>
+                <p className="mt-1 text-xl font-semibold text-foreground">{s.value.toFixed(2)}</p>
+                <p
+                  className={cn(
+                    "text-xs",
+                    s.direction === "up"
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : s.direction === "down"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-muted-foreground",
+                  )}
+                >
+                  {t("insightsDeltaPrefix")} {s.delta_vs_category.toFixed(2)}
+                </p>
+              </article>
+            ))}
+          </div>
+          <div className="grid gap-4 lg:grid-cols-2">
+            <article className="rounded-lg border border-border bg-muted/20 p-3">
+              <h3 className="text-sm font-semibold">{t("insightsAlertsTitle")}</h3>
+              <div className="mt-2 space-y-2">
+                {insightsQuery.data.alerts.map((a) => (
+                  <div key={a.key} className="rounded-md border border-border bg-card p-2">
+                    <p className="text-sm font-medium text-foreground">
+                      {a.title} {a.triggered ? "•" : ""}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{a.detail}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+            <article className="rounded-lg border border-border bg-muted/20 p-3">
+              <h3 className="text-sm font-semibold">{t("insightsActionsTitle")}</h3>
+              <div className="mt-2 space-y-2">
+                {insightsQuery.data.actions.map((a, idx) => (
+                  <div key={`${a.problem}-${idx}`} className="rounded-md border border-border bg-card p-2">
+                    <p className="text-sm font-medium text-foreground">
+                      {a.priority} · {a.problem}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{a.recommendation}</p>
+                  </div>
+                ))}
+              </div>
+            </article>
+          </div>
+          <article className="rounded-lg border border-border bg-muted/20 p-3">
+            <h3 className="text-sm font-semibold">{t("insightsReleaseTitle")}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{insightsQuery.data.release_impact.summary}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {insightsQuery.data.release_impact.current_version ?? "—"} vs{" "}
+              {insightsQuery.data.release_impact.previous_version ?? "—"} · Δ{" "}
+              {insightsQuery.data.release_impact.rating_delta?.toFixed(2) ?? "—"}
+            </p>
+          </article>
+          <article className="rounded-lg border border-border bg-muted/20 p-3">
+            <h3 className="text-sm font-semibold">{t("insightsSegmentsTitle")}</h3>
+            <div className="mt-2 grid gap-2 md:grid-cols-2">
+              {insightsQuery.data.segments.map((s) => (
+                <div key={s.segment} className="rounded-md border border-border bg-card p-2">
+                  <p className="text-xs text-muted-foreground">{s.segment}</p>
+                  <p className="text-sm font-medium text-foreground">
+                    {s.reviews} · {t("insightsAvgRating")} {s.avg_rating.toFixed(2)}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </article>
+        </section>
+      ) : null}
 
       {fetch.status === "completed" ? (
         <section className="rounded-lg border border-border bg-card p-4 shadow-sm">

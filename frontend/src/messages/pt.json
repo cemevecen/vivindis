@@ -183,7 +183,14 @@
     "deepResearchStatusRunning": "Deep research is running. Results will refresh automatically on this page when it finishes.",
     "deepResearchStatusCompleted": "Deep research completed. Global results are now ready.",
     "deepResearchStatusFailed": "Deep research did not complete successfully. You can retry it.",
-    "deepResearchCollectedLabel": "Collected reviews"
+    "deepResearchCollectedLabel": "Collected reviews",
+    "insightsTitle": "Benchmark and Action Center",
+    "insightsDeltaPrefix": "Delta vs category:",
+    "insightsAlertsTitle": "Early Alerts",
+    "insightsActionsTitle": "AI Action Recommendations",
+    "insightsReleaseTitle": "Release Impact",
+    "insightsSegmentsTitle": "User Segments",
+    "insightsAvgRating": "Avg rating:"
   },
   "auth": {
     "signIn": "Entrar",

@@ -21,3 +21,55 @@ export type AnalysisDto = {
 export type AnalysisListDto = {
   items: AnalysisDto[];
 };
+
+export type InsightBenchmarkScore = {
+  label: string;
+  value: number;
+  delta_vs_category: number;
+  direction: "up" | "down" | "flat";
+};
+
+export type InsightBenchmark = {
+  app_name: string;
+  category: string;
+  category_sample_apps: number;
+  scores: InsightBenchmarkScore[];
+};
+
+export type InsightAlert = {
+  key: string;
+  title: string;
+  severity: "high" | "medium" | "low";
+  detail: string;
+  triggered: boolean;
+};
+
+export type InsightAction = {
+  problem: string;
+  recommendation: string;
+  owner: string;
+  priority: "P0" | "P1" | "P2";
+};
+
+export type InsightReleaseImpact = {
+  current_version: string | null;
+  previous_version: string | null;
+  current_avg_rating: number | null;
+  previous_avg_rating: number | null;
+  rating_delta: number | null;
+  summary: string;
+};
+
+export type InsightSegment = {
+  segment: string;
+  reviews: number;
+  avg_rating: number;
+};
+
+export type InsightsDto = {
+  benchmark: InsightBenchmark;
+  alerts: InsightAlert[];
+  actions: InsightAction[];
+  release_impact: InsightReleaseImpact;
+  segments: InsightSegment[];
+};
