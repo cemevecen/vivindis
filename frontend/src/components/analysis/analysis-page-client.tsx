@@ -202,11 +202,6 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         },
         getToken,
       });
-      await apiFetch<AnalysisDto[]>(`/api/v1/fetches/${created.id}/analyze`, {
-        method: "POST",
-        body: { types: ["heuristic", "ai"] },
-        getToken,
-      });
       return created;
     },
     onSuccess: async (created) => {
