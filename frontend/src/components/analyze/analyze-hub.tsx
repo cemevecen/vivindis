@@ -1199,8 +1199,8 @@ function AnalyzeHubConnected() {
                   onClear={clearStorePin}
                   onSearchAnother={dismissStorePinCard}
                 />
-                <div className="flex flex-wrap items-end gap-4">
-                  <div className="flex-1 min-w-[180px] space-y-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-start">
+                  <div className="flex min-w-0 flex-col gap-2">
                     <Label htmlFor="store-fetch-date-preset" className="text-foreground">
                       {t("dateRangeLabel")}
                     </Label>
@@ -1208,7 +1208,7 @@ function AnalyzeHubConnected() {
                       id="store-fetch-date-preset"
                       value={datePreset}
                       onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
-                      className="rounded-xl"
+                      className="h-11 rounded-xl"
                       disabled={!sessionApp}
                     >
                       <option value="7d">{t("datePresetLast7")}</option>
@@ -1221,34 +1221,37 @@ function AnalyzeHubConnected() {
                       <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
                   </div>
-                  <div className="space-y-2">
+                  <div className="flex flex-col gap-2">
                     <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                    <div className="flex h-11 items-center gap-2">
-                      <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                        {t("reviewScopeLocal")}
-                      </span>
-                    </div>
+                    <span className="inline-flex h-11 min-w-[7rem] items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 text-sm font-semibold text-emerald-700 dark:text-emerald-300">
+                      {t("reviewScopeLocal")}
+                    </span>
                   </div>
-                  <Button
-                    type="button"
-                    className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                    onClick={() => void handlePullStoreReviews()}
-                    disabled={
-                      !sessionApp ||
-                      storePullMutation.isPending ||
+                  <div className="flex flex-col gap-2 sm:min-w-0">
+                    <span className="invisible block select-none text-sm font-medium text-foreground" aria-hidden>
+                      &nbsp;
+                    </span>
+                    <Button
+                      type="button"
+                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 sm:w-auto"
+                      onClick={() => void handlePullStoreReviews()}
+                      disabled={
+                        !sessionApp ||
+                        storePullMutation.isPending ||
+                        fetchRowQuery.data?.status === "pending" ||
+                        fetchRowQuery.data?.status === "running" ||
+                        (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                      }
+                    >
+                      {storePullMutation.isPending ||
                       fetchRowQuery.data?.status === "pending" ||
-                      fetchRowQuery.data?.status === "running" ||
                       (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                    }
-                  >
-                    {storePullMutation.isPending ||
-                    fetchRowQuery.data?.status === "pending" ||
-                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                      ? tCommon("loading")
-                      : fetchRowQuery.data?.status === "running"
-                        ? t("fetchRunningShort")
-                        : t("pullStoreReviewsCta")}
-                  </Button>
+                        ? tCommon("loading")
+                        : fetchRowQuery.data?.status === "running"
+                          ? t("fetchRunningShort")
+                          : t("pullStoreReviewsCta")}
+                    </Button>
+                  </div>
                 </div>
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
