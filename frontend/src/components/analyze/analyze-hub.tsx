@@ -2099,26 +2099,58 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
             ) : null}
-            <div className="space-y-2">
-              <Label htmlFor="compare-date" className="text-foreground">
-                {t("compareDateLabel")}
-              </Label>
-              <SelectNative
-                id="compare-date"
-                value={datePreset}
-                onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
-                className="max-w-md rounded-xl"
+            <div className="flex flex-wrap items-end gap-4">
+              <div className="flex-1 min-w-[200px] space-y-2">
+                <Label htmlFor="store-fetch-date-preset" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t("dateRangeLabel")}
+                </Label>
+                <SelectNative
+                  id="store-fetch-date-preset"
+                  value={datePreset}
+                  onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
+                  className="h-11 rounded-xl"
+                  disabled={!sessionApp}
+                >
+                  <option value="7d">{t("datePresetLast7")}</option>
+                  <option value="30d">{t("datePresetLast30")}</option>
+                  <option value="90d">{t("datePresetLast90")}</option>
+                  <option value="180d">{t("datePresetLast180")}</option>
+                  <option value="365d">{t("datePresetLast365")}</option>
+                  <option value="2y">{t("datePresetLast2y")}</option>
+                  <option value="5y">{t("datePresetLast5y")}</option>
+                  <option value="all">{t("datePresetAll")}</option>
+                </SelectNative>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  {t("reviewScopeLabel")}
+                </Label>
+                <div className="flex h-11 items-center rounded-xl border border-border bg-muted/20 px-3">
+                  <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-tight text-emerald-700 dark:text-emerald-300">
+                    {t("reviewScopeLocal")}
+                  </span>
+                </div>
+              </div>
+              <Button
+                type="button"
+                className="h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                onClick={() => void handlePullStoreReviews()}
+                disabled={
+                  !sessionApp ||
+                  storePullMutation.isPending ||
+                  fetchRowQuery.data?.status === "pending" ||
+                  fetchRowQuery.data?.status === "running" ||
+                  (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                }
               >
-                <option value="7d">{t("datePresetLast7")}</option>
-                <option value="30d">{t("datePresetLast30")}</option>
-                <option value="90d">{t("datePresetLast90")}</option>
-                <option value="180d">{t("datePresetLast180")}</option>
-                <option value="365d">{t("datePresetLast365")}</option>
-                <option value="2y">{t("datePresetLast2y")}</option>
-                <option value="5y">{t("datePresetLast5y")}</option>
-                <option value="all">{t("datePresetAll")}</option>
-              </SelectNative>
-              <p className="text-xs text-muted-foreground">{t("compareDateRangePoolHint")}</p>
+                {storePullMutation.isPending ||
+                fetchRowQuery.data?.status === "pending" ||
+                (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                  ? tCommon("loading")
+                  : fetchRowQuery.data?.status === "running"
+                    ? t("fetchRunningShort")
+                    : t("pullStoreReviewsCta")}
+              </Button>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
