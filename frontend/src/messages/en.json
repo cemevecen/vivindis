@@ -408,7 +408,7 @@
     "deepResearchSettingsExpandAria": "Show global scan settings",
     "deepResearchSettingsCollapseAria": "Hide global scan settings",
     "deepResearchSettingsRunningCollapsedHint": "Settings are tucked away while the scan runs. Expand to view or edit, or to queue another scan.",
-    "deepResearchDatePresetCustom": "Custom (manual dates)",
+    "deepResearchDatePresetCustom": "Custom range",
     "deepResearchDateFromLabel": "From",
     "deepResearchDateToLabel": "To",
     "deepResearchLangCapHint": "You can select up to 24 languages per scan (server limit).",

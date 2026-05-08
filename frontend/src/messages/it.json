@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "Mostra impostazioni scansione globale",
     "deepResearchSettingsCollapseAria": "Nascondi impostazioni scansione globale",
     "deepResearchSettingsRunningCollapsedHint": "Durante la scansione le impostazioni sono compresse. Espandi per vedere, modificare o avviare un’altra scansione.",
-    "deepResearchDatePresetCustom": "Personalizzato (date manuali)",
+    "deepResearchDatePresetCustom": "Intervallo personalizzato",
     "deepResearchDateFromLabel": "Da",
     "deepResearchDateToLabel": "A",
     "deepResearchLangCapHint": "Fino a 24 lingue per scansione (limite del server).",

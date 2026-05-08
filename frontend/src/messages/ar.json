@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "إظهار إعدادات المسح العالمي",
     "deepResearchSettingsCollapseAria": "إخفاء إعدادات المسح العالمي",
     "deepResearchSettingsRunningCollapsedHint": "أثناء المسح تكون الإعدادات مطوية. وسّع لعرضها أو تعديلها أو لبدء مسح آخر.",
-    "deepResearchDatePresetCustom": "مخصص (تواريخ يدوية)",
+    "deepResearchDatePresetCustom": "نطاق مخصص",
     "deepResearchDateFromLabel": "من",
     "deepResearchDateToLabel": "إلى",
     "deepResearchLangCapHint": "حتى 24 لغة لكل مسح (حد الخادم).",

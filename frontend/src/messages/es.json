@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "Mostrar ajustes del escaneo global",
     "deepResearchSettingsCollapseAria": "Ocultar ajustes del escaneo global",
     "deepResearchSettingsRunningCollapsedHint": "Los ajustes están plegados mientras el escaneo está en curso. Expanda para ver, editar o iniciar otro escaneo.",
-    "deepResearchDatePresetCustom": "Personalizado (fechas manuales)",
+    "deepResearchDatePresetCustom": "Intervalo personalizado",
     "deepResearchDateFromLabel": "Desde",
     "deepResearchDateToLabel": "Hasta",
     "deepResearchLangCapHint": "Puedes elegir hasta 24 idiomas por escaneo (límite del servidor).",

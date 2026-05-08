@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "Показать настройки глобального сканирования",
     "deepResearchSettingsCollapseAria": "Скрыть настройки глобального сканирования",
     "deepResearchSettingsRunningCollapsedHint": "Пока идёт сканирование, настройки свёрнуты. Разверните, чтобы посмотреть, изменить или запустить ещё одно сканирование.",
-    "deepResearchDatePresetCustom": "Вручную (свои даты)",
+    "deepResearchDatePresetCustom": "Свой период",
     "deepResearchDateFromLabel": "С",
     "deepResearchDateToLabel": "По",
     "deepResearchLangCapHint": "До 24 языков за сканирование (лимит сервера).",

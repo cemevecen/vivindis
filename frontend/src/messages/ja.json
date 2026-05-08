@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "グローバルスキャン設定を表示",
     "deepResearchSettingsCollapseAria": "グローバルスキャン設定を隠す",
     "deepResearchSettingsRunningCollapsedHint": "スキャン中は設定が折りたたまれています。開いて確認・変更するか、別のスキャンをキューに入れます。",
-    "deepResearchDatePresetCustom": "カスタム（日付を直接指定）",
+    "deepResearchDatePresetCustom": "期間を指定",
     "deepResearchDateFromLabel": "開始",
     "deepResearchDateToLabel": "終了",
     "deepResearchLangCapHint": "1 回のスキャンで選べるのは最大 24 言語です（サーバー制限）。",

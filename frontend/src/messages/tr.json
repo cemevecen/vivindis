@@ -408,7 +408,7 @@
     "deepResearchSettingsExpandAria": "Global tarama ayarlarını göster",
     "deepResearchSettingsCollapseAria": "Global tarama ayarlarını gizle",
     "deepResearchSettingsRunningCollapsedHint": "Tarama sürerken ayarlar daraltıldı. Seçenekleri görmek, düzenlemek veya yeni tarama için genişletin.",
-    "deepResearchDatePresetCustom": "Özel (manuel tarihler)",
+    "deepResearchDatePresetCustom": "Özel aralık",
     "deepResearchDateFromLabel": "Başlangıç",
     "deepResearchDateToLabel": "Bitiş",
     "deepResearchLangCapHint": "Tarama başına en fazla 24 dil seçebilirsiniz (sunucu sınırı).",

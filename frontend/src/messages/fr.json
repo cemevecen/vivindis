@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "Afficher les paramètres du scan global",
     "deepResearchSettingsCollapseAria": "Masquer les paramètres du scan global",
     "deepResearchSettingsRunningCollapsedHint": "Les paramètres sont repliés pendant le scan. Développez pour voir, modifier ou lancer un autre scan.",
-    "deepResearchDatePresetCustom": "Personnalisé (dates manuelles)",
+    "deepResearchDatePresetCustom": "Plage personnalisée",
     "deepResearchDateFromLabel": "Du",
     "deepResearchDateToLabel": "Au",
     "deepResearchLangCapHint": "Jusqu’à 24 langues par scan (limite serveur).",

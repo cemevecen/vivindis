@@ -190,7 +190,7 @@
     "deepResearchSettingsExpandAria": "Globale Scan-Einstellungen anzeigen",
     "deepResearchSettingsCollapseAria": "Globale Scan-Einstellungen ausblenden",
     "deepResearchSettingsRunningCollapsedHint": "Während des Scans sind die Einstellungen eingeklappt. Aufklappen zum Anzeigen, Bearbeiten oder für einen weiteren Scan.",
-    "deepResearchDatePresetCustom": "Benutzerdefiniert (manuelle Daten)",
+    "deepResearchDatePresetCustom": "Eigener Zeitraum",
     "deepResearchDateFromLabel": "Von",
     "deepResearchDateToLabel": "Bis",
     "deepResearchLangCapHint": "Pro Scan sind höchstens 24 Sprachen möglich (Serverlimit).",

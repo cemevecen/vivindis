@@ -189,7 +189,7 @@
     "deepResearchSettingsExpandAria": "Mostrar configurações da varredura global",
     "deepResearchSettingsCollapseAria": "Ocultar configurações da varredura global",
     "deepResearchSettingsRunningCollapsedHint": "As configurações ficam recolhidas durante a varredura. Expanda para ver, editar ou iniciar outra varredura.",
-    "deepResearchDatePresetCustom": "Personalizado (datas manuais)",
+    "deepResearchDatePresetCustom": "Intervalo personalizado",
     "deepResearchDateFromLabel": "De",
     "deepResearchDateToLabel": "Até",
     "deepResearchLangCapHint": "Até 24 idiomas por varredura (limite do servidor).",
