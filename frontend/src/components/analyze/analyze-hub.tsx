@@ -129,7 +129,7 @@ function AnalyzeHubConnected() {
   const [selectedStoreHit, setSelectedStoreHit] = useState<StoreSearchResultItem | null>(null);
   const [sessionApp, setSessionApp] = useState<AppDto | null>(null);
   const [storeFetchId, setStoreFetchId] = useState<string | null>(null);
-  const [fetchProgressEvents, setFetchProgressEvents] = useState<FetchProgressEvent[]>([]);
+  const [, setFetchProgressEvents] = useState<FetchProgressEvent[]>([]);
   const [nowTick, setNowTick] = useState<number>(() => Date.now());
   const [isPinningStore, setIsPinningStore] = useState(false);
   const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
@@ -201,12 +201,6 @@ function AnalyzeHubConnected() {
       p === "google_play" ? t("platformAndroid") : p === "app_store" ? t("platformIos") : t("platformBoth"),
     [t],
   );
-
-  const appFetchesQuery = useQuery({
-    queryKey: sessionApp ? queryKeys.apps.fetches(sessionApp.id) : ["analyzeHub", "fetches", "idle"],
-    queryFn: () => apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${sessionApp?.id}/fetches`, { getToken }),
-    enabled: Boolean(sessionApp?.id && isSignedIn),
-  });
 
   const addFetchProgressEvent = useCallback((event: FetchProgressEvent) => {
     if (progressEventKeysRef.current.has(event.key)) {
@@ -594,23 +588,6 @@ function AnalyzeHubConnected() {
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
   const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
 
-  const historicalAvgDurationSec = useMemo(() => {
-    const rows = appFetchesQuery.data ?? [];
-    const completed = rows
-      .filter((r) => r.status === "completed" && r.started_at && r.completed_at)
-      .slice(0, 10)
-      .map((r) => {
-        const s = Date.parse(r.started_at || "");
-        const e = Date.parse(r.completed_at || "");
-        return Number.isFinite(s) && Number.isFinite(e) ? Math.max(1, Math.floor((e - s) / 1000)) : 0;
-      })
-      .filter((v) => v > 0);
-    if (completed.length === 0) {
-      return 240;
-    }
-    return Math.max(45, Math.floor(completed.reduce((a, b) => a + b, 0) / completed.length));
-  }, [appFetchesQuery.data]);
-
   const fetchElapsedSec = useMemo(() => {
     const row = fetchRowQuery.data;
     if (!row || !storeFetchId || row.id !== storeFetchId) {
@@ -625,14 +602,6 @@ function AnalyzeHubConnected() {
     const safeEnd = Number.isFinite(end) ? end : nowTick;
     return Math.max(0, Math.floor((safeEnd - start) / 1000));
   }, [fetchRowQuery.data, nowTick, storeFetchId]);
-
-  const fetchEtaSec = useMemo(() => {
-    const row = fetchRowQuery.data;
-    if (!row || row.status !== "running" || !storeFetchId || row.id !== storeFetchId) {
-      return null;
-    }
-    return Math.max(0, historicalAvgDurationSec - fetchElapsedSec);
-  }, [fetchElapsedSec, fetchRowQuery.data, historicalAvgDurationSec, storeFetchId]);
 
   const fetchDynamicHint = useMemo(() => {
     const row = fetchRowQuery.data;
@@ -670,19 +639,6 @@ function AnalyzeHubConnected() {
     }
     return t("fetchStageEnded");
   }, [fetchRowQuery.data, isHydratingPool, storeFetchId, t]);
-
-  const fetchTimeline = useMemo(() => {
-    const fmt = new Intl.DateTimeFormat(locale === "tr" ? "tr-TR" : locale, {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    });
-    return fetchProgressEvents.map((ev) => {
-      const ts = Date.parse(ev.at);
-      const time = Number.isFinite(ts) ? fmt.format(new Date(ts)) : ev.at;
-      return { ...ev, time };
-    });
-  }, [fetchProgressEvents, locale]);
 
   const rotatingProgressHints = useMemo(() => {
     const hints = [fetchStageLabel, fetchDynamicHint, t("estimatedTimeHint")]
