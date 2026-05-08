@@ -1307,7 +1307,7 @@ function AnalyzeHubConnected() {
                   </div>
                 </div>
                 {sessionApp ? (
-                  <div className="space-y-1 pt-1">
+                  <div className="space-y-2 pt-2">
                     <p className="text-xs text-muted-foreground">{t("reviewVolumeInRange")}</p>
                     <ReviewVolumeSparkline
                       points={statsQuery.data?.points ?? []}
