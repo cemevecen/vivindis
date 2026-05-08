@@ -165,10 +165,7 @@ async def _scrape_google_play(
     ]
 
     if review_scope == "local":
-        locale_candidates = [
-            (req_lang or "tr", req_country or "tr"),
-            ("en", "us"),
-        ]
+        locale_candidates = [(req_lang or "tr", req_country or "tr")]
     else:
         max_global_locales = max(2, int(getattr(settings, "scrape_play_global_locale_limit", 12) or 12))
         requested_langs = {x.strip().lower() for x in (global_langs or []) if x and x.strip()}
@@ -217,7 +214,11 @@ async def _scrape_google_play(
     # Safety net: if shard model yields 0 (often due transient Play throttling),
     # fallback to low-pressure baseline scraping without score filter.
     if total_inserted == 0:
-        fallback_locales = [(req_lang or "tr", req_country or "tr"), ("tr", "tr"), ("en", "us")]
+        fallback_locales = (
+            [(req_lang or "tr", req_country or "tr")]
+            if review_scope == "local"
+            else [(req_lang or "tr", req_country or "tr"), ("tr", "tr"), ("en", "us")]
+        )
         unique_locales = list(dict.fromkeys(fallback_locales))
         for variant in pkg_variants:
             baseline_count = await _scrape_google_play_baseline(
@@ -440,7 +441,7 @@ async def _scrape_app_store(
     ]
 
     if review_scope == "local":
-        countries = [req_country or "tr", "us"]
+        countries = [req_country or "tr"]
     else:
         max_global_countries = max(
             4,
@@ -615,12 +616,7 @@ async def _scrape_app_store(
 
     total_inserted = await _fetch_country_group(countries)
 
-    # App Store RSS, ülke başına sınırlı sayfa döndürebildiğinden "local" modda
-    # düşük hacim kalırsa ek ülkelerle otomatik genişletme yap.
-    if review_scope == "local" and total_inserted < 1500 and total_inserted < max_inserted:
-        overflow_countries = [c for c in APP_STORE_COUNTRIES if c not in set(countries)]
-        if overflow_countries:
-            await _fetch_country_group(overflow_countries)
+    # "Local" modda yalnızca seçili ülke taranır; otomatik ülke genişletmesi yapılmaz.
     return total_inserted
 
 
