@@ -1199,8 +1199,8 @@ function AnalyzeHubConnected() {
                   onClear={clearStorePin}
                   onSearchAnother={dismissStorePinCard}
                 />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="space-y-2">
+                <div className="flex flex-wrap items-end gap-4">
+                  <div className="flex-1 min-w-[180px] space-y-2">
                     <Label htmlFor="store-fetch-date-preset" className="text-foreground">
                       {t("dateRangeLabel")}
                     </Label>
@@ -1223,14 +1223,12 @@ function AnalyzeHubConnected() {
                   </div>
                   <div className="space-y-2">
                     <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                    <div className="flex items-center gap-2">
+                    <div className="flex h-11 items-center gap-2">
                       <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                         {t("reviewScopeLocal")}
                       </span>
                     </div>
                   </div>
-                </div>
-                <div className="flex flex-wrap items-center gap-3">
                   <Button
                     type="button"
                     className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
