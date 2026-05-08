@@ -400,6 +400,7 @@
     "globalLangsHint": "Bir veya daha fazla dil seçin. Seçtiğiniz dillere göre global mağaza yorumları çekilir.",
     "globalTop30Hint": "Başlamadan önce aşağıdan tarih aralığını ve dilleri seçin. Daha geniş ayarlar daha uzun sürebilir.",
     "deepResearchPrepTitle": "Global tarama ayarları",
+    "deepResearchDatePresetCustom": "Özel (manuel tarihler)",
     "deepResearchDateFromLabel": "Başlangıç",
     "deepResearchDateToLabel": "Bitiş",
     "deepResearchLangCapHint": "Tarama başına en fazla 24 dil seçebilirsiniz (sunucu sınırı).",

@@ -400,6 +400,7 @@
     "globalLangsHint": "Select one or more languages. Global store reviews will focus on these languages.",
     "globalTop30Hint": "Pick the date range and languages below before starting. Broader settings may take longer to finish.",
     "deepResearchPrepTitle": "Global scan settings",
+    "deepResearchDatePresetCustom": "Custom (manual dates)",
     "deepResearchDateFromLabel": "From",
     "deepResearchDateToLabel": "To",
     "deepResearchLangCapHint": "You can select up to 24 languages per scan (server limit).",

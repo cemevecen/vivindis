@@ -181,6 +181,7 @@
     "globalLangsHint": "Seleziona una o più lingue. Le recensioni globali si concentreranno su di esse.",
     "globalTop30Hint": "Scegli intervallo di date e lingue qui sotto prima di avviare. Impostazioni più ampie possono richiedere più tempo.",
     "deepResearchPrepTitle": "Impostazioni scansione globale",
+    "deepResearchDatePresetCustom": "Personalizzato (date manuali)",
     "deepResearchDateFromLabel": "Da",
     "deepResearchDateToLabel": "A",
     "deepResearchLangCapHint": "Fino a 24 lingue per scansione (limite del server).",

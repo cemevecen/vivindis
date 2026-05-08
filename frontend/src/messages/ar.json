@@ -181,6 +181,7 @@
     "globalLangsHint": "اختر لغة واحدة أو أكثر. ستركز مراجعات المتجر العالمية على هذه اللغات.",
     "globalTop30Hint": "اختر نطاق التاريخ واللغات أدناه قبل البدء. الإعدادات الأوسع قد تستغرق وقتاً أطول.",
     "deepResearchPrepTitle": "إعدادات المسح العالمي",
+    "deepResearchDatePresetCustom": "مخصص (تواريخ يدوية)",
     "deepResearchDateFromLabel": "من",
     "deepResearchDateToLabel": "إلى",
     "deepResearchLangCapHint": "حتى 24 لغة لكل مسح (حد الخادم).",

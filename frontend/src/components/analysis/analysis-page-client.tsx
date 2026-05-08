@@ -13,6 +13,7 @@ import { ReviewTimelineCharts } from "@/components/analysis/review-timeline-char
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SelectNative } from "@/components/ui/select-native";
 import { Link, useRouter } from "@/i18n/routing";
 import { downloadAnalysisCsvExport, downloadAnalysisJson } from "@/lib/analysis-export";
 import {
@@ -21,6 +22,7 @@ import {
   type AnalysisPdfLocaleStrings,
 } from "@/lib/analysis-pdf-html";
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
+import { rangeFromPreset, type DatePresetId } from "@/lib/analyze-hub-utils";
 import { GLOBAL_SCAN_LANG_CODES, MAX_GLOBAL_FETCH_LANGS } from "@/lib/global-scan-langs";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
@@ -72,6 +74,8 @@ function reviewToneMessageKey(rating: number): "tonePositive" | "toneNeutral" | 
   }
   return "toneNeutral";
 }
+
+type DeepResearchDatePreset = DatePresetId | "custom";
 
 function ratingTierClasses(rating: number): { dot: string; text: string } {
   const safe = Math.max(1, Math.min(5, Math.round(rating)));
@@ -126,6 +130,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const [insightAlertFilter, setInsightAlertFilter] = useState<"all" | "triggered" | "high" | "medium" | "low">("all");
   const [deepFrom, setDeepFrom] = useState("");
   const [deepTo, setDeepTo] = useState("");
+  const [deepDatePreset, setDeepDatePreset] = useState<DeepResearchDatePreset>("custom");
   const [deepLangs, setDeepLangs] = useState<Set<string>>(() => new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)));
   const [globalScanMeta, setGlobalScanMeta] = useState<{ from: string; to: string; langs: string[] } | null>(null);
 
@@ -176,6 +181,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     }
     setDeepFrom(f.from_date);
     setDeepTo(f.to_date);
+    setDeepDatePreset("custom");
     // Sync when fetch id or server import range changes (not every query refetch)
   }, [fetchQuery.data?.id, fetchQuery.data?.from_date, fetchQuery.data?.to_date]); // eslint-disable-line react-hooks/exhaustive-deps -- see above
 
@@ -923,6 +929,34 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             <div className="space-y-4 rounded-xl border border-white/40 bg-background/60 p-4 dark:border-white/10 dark:bg-background/40">
               <p className="text-sm font-semibold text-foreground">{t("deepResearchPrepTitle")}</p>
               <div className="grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label htmlFor="deep-date-preset">{tAnalyzeHub("dateRangeLabel")}</Label>
+                  <SelectNative
+                    id="deep-date-preset"
+                    value={deepDatePreset}
+                    onChange={(e) => {
+                      const v = e.target.value as DeepResearchDatePreset;
+                      setDeepDatePreset(v);
+                      if (v === "custom") {
+                        return;
+                      }
+                      const r = rangeFromPreset(v);
+                      setDeepFrom(r.from);
+                      setDeepTo(r.to);
+                    }}
+                    className="h-11 w-full rounded-xl"
+                  >
+                    <option value="7d">{tAnalyzeHub("datePresetLast7")}</option>
+                    <option value="30d">{tAnalyzeHub("datePresetLast30")}</option>
+                    <option value="90d">{tAnalyzeHub("datePresetLast90")}</option>
+                    <option value="180d">{tAnalyzeHub("datePresetLast180")}</option>
+                    <option value="365d">{tAnalyzeHub("datePresetLast365")}</option>
+                    <option value="2y">{tAnalyzeHub("datePresetLast2y")}</option>
+                    <option value="5y">{tAnalyzeHub("datePresetLast5y")}</option>
+                    <option value="all">{tAnalyzeHub("datePresetAll")}</option>
+                    <option value="custom">{t("deepResearchDatePresetCustom")}</option>
+                  </SelectNative>
+                </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="deep-from">{t("deepResearchDateFromLabel")}</Label>
                   <Input
@@ -930,7 +964,10 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                     type="date"
                     value={deepFrom}
                     max={deepTo || undefined}
-                    onChange={(e) => setDeepFrom(e.target.value)}
+                    onChange={(e) => {
+                      setDeepDatePreset("custom");
+                      setDeepFrom(e.target.value);
+                    }}
                   />
                 </div>
                 <div className="space-y-1.5">
@@ -940,7 +977,10 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                     type="date"
                     value={deepTo}
                     min={deepFrom || undefined}
-                    onChange={(e) => setDeepTo(e.target.value)}
+                    onChange={(e) => {
+                      setDeepDatePreset("custom");
+                      setDeepTo(e.target.value);
+                    }}
                   />
                 </div>
               </div>

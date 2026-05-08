@@ -181,6 +181,7 @@
     "globalLangsHint": "Seleccione uno o más idiomas. Las reseñas globales se centrarán en ellos.",
     "globalTop30Hint": "Elige el rango de fechas y los idiomas abajo antes de empezar. Ajustes más amplios pueden tardar más.",
     "deepResearchPrepTitle": "Ajustes del escaneo global",
+    "deepResearchDatePresetCustom": "Personalizado (fechas manuales)",
     "deepResearchDateFromLabel": "Desde",
     "deepResearchDateToLabel": "Hasta",
     "deepResearchLangCapHint": "Puedes elegir hasta 24 idiomas por escaneo (límite del servidor).",

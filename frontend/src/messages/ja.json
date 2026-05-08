@@ -181,6 +181,7 @@
     "globalLangsHint": "1 つ以上の言語を選びます。グローバルレビューはそれらにフォーカスします。",
     "globalTop30Hint": "開始前に下で期間と言語を選んでください。範囲が広いほど時間がかかることがあります。",
     "deepResearchPrepTitle": "グローバルスキャンの設定",
+    "deepResearchDatePresetCustom": "カスタム（日付を直接指定）",
     "deepResearchDateFromLabel": "開始",
     "deepResearchDateToLabel": "終了",
     "deepResearchLangCapHint": "1 回のスキャンで選べるのは最大 24 言語です（サーバー制限）。",

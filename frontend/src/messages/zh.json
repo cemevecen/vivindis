@@ -181,6 +181,7 @@
     "globalLangsHint": "选择一种或多种语言。全球商店评论将聚焦这些语言。",
     "globalTop30Hint": "开始前请在下方选择日期范围和语言。范围越大可能耗时越久。",
     "deepResearchPrepTitle": "全球扫描设置",
+    "deepResearchDatePresetCustom": "自定义（手动日期）",
     "deepResearchDateFromLabel": "开始",
     "deepResearchDateToLabel": "结束",
     "deepResearchLangCapHint": "每次扫描最多可选择 24 种语言（服务器限制）。",

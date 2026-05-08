@@ -182,6 +182,7 @@
     "globalLangsHint": "Wählen Sie eine oder mehrere Sprachen. Globale Store-Bewertungen fokussieren diese Sprachen.",
     "globalTop30Hint": "Wählen Sie unten Datumsbereich und Sprachen, bevor Sie starten. Größere Einstellungen können länger dauern.",
     "deepResearchPrepTitle": "Einstellungen für globalen Scan",
+    "deepResearchDatePresetCustom": "Benutzerdefiniert (manuelle Daten)",
     "deepResearchDateFromLabel": "Von",
     "deepResearchDateToLabel": "Bis",
     "deepResearchLangCapHint": "Pro Scan sind höchstens 24 Sprachen möglich (Serverlimit).",

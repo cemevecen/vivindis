@@ -181,6 +181,7 @@
     "globalLangsHint": "Selecione um ou mais idiomas. As avaliações globais focarão neles.",
     "globalTop30Hint": "Escolha o intervalo de datas e os idiomas abaixo antes de iniciar. Configurações mais amplas podem demorar mais.",
     "deepResearchPrepTitle": "Configurações da varredura global",
+    "deepResearchDatePresetCustom": "Personalizado (datas manuais)",
     "deepResearchDateFromLabel": "De",
     "deepResearchDateToLabel": "Até",
     "deepResearchLangCapHint": "Até 24 idiomas por varredura (limite do servidor).",
