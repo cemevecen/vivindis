@@ -5,9 +5,12 @@ from __future__ import annotations
 import uuid
 from datetime import date, datetime
 
-from pydantic import BaseModel, ConfigDict, model_validator
+from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
 from app.models.enums import FetchStatus
+
+
+_ALLOWED_REVIEW_LIMITS = frozenset({100, 500, 1000, 5000})
 
 
 class ReviewFetchCreate(BaseModel):
@@ -17,6 +20,17 @@ class ReviewFetchCreate(BaseModel):
     lang: str | None = None
     country: str | None = None
     global_langs: list[str] | None = None
+    review_limit: int | None = None
+
+    @field_validator("review_limit")
+    @classmethod
+    def validate_review_limit(cls, v: int | None) -> int | None:
+        if v is None:
+            return None
+        if v not in _ALLOWED_REVIEW_LIMITS:
+            msg = "review_limit yalnızca 100, 500, 1000 veya 5000 olabilir (veya boş bırakılabilir)."
+            raise ValueError(msg)
+        return v
 
     @model_validator(mode="after")
     def check_range(self) -> ReviewFetchCreate:
@@ -51,6 +65,7 @@ class ReviewFetchResponse(BaseModel):
     status: FetchStatus
     from_date: date
     to_date: date
+    review_limit: int | None
     review_count: int
     error_message: str | None
     started_at: datetime | None

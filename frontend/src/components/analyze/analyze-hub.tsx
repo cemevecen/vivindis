@@ -1199,11 +1199,8 @@ function AnalyzeHubConnected() {
                   onClear={clearStorePin}
                   onSearchAnother={dismissStorePinCard}
                 />
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_2fr] items-end">
-                  <div className="flex flex-col gap-2">
-                    <Label htmlFor="store-fetch-date-preset" className="text-sm font-medium text-foreground">
-                      {t("dateRangeLabel")}
-                    </Label>
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex-1 min-w-[200px]">
                     <SelectNative
                       id="store-fetch-date-preset"
                       value={datePreset}
@@ -1221,39 +1218,31 @@ function AnalyzeHubConnected() {
                       <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <Label className="whitespace-nowrap text-sm font-medium text-foreground">
-                      {t("reviewScopeLabel")}
-                    </Label>
-                    <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
-                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                        {t("reviewScopeLocal")}
-                      </span>
-                    </div>
+                  <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                      {t("reviewScopeLocal")}
+                    </span>
                   </div>
-                  <div className="flex flex-col gap-2">
-                    <div className="h-5 invisible select-none" aria-hidden>&nbsp;</div>
-                    <Button
-                      type="button"
-                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                      onClick={() => void handlePullStoreReviews()}
-                      disabled={
-                        !sessionApp ||
-                        storePullMutation.isPending ||
-                        fetchRowQuery.data?.status === "pending" ||
-                        fetchRowQuery.data?.status === "running" ||
-                        (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                      }
-                    >
-                      {storePullMutation.isPending ||
+                  <Button
+                    type="button"
+                    className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                    onClick={() => void handlePullStoreReviews()}
+                    disabled={
+                      !sessionApp ||
+                      storePullMutation.isPending ||
                       fetchRowQuery.data?.status === "pending" ||
+                      fetchRowQuery.data?.status === "running" ||
                       (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                        ? tCommon("loading")
-                        : fetchRowQuery.data?.status === "running"
-                          ? t("fetchRunningShort")
-                          : t("pullStoreReviewsCta")}
-                    </Button>
-                  </div>
+                    }
+                  >
+                    {storePullMutation.isPending ||
+                    fetchRowQuery.data?.status === "pending" ||
+                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                      ? tCommon("loading")
+                      : fetchRowQuery.data?.status === "running"
+                        ? t("fetchRunningShort")
+                        : t("pullStoreReviewsCta")}
+                  </Button>
                 </div>
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
@@ -2099,11 +2088,8 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
             ) : null}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_2fr] items-end">
-              <div className="flex flex-col gap-2">
-                <Label htmlFor="store-fetch-date-preset" className="text-sm font-medium text-foreground">
-                  {t("dateRangeLabel")}
-                </Label>
+            <div className="flex flex-wrap items-center gap-4">
+              <div className="flex-1 min-w-[200px]">
                 <SelectNative
                   id="store-fetch-date-preset"
                   value={datePreset}
@@ -2121,39 +2107,31 @@ function AnalyzeHubConnected() {
                   <option value="all">{t("datePresetAll")}</option>
                 </SelectNative>
               </div>
-              <div className="flex flex-col gap-2">
-                <Label className="whitespace-nowrap text-sm font-medium text-foreground">
-                  {t("reviewScopeLabel")}
-                </Label>
-                <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
-                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                    {t("reviewScopeLocal")}
-                  </span>
-                </div>
+              <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                  {t("reviewScopeLocal")}
+                </span>
               </div>
-              <div className="flex flex-col gap-2">
-                <div className="h-5 invisible select-none" aria-hidden>&nbsp;</div>
-                <Button
-                  type="button"
-                  className="h-11 w-full rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                  onClick={() => void handlePullStoreReviews()}
-                  disabled={
-                    !sessionApp ||
-                    storePullMutation.isPending ||
-                    fetchRowQuery.data?.status === "pending" ||
-                    fetchRowQuery.data?.status === "running" ||
-                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                  }
-                >
-                  {storePullMutation.isPending ||
+              <Button
+                type="button"
+                className="h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                onClick={() => void handlePullStoreReviews()}
+                disabled={
+                  !sessionApp ||
+                  storePullMutation.isPending ||
                   fetchRowQuery.data?.status === "pending" ||
+                  fetchRowQuery.data?.status === "running" ||
                   (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                    ? tCommon("loading")
-                    : fetchRowQuery.data?.status === "running"
-                      ? t("fetchRunningShort")
-                      : t("pullStoreReviewsCta")}
-                </Button>
-              </div>
+                }
+              >
+                {storePullMutation.isPending ||
+                fetchRowQuery.data?.status === "pending" ||
+                (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                  ? tCommon("loading")
+                  : fetchRowQuery.data?.status === "running"
+                    ? t("fetchRunningShort")
+                    : t("pullStoreReviewsCta")}
+              </Button>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>

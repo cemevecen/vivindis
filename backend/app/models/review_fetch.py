@@ -38,6 +38,7 @@ class ReviewFetch(Base):
     )
     from_date: Mapped[date] = mapped_column(Date, nullable=False)
     to_date: Mapped[date] = mapped_column(Date, nullable=False)
+    review_limit: Mapped[int | None] = mapped_column(Integer, nullable=True)
     review_count: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
