@@ -1228,7 +1228,6 @@ function AnalyzeHubConnected() {
                         {t("reviewScopeLocal")}
                       </span>
                     </div>
-                    <p className="text-xs text-muted-foreground">{t("localFirstHint")}</p>
                   </div>
                 </div>
                 <div className="flex flex-wrap items-center gap-3">
