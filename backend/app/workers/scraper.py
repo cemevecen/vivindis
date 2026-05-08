@@ -162,6 +162,9 @@ async def _scrape_google_play(
         ("zh", "hk"),
         ("id", "id"),
         ("th", "th"),
+        ("sw", "ke"),
+        ("sw", "tz"),
+        ("sw", "ug"),
         ("pl", "pl"),
         ("hi", "in"),
         ("vi", "vn"),
@@ -462,6 +465,9 @@ async def _scrape_app_store(
         "nl",
         "be",
         "ch",
+        "ke",
+        "tz",
+        "ug",
     ]
 
     if review_scope == "local":
@@ -484,6 +490,7 @@ async def _scrape_app_store(
             "sv": ["se"],
             "no": ["no"],
             "da": ["dk"],
+            "sw": ["ke", "tz", "ug"],
         }
         by_lang = [c for c in lang_country_map.get(target_lang, []) if c in APP_STORE_COUNTRIES]
         if not by_lang:
