@@ -1252,7 +1252,6 @@ function AnalyzeHubConnected() {
                         ? t("fetchRunningShort")
                         : t("pullStoreReviewsCta")}
                   </Button>
-                  <p className="text-xs text-muted-foreground">{t("localFirstHint")}</p>
                 </div>
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
