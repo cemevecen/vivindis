@@ -1,9 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Link } from "@/i18n/routing";
 import { logClientErrorInDev } from "@/lib/dev-client-log";
 import { cn } from "@/lib/utils";
 
@@ -12,11 +13,10 @@ type Props = {
   reset: () => void;
 };
 
-/**
- * Alt segmentlerdeki hatalar için App Router error boundary.
- * (Dev’de “missing required error components” / kısmi derleme senaryolarında da yardımcı olur.)
- */
-export default function AppError({ error, reset }: Props) {
+/** Hatalar `NextIntlClientProvider` içinde yakalanır; çeviri anahtarları kullanılır. */
+export default function LocaleSegmentError({ error, reset }: Props) {
+  const t = useTranslations("errors");
+
   useEffect(() => {
     logClientErrorInDev(error);
   }, [error]);
@@ -24,9 +24,9 @@ export default function AppError({ error, reset }: Props) {
   return (
     <div className="flex min-h-[50vh] flex-col items-center justify-center gap-4 p-6 text-center">
       <div className="space-y-2">
-        <h1 className="text-lg font-semibold tracking-tight">Something went wrong</h1>
+        <h1 className="text-lg font-semibold tracking-tight">{t("boundaryTitle")}</h1>
         <p className="max-w-md text-sm text-muted-foreground">
-          You can try again or return to the home page.
+          {t("boundaryDescription")}
           {error.digest ? (
             <>
               {" "}
@@ -37,10 +37,10 @@ export default function AppError({ error, reset }: Props) {
       </div>
       <div className="flex flex-wrap items-center justify-center gap-2">
         <Button type="button" variant="default" size="sm" onClick={() => reset()}>
-          Try again
+          {t("boundaryRetry")}
         </Button>
         <Link href="/" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
-          Home
+          {t("boundaryHome")}
         </Link>
       </div>
     </div>

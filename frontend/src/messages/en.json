@@ -459,6 +459,18 @@
     "shareNativeBody": "Review analytics: {name}",
     "shareFailed": "Sharing was cancelled or failed."
   },
+  "meta": {
+    "siteDescription": "SaaS platform that pulls and analyzes Google Play and App Store reviews at scale."
+  },
+  "errors": {
+    "boundaryTitle": "Something went wrong",
+    "boundaryDescription": "You can try again or return to the home page.",
+    "boundaryRetry": "Try again",
+    "boundaryHome": "Home",
+    "globalTitle": "Critical error",
+    "globalDescription": "The interface could not load. In development, stop all next dev processes, run rm -rf .next, then restart.",
+    "globalRetry": "Try again"
+  },
   "about": {
     "title": "About Vivindis",
     "p1": "Vivindis pulls Google Play and App Store reviews, runs heuristic and optional AI analysis, and shows results in a structured dashboard.",

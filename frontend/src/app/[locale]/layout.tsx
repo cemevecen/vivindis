@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages, setRequestLocale } from "next-intl/server";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
@@ -37,7 +37,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     languages[loc] = `${siteUrl}/${loc}${pathSuffix}`;
   }
 
+  const tMeta = await getTranslations({ locale, namespace: "meta" });
+
   return {
+    description: tMeta("siteDescription"),
     alternates: {
       canonical: `${siteUrl}/${locale}${pathSuffix}`,
       languages,

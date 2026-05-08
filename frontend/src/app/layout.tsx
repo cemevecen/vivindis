@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     template: "%s | Vivindis",
   },
   description:
-    "Google Play ve App Store yorumlarını toplu çekip analiz eden SaaS platformu.",
+    "SaaS platform that pulls and analyzes Google Play and App Store reviews at scale.",
   manifest: "/manifest.webmanifest",
   applicationName: "Vivindis",
   icons: {
