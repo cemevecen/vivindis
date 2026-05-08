@@ -288,11 +288,24 @@ function AnalyzeHubConnected() {
 
   const fetchRowQuery = useQuery({
     queryKey: storeFetchId ? queryKeys.reviews.fetchById(storeFetchId) : ["analyzeHub", "fetch", "idle"],
-    queryFn: () => apiFetch<ReviewFetchDto>(`/api/v1/fetches/${storeFetchId}`, { getToken }),
+    queryFn: async () => {
+      try {
+        return await apiFetch<ReviewFetchDto>(`/api/v1/fetches/${storeFetchId}`, { getToken });
+      } catch (err) {
+        // Some deploys can briefly return 404 for the global fetch lookup; recover via app-scoped list.
+        if (err instanceof ApiError && err.status === 404 && sessionApp?.id && storeFetchId) {
+          const rows = await apiFetch<ReviewFetchDto[]>(`/api/v1/apps/${sessionApp.id}/fetches`, { getToken });
+          const matched = rows.find((row) => String(row.id).trim() === String(storeFetchId).trim());
+          if (matched) {
+            return matched;
+          }
+        }
+        throw err;
+      }
+    },
     enabled: Boolean(storeFetchId && storeFetchId.length > 0 && isSignedIn),
-    retry: (failureCount, err) =>
-      failureCount < 4 && err instanceof ApiError && err.status === 404,
-    retryDelay: (attempt) => 200 * (attempt + 1),
+    retry: (failureCount, err) => failureCount < 8 && err instanceof ApiError && err.status === 404,
+    retryDelay: (attempt) => 300 * (attempt + 1),
     refetchInterval: (q) => {
       const s = q.state.data?.status;
       return s === "pending" || s === "running" ? 1000 : false;
@@ -1245,7 +1258,11 @@ function AnalyzeHubConnected() {
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
                     <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
-                    <p className="text-xs break-words text-red-800/90">{formatClientFetchError(fetchRowQuery.error)}</p>
+                    <p className="text-xs break-words text-red-800/90">
+                      {fetchRowQuery.error instanceof ApiError && fetchRowQuery.error.status === 404
+                        ? t("fetchHintPending")
+                        : formatClientFetchError(fetchRowQuery.error)}
+                    </p>
                     <Button type="button" variant="outline" size="sm" onClick={() => void fetchRowQuery.refetch()}>
                       {tCommon("retry")}
                     </Button>
