@@ -19,6 +19,14 @@ env:
 
 jobs:
   api:
+    if: |
+      github.event_name != 'push' ||
+      github.event.head_commit == null ||
+      (
+        !contains(github.event.head_commit.message, '[skip ci]') &&
+        !contains(github.event.head_commit.message, '[ci skip]') &&
+        !contains(github.event.head_commit.message, '[skip actions]')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: GET /health
@@ -38,6 +46,14 @@ jobs:
           test "$code" != "404"
 
   site:
+    if: |
+      github.event_name != 'push' ||
+      github.event.head_commit == null ||
+      (
+        !contains(github.event.head_commit.message, '[skip ci]') &&
+        !contains(github.event.head_commit.message, '[ci skip]') &&
+        !contains(github.event.head_commit.message, '[skip actions]')
+      )
     runs-on: ubuntu-latest
     steps:
       - name: Ana site (TR)

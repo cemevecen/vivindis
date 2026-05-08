@@ -10,3 +10,10 @@ alwaysApply: true
 - **Kapatma kriteri:** Anlamlı bir kod/iş değişikliği bittiğinde iş **mutlaka** `git commit` + `git push` (ör. `main`) ile GitHub’a aktarılır. İşi “bitti” sayma: push yapılmadıysa yarım kalmıştır. Kullanıcı yarım kalan önceki işlerden bahsediyorsa, önce onları tamamla ve aynı şekilde commit + push ile kapat.
 - **Dağıtım zinciri:** GitHub güncellemesi → Vercel (frontend) / Railway (backend) deploy beklentisi. Canlıyı güncelleyen bu akıştır; IDE yerel diski tek başına canlıya taşımaz.
 - **Tarayıcı / MCP doğrulama:** Gerekirse üretim veya staging URL kullan; kullanıcı localhost istemedikçe `localhost:3010` veya benzeri ile doğrulama yapma.
+
+## `[skip ci]` ve kota (Vercel Hobby)
+
+- **GitHub Actions:** `main` push mesajında `[skip ci]`, `[ci skip]` veya `[skip actions]` geçerse `Production smoke` workflow çalışmaz (`schedule` / `workflow_dispatch` her zaman çalışır).
+- **Vercel:** Repo kökünde `frontend/vercel.json` içindeki `ignoreCommand`, aynı anahtar kelimelerde **build’i atlar** (`frontend/scripts/vercel-skip-build-if-flag.mjs`). Böylece yalnızca dokümantasyon / altyapı gibi “canlıyı değiştirmeyen” commitlerde hem Actions hem Vercel kotası korunur.
+- **Dikkat:** Üretim kodu değişikliğinde commit mesajına bu etiketleri yazma; canlı güncellenmez.
+- **İki Vercel projesi:** Aynı repoya bağlı iki proje (ör. `vivindis` ve `vivindis-outb`) her push’ta **iki kez** build dener; Hobby **build rate limit**’e hızlı yaklaşılır. Silmeden önce her iki projede **Settings → Domains**: `vivindis.com` / `www.vivindis.com` hangi projede bağlıysa **üretim o projedir**. Diğer projede **Settings → Git → Disconnect** (veya otomatik deploy’u kapat) güvenli yoldur; domain’i olmayan projeyi silmek yalnızca o projeye ait `*.vercel.app` önizlemelerini etkiler — yine de silmeden önce domain eşlemesini doğrula.
