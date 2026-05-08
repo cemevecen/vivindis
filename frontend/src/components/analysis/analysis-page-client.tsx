@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Globe } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -784,19 +785,38 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         ) : null}
       </div>
 
-      <section className="rounded-lg border border-primary/20 bg-primary/5 p-4">
-        <p className="text-sm font-medium text-foreground">{t("localResultNotice")}</p>
-        <p className="mt-1 text-sm text-muted-foreground">{t("globalUpsellHint")}</p>
-        <p className="mt-2 text-xs text-muted-foreground">{t("globalTop30Hint")}</p>
-        <Button
-          type="button"
-          className="mt-3"
-          variant="outline"
-          onClick={() => deepResearchMutation.mutate()}
-          disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
-        >
-          {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
-        </Button>
+      <section
+        className={cn(
+          "relative overflow-hidden rounded-2xl border-2 border-violet-500/40 bg-gradient-to-br from-violet-500/[0.14] via-primary/[0.09] to-amber-500/[0.12] p-5 shadow-md ring-1 ring-violet-500/15",
+          "dark:border-violet-400/35 dark:from-violet-500/[0.18] dark:via-primary/[0.12] dark:to-amber-500/[0.1] dark:ring-violet-400/20",
+        )}
+      >
+        <div
+          className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-violet-500/20 blur-2xl dark:bg-violet-400/15"
+          aria-hidden
+        />
+        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">
+          <div
+            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-primary text-white shadow-lg dark:from-violet-500 dark:to-primary"
+            aria-hidden
+          >
+            <Globe className="h-6 w-6" strokeWidth={2} />
+          </div>
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
+            <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
+            <p className="pt-1 text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
+            <Button
+              type="button"
+              size="lg"
+              className="mt-4 w-full rounded-xl font-semibold shadow-sm sm:w-auto"
+              onClick={() => deepResearchMutation.mutate()}
+              disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
+            >
+              {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
+            </Button>
+          </div>
+        </div>
       </section>
 
       {isDeepResearchFlow ? (
