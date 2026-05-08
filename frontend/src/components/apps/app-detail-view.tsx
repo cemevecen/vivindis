@@ -2,9 +2,10 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ChevronDown, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { StartFetchForm } from "@/components/apps/start-fetch-form";
@@ -27,6 +28,10 @@ function parseApiDate(isoDate: string): Date {
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function duplicateBannerDismissKey(appId: string): string {
+  return `vivindis:duplicate-banner-dismissed:${appId}`;
+}
 
 function statusClass(status: FetchStatus): string {
   switch (status) {
@@ -120,6 +125,26 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
     }
     return findDuplicateAppsForApp(all, row);
   }, [allAppsQuery.data, appQuery.data]);
+  const [duplicatePanelOpen, setDuplicatePanelOpen] = useState(true);
+  const [duplicatePanelDismissed, setDuplicatePanelDismissed] = useState(false);
+
+  useEffect(() => {
+    if (!effectiveAppId) {
+      setDuplicatePanelDismissed(false);
+      return;
+    }
+    const stored = window.localStorage.getItem(duplicateBannerDismissKey(effectiveAppId));
+    setDuplicatePanelDismissed(stored === "1");
+  }, [effectiveAppId]);
+
+  useEffect(() => {
+    if (!duplicateApps.length) {
+      setDuplicatePanelDismissed(false);
+      if (effectiveAppId) {
+        window.localStorage.removeItem(duplicateBannerDismissKey(effectiveAppId));
+      }
+    }
+  }, [duplicateApps.length, effectiveAppId]);
 
   const deleteDuplicateMutation = useMutation({
     mutationFn: (id: string) =>
@@ -212,55 +237,89 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
           {tCommon("error")}
         </div>
       ) : null}
-      {duplicateApps.length > 0 ? (
+      {duplicateApps.length > 0 && !duplicatePanelDismissed ? (
         <section className="rounded-lg border border-amber-200/80 bg-amber-50/60 p-4 dark:border-amber-900/45 dark:bg-amber-950/25">
-          <h2 className="text-sm font-semibold text-amber-950 dark:text-amber-100">
-            {t("duplicateRegistrationsHeading")}
-          </h2>
-          <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/85">{t("duplicateRegistrationsHint")}</p>
-          <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-card">
-            {duplicateApps.map((d) => (
-              <li
-                key={d.id}
-                className="flex flex-col gap-2 px-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="min-w-0 space-y-0.5">
-                  <p className="truncate font-medium text-foreground">{d.name || t("detailTitle")}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t("duplicateSavedAt", {
-                      date: dateTimeFmt.format(new Date(d.created_at)),
-                    })}
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    href={`/apps/${d.id}`}
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-                  >
-                    {t("duplicateOpen")}
-                  </Link>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
-                    disabled={deleteDuplicateMutation.isPending}
-                    onClick={() => {
-                      const ok = window.confirm(
-                        t("deleteConfirm", { name: d.name || t("detailTitle") }),
-                      );
-                      if (!ok) {
-                        return;
-                      }
-                      deleteDuplicateMutation.mutate(d.id);
-                    }}
-                  >
-                    {t("duplicateDelete")}
-                  </Button>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="flex items-start justify-between gap-2">
+            <button
+              type="button"
+              className="flex min-w-0 flex-1 items-start gap-2 text-left"
+              onClick={() => setDuplicatePanelOpen((prev) => !prev)}
+              aria-expanded={duplicatePanelOpen}
+            >
+              <ChevronDown
+                className={cn("mt-0.5 size-4 shrink-0 text-amber-900 transition-transform dark:text-amber-200", duplicatePanelOpen ? "rotate-180" : "")}
+                aria-hidden
+              />
+              <div className="min-w-0">
+                <h2 className="text-sm font-semibold text-amber-950 dark:text-amber-100">
+                  {t("duplicateRegistrationsHeading")}
+                </h2>
+                <p className="mt-1 text-xs text-amber-900/80 dark:text-amber-200/85">
+                  {t("duplicateRegistrationsHint")}
+                </p>
+              </div>
+            </button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 text-amber-900 hover:bg-amber-100 dark:text-amber-200 dark:hover:bg-amber-900/40"
+              aria-label={tCommon("cancel")}
+              onClick={() => {
+                if (effectiveAppId) {
+                  window.localStorage.setItem(duplicateBannerDismissKey(effectiveAppId), "1");
+                }
+                setDuplicatePanelDismissed(true);
+              }}
+            >
+              <X className="size-4" aria-hidden />
+            </Button>
+          </div>
+          {duplicatePanelOpen ? (
+            <ul className="mt-3 divide-y divide-border rounded-md border border-border bg-card">
+              {duplicateApps.map((d) => (
+                <li
+                  key={d.id}
+                  className="flex flex-col gap-2 px-3 py-3 text-sm sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="min-w-0 space-y-0.5">
+                    <p className="truncate font-medium text-foreground">{d.name || t("detailTitle")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {t("duplicateSavedAt", {
+                        date: dateTimeFmt.format(new Date(d.created_at)),
+                      })}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/apps/${d.id}`}
+                      className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                    >
+                      {t("duplicateOpen")}
+                    </Link>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="border-destructive/30 text-destructive hover:bg-destructive hover:text-destructive-foreground"
+                      disabled={deleteDuplicateMutation.isPending}
+                      onClick={() => {
+                        const ok = window.confirm(
+                          t("deleteConfirm", { name: d.name || t("detailTitle") }),
+                        );
+                        if (!ok) {
+                          return;
+                        }
+                        deleteDuplicateMutation.mutate(d.id);
+                      }}
+                    >
+                      {t("duplicateDelete")}
+                    </Button>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </section>
       ) : null}
       <div className="flex flex-wrap items-start justify-between gap-4">
