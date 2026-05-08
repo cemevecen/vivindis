@@ -25,6 +25,7 @@ export type ReviewFetchDto = {
   status: FetchStatus;
   from_date: string;
   to_date: string;
+  review_limit?: number | null;
   review_count: number;
   error_message: string | null;
   started_at: string | null;

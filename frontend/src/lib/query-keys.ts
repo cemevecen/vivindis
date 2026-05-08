@@ -8,6 +8,8 @@ export const queryKeys = {
     detail: (id: string) => ["apps", id] as const,
     fetches: (id: string) => ["apps", id, "fetches"] as const,
     fetchDetail: (appId: string, fetchId: string) => ["apps", appId, "fetches", fetchId] as const,
+    reviewVolume: (appId: string, from: string, to: string) =>
+      ["apps", appId, "stats", "review-volume", from, to] as const,
   },
   analyses: {
     byApp: (appId: string) => ["analyses", "app", appId] as const,

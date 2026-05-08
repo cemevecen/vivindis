@@ -35,6 +35,33 @@ ensure_play_request_user_agents()
 log = get_logger(__name__)
 
 
+class _ReviewFetchBudget:
+    """Paylaşımlı çekim üst sınırı (Play shard’ları + App Store RSS paralelliği)."""
+
+    def __init__(self, cap: int) -> None:
+        self._cap = max(0, int(cap))
+        self.used = 0
+        self._lock = asyncio.Lock()
+
+    async def try_consume(self) -> bool:
+        async with self._lock:
+            if self.used >= self._cap:
+                return False
+            self.used += 1
+            return True
+
+    async def has_room(self) -> bool:
+        async with self._lock:
+            return self.used < self._cap
+
+
+def _effective_review_cap(fetch: ReviewFetch, settings: Any) -> int:
+    server = int(settings.scrape_max_reviews or 250000)
+    if fetch.review_limit is None:
+        return server
+    return min(server, int(fetch.review_limit))
+
+
 async def _commit_reviews_and_sync_fetch_count(session: Any, fetch_id: uuid.UUID) -> None:
     """Yorum satırlarını kalıcı yap, ardından fetch.review_count'u DB'deki gerçek sayıma eşitle (polling UI)."""
     await session.commit()
@@ -118,6 +145,7 @@ async def _scrape_google_play(
     req_country: str | None,
     global_langs: list[str] | None,
     limiter: AsyncTokenBucketRateLimiter,
+    insert_budget: _ReviewFetchBudget | None = None,
 ) -> int:
     pkg = (app.package_name or "").strip()
     if not pkg:
@@ -203,9 +231,8 @@ async def _scrape_google_play(
         else:
             locale_candidates = PLAY_STORE_MATRIX[:max_global_locales]
 
-    max_inserted = int(settings.scrape_max_reviews or 250000)
+    budget = insert_budget or _ReviewFetchBudget(_effective_review_cap(fetch, settings))
     lo, hi = fetch.from_date, fetch.to_date
-    total_inserted = 0
     # NOTE: Her shard ayrı DB session açıyor; shard sayısı connection pool'u aşarsa
     # Railway worker'da çoğu shard timeout verip çok az yorum kalabiliyor.
     # Bu yüzden shard paralelliğini havuz limitinin altında tutuyoruz.
@@ -225,7 +252,7 @@ async def _scrape_google_play(
             async with sem:
                 async with factory() as shard_session:
                     return await _scrape_locale_score(
-                        shard_session, l, c, s, v, limiter, lo, hi, app, fetch, max_inserted
+                        shard_session, l, c, s, v, limiter, lo, hi, app, fetch, budget
                     )
 
         tasks = [
@@ -233,14 +260,13 @@ async def _scrape_google_play(
             for (l, c) in locale_candidates
             for s in (1, 2, 3, 4, 5)
         ]
-        counts = await asyncio.gather(*tasks)
-        total_inserted = sum(counts)
-        if total_inserted > 0:
+        await asyncio.gather(*tasks)
+        if budget.used > 0:
             break
 
     # Safety net: if shard model yields 0 (often due transient Play throttling),
     # fallback to low-pressure baseline scraping without score filter.
-    if total_inserted == 0:
+    if budget.used == 0:
         fallback_locales = (
             [(req_lang or "tr", req_country or "tr")]
             if review_scope == "local"
@@ -248,7 +274,7 @@ async def _scrape_google_play(
         )
         unique_locales = list(dict.fromkeys(fallback_locales))
         for variant in pkg_variants:
-            baseline_count = await _scrape_google_play_baseline(
+            await _scrape_google_play_baseline(
                 session,
                 pkg=variant,
                 fetch=fetch,
@@ -256,14 +282,13 @@ async def _scrape_google_play(
                 lo=lo,
                 hi=hi,
                 limiter=limiter,
-                max_inserted=max_inserted,
+                budget=budget,
                 locales=unique_locales,
             )
-            total_inserted += baseline_count
-            if total_inserted > 0:
+            if budget.used > 0:
                 break
 
-    return total_inserted
+    return budget.used
 
 
 async def _scrape_google_play_baseline(
@@ -275,7 +300,7 @@ async def _scrape_google_play_baseline(
     lo: date,
     hi: date,
     limiter: AsyncTokenBucketRateLimiter,
-    max_inserted: int,
+    budget: _ReviewFetchBudget,
     locales: list[tuple[str, str]],
 ) -> int:
     inserted = 0
@@ -307,6 +332,9 @@ async def _scrape_google_play_baseline(
             rid = str(rev.get("reviewId") or "")[:255]
             if not rid:
                 continue
+            if not await budget.try_consume():
+                await _commit_reviews_and_sync_fetch_count(session, fetch.id)
+                return inserted
             await _upsert_review(
                 session,
                 app_id=app.id,
@@ -326,17 +354,24 @@ async def _scrape_google_play_baseline(
                 reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
             )
             inserted += 1
-            if inserted >= max_inserted:
-                break
         await _commit_reviews_and_sync_fetch_count(session, fetch.id)
-        if inserted >= max_inserted:
+        if not await budget.has_room():
             break
     return inserted
 
 
 async def _scrape_locale_score(
-    session: Any, lang: str, country: str, score: int, target_pkg: str,
-    limiter: Any, lo: date, hi: date, app: App, fetch: ReviewFetch, max_inserted: int
+    session: Any,
+    lang: str,
+    country: str,
+    score: int,
+    target_pkg: str,
+    limiter: Any,
+    lo: date,
+    hi: date,
+    app: App,
+    fetch: ReviewFetch,
+    budget: _ReviewFetchBudget,
 ) -> int:
     from app.core.logging import get_logger
     from google_play_scraper import reviews as gp_reviews, Sort
@@ -381,11 +416,16 @@ async def _scrape_locale_score(
                 continue
             
             rid = str(rev.get("reviewId") or "")[:255]
-            if not rid: continue
+            if not rid:
+                continue
+            if not await budget.try_consume():
+                await _commit_reviews_and_sync_fetch_count(session, fetch.id)
+                return inserted
 
             await _upsert_review(
                 session,
-                app_id=app.id, fetch_id=fetch.id,
+                app_id=app.id,
+                fetch_id=fetch.id,
                 platform=StorePlatform.GOOGLE_PLAY,
                 store_review_id=rid,
                 rating=int(rev.get("score") or 0),
@@ -401,11 +441,13 @@ async def _scrape_locale_score(
                 reply_date=rev.get("repliedAt").date() if isinstance(rev.get("repliedAt"), datetime) else None,
             )
             inserted += 1
-        
+
         await _commit_reviews_and_sync_fetch_count(session, fetch.id)
+        if not await budget.has_room():
+            break
         if continuation is None or getattr(continuation, "token", None) is None:
             break
-            
+
     return inserted
 
 
@@ -420,8 +462,8 @@ async def _scrape_app_store(
     req_country: str | None,
     global_langs: list[str] | None,
     limiter: AsyncTokenBucketRateLimiter,
+    insert_budget: _ReviewFetchBudget | None = None,
 ) -> int:
-    _ = settings, req_lang
     numeric_id = (app.bundle_id or "").strip()
     if not numeric_id:
         return 0
@@ -532,17 +574,23 @@ async def _scrape_app_store(
             countries = (deduped or APP_STORE_COUNTRIES)[:max_global_countries]
         else:
             countries = APP_STORE_COUNTRIES[:max_global_countries]
-    max_inserted = int(settings.scrape_max_reviews or 250000)
+    if insert_budget is None:
+        cnt_r = await session.execute(
+            select(func.count()).select_from(Review).where(Review.fetch_id == fetch.id),
+        )
+        already = int(cnt_r.scalar_one())
+        cap = _effective_review_cap(fetch, settings)
+        budget = _ReviewFetchBudget(max(0, cap - already))
+    else:
+        budget = insert_budget
     max_pages_per_country = max(1, int(getattr(settings, "scrape_app_store_max_pages", 250) or 250))
     country_parallelism = 2 if review_scope == "local" else 6
     lo, hi = fetch.from_date, fetch.to_date
-    total_inserted = 0
     rss_404_countries: set[str] = set()
     country_sem = asyncio.Semaphore(country_parallelism)
 
     async def _fetch_rss_page(client: httpx.AsyncClient, country: str, page: int) -> tuple[int, bool]:
-        nonlocal total_inserted
-        if total_inserted >= max_inserted:
+        if not await budget.has_room():
             return 0, True
         if country in rss_404_countries:
             return 0, True
@@ -607,8 +655,10 @@ async def _scrape_app_store(
         for entry in entries:
             if not isinstance(entry, dict):
                 continue
-            if "author" not in entry or total_inserted >= max_inserted:
+            if "author" not in entry:
                 continue
+            if not await budget.has_room():
+                break
             has_review_entries = True
             try:
                 rid = _rss_label(entry, "id") or ""
@@ -634,6 +684,8 @@ async def _scrape_app_store(
                 version = _rss_label(entry, "im:version")
                 rating_raw = _rss_label(entry, "im:rating") or "0"
 
+                if not await budget.try_consume():
+                    return inserted, True
                 await _upsert_review(
                     session,
                     app_id=app.id,
@@ -653,20 +705,18 @@ async def _scrape_app_store(
                     reply_date=None,
                 )
                 inserted += 1
-                total_inserted += 1
             except Exception:
                 continue
         should_stop = saw_older_than_range or (not has_review_entries)
         return inserted, should_stop
 
     async def _fetch_country(country: str) -> int:
-        nonlocal total_inserted
         country_total = 0
         page = 1
         async with country_sem:
             req_timeout = float(getattr(settings, "scrape_http_timeout_seconds", 60.0) or 60.0)
             async with httpx.AsyncClient(timeout=max(20.0, req_timeout)) as client:
-                while page <= max_pages_per_country and total_inserted < max_inserted:
+                while page <= max_pages_per_country and await budget.has_room():
                     inserted, should_stop = await _fetch_rss_page(client, country, page)
                     country_total += inserted
                     if should_stop:
@@ -679,10 +729,10 @@ async def _scrape_app_store(
         counts = await asyncio.gather(*[_fetch_country(c) for c in unique_countries])
         return sum(counts)
 
-    total_inserted = await _fetch_country_group(countries)
+    await _fetch_country_group(countries)
 
     # "Local" modda yalnızca seçili ülke taranır; otomatik ülke genişletmesi yapılmaz.
-    return total_inserted
+    return budget.used
 
 
 async def _execute_review_fetch(
@@ -715,10 +765,12 @@ async def _execute_review_fetch(
     # Make pending->running transition visible to polling UI immediately.
     await session.commit()
 
+    cap = _effective_review_cap(fetch, settings)
     total_inserted = 0
     try:
         if app.platform in (AppPlatform.GOOGLE_PLAY, AppPlatform.BOTH):
-            total_inserted += await _scrape_google_play(
+            play_budget = _ReviewFetchBudget(cap)
+            total_inserted = await _scrape_google_play(
                 session,
                 fetch=fetch,
                 app=app,
@@ -728,22 +780,33 @@ async def _execute_review_fetch(
                 req_country=req_country,
                 global_langs=global_langs,
                 limiter=limiter,
+                insert_budget=play_budget,
             )
             fetch.review_count = total_inserted
             await session.flush()
             await session.commit()
         if app.platform in (AppPlatform.APP_STORE, AppPlatform.BOTH):
-            total_inserted += await _scrape_app_store(
-                session,
-                fetch=fetch,
-                app=app,
-                settings=settings,
-                review_scope=review_scope,
-                req_lang=req_lang,
-                req_country=req_country,
-                global_langs=global_langs,
-                limiter=limiter,
+            cnt_row = await session.execute(
+                select(func.count()).select_from(Review).where(Review.fetch_id == fetch.id),
             )
+            already = int(cnt_row.scalar_one())
+            remaining = max(0, cap - already)
+            store_added = 0
+            if remaining > 0:
+                store_budget = _ReviewFetchBudget(remaining)
+                store_added = await _scrape_app_store(
+                    session,
+                    fetch=fetch,
+                    app=app,
+                    settings=settings,
+                    review_scope=review_scope,
+                    req_lang=req_lang,
+                    req_country=req_country,
+                    global_langs=global_langs,
+                    limiter=limiter,
+                    insert_budget=store_budget,
+                )
+            total_inserted += store_added
             fetch.review_count = total_inserted
             await session.flush()
             await session.commit()

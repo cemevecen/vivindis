@@ -8,7 +8,9 @@ import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { AnimatedPoolCount } from "@/components/analyze/animated-pool-count";
 import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
+import { ReviewVolumeSparkline } from "@/components/analyze/review-volume-sparkline";
 import { RegisteredAppGridPicker, RegisteredAppTileVisual } from "@/components/analyze/registered-app-grid-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,12 +40,15 @@ import { queryKeys } from "@/lib/query-keys";
 import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
+import type { AppReviewVolumeStatsDto } from "@/types/app-stats";
 import type { AppDto, AppPlatform, ReviewFetchDto, ReviewImportResponseDto, ReviewListResponseDto } from "@/types/app";
 import type { StoreSearchResponse, StoreSearchResultItem } from "@/types/store-search";
 
 type Props = {
   clerkEnabled: boolean;
 };
+
+type ReviewSampleLimitOption = 100 | 500 | 1000 | 5000 | null;
 
 type FetchProgressEvent = {
   key: string;
@@ -85,6 +90,7 @@ function AnalyzeHubConnected() {
   const mode = useMemo(() => parseAnalyzeHubMode(searchParams.get("mode")), [searchParams]);
   const [datePreset, setDatePreset] = useState<DatePresetId>("30d");
   const reviewScope: ReviewScope = "local";
+  const [reviewSampleLimit, setReviewSampleLimit] = useState<ReviewSampleLimitOption>(1000);
   const [analysisMode, setAnalysisMode] = useState<AnalysisMode>("fast");
 
   const dateRange = useMemo(() => rangeFromPreset(datePreset), [datePreset]);
@@ -191,6 +197,16 @@ function AnalyzeHubConnected() {
     enabled: Boolean(isSignedIn),
   });
 
+  const statsQuery = useQuery({
+    queryKey: queryKeys.apps.reviewVolume(sessionApp?.id ?? "", dateRange.from, dateRange.to),
+    queryFn: () =>
+      apiFetch<AppReviewVolumeStatsDto>(
+        `/api/v1/apps/${sessionApp!.id}/stats?from_date=${encodeURIComponent(dateRange.from)}&to_date=${encodeURIComponent(dateRange.to)}`,
+        { getToken },
+      ),
+    enabled: Boolean(isSignedIn && sessionApp?.id),
+  });
+
   const registeredAppsDeduped = useMemo(
     () => dedupeAppsForList(appsQuery.data ?? []),
     [appsQuery.data],
@@ -249,14 +265,15 @@ function AnalyzeHubConnected() {
   });
 
   const storePullMutation = useMutation({
-    mutationFn: async (appId: string) => {
-      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
+    mutationFn: async (payload: { appId: string }) => {
+      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${payload.appId}/fetch`, {
         method: "POST",
         body: {
           from_date: dateRange.from,
           to_date: dateRange.to,
           review_scope: reviewScope,
           ...(reviewScope === "local" ? { lang: searchLang, country: searchCountry } : {}),
+          ...(reviewSampleLimit !== null ? { review_limit: reviewSampleLimit } : {}),
         },
         getToken,
       });
@@ -270,6 +287,7 @@ function AnalyzeHubConnected() {
         reason: t("fetchEventCreatedReason"),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
+      void queryClient.invalidateQueries({ queryKey: ["apps", String(row.app_id), "stats"] });
     },
     onError: (err) => {
       if (err instanceof ApiError && err.status >= 500) {
@@ -582,11 +600,16 @@ function AnalyzeHubConnected() {
     lastFetchHydratedToPoolRef.current = null;
     storeFetchFailedToastRef.current = null;
     storeFetchPollErrorToastRef.current = null;
-    storePullMutation.mutate(sessionApp.id);
+    storePullMutation.mutate({ appId: sessionApp.id });
   }, [addFetchProgressEvent, requireSignedIn, resetFetchProgressTimeline, sessionApp, storePullMutation, t]);
 
   /** Metin/dosya havuzu ile mağazadan yüklenen satırlar tek sayaçta birleşir. */
-  const poolDisplayCount = useMemo(() => poolLines.length, [poolLines.length]);
+  const poolCountForDisplay = useMemo(() => {
+    if (isHydratingPool) {
+      return Math.max(poolLines.length, hydratedPoolCount);
+    }
+    return poolLines.length;
+  }, [hydratedPoolCount, isHydratingPool, poolLines.length]);
 
   const fetchElapsedSec = useMemo(() => {
     const row = fetchRowQuery.data;
@@ -952,6 +975,7 @@ function AnalyzeHubConnected() {
             to_date: dateRange.to,
             review_scope: scope,
             ...(scope === "local" ? { lang: searchLang, country: searchCountry } : {}),
+            ...(reviewSampleLimit !== null ? { review_limit: reviewSampleLimit } : {}),
           },
           getToken,
         });
@@ -1199,8 +1223,11 @@ function AnalyzeHubConnected() {
                   onClear={clearStorePin}
                   onSearchAnother={dismissStorePinCard}
                 />
-                <div className="flex flex-wrap items-center gap-4">
-                  <div className="flex-1 min-w-[200px]">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_1fr_2fr] sm:items-end">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="store-fetch-date-preset" className="text-sm font-medium text-foreground">
+                      {t("dateRangeLabel")}
+                    </Label>
                     <SelectNative
                       id="store-fetch-date-preset"
                       value={datePreset}
@@ -1218,32 +1245,76 @@ function AnalyzeHubConnected() {
                       <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
                   </div>
-                  <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
-                    <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                      {t("reviewScopeLocal")}
-                    </span>
+                  <div className="flex flex-col gap-2">
+                    <Label className="whitespace-nowrap text-sm font-medium text-foreground">
+                      {t("reviewScopeLabel")}
+                    </Label>
+                    <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        {t("reviewScopeLocal")}
+                      </span>
+                    </div>
                   </div>
-                  <Button
-                    type="button"
-                    className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                    onClick={() => void handlePullStoreReviews()}
-                    disabled={
-                      !sessionApp ||
-                      storePullMutation.isPending ||
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="store-fetch-sample-limit" className="text-sm font-medium text-foreground">
+                      {t("reviewSampleLimitLabel")}
+                    </Label>
+                    <SelectNative
+                      id="store-fetch-sample-limit"
+                      value={reviewSampleLimit === null ? "all" : String(reviewSampleLimit)}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "all") {
+                          setReviewSampleLimit(null);
+                          return;
+                        }
+                        setReviewSampleLimit(Number(v) as 100 | 500 | 1000 | 5000);
+                      }}
+                      className="h-11 rounded-xl"
+                      disabled={!sessionApp}
+                    >
+                      <option value="100">100</option>
+                      <option value="500">500</option>
+                      <option value="1000">1.000</option>
+                      <option value="5000">5.000</option>
+                      <option value="all">{t("reviewSampleLimitAll")}</option>
+                    </SelectNative>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="h-5 invisible select-none" aria-hidden>
+                      &nbsp;
+                    </div>
+                    <Button
+                      type="button"
+                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                      onClick={() => void handlePullStoreReviews()}
+                      disabled={
+                        !sessionApp ||
+                        storePullMutation.isPending ||
+                        fetchRowQuery.data?.status === "pending" ||
+                        fetchRowQuery.data?.status === "running" ||
+                        (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                      }
+                    >
+                      {storePullMutation.isPending ||
                       fetchRowQuery.data?.status === "pending" ||
-                      fetchRowQuery.data?.status === "running" ||
                       (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                    }
-                  >
-                    {storePullMutation.isPending ||
-                    fetchRowQuery.data?.status === "pending" ||
-                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                      ? tCommon("loading")
-                      : fetchRowQuery.data?.status === "running"
-                        ? t("fetchRunningShort")
-                        : t("pullStoreReviewsCta")}
-                  </Button>
+                        ? tCommon("loading")
+                        : fetchRowQuery.data?.status === "running"
+                          ? t("fetchRunningShort")
+                          : t("pullStoreReviewsCta")}
+                    </Button>
+                  </div>
                 </div>
+                {sessionApp ? (
+                  <div className="space-y-1 pt-1">
+                    <p className="text-xs text-muted-foreground">{t("reviewVolumeInRange")}</p>
+                    <ReviewVolumeSparkline
+                      points={statsQuery.data?.points ?? []}
+                      isLoading={statsQuery.isFetching}
+                    />
+                  </div>
+                ) : null}
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
                     <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
@@ -2088,14 +2159,16 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
             ) : null}
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex-1 min-w-[200px]">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_1fr_2fr] sm:items-end">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="compare-fetch-date-preset" className="text-sm font-medium text-foreground">
+                  {t("dateRangeLabel")}
+                </Label>
                 <SelectNative
-                  id="store-fetch-date-preset"
+                  id="compare-fetch-date-preset"
                   value={datePreset}
                   onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
                   className="h-11 rounded-xl"
-                  disabled={!sessionApp}
                 >
                   <option value="7d">{t("datePresetLast7")}</option>
                   <option value="30d">{t("datePresetLast30")}</option>
@@ -2107,31 +2180,65 @@ function AnalyzeHubConnected() {
                   <option value="all">{t("datePresetAll")}</option>
                 </SelectNative>
               </div>
-              <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
-                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                  {t("reviewScopeLocal")}
-                </span>
+              <div className="flex flex-col gap-2">
+                <Label className="whitespace-nowrap text-sm font-medium text-foreground">
+                  {t("reviewScopeLabel")}
+                </Label>
+                <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                    {t("reviewScopeLocal")}
+                  </span>
+                </div>
               </div>
-              <Button
-                type="button"
-                className="h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                onClick={() => void handlePullStoreReviews()}
-                disabled={
-                  !sessionApp ||
-                  storePullMutation.isPending ||
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="compare-fetch-sample-limit" className="text-sm font-medium text-foreground">
+                  {t("reviewSampleLimitLabel")}
+                </Label>
+                <SelectNative
+                  id="compare-fetch-sample-limit"
+                  value={reviewSampleLimit === null ? "all" : String(reviewSampleLimit)}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    if (v === "all") {
+                      setReviewSampleLimit(null);
+                      return;
+                    }
+                    setReviewSampleLimit(Number(v) as 100 | 500 | 1000 | 5000);
+                  }}
+                  className="h-11 rounded-xl"
+                >
+                  <option value="100">100</option>
+                  <option value="500">500</option>
+                  <option value="1000">1.000</option>
+                  <option value="5000">5.000</option>
+                  <option value="all">{t("reviewSampleLimitAll")}</option>
+                </SelectNative>
+              </div>
+              <div className="flex flex-col gap-2">
+                <div className="h-5 invisible select-none" aria-hidden>
+                  &nbsp;
+                </div>
+                <Button
+                  type="button"
+                  className="h-11 w-full rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                  onClick={() => void handlePullStoreReviews()}
+                  disabled={
+                    !sessionApp ||
+                    storePullMutation.isPending ||
+                    fetchRowQuery.data?.status === "pending" ||
+                    fetchRowQuery.data?.status === "running" ||
+                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                  }
+                >
+                  {storePullMutation.isPending ||
                   fetchRowQuery.data?.status === "pending" ||
-                  fetchRowQuery.data?.status === "running" ||
                   (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                }
-              >
-                {storePullMutation.isPending ||
-                fetchRowQuery.data?.status === "pending" ||
-                (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                  ? tCommon("loading")
-                  : fetchRowQuery.data?.status === "running"
-                    ? t("fetchRunningShort")
-                    : t("pullStoreReviewsCta")}
-              </Button>
+                    ? tCommon("loading")
+                    : fetchRowQuery.data?.status === "running"
+                      ? t("fetchRunningShort")
+                      : t("pullStoreReviewsCta")}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
@@ -2160,7 +2267,10 @@ function AnalyzeHubConnected() {
             <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/60 dark:border-orange-900/40 pb-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-200/90">{t("poolBadgeTitle")}</p>
-                <p className="text-3xl font-bold tabular-nums text-foreground">{poolDisplayCount}</p>
+                <AnimatedPoolCount
+                  value={poolCountForDisplay}
+                  className="text-3xl font-bold tabular-nums text-foreground"
+                />
                 {isHydratingPool ? (
                   <p className="mt-1 text-xs font-medium text-orange-800 dark:text-orange-200">{t("hydratePoolTitle")}</p>
                 ) : null}
