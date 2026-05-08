@@ -10,7 +10,7 @@ export function parseAnalyzeHubMode(raw: string | null): AnalyzeHubMode {
   return "store";
 }
 export type SearchPlatform = "google_play" | "app_store" | "both";
-export type DatePresetId = "7d" | "30d" | "90d" | "365d";
+export type DatePresetId = "7d" | "30d" | "90d" | "180d" | "365d" | "2y" | "5y" | "all";
 export type ReviewScope = "local" | "global";
 export type AnalysisMode = "fast" | "rich";
 
@@ -20,7 +20,22 @@ export function isoDate(d: Date): string {
 
 export function rangeFromPreset(preset: DatePresetId): { from: string; to: string } {
   const to = new Date();
-  const from = new Date();
+  const from = new Date(to);
+  if (preset === "all") {
+    return { from: "2000-01-01", to: isoDate(to) };
+  }
+  if (preset === "180d") {
+    from.setMonth(from.getMonth() - 6);
+    return { from: isoDate(from), to: isoDate(to) };
+  }
+  if (preset === "2y") {
+    from.setFullYear(from.getFullYear() - 2);
+    return { from: isoDate(from), to: isoDate(to) };
+  }
+  if (preset === "5y") {
+    from.setFullYear(from.getFullYear() - 5);
+    return { from: isoDate(from), to: isoDate(to) };
+  }
   const days = preset === "7d" ? 7 : preset === "30d" ? 30 : preset === "90d" ? 90 : 365;
   from.setDate(from.getDate() - days);
   return { from: isoDate(from), to: isoDate(to) };

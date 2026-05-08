@@ -1204,7 +1204,11 @@ function AnalyzeHubConnected() {
                       <option value="7d">{t("datePresetLast7")}</option>
                       <option value="30d">{t("datePresetLast30")}</option>
                       <option value="90d">{t("datePresetLast90")}</option>
+                      <option value="180d">{t("datePresetLast180")}</option>
                       <option value="365d">{t("datePresetLast365")}</option>
+                      <option value="2y">{t("datePresetLast2y")}</option>
+                      <option value="5y">{t("datePresetLast5y")}</option>
+                      <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
                   </div>
                   <div className="space-y-2">
@@ -2106,7 +2110,11 @@ function AnalyzeHubConnected() {
                 <option value="7d">{t("datePresetLast7")}</option>
                 <option value="30d">{t("datePresetLast30")}</option>
                 <option value="90d">{t("datePresetLast90")}</option>
+                <option value="180d">{t("datePresetLast180")}</option>
                 <option value="365d">{t("datePresetLast365")}</option>
+                <option value="2y">{t("datePresetLast2y")}</option>
+                <option value="5y">{t("datePresetLast5y")}</option>
+                <option value="all">{t("datePresetAll")}</option>
               </SelectNative>
               <p className="text-xs text-muted-foreground">{t("compareDateRangePoolHint")}</p>
             </div>

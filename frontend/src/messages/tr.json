@@ -197,7 +197,11 @@
     "csvHeaderReviewDate": "yorum_tarihi",
     "csvHeaderAuthor": "yazar",
     "csvHeaderTitle": "başlık",
-    "csvHeaderBody": "metin"
+    "csvHeaderBody": "metin",
+    "datePresetLast180": "son 6 ay",
+    "datePresetLast2y": "son 2 sene",
+    "datePresetLast5y": "son 5 sene",
+    "datePresetAll": "tümü"
   },
   "compare": {
     "emptyTitle": "Uygulamaları karşılaştır",

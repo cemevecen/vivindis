@@ -387,7 +387,11 @@
     "csvHeaderReviewDate": "date_avis",
     "csvHeaderAuthor": "auteur",
     "csvHeaderTitle": "titre",
-    "csvHeaderBody": "texte"
+    "csvHeaderBody": "texte",
+    "datePresetLast180": "Last 6 months",
+    "datePresetLast2y": "Last 2 years",
+    "datePresetLast5y": "Last 5 years",
+    "datePresetAll": "All time"
   },
   "about": {
     "title": "À propos de Vivindis",

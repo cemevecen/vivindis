@@ -387,7 +387,11 @@
     "csvHeaderReviewDate": "评论日期",
     "csvHeaderAuthor": "作者",
     "csvHeaderTitle": "标题",
-    "csvHeaderBody": "身体"
+    "csvHeaderBody": "身体",
+    "datePresetLast180": "Last 6 months",
+    "datePresetLast2y": "Last 2 years",
+    "datePresetLast5y": "Last 5 years",
+    "datePresetAll": "All time"
   },
   "about": {
     "title": "关于维文迪斯",

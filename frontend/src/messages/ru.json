@@ -387,7 +387,11 @@
     "csvHeaderReviewDate": "data_otzyva",
     "csvHeaderAuthor": "avtor",
     "csvHeaderTitle": "zagolovok",
-    "csvHeaderBody": "tekst"
+    "csvHeaderBody": "tekst",
+    "datePresetLast180": "Last 6 months",
+    "datePresetLast2y": "Last 2 years",
+    "datePresetLast5y": "Last 5 years",
+    "datePresetAll": "All time"
   },
   "about": {
     "title": "О Вивиндис",

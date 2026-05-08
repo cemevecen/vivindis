@@ -387,7 +387,11 @@
     "csvHeaderReviewDate": "レビュー日",
     "csvHeaderAuthor": "著者",
     "csvHeaderTitle": "タイトル",
-    "csvHeaderBody": "体"
+    "csvHeaderBody": "体",
+    "datePresetLast180": "Last 6 months",
+    "datePresetLast2y": "Last 2 years",
+    "datePresetLast5y": "Last 5 years",
+    "datePresetAll": "All time"
   },
   "about": {
     "title": "ビビンディスについて",
