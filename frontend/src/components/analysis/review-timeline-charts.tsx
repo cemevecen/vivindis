@@ -18,7 +18,13 @@ import { buildReviewTimeline, type ReviewTimeBucketMode, type ReviewTimelineRow 
 import { cn } from "@/lib/utils";
 import type { ReviewListItemDto } from "@/types/app";
 
-const STAR_STACK_COLORS = ["#ef4444", "#f97316", "#eab308", "#84cc16", "#22c55e"];
+const STAR_STACK_COLORS = ["var(--chart-5)", "var(--chart-4)", "var(--chart-3)", "var(--chart-2)", "var(--chart-1)"];
+const tooltipStyle = {
+  backgroundColor: "var(--popover)",
+  border: "1px solid var(--border)",
+  borderRadius: 10,
+  color: "var(--popover-foreground)",
+};
 
 type Labels = {
   sectionHeading: string;
@@ -113,9 +119,10 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
+                  contentStyle={tooltipStyle}
                   labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
                 />
-                <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} name={labels.volumeTitle} />
+                <Bar dataKey="count" fill="var(--chart-1)" radius={[4, 4, 0, 0]} name={labels.volumeTitle} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -134,6 +141,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
+                  contentStyle={tooltipStyle}
                   labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
                 />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
@@ -164,6 +172,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
                 <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} width={32} />
                 <Tooltip
+                  contentStyle={tooltipStyle}
                   formatter={(v) => [
                     typeof v === "number" && Number.isFinite(v) ? v.toFixed(2) : "—",
                     labels.avgRatingTitle,
@@ -173,7 +182,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
                 <Line
                   type="monotone"
                   dataKey="avgRating"
-                  stroke="hsl(217, 91%, 45%)"
+                  stroke="var(--chart-1)"
                   strokeWidth={2}
                   dot={{ r: 3 }}
                   activeDot={{ r: 5 }}

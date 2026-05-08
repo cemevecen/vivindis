@@ -29,6 +29,13 @@ const SENTIMENT_COLORS: Record<string, string> = {
   negative: "hsl(0, 72%, 51%)",
 };
 
+const tooltipStyle = {
+  backgroundColor: "var(--popover)",
+  border: "1px solid var(--border)",
+  borderRadius: 10,
+  color: "var(--popover-foreground)",
+};
+
 type ChartLabels = {
   sentiment: string;
   ratings: string;
@@ -86,7 +93,7 @@ function SentimentCard({
                 <Cell key={entry.name} fill={SENTIMENT_COLORS[entry.name] ?? "hsl(var(--muted-foreground))"} />
               ))}
             </Pie>
-            <Tooltip />
+            <Tooltip contentStyle={tooltipStyle} />
             <Legend verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: featured ? 12 : 11, paddingTop: 8 }} />
           </PieChart>
         </ResponsiveContainer>
@@ -122,8 +129,8 @@ function RatingsDistCard({
             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
             <XAxis dataKey="rating" tick={{ fontSize: featured ? 12 : 11 }} />
             <YAxis allowDecimals={false} tick={{ fontSize: featured ? 12 : 11 }} width={featured ? 40 : 32} />
-            <Tooltip />
-            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+            <Tooltip contentStyle={tooltipStyle} />
+            <Bar dataKey="count" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
@@ -165,8 +172,8 @@ function TopicsCard({
                 tick={{ fontSize: featured ? 11 : 10 }}
                 tickFormatter={(v: string) => (v.length > (featured ? 22 : 14) ? `${v.slice(0, featured ? 20 : 14)}…` : v)}
               />
-              <Tooltip />
-              <Bar dataKey="count" fill="hsl(217, 91%, 45%)" radius={[0, 4, 4, 0]} />
+              <Tooltip contentStyle={tooltipStyle} />
+              <Bar dataKey="count" fill="var(--chart-2)" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         ) : (
