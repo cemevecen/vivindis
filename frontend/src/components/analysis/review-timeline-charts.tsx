@@ -14,7 +14,12 @@ import {
   YAxis,
 } from "recharts";
 
-import { buildReviewTimeline, type ReviewTimeBucketMode, type ReviewTimelineRow } from "@/lib/review-time-buckets";
+import {
+  buildReviewTimelineWithFlags,
+  hasAnyTimelineChart,
+  type ReviewTimeBucketMode,
+  type ReviewTimelineRow,
+} from "@/lib/review-time-buckets";
 import { defaultTimelineBucket } from "@/lib/timeline-bucket-defaults";
 import { cn } from "@/lib/utils";
 import type { ReviewListItemDto } from "@/types/app";
@@ -75,7 +80,10 @@ export function ReviewTimelineCharts({
     setBucket(defaultMode);
   }, [rangeKey, defaultMode]);
 
-  const rows = useMemo(() => buildReviewTimeline(reviews, bucket, locale), [reviews, bucket, locale]);
+  const { rows, flags } = useMemo(
+    () => buildReviewTimelineWithFlags(reviews, bucket, locale),
+    [reviews, bucket, locale],
+  );
 
   const chartData = useMemo(() => {
     return rows.map((r) => ({
@@ -135,134 +143,139 @@ export function ReviewTimelineCharts({
     return base;
   }, [labels.bucketDay, labels.bucketMonth, labels.bucketWeek, labels.bucketYear, showYear]);
 
-  if (reviews.length === 0) {
-    return (
-      <section className={cn("rounded-2xl border border-border bg-card p-6 shadow-sm", className)}>
-        <h2 className="text-base font-semibold text-foreground">{labels.sectionHeading}</h2>
-        <p className="mt-3 text-sm text-muted-foreground">{labels.empty}</p>
-      </section>
-    );
+  if (reviews.length === 0 || !hasAnyTimelineChart(flags)) {
+    return null;
   }
+
+  const showBucketToolbar = flags.showVolume || flags.showAvgRating;
 
   return (
     <section className={cn("space-y-6", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-base font-semibold text-foreground">{labels.sectionHeading}</h2>
-        <div
-          className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
-          role="group"
-          aria-label={labels.sectionHeading}
-        >
-          {bucketButtons.map(({ id, label }) => (
-            <button
-              key={id}
-              type="button"
-              className={cn(
-                "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
-                bucket === id
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground",
-              )}
-              onClick={() => setBucket(id)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
+        {showBucketToolbar ? (
+          <div
+            className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
+            role="group"
+            aria-label={labels.sectionHeading}
+          >
+            {bucketButtons.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                className={cn(
+                  "rounded-md px-3 py-1.5 text-xs font-medium transition-colors",
+                  bucket === id
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground",
+                )}
+                onClick={() => setBucket(id)}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
       {isPartial && totalExpected > reviews.length ? (
         <p className="text-xs text-amber-700 dark:text-amber-300">{labels.truncatedHint}</p>
       ) : null}
 
-      <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="mb-4 text-sm font-semibold text-foreground">{labels.volumeTitle}</h3>
-        <div className="h-[300px] w-full min-w-0">
-          {chartData.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">{labels.empty}</p>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
-                <Tooltip
-                  cursor={false}
-                  contentStyle={tooltipStyle}
-                  labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
-                />
-                <Bar dataKey="count" fill="var(--chart-1)" radius={[4, 4, 0, 0]} name={labels.volumeTitle} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </article>
-
-      <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="mb-4 text-sm font-semibold text-foreground">{labels.starsStackTitle}</h3>
-        <div className="h-[320px] w-full min-w-0">
-          {chartData.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">{labels.empty}</p>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
-                <Tooltip
-                  cursor={false}
-                  contentStyle={tooltipStyle}
-                  labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
-                />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <Bar
-                    key={n}
-                    dataKey={`r${n}` as keyof ReviewTimelineRow}
-                    stackId="stars"
-                    fill={STAR_STACK_COLORS[n - 1]}
-                    name={labels.starShort(n)}
+      {flags.showVolume ? (
+        <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">{labels.volumeTitle}</h3>
+          <div className="h-[300px] w-full min-w-0">
+            {chartData.length === 0 ? (
+              <p className="py-16 text-center text-sm text-muted-foreground">{labels.empty}</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
+                  <Tooltip
+                    cursor={false}
+                    contentStyle={tooltipStyle}
+                    labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
                   />
-                ))}
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </article>
+                  <Bar dataKey="count" fill="var(--chart-1)" radius={[4, 4, 0, 0]} name={labels.volumeTitle} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </article>
+      ) : null}
 
-      <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
-        <h3 className="mb-4 text-sm font-semibold text-foreground">{labels.avgRatingTitle}</h3>
-        <div className="h-[280px] w-full min-w-0">
-          {chartData.length === 0 ? (
-            <p className="py-16 text-center text-sm text-muted-foreground">{labels.empty}</p>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
-                <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} width={32} />
-                <Tooltip
-                  cursor={false}
-                  contentStyle={tooltipStyle}
-                  formatter={(v) => [
-                    typeof v === "number" && Number.isFinite(v) ? v.toFixed(2) : "—",
-                    labels.avgRatingTitle,
-                  ]}
-                  labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="avgRating"
-                  stroke="var(--chart-1)"
-                  strokeWidth={2}
-                  dot={{ r: 3 }}
-                  activeDot={{ r: 5 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </article>
+      {flags.showStarsStack ? (
+        <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">{labels.starsStackTitle}</h3>
+          <div className="h-[320px] w-full min-w-0">
+            {chartData.length === 0 ? (
+              <p className="py-16 text-center text-sm text-muted-foreground">{labels.empty}</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
+                  <Tooltip
+                    cursor={false}
+                    contentStyle={tooltipStyle}
+                    labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
+                  />
+                  <Legend wrapperStyle={{ fontSize: 12 }} />
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Bar
+                      key={n}
+                      dataKey={`r${n}` as keyof ReviewTimelineRow}
+                      stackId="stars"
+                      fill={STAR_STACK_COLORS[n - 1]}
+                      name={labels.starShort(n)}
+                    />
+                  ))}
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </article>
+      ) : null}
+
+      {flags.showAvgRating ? (
+        <article className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="mb-4 text-sm font-semibold text-foreground">{labels.avgRatingTitle}</h3>
+          <div className="h-[280px] w-full min-w-0">
+            {chartData.length === 0 ? (
+              <p className="py-16 text-center text-sm text-muted-foreground">{labels.empty}</p>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
+                  <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} width={32} />
+                  <Tooltip
+                    cursor={false}
+                    contentStyle={tooltipStyle}
+                    formatter={(v) => [
+                      typeof v === "number" && Number.isFinite(v) ? v.toFixed(2) : "—",
+                      labels.avgRatingTitle,
+                    ]}
+                    labelFormatter={(_, payload) => (payload[0]?.payload as ReviewTimelineRow | undefined)?.label ?? ""}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="avgRating"
+                    stroke="var(--chart-1)"
+                    strokeWidth={2}
+                    dot={{ r: 3 }}
+                    activeDot={{ r: 5 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </article>
+      ) : null}
     </section>
   );
 }

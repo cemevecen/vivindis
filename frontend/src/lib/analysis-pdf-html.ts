@@ -12,6 +12,8 @@ import {
 import { defaultTimelineBucket } from "@/lib/timeline-bucket-defaults";
 import {
   buildReviewTimeline,
+  buildReviewTimelineWithFlags,
+  hasAnyTimelineChart,
   type ReviewTimeBucketMode,
   type ReviewTimelineRow,
 } from "@/lib/review-time-buckets";
@@ -263,23 +265,41 @@ function timelineChartsSection(
     return "";
   }
   const { defaultMode } = defaultTimelineBucket(fetchFromDate, fetchToDate);
+  const { rows: rawRows, flags } = buildReviewTimelineWithFlags(reviews, defaultMode, locale);
+  if (!hasAnyTimelineChart(flags)) {
+    return "";
+  }
   const bucketTitle = bucketPdfLabel(defaultMode, copy);
-  let rows = buildReviewTimeline(reviews, defaultMode, locale);
-  rows = samplePdfTimelineRows(rows, 52);
+  const rows = samplePdfTimelineRows(rawRows, 52);
   const chartW = 760;
   const note = copy.timelineTruncatedNote
     ? `<p style="font-size:11px;color:#b45309;margin:0 0 10px;">${escapeHtml(copy.timelineTruncatedNote)}</p>`
     : "";
-  return `<section style="margin:12px 0;padding:12px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
+  const chunks: string[] = [
+    `<section style="margin:12px 0;padding:12px;border:1px solid #e2e8f0;border-radius:12px;page-break-inside:avoid;">
     <h3 style="margin:0 0 6px;font-size:16px;">${escapeHtml(copy.sectionTimeline)} <span style="color:#64748b;font-weight:600;">(${escapeHtml(bucketTitle)})</span></h3>
-    ${note}
-    <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineVolumeTitle)}</h4>
-    ${pdfTimelineVolumeBarsSvg(rows, chartW, 130)}
-    <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineStarsStackTitle)}</h4>
-    ${pdfTimelineStackedStarsSvg(rows, chartW, 150)}
-    <h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineAvgRatingTitle)}</h4>
-    ${pdfTimelineAvgLineSvg(rows, chartW, 110)}
-  </section>`;
+    ${note}`,
+  ];
+  if (flags.showVolume) {
+    chunks.push(
+      `<h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineVolumeTitle)}</h4>
+    ${pdfTimelineVolumeBarsSvg(rows, chartW, 130)}`,
+    );
+  }
+  if (flags.showStarsStack) {
+    chunks.push(
+      `<h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineStarsStackTitle)}</h4>
+    ${pdfTimelineStackedStarsSvg(rows, chartW, 150)}`,
+    );
+  }
+  if (flags.showAvgRating) {
+    chunks.push(
+      `<h4 style="margin:12px 0 6px;font-size:13px;">${escapeHtml(copy.timelineAvgRatingTitle)}</h4>
+    ${pdfTimelineAvgLineSvg(rows, chartW, 110)}`,
+    );
+  }
+  chunks.push(`</section>`);
+  return chunks.join("");
 }
 
 function splitAnalysisRun(
@@ -413,8 +433,14 @@ function timelineTablesAppendix(
   locale: string,
   copy: AnalysisPdfLocaleStrings,
   fetchFromDate: string,
+  fetchToDate: string,
 ): string {
   if (!reviews || reviews.length === 0) {
+    return "";
+  }
+  const { defaultMode } = defaultTimelineBucket(fetchFromDate, fetchToDate);
+  const { flags: defaultFlags } = buildReviewTimelineWithFlags(reviews, defaultMode, locale);
+  if (!hasAnyTimelineChart(defaultFlags)) {
     return "";
   }
   const modes: { mode: ReviewTimeBucketMode; label: string }[] = [
@@ -592,7 +618,13 @@ export function buildFullAnalysisPdfHtml(p: BuildFullAnalysisPdfParams): string 
   const heurParts = splitAnalysisRun(copy.sectionHeuristic, heuristic, copy);
   const aiHasResult = Boolean(ai?.status === "completed" && ai.result);
   const aiParts = aiHasResult ? splitAnalysisRun(copy.sectionAi, ai, copy) : { chartsSection: "", tablesSection: "" };
-  const timelineTables = timelineTablesAppendix(timelineReviews, timelineLocale, copy, fetch.from_date);
+  const timelineTables = timelineTablesAppendix(
+    timelineReviews,
+    timelineLocale,
+    copy,
+    fetch.from_date,
+    fetch.to_date,
+  );
   const ins = insightsSection(insights, copy);
 
   const listHeading = `<h2 style="font-size:18px;margin:18px 0 6px;">${escapeHtml(copy.sectionReviewDetails)}</h2>

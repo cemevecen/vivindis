@@ -167,3 +167,36 @@ export function buildReviewTimeline(
   rows.sort((a, b) => (a.sortKey < b.sortKey ? -1 : a.sortKey > b.sortKey ? 1 : 0));
   return rows;
 }
+
+/** Ham yorumlarda kaç farklı yuvarlanmış yıldız (1–5) var. */
+function distinctRatingCount(reviews: ReviewListItemDto[]): number {
+  const s = new Set<number>();
+  for (const rev of reviews) {
+    s.add(Math.max(1, Math.min(5, Math.round(Number(rev.rating) || 0))));
+  }
+  return s.size;
+}
+
+/** Zaman / yıldız grafiklerinin anlamlı olup olmayacağı (tek çubuk, tek renk vb. gizlenir). */
+export type TimelineChartsDisplayFlags = {
+  showVolume: boolean;
+  showStarsStack: boolean;
+  showAvgRating: boolean;
+};
+
+export function buildReviewTimelineWithFlags(
+  reviews: ReviewListItemDto[],
+  mode: ReviewTimeBucketMode,
+  locale: string,
+): { rows: ReviewTimelineRow[]; flags: TimelineChartsDisplayFlags } {
+  const rows = buildReviewTimeline(reviews, mode, locale);
+  const hasRatingSpread = distinctRatingCount(reviews) >= 2;
+  const showVolume = rows.length >= 2;
+  const showStarsStack = rows.length >= 1 && hasRatingSpread;
+  const showAvgRating = rows.length >= 2 && hasRatingSpread;
+  return { rows, flags: { showVolume, showStarsStack, showAvgRating } };
+}
+
+export function hasAnyTimelineChart(flags: TimelineChartsDisplayFlags): boolean {
+  return flags.showVolume || flags.showStarsStack || flags.showAvgRating;
+}
