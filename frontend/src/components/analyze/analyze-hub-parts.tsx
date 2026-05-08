@@ -71,7 +71,7 @@ export function PinnedStoreAppCard({
   const t = useTranslations("analyzeHub");
   const title = app?.name ?? hit.name;
   return (
-    <div className="rounded-2xl border-2 border-orange-200/80 bg-gradient-to-br from-orange-50/90 via-card to-amber-50/50 p-5 shadow-md dark:border-orange-900/45 dark:from-orange-950/35 dark:via-card dark:to-amber-950/20 sm:p-6">
+    <div className="rounded-2xl border border-orange-200/30 bg-gradient-to-br from-orange-50/25 via-card to-amber-50/15 p-5 shadow-sm dark:border-orange-800/25 dark:from-orange-950/12 dark:via-card dark:to-amber-950/8 sm:p-6">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 gap-4">
           {hit.icon ? (
@@ -87,7 +87,7 @@ export function PinnedStoreAppCard({
             <div className="size-16 shrink-0 rounded-2xl border border-dashed border-border bg-muted/50 sm:size-20" />
           )}
           <div className="min-w-0 space-y-1">
-            <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               {t("activeAppCardLabel")}
             </p>
             <p className="truncate text-xl font-bold tracking-tight text-foreground">{title}</p>
@@ -95,7 +95,7 @@ export function PinnedStoreAppCard({
               {hit.platform === "google_play" ? hit.id : `id ${hit.id}`}
             </p>
             {isResolving ? (
-              <p className="text-sm font-medium text-orange-800 dark:text-orange-200">{t("storePinResolving")}</p>
+              <p className="text-sm font-medium text-muted-foreground">{t("storePinResolving")}</p>
             ) : null}
           </div>
         </div>

@@ -1206,7 +1206,7 @@ function AnalyzeHubConnected() {
             </div>
 
             {!isPublicApiBaseUrlConfigured() ? (
-              <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100">
+              <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
                 {t("apiUrlMissing")}
               </p>
             ) : null}
@@ -1214,7 +1214,7 @@ function AnalyzeHubConnected() {
             {selectedStoreHit && (sessionApp || isPinningStore) ? (
               <div
                 ref={pinnedPanelRef}
-                className="space-y-4 rounded-2xl border border-orange-200/70 bg-orange-50/30 p-4 dark:border-orange-900/45 dark:bg-orange-950/20 sm:p-5"
+                className="space-y-4 rounded-2xl border border-orange-200/30 bg-orange-50/12 p-4 dark:border-orange-800/22 dark:bg-orange-950/10 sm:p-5"
               >
                 <PinnedStoreAppCard
                   hit={selectedStoreHit}
@@ -1375,9 +1375,9 @@ function AnalyzeHubConnected() {
                   </p>
                 ) : null}
                 {isHydratingPool ? (
-                  <div className="space-y-2 rounded-xl border border-orange-200 bg-orange-50/70 p-3 dark:border-orange-900/50 dark:bg-orange-950/30">
-                    <p className="text-sm font-semibold text-orange-900 dark:text-orange-100">{t("hydratePoolTitle")}</p>
-                    <p className="text-xs text-orange-800 dark:text-orange-200">
+                  <div className="space-y-2 rounded-xl border border-orange-200/35 bg-orange-50/20 p-3 dark:border-orange-800/28 dark:bg-orange-950/12">
+                    <p className="text-sm font-semibold text-foreground">{t("hydratePoolTitle")}</p>
+                    <p className="text-xs text-muted-foreground">
                       {fetchRowQuery.data?.review_count
                         ? t("hydratePoolRowsTotal", {
                             loaded: hydratedPoolCount,
@@ -1385,8 +1385,8 @@ function AnalyzeHubConnected() {
                           })
                         : t("hydratePoolRows", { loaded: hydratedPoolCount })}
                     </p>
-                    <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100 dark:bg-orange-950/50">
-                      <div className="h-full w-1/3 animate-pulse rounded-full bg-orange-500" />
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100/50 dark:bg-orange-950/30">
+                      <div className="h-full w-1/3 animate-pulse rounded-full bg-orange-500/55" />
                     </div>
                   </div>
                 ) : null}
@@ -1523,8 +1523,8 @@ function AnalyzeHubConnected() {
                     role="button"
                     tabIndex={0}
                     className={cn(
-                      "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-orange-400/70",
-                      fileDragOver ? "border-orange-500 bg-orange-50/60" : "border-border bg-muted/80",
+                      "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed p-8 text-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary/35",
+                      fileDragOver ? "border-orange-400/45 bg-orange-50/25 dark:bg-orange-950/15" : "border-border bg-muted/80",
                     )}
                     onDragOver={(e) => {
                       e.preventDefault();
@@ -1631,7 +1631,7 @@ function AnalyzeHubConnected() {
                   {t("noAppsYet")}{" "}
                   <button
                     type="button"
-                    className="font-medium text-orange-700 underline dark:text-orange-300"
+                    className="font-medium text-primary/90 underline"
                     onClick={() => router.push("/analyze?mode=store")}
                   >
                     {t("goCreateApp")}
@@ -1790,16 +1790,16 @@ function AnalyzeHubConnected() {
                   {t("searchAction")}
                 </Button>
                 {compareRegistryAppA ? (
-                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                  <div className="rounded-xl border border-orange-200/30 bg-orange-50/12 p-3 dark:border-orange-800/22 dark:bg-orange-950/10">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {t("compareSelectedSummaryLabel")}
                       </p>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        className="size-8 shrink-0 text-muted-foreground hover:bg-muted dark:hover:bg-muted/80"
                         onClick={clearCompareSelectionA}
                         aria-label={t("compareRemoveSelectedAppAria")}
                       >
@@ -1837,16 +1837,16 @@ function AnalyzeHubConnected() {
                   </div>
                 ) : null}
                 {!compareRegistryAppA && compareHitA ? (
-                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                  <div className="rounded-xl border border-orange-200/30 bg-orange-50/12 p-3 dark:border-orange-800/22 dark:bg-orange-950/10">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {t("compareSelectedSummaryLabel")}
                       </p>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        className="size-8 shrink-0 text-muted-foreground hover:bg-muted dark:hover:bg-muted/80"
                         onClick={clearCompareSelectionA}
                         aria-label={t("compareRemoveSelectedAppAria")}
                       >
@@ -1996,16 +1996,16 @@ function AnalyzeHubConnected() {
                   {t("searchAction")}
                 </Button>
                 {compareRegistryAppB ? (
-                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                  <div className="rounded-xl border border-orange-200/30 bg-orange-50/12 p-3 dark:border-orange-800/22 dark:bg-orange-950/10">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {t("compareSelectedSummaryLabel")}
                       </p>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        className="size-8 shrink-0 text-muted-foreground hover:bg-muted dark:hover:bg-muted/80"
                         onClick={clearCompareSelectionB}
                         aria-label={t("compareRemoveSelectedAppAria")}
                       >
@@ -2043,16 +2043,16 @@ function AnalyzeHubConnected() {
                   </div>
                 ) : null}
                 {!compareRegistryAppB && compareHitB ? (
-                  <div className="rounded-xl border border-orange-200/70 bg-orange-50/40 p-3 dark:border-orange-900/45 dark:bg-orange-950/25">
+                  <div className="rounded-xl border border-orange-200/30 bg-orange-50/12 p-3 dark:border-orange-800/22 dark:bg-orange-950/10">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-orange-900/90 dark:text-orange-200/90">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {t("compareSelectedSummaryLabel")}
                       </p>
                       <Button
                         type="button"
                         variant="ghost"
                         size="icon"
-                        className="size-8 shrink-0 text-orange-900 hover:bg-orange-200/50 dark:text-orange-200 dark:hover:bg-orange-950/50"
+                        className="size-8 shrink-0 text-muted-foreground hover:bg-muted dark:hover:bg-muted/80"
                         onClick={clearCompareSelectionB}
                         aria-label={t("compareRemoveSelectedAppAria")}
                       >
@@ -2252,7 +2252,7 @@ function AnalyzeHubConnected() {
             </div>
             <Button
               type="button"
-              className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-base font-semibold text-white shadow-md disabled:opacity-50"
+              className="h-12 w-full rounded-xl bg-gradient-to-b from-amber-500/70 to-orange-600/75 text-base font-semibold text-white shadow-sm disabled:opacity-50"
               disabled={!canStartCompare || compareBusy}
               onClick={() => void handleCompareStart()}
             >
@@ -2263,16 +2263,16 @@ function AnalyzeHubConnected() {
         ) : null}
 
         {mode !== "compare" ? (
-          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border border-orange-200/70 bg-gradient-to-b from-card via-card to-orange-50/30 p-4 shadow-lg dark:border-orange-900/50 dark:from-card dark:to-orange-950/20 sm:p-6">
-            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/60 dark:border-orange-900/40 pb-3">
+          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border border-orange-200/28 bg-gradient-to-b from-card via-card to-orange-50/12 p-4 shadow-md dark:border-orange-800/22 dark:from-card dark:to-orange-950/10 sm:p-6">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/30 dark:border-orange-800/20 pb-3">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-200/90">{t("poolBadgeTitle")}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("poolBadgeTitle")}</p>
                 <AnimatedPoolCount
                   value={poolCountForDisplay}
                   className="text-3xl font-bold tabular-nums text-foreground"
                 />
                 {isHydratingPool ? (
-                  <p className="mt-1 text-xs font-medium text-orange-800 dark:text-orange-200">{t("hydratePoolTitle")}</p>
+                  <p className="mt-1 text-xs font-medium text-muted-foreground">{t("hydratePoolTitle")}</p>
                 ) : null}
               </div>
               {poolLines.length > 0 ? (
@@ -2319,7 +2319,7 @@ function AnalyzeHubConnected() {
                 </Button>
                 <Button
                   type="button"
-                  className="h-11 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 text-sm font-semibold text-white shadow-sm hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
+                  className="h-11 rounded-xl bg-gradient-to-r from-amber-500/68 to-orange-600/72 px-6 text-sm font-semibold text-white shadow-sm hover:from-amber-500/78 hover:to-orange-600/82 disabled:opacity-50"
                   disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
                   onClick={() => void runUnifiedAnalysis()}
                 >
@@ -2328,7 +2328,7 @@ function AnalyzeHubConnected() {
               </div>
             </div>
             {poolLines.length > 0 && !effectiveAppId ? (
-              <p className="text-center text-xs font-medium text-amber-900 dark:text-amber-200">{t("analyzeNeedAppForTextPool")}</p>
+              <p className="text-center text-xs font-medium text-muted-foreground">{t("analyzeNeedAppForTextPool")}</p>
             ) : null}
           </div>
         ) : null}

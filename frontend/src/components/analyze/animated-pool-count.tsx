@@ -43,10 +43,10 @@ export function AnimatedPoolCount({ value, className }: Props) {
           ? {
               textShadow: [
                 "0 0 0 rgba(251, 146, 60, 0)",
-                "0 0 18px rgba(251, 146, 60, 0.55)",
+                "0 0 12px rgba(251, 146, 60, 0.28)",
                 "0 0 0 rgba(251, 146, 60, 0)",
               ],
-              scale: [1, 1.03, 1],
+              scale: [1, 1.02, 1],
             }
           : { textShadow: "0 0 0 rgba(251, 146, 60, 0)", scale: 1 }
       }
