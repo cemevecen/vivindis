@@ -2123,13 +2123,38 @@ function AnalyzeHubConnected() {
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
-              <SegmentedTwo
-                ariaLabel={t("analysisModeLabel")}
-                left={t("analysisModeFast")}
-                right={t("analysisModeRich")}
-                value={analysisMode === "fast" ? "left" : "right"}
-                onChange={(v) => setAnalysisMode(v === "left" ? "fast" : "rich")}
-              />
+              <div className="grid gap-2 md:grid-cols-3">
+                <Button
+                  type="button"
+                  variant={analysisMode === "fast" ? "default" : "outline"}
+                  className={cn(
+                    "h-11 rounded-xl text-sm font-semibold",
+                    analysisMode === "fast" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                  )}
+                  onClick={() => setAnalysisMode("fast")}
+                >
+                  {t("analysisModeFast")}
+                </Button>
+                <Button
+                  type="button"
+                  variant={analysisMode === "rich" ? "default" : "outline"}
+                  className={cn(
+                    "h-11 rounded-xl text-sm font-semibold",
+                    analysisMode === "rich" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                  )}
+                  onClick={() => setAnalysisMode("rich")}
+                >
+                  {t("analysisModeRich")}
+                </Button>
+                <Button
+                  type="button"
+                  className="h-11 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 text-sm font-semibold text-white shadow-sm hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
+                  disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
+                  onClick={() => void runUnifiedAnalysis()}
+                >
+                  {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
+                </Button>
+              </div>
             </div>
             <Button
               type="button"
@@ -2183,17 +2208,6 @@ function AnalyzeHubConnected() {
             {poolLines.length > 0 && !effectiveAppId ? (
               <p className="text-center text-xs font-medium text-amber-900 dark:text-amber-200">{t("analyzeNeedAppForTextPool")}</p>
             ) : null}
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="text-xs text-muted-foreground">{t("analyzeFooterNeedData")}</p>
-              <Button
-                type="button"
-                className="h-11 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 text-sm font-semibold text-white shadow-sm hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
-                disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
-                onClick={() => void runUnifiedAnalysis()}
-              >
-                {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
-              </Button>
-            </div>
           </div>
         ) : null}
       </div>
