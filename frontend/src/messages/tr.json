@@ -395,7 +395,11 @@
     "globalQueued": "Global tarama ve analiz kuyruğa alındı.",
     "globalLangsLabel": "Global tarama dilleri",
     "globalLangsHint": "Bir veya daha fazla dil seçin. Seçtiğiniz dillere göre global mağaza yorumları çekilir.",
-    "globalTop30Hint": "Derin araştırma globalde en önemli 30 dili tarar; işlem uzun sürebilir ama kapsam geniş tutulur."
+    "globalTop30Hint": "Derin araştırma globalde en önemli 30 dili tarar; işlem uzun sürebilir ama kapsam geniş tutulur.",
+    "deepResearchStatusTitle": "Derin araştırma durumu",
+    "deepResearchStatusRunning": "Derin araştırma sürüyor. Bittiğinde sonuçlar bu sayfada otomatik güncellenecek.",
+    "deepResearchStatusCompleted": "Derin araştırma tamamlandı. Global sonuçlar hazır.",
+    "deepResearchStatusFailed": "Derin araştırma tamamlanamadı. İsterseniz tekrar başlatabilirsiniz."
   },
   "about": {
     "title": "Vivindis hakkında",

@@ -4,6 +4,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
@@ -131,6 +132,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const exportBase = t("exportFileBase");
   const { getToken } = useAuth();
   const router = useRouter();
@@ -208,7 +210,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
       toast.success(t("globalQueued"));
-      router.push(`/apps/${appId}/analysis?fetchId=${created.id}`);
+      router.push(`/apps/${appId}/analysis?fetchId=${created.id}&deep=1`);
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : tCommon("error"));
@@ -500,6 +502,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
   const items = analysesForFetch(analysesQuery.data?.items ?? [], fetchId);
   const busy = items.some((a) => a.status === "pending" || a.status === "running");
+  const isDeepResearchFlow = searchParams.get("deep") === "1";
 
   const heuristic = latestByType(items, "heuristic");
   const ai = latestByType(items, "ai");
@@ -606,6 +609,19 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
         </Button>
       </section>
+
+      {isDeepResearchFlow ? (
+        <section className="rounded-lg border border-border bg-card p-4">
+          <p className="text-sm font-semibold text-foreground">{t("deepResearchStatusTitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {fetch.status === "pending" || fetch.status === "running"
+              ? t("deepResearchStatusRunning")
+              : fetch.status === "completed"
+                ? t("deepResearchStatusCompleted")
+                : t("deepResearchStatusFailed")}
+          </p>
+        </section>
+      ) : null}
 
       {((heuristic?.status === "completed" && heuristic.result) ||
         (ai?.status === "completed" && ai.result)) &&

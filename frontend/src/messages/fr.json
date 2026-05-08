@@ -178,7 +178,11 @@
     "globalQueued": "Global scan and analysis have been queued.",
     "globalLangsLabel": "Global scan languages",
     "globalLangsHint": "Select one or more languages. Global store reviews will focus on these languages.",
-    "globalTop30Hint": "Deep research scans the top 30 global languages; it may take longer to complete for full coverage."
+    "globalTop30Hint": "Deep research scans the top 30 global languages; it may take longer to complete for full coverage.",
+    "deepResearchStatusTitle": "Deep research status",
+    "deepResearchStatusRunning": "Deep research is running. Results will refresh automatically on this page when it finishes.",
+    "deepResearchStatusCompleted": "Deep research completed. Global results are now ready.",
+    "deepResearchStatusFailed": "Deep research did not complete successfully. You can retry it."
   },
   "auth": {
     "signIn": "Connexion",
