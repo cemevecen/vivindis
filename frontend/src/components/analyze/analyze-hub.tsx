@@ -1168,18 +1168,22 @@ function AnalyzeHubConnected() {
               </div>
             </div>
 
-            <Button
-              type="button"
-              className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground hover:bg-primary/90"
-              onClick={() => {
-                if (requireSignedIn()) {
-                  setActiveQuery(draftQuery.trim());
-                }
-              }}
-              disabled={!isLoaded || draftQuery.trim().length < 2}
-            >
-              {t("searchCatalogCta")}
-            </Button>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                type="button"
+                className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
+                onClick={() => {
+                  if (requireSignedIn()) {
+                    setActiveQuery(draftQuery.trim());
+                  }
+                }}
+                disabled={!isLoaded || draftQuery.trim().length < 2}
+              >
+                <Search className="mr-2 size-4" aria-hidden />
+                {t("searchCatalogCta")}
+              </Button>
+              <p className="text-xs text-muted-foreground">{t("searchHint")}</p>
+            </div>
 
             {!isPublicApiBaseUrlConfigured() ? (
               <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/15 dark:text-amber-100">
@@ -1229,26 +1233,29 @@ function AnalyzeHubConnected() {
                     <p className="text-xs text-muted-foreground">{t("localFirstHint")}</p>
                   </div>
                 </div>
-                <Button
-                  type="button"
-                  className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-md hover:bg-primary/90 disabled:opacity-50"
-                  onClick={() => void handlePullStoreReviews()}
-                  disabled={
-                    !sessionApp ||
-                    storePullMutation.isPending ||
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button
+                    type="button"
+                    className="h-11 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                    onClick={() => void handlePullStoreReviews()}
+                    disabled={
+                      !sessionApp ||
+                      storePullMutation.isPending ||
+                      fetchRowQuery.data?.status === "pending" ||
+                      fetchRowQuery.data?.status === "running" ||
+                      (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                    }
+                  >
+                    {storePullMutation.isPending ||
                     fetchRowQuery.data?.status === "pending" ||
-                    fetchRowQuery.data?.status === "running" ||
                     (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                  }
-                >
-                  {storePullMutation.isPending ||
-                  fetchRowQuery.data?.status === "pending" ||
-                  (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                    ? tCommon("loading")
-                    : fetchRowQuery.data?.status === "running"
-                      ? t("fetchRunningShort")
-                      : t("pullStoreReviewsCta")}
-                </Button>
+                      ? tCommon("loading")
+                      : fetchRowQuery.data?.status === "running"
+                        ? t("fetchRunningShort")
+                        : t("pullStoreReviewsCta")}
+                  </Button>
+                  <p className="text-xs text-muted-foreground">{t("localFirstHint")}</p>
+                </div>
                 {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
                     <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
@@ -2137,7 +2144,7 @@ function AnalyzeHubConnected() {
         ) : null}
 
         {mode !== "compare" ? (
-          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border-2 border-orange-200/80 bg-gradient-to-b from-card to-orange-50/35 p-4 shadow-xl dark:border-orange-900/50 dark:from-card dark:to-orange-950/25 sm:p-6">
+          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border border-orange-200/70 bg-gradient-to-b from-card via-card to-orange-50/30 p-4 shadow-lg dark:border-orange-900/50 dark:from-card dark:to-orange-950/20 sm:p-6">
             <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/60 dark:border-orange-900/40 pb-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-orange-900 dark:text-orange-200/90">{t("poolBadgeTitle")}</p>
@@ -2176,14 +2183,17 @@ function AnalyzeHubConnected() {
             {poolLines.length > 0 && !effectiveAppId ? (
               <p className="text-center text-xs font-medium text-amber-900 dark:text-amber-200">{t("analyzeNeedAppForTextPool")}</p>
             ) : null}
-            <Button
-              type="button"
-              className="h-14 w-full rounded-xl bg-gradient-to-b from-amber-400 to-orange-600 text-lg font-bold text-white shadow-md hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
-              disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
-              onClick={() => void runUnifiedAnalysis()}
-            >
-              {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
-            </Button>
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs text-muted-foreground">{t("analyzeFooterNeedData")}</p>
+              <Button
+                type="button"
+                className="h-11 rounded-xl bg-gradient-to-r from-amber-400 to-orange-500 px-6 text-sm font-semibold text-white shadow-sm hover:from-amber-500 hover:to-orange-600 disabled:opacity-50"
+                disabled={!canRunUnifiedAnalysis || analysisKickoffBusy || importMutation.isPending}
+                onClick={() => void runUnifiedAnalysis()}
+              >
+                {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
+              </Button>
+            </div>
           </div>
         ) : null}
       </div>
