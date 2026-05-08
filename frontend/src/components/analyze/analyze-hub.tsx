@@ -34,6 +34,7 @@ import {
   type SearchPlatform,
 } from "@/lib/analyze-hub-utils";
 import { dedupeAppsForList } from "@/lib/app-dedupe";
+import { buildDailyVolumePointsForRange } from "@/lib/daily-volume-points";
 import { parseReviewFile } from "@/lib/parse-review-file";
 import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
@@ -206,6 +207,27 @@ function AnalyzeHubConnected() {
       ),
     enabled: Boolean(isSignedIn && sessionApp?.id),
   });
+
+  const statsPoints = statsQuery.data?.points;
+  const hasServerReviewVolume = useMemo(
+    () => (statsPoints ?? []).some((p) => p.count > 0),
+    [statsPoints],
+  );
+
+  const clientVolumePoints = useMemo(
+    () => buildDailyVolumePointsForRange(hydratedReviews, dateRange.from, dateRange.to),
+    [hydratedReviews, dateRange.from, dateRange.to],
+  );
+  const hasClientReviewVolume = useMemo(
+    () => clientVolumePoints.some((p) => p.count > 0),
+    [clientVolumePoints],
+  );
+
+  const reviewVolumeDisplayPoints = hasServerReviewVolume && statsPoints ? statsPoints : clientVolumePoints;
+  const hasReviewVolumeToShow = hasServerReviewVolume || hasClientReviewVolume;
+  const showStoreReviewVolumeBlock = Boolean(
+    sessionApp && (statsQuery.isFetching || hasReviewVolumeToShow),
+  );
 
   const registeredAppsDeduped = useMemo(
     () => dedupeAppsForList(appsQuery.data ?? []),
@@ -1306,12 +1328,14 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 </div>
-                {sessionApp ? (
+                {showStoreReviewVolumeBlock ? (
                   <div className="space-y-2 pt-2">
                     <p className="text-xs text-muted-foreground">{t("reviewVolumeInRange")}</p>
                     <ReviewVolumeSparkline
-                      points={statsQuery.data?.points ?? []}
-                      isLoading={statsQuery.isFetching}
+                      points={reviewVolumeDisplayPoints}
+                      isLoading={
+                        statsQuery.isFetching && !hasServerReviewVolume && !hasClientReviewVolume
+                      }
                       emptyLabel={t("reviewVolumeNoData")}
                     />
                   </div>
