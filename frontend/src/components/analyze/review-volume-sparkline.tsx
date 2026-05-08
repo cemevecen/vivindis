@@ -9,10 +9,12 @@ import type { ReviewVolumePointDto } from "@/types/app-stats";
 type Props = {
   points: ReviewVolumePointDto[];
   isLoading: boolean;
+  /** Shown inside the empty (no points) placeholder for sighted and screen-reader users. */
+  emptyLabel?: string;
   className?: string;
 };
 
-export function ReviewVolumeSparkline({ points, isLoading, className }: Props) {
+export function ReviewVolumeSparkline({ points, isLoading, emptyLabel, className }: Props) {
   const data = useMemo(
     () => points.map((p) => ({ date: p.date, count: p.count })),
     [points],
@@ -26,10 +28,12 @@ export function ReviewVolumeSparkline({ points, isLoading, className }: Props) {
     return (
       <div
         className={cn(
-          "flex h-11 w-full items-center rounded-lg border border-dashed border-border/60 px-2 text-xs text-muted-foreground",
+          "flex h-11 w-full items-center justify-center rounded-lg border border-dashed border-border/60 px-2 text-center text-xs text-muted-foreground",
           className,
         )}
-      />
+      >
+        {emptyLabel ?? null}
+      </div>
     );
   }
 

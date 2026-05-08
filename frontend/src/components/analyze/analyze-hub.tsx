@@ -1312,6 +1312,7 @@ function AnalyzeHubConnected() {
                     <ReviewVolumeSparkline
                       points={statsQuery.data?.points ?? []}
                       isLoading={statsQuery.isFetching}
+                      emptyLabel={t("reviewVolumeNoData")}
                     />
                   </div>
                 ) : null}

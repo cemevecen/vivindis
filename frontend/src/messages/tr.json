@@ -88,6 +88,7 @@
     "reviewSampleLimitLabel": "Örneklem limiti",
     "reviewSampleLimitAll": "Limitsiz (hepsi)",
     "reviewVolumeInRange": "Bu tarih aralığındaki yorum hacmi",
+    "reviewVolumeNoData": "Bu aralık için günlük hacim verisi yok",
     "dateRangeLabel": "tarih aralığı",
     "datePresetLast7": "son 7 gün",
     "datePresetLast30": "son 1 ay",
