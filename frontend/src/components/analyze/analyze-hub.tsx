@@ -1199,9 +1199,9 @@ function AnalyzeHubConnected() {
                   onClear={clearStorePin}
                   onSearchAnother={dismissStorePinCard}
                 />
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  <div className="flex min-w-0 flex-1 flex-col gap-2">
-                    <Label htmlFor="store-fetch-date-preset" className="text-foreground">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_2fr] items-end">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="store-fetch-date-preset" className="text-sm font-medium text-foreground">
                       {t("dateRangeLabel")}
                     </Label>
                     <SelectNative
@@ -1221,21 +1221,21 @@ function AnalyzeHubConnected() {
                       <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
                   </div>
-                  <div className="flex w-full max-w-[5.5rem] shrink-0 flex-col gap-2 sm:w-[5.5rem]">
-                    <span className="block text-sm font-medium leading-tight text-foreground">
+                  <div className="flex flex-col gap-2">
+                    <Label className="whitespace-nowrap text-sm font-medium text-foreground">
                       {t("reviewScopeLabel")}
-                    </span>
-                    <span className="inline-flex h-11 w-full max-w-[3.75rem] items-center justify-center self-start rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-                      {t("reviewScopeLocal")}
-                    </span>
+                    </Label>
+                    <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                      <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+                        {t("reviewScopeLocal")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex min-w-0 flex-[1.35] flex-col gap-2">
-                    <span className="invisible block select-none text-sm font-medium text-foreground" aria-hidden>
-                      &nbsp;
-                    </span>
+                  <div className="flex flex-col gap-2">
+                    <div className="h-5 invisible select-none" aria-hidden>&nbsp;</div>
                     <Button
                       type="button"
-                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50 sm:min-h-11 sm:px-6 sm:text-base"
+                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
                       onClick={() => void handlePullStoreReviews()}
                       disabled={
                         !sessionApp ||
@@ -2099,9 +2099,9 @@ function AnalyzeHubConnected() {
                 ) : null}
               </div>
             ) : null}
-            <div className="flex flex-wrap items-end gap-4">
-              <div className="flex-1 min-w-[200px] space-y-2">
-                <Label htmlFor="store-fetch-date-preset" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_2fr] items-end">
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="store-fetch-date-preset" className="text-sm font-medium text-foreground">
                   {t("dateRangeLabel")}
                 </Label>
                 <SelectNative
@@ -2121,36 +2121,39 @@ function AnalyzeHubConnected() {
                   <option value="all">{t("datePresetAll")}</option>
                 </SelectNative>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+              <div className="flex flex-col gap-2">
+                <Label className="whitespace-nowrap text-sm font-medium text-foreground">
                   {t("reviewScopeLabel")}
                 </Label>
-                <div className="flex h-11 items-center rounded-xl border border-border bg-muted/20 px-3">
-                  <span className="inline-flex rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-tight text-emerald-700 dark:text-emerald-300">
+                <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                     {t("reviewScopeLocal")}
                   </span>
                 </div>
               </div>
-              <Button
-                type="button"
-                className="h-11 rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
-                onClick={() => void handlePullStoreReviews()}
-                disabled={
-                  !sessionApp ||
-                  storePullMutation.isPending ||
+              <div className="flex flex-col gap-2">
+                <div className="h-5 invisible select-none" aria-hidden>&nbsp;</div>
+                <Button
+                  type="button"
+                  className="h-11 w-full rounded-xl bg-primary px-6 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                  onClick={() => void handlePullStoreReviews()}
+                  disabled={
+                    !sessionApp ||
+                    storePullMutation.isPending ||
+                    fetchRowQuery.data?.status === "pending" ||
+                    fetchRowQuery.data?.status === "running" ||
+                    (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                  }
+                >
+                  {storePullMutation.isPending ||
                   fetchRowQuery.data?.status === "pending" ||
-                  fetchRowQuery.data?.status === "running" ||
                   (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                }
-              >
-                {storePullMutation.isPending ||
-                fetchRowQuery.data?.status === "pending" ||
-                (Boolean(storeFetchId) && fetchRowQuery.isPending)
-                  ? tCommon("loading")
-                  : fetchRowQuery.data?.status === "running"
-                    ? t("fetchRunningShort")
-                    : t("pullStoreReviewsCta")}
-              </Button>
+                    ? tCommon("loading")
+                    : fetchRowQuery.data?.status === "running"
+                      ? t("fetchRunningShort")
+                      : t("pullStoreReviewsCta")}
+                </Button>
+              </div>
             </div>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-foreground">{t("analysisModeSectionTitle")}</p>
