@@ -28,6 +28,10 @@
 - UI: shadcn/ui + Tailwind; toast: **Sonner**.
 - `'use client'` yalnızca gerektiğinde.
 
+## README / Hakkında metni
+
+Kullanıcı **README güncelle** veya **hakkında metni** istediğinde: [.cursor/rules/readme-and-about-i18n.mdc](./.cursor/rules/readme-and-about-i18n.mdc) — gizli bilgi yok; README’de 10 dil + anchor’lı özet; `about.*` tüm locale dosyalarında parity.
+
 ## Dağıtım (canlı odak)
 
 - Hedef: **vivindis.com** (Vercel + Railway, GitHub üzerinden). Anlamlı iş bitince **her zaman** commit + `git push` — yarım bırakma.

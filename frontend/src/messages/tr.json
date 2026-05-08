@@ -507,10 +507,10 @@
   },
   "about": {
     "title": "Vivindis hakkında",
-    "p1": "Vivindis, Google Play ve App Store yorumlarını çeker; heuristic ve isteğe bağlı AI analizi yapar; sonuçları yapılandırılmış bir panelde gösterir.",
-    "p2": "Analiz merkezi, Streamlit yerine FastAPI + Celery + Next.js ile tanıdık tek ekran akışını sunar: mağaza araması, dosya ve yapıştırma içe aktarma, karşılaştırma için iki uygulama oluşturma.",
-    "p3": "Dışa aktarma: analitik sayfasında JSON, CSV, Excel ve tarayıcı yazdır ile kaydedilebilen tam rapor (grafikler, içgörüler ve yorum metinleri) sunulur.",
-    "p4": "Gizli anahtarlar yalnızca Railway ve Vercel ortam değişkenlerinde tutulur; asla repoya eklenmemelidir."
+    "p1": "Vivindis, ürün ekiplerinin Google Play ve App Store yorumlarını bir araya getirip heuristic özetler ve isteğe bağlı AI destekli analizle yapılandırılmış panellerde anlamlı içgörülere dönüştürmesine yardımcı olur.",
+    "p2": "Oturum açıp uygulama ekleyebilir, tarih aralığı seçebilir, mağazada arayabilir veya dosya ve yapıştırılmış metin içe aktarabilirsiniz; karşılaştırma için iki uygulamayı yan yana hazırlayabilirsiniz. Analiz merkezi FastAPI, Celery ve Next.js üzerindedir.",
+    "p3": "Sonuçları JSON, CSV, Excel veya analitik sayfadaki yazdırılabilir tam rapor olarak dışa aktarabilirsiniz (grafikler, öne çıkanlar, yorum özetleri). Arayüz çok dillidir; dili üst menüden istediğiniz zaman değiştirin.",
+    "p4": "Kurulum politikasına bağlı olarak çok büyük otomatik çekimler, işlem operatör onayı beklerken durabilir. Gizli anahtarlar ve API anahtarları yalnızca barındırma ortam değişkenlerinde tutulmalı; asla repoya eklenmemelidir."
   },
   "auth": {
     "signIn": "Giriş yap",

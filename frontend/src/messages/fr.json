@@ -499,10 +499,10 @@
   },
   "about": {
     "title": "À propos de Vivindis",
-    "p1": "Vivindis extrait les avis de Google Play et de l'App Store, exécute une analyse heuristique et facultative de l'IA et affiche les résultats dans un tableau de bord structuré.",
-    "p2": "Le hub Analyse reflète un flux de travail familier sur un seul écran : recherche de magasin, importation de fichiers et de collages et étape de création de deux applications à des fins de comparaison - construit sur FastAPI, Celery et Next.js au lieu de Streamlit.",
-    "p3": "Exportations : les analyses terminées proposent du JSON et un résumé CSV plat à partir de la page d'analyse. ",
-    "p4": "Les secrets et les clés API ne résident que dans les variables d'environnement sur Railway et Vercel ; "
+    "p1": "Vivindis aide les équipes produit à agréger les avis Google Play et App Store et à les transformer en insights exploitables grâce à des synthèses heuristiques et une analyse assistée par IA optionnelle dans des tableaux de bord structurés.",
+    "p2": "Connectez-vous pour enregistrer des apps, choisir des plages de dates, rechercher dans les stores ou importer fichiers et texte collé, et préparer deux apps côte à côte pour comparer. Le hub Analyse repose sur FastAPI, Celery et Next.js.",
+    "p3": "Exportez en JSON, CSV, Excel ou rapport imprimable depuis la page d’analyse (graphiques, points clés, extraits d’avis). L’interface est localisée—changez de langue dans l’en-tête à tout moment.",
+    "p4": "Selon la politique de déploiement, les extractions automatiques très volumineuses peuvent être mises en pause jusqu’à validation opérationnelle. Secrets et clés API uniquement dans les variables d’environnement du fournisseur—jamais dans le dépôt."
   },
   "meta": {
     "siteDescription": "Plateforme SaaS qui récupère et analyse à grande échelle les avis Google Play et App Store."

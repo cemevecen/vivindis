@@ -499,10 +499,10 @@
   },
   "about": {
     "title": "Acerca de Vivindis",
-    "p1": "Vivindis obtiene reseñas de Google Play y App Store, ejecuta análisis heurísticos y de IA opcionales y muestra los resultados en un panel estructurado.",
-    "p2": "El centro de análisis refleja un flujo de trabajo familiar de pantalla única: almacenar búsqueda, importar archivos y pegar, y un paso de creación de dos aplicaciones para comparar, creado en FastAPI, Celery y Next.js en lugar de Streamlit.",
-    "p3": "Exportaciones: los análisis completados ofrecen JSON y un resumen CSV plano desde la página de análisis. ",
-    "p4": "Los secretos y las claves API residen únicamente en variables de entorno en Railway y Vercel; "
+    "p1": "Vivindis ayuda a los equipos de producto a reunir reseñas de Google Play y App Store y convertirlas en información accionable mediante resúmenes heurísticos y análisis opcional asistido por IA en paneles estructurados.",
+    "p2": "Inicie sesión para registrar apps, elegir rangos de fechas, buscar en tiendas o importar archivos y texto pegado, y preparar dos aplicaciones en paralelo para comparar. El centro de análisis funciona con FastAPI, Celery y Next.js.",
+    "p3": "Exporte resultados en JSON, CSV, Excel o informe imprimible completo desde la página de analítica (gráficos, destacados, extractos de reseñas). La interfaz está localizada; cambie el idioma desde la cabecera en cualquier momento.",
+    "p4": "Según la política de despliegue, las extracciones automáticas muy grandes pueden pausarse hasta que un operador las apruebe. Los secretos y claves API deben vivir solo en variables de entorno del hosting; nunca en el repositorio."
   },
   "meta": {
     "siteDescription": "Plataforma SaaS que obtiene y analiza reseñas de Google Play y App Store a escala."

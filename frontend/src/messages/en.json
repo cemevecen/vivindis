@@ -507,10 +507,10 @@
   },
   "about": {
     "title": "About Vivindis",
-    "p1": "Vivindis pulls Google Play and App Store reviews, runs heuristic and optional AI analysis, and shows results in a structured dashboard.",
-    "p2": "The Analyze hub mirrors a familiar single-screen workflow: store search, file and paste import, and a two-app creation step for comparison — built on FastAPI, Celery, and Next.js instead of Streamlit.",
-    "p3": "Exports: the analytics page offers JSON, CSV, Excel, and a printable full report (PDF via the browser print dialog) that includes charts, insights, and review text.",
-    "p4": "Secrets and API keys live only in environment variables on Railway and Vercel; never commit them to git."
+    "p1": "Vivindis helps product teams aggregate Google Play and App Store reviews and turn them into actionable insights—through heuristic summaries and optional AI-assisted analysis in structured dashboards.",
+    "p2": "Sign in to register apps, pick date ranges, search stores or import files and pasted text, and set up two apps side by side when you want to compare. The Analyze hub runs on FastAPI, Celery, and Next.js.",
+    "p3": "Export results as JSON, CSV, Excel, or a printable full report from the analytics page (charts, highlights, and review excerpts). The UI is localized—switch languages from the header at any time.",
+    "p4": "Depending on deployment policy, very large automated review pulls may pause until an operator approves the job. Secrets and API keys must live only in hosting environment variables—never in source control."
   },
   "auth": {
     "signIn": "Sign in",

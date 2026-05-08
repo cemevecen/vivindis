@@ -499,10 +499,10 @@
   },
   "about": {
     "title": "Kuhusu Vivindis",
-    "p1": "Vivindis huchota ukaguzi wa Google Play na Duka la Programu, huendesha uchanganuzi wa hiari na wa hiari wa AI, na huonyesha matokeo katika dashibodi iliyoundwa.",
-    "p2": "Kitovu cha Uchanganuzi huakisi utendakazi wa skrini moja unaojulikana: utafutaji wa duka, uletaji wa faili na ubandike, na hatua ya kuunda programu mbili kwa kulinganisha - iliyojengwa kwenye FastAPI, Celery na Next.js badala ya Streamlit.",
-    "p3": "Mauzo: uchambuzi uliokamilika hutoa JSON na muhtasari wa CSV bapa kutoka kwa ukurasa wa uchanganuzi. ",
-    "p4": "Siri na funguo za API huishi tu katika vigezo vya mazingira kwenye Reli na Vercel; "
+    "p1": "Vivindis husaidia timu za bidhaa kuunganisha ukaguzi wa Google Play na App Store na kuugeuza kuwa maarifa yanayoweza kutumika kupitia muhtasari wa hiari na uchanganuzi wa hiari unaoungwa mkono na AI kwenye dashibodi zilizopangwa.",
+    "p2": "Ingia ili kusajili programu, kuchagua masafa ya tarehe, kutafuta maduka au kuleta faili na maandishi yaliyobandikwa, na kuandaa programu mbili upande kwa upande kwa kulinganisha. Kitovu cha Uchanganuzi kinatumia FastAPI, Celery na Next.js.",
+    "p3": "Hamisha matokeo kama JSON, CSV, Excel au ripoti kamili inayoweza kuchapishwa kutoka ukurasa wa uchanganuzi (chati, vilio vikuu, vipande vya ukaguzi). Kiolesura kinatumika kwa lugha nyingi—badilisha lugha kichwani wakati wowote.",
+    "p4": "Kulingana na sera ya ujenzi, upakiaji mkubwa sana wa kiotomatiki unaweza kusimama hadi idhini ya uendeshaji. Siri na funguo za API ziwe kwenye vigezo vya mazingira ya mwenyeji tu—kamwe msidhani kwenye hifadhidata ya kanuni."
   },
   "meta": {
     "siteDescription": "Jukwaa la SaaS linalovuta na kuchambua ukaguzi wa Google Play na App Store kwa kiwango kikubwa."

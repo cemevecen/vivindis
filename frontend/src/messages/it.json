@@ -499,10 +499,10 @@
   },
   "about": {
     "title": "A proposito di Vivindis",
-    "p1": "Vivindis raccoglie recensioni su Google Play e App Store, esegue analisi euristiche e facoltative sull'intelligenza artificiale e mostra i risultati in una dashboard strutturata.",
-    "p2": "L'hub di analisi rispecchia un flusso di lavoro familiare a schermata singola: ricerca in archivio, importazione di file e incolla e una fase di creazione di due app per il confronto, basata su FastAPI, Celery e Next.js anziché Streamlit.",
-    "p3": "Esportazioni: le analisi completate offrono JSON e un riepilogo CSV semplice dalla pagina di analisi. ",
-    "p4": "I segreti e le chiavi API risiedono solo nelle variabili di ambiente su Railway e Vercel; "
+    "p1": "Vivindis aiuta i team di prodotto a aggregare le recensioni di Google Play e App Store e trasformarle in insight operativi tramite sintesi euristiche e analisi assistita da IA opzionale in dashboard strutturate.",
+    "p2": "Accedi per registrare app, scegliere intervalli di date, cercare negli store o importare file e testo incollato e predisporre due app affiancate per il confronto. L’hub Analisi è basato su FastAPI, Celery e Next.js.",
+    "p3": "Esporta in JSON, CSV, Excel o rapporto stampabile completo dalla pagina analytics (grafici, punti salienti, estratti recensioni). L’interfaccia è localizzata; cambia lingua dall’intestazione in qualsiasi momento.",
+    "p4": "In base alla policy di deployment, i pull automatici molto grandi possono essere messi in pausa fino all’approvazione operativa. Segreti e chiavi API solo nelle variabili d’ambiente dell’hosting—mai nel repository."
   },
   "meta": {
     "siteDescription": "Piattaforma SaaS che recupera e analizza le recensioni di Google Play e App Store su larga scala."

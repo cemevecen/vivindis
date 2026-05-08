@@ -1,0 +1,16 @@
+---
+description: README veya About/Hakkında güncellenince çok dilli profesyonel özet kuralı
+alwaysApply: true
+---
+
+# README ve About metni (Vivindis)
+
+Kullanıcı **README güncelle**, **readme**, **hakkında**, **about** veya eşdeğerini söylediğinde:
+
+1. **Gizlilik:** Token, chat id, iç URL’ler, anahtarlar **asla** metne yazılmaz.
+2. **README (`README.md`):**
+   - **En büyük 10 dil** için ayrı bölüm: ürün özeti maddeler halinde (bullet).
+   - Dil geçişi için üstte **içindekiler** + **sabit anchor** (`<a id="readme-xx"></a>`) kullan.
+   - Teknik stack / deploy özeti mevcut yapıyla uyumlu kalsın.
+3. **Footer → Hakkında sayfası:** `frontend/src/messages/*.json` içindeki **`about.p1`–`about.p4`** (ve gerekirse `about.title`) **tüm locale dosyalarında** aynı anlamda güncellenir; `node frontend/scripts/check-i18n-parity.mjs` geçmeli.
+4. Projede **12 locale** varsa About için **12 dosya** güncellenir; README’deki “10 dil” tamamlayıcı ürün özeti, About ise tam dil kapsamıdır.

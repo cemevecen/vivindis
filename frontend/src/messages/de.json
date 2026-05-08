@@ -499,10 +499,10 @@
   },
   "about": {
     "title": "Über Vivindis",
-    "p1": "Vivindis ruft Google Play- und App Store-Bewertungen ab, führt heuristische und optionale KI-Analysen durch und zeigt die Ergebnisse in einem strukturierten Dashboard an.",
-    "p2": "Der Analyse-Hub bildet einen vertrauten Ein-Screen-Ablauf ab: Store-Suche, Datei- und Einfüge-Import sowie ein Schritt mit zwei Apps für den Vergleich — auf Basis von FastAPI, Celery und Next.js statt Streamlit.",
-    "p3": "Exporte: Die Analyseseite bietet JSON, CSV, Excel und einen druckbaren Gesamtbericht (PDF über den Druckdialog des Browsers) mit Diagrammen, Insights und Review-Texten.",
-    "p4": "Geheimnisse und API-Schlüssel liegen nur in Umgebungsvariablen auf Railway und Vercel; niemals ins Git committen."
+    "p1": "Vivindis hilft Produktteams, Google Play- und App Store-Rezensionen zu bündeln und mit heuristischen Übersichten sowie optionaler KI-gestützter Analyse in strukturierten Dashboards umsetzbare Erkenntnisse zu gewinnen.",
+    "p2": "Nach der Anmeldung registrieren Sie Apps, wählen Zeiträume, durchsuchen Stores oder importieren Dateien und eingefügten Text; für Vergleiche richten Sie zwei Apps nebeneinander ein. Der Analyse-Hub basiert auf FastAPI, Celery und Next.js.",
+    "p3": "Exportieren Sie Ergebnisse als JSON, CSV, Excel oder als druckbaren Gesamtbericht auf der Analyseseite (Diagramme, Highlights, Review-Auszüge). Die Oberfläche ist mehrsprachig—wechseln Sie die Sprache jederzeit über den Header.",
+    "p4": "Je nach Bereitstellungsrichtlinie können sehr große automatisierte Abrufe pausieren, bis ein Betrieb sie freigibt. Geheimnisse und API-Schlüssel dürfen ausschließlich in Hosting-Umgebungsvariablen liegen—niemals im Quellcode-Repository."
   },
   "meta": {
     "siteDescription": "SaaS-Plattform zum Abrufen und Analysieren von Google Play- und App Store-Bewertungen im großen Maßstab."

@@ -499,10 +499,10 @@
   },
   "about": {
     "title": "Sobre Vivindis",
-    "p1": "A Vivindis obtém análises do Google Play e da App Store, executa análises heurísticas e de IA opcionais e mostra os resultados em um painel estruturado.",
-    "p2": "O hub Analisar reflete um fluxo de trabalho familiar de tela única: pesquisa de armazenamento, importação de arquivo e colagem e uma etapa de criação de dois aplicativos para comparação - construída em FastAPI, Celery e Next.js em vez de Streamlit.",
-    "p3": "Exportações: as análises concluídas oferecem JSON e um resumo CSV simples da página de análise. ",
-    "p4": "Segredos e chaves de API residem apenas em variáveis ​​de ambiente no Railway e Vercel; "
+    "p1": "A Vivindis ajuda equipas de produto a agregar avaliações da Google Play e da App Store e transformá-las em insights acionáveis com resumos heurísticos e análise opcional assistida por IA em painéis estruturados.",
+    "p2": "Inicie sessão para registar apps, definir intervalos de datas, pesquisar nas lojas ou importar ficheiros e texto colado e preparar duas apps lado a lado para comparar. O hub Analisar corre em FastAPI, Celery e Next.js.",
+    "p3": "Exporte para JSON, CSV, Excel ou relatório completo imprimível na página de analytics (gráficos, destaques, excertos). A interface está localizada—altere o idioma no cabeçalho a qualquer momento.",
+    "p4": "Consoante a política de implementação, extrações automáticas muito grandes podem ficar em pausa até aprovação operacional. Segredos e chaves API apenas em variáveis de ambiente do hosting—nunca no repositório."
   },
   "meta": {
     "siteDescription": "Plataforma SaaS que obtém e analisa avaliações da Google Play e App Store em escala."
