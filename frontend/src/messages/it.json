@@ -165,6 +165,7 @@
     "timelineBucketDay": "Giornaliero",
     "timelineBucketWeek": "Settimanale",
     "timelineBucketMonth": "Mensile",
+    "timelineBucketYear": "Annuale",
     "timelineVolumeTitle": "Revisione del volume per periodo",
     "timelineStarsStackTitle": "Mix di stelle per periodo (1–5)",
     "timelineAvgRatingTitle": "Voto medio per periodo",

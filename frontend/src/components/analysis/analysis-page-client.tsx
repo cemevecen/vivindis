@@ -229,6 +229,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       timelineBucketDay: t("timelineBucketDay"),
       timelineBucketWeek: t("timelineBucketWeek"),
       timelineBucketMonth: t("timelineBucketMonth"),
+      timelineBucketYear: t("timelineBucketYear"),
       colPeriod: t("pdfColPeriod"),
       colCount: t("pdfColCount"),
       colAvgRating: t("pdfColAvgRating"),
@@ -903,11 +904,14 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             locale={locale}
             isPartial={timelineReviews.length < fetch.review_count}
             totalExpected={fetch.review_count}
+            fetchFromDate={fetch.from_date}
+            fetchToDate={fetch.to_date}
             labels={{
               sectionHeading: t("timelineSectionHeading"),
               bucketDay: t("timelineBucketDay"),
               bucketWeek: t("timelineBucketWeek"),
               bucketMonth: t("timelineBucketMonth"),
+              bucketYear: t("timelineBucketYear"),
               volumeTitle: t("timelineVolumeTitle"),
               starsStackTitle: t("timelineStarsStackTitle"),
               avgRatingTitle: t("timelineAvgRatingTitle"),

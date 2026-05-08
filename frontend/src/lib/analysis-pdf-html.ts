@@ -40,6 +40,7 @@ export type AnalysisPdfLocaleStrings = {
   timelineBucketDay: string;
   timelineBucketWeek: string;
   timelineBucketMonth: string;
+  timelineBucketYear: string;
   colPeriod: string;
   colCount: string;
   colAvgRating: string;
@@ -243,6 +244,7 @@ function timelineSection(
   reviews: ReviewListItemDto[] | null,
   locale: string,
   copy: AnalysisPdfLocaleStrings,
+  fetchFromDate: string,
 ): string {
   if (!reviews || reviews.length === 0) {
     return `<section style="margin:20px 0;"><h2 style="font-size:18px;">${escapeHtml(copy.sectionTimeline)}</h2>
@@ -253,6 +255,9 @@ function timelineSection(
     { mode: "week", label: copy.timelineBucketWeek },
     { mode: "month", label: copy.timelineBucketMonth },
   ];
+  if (fetchFromDate === "2000-01-01") {
+    modes.push({ mode: "year", label: copy.timelineBucketYear });
+  }
   const note = copy.timelineTruncatedNote
     ? `<p style="font-size:11px;color:#b45309;">${escapeHtml(copy.timelineTruncatedNote)}</p>`
     : "";
@@ -417,7 +422,7 @@ export function buildFullAnalysisPdfHtml(p: BuildFullAnalysisPdfParams): string 
       <p style="margin:4px 0 0;"><strong>${escapeHtml(copy.labelGenerated)}</strong> ${escapeHtml(generatedAtLabel)}</p>
     </div>`;
 
-  const timeline = timelineSection(timelineReviews, timelineLocale, copy);
+  const timeline = timelineSection(timelineReviews, timelineLocale, copy, fetch.from_date);
   const heur = analysisRunBlock(copy.sectionHeuristic, heuristic, copy);
   const aiBlock = analysisRunBlock(copy.sectionAi, ai, copy);
   const ins = insightsSection(insights, copy);

@@ -2,7 +2,7 @@
 
 import type { ReviewListItemDto } from "@/types/app";
 
-export type ReviewTimeBucketMode = "day" | "week" | "month";
+export type ReviewTimeBucketMode = "day" | "week" | "month" | "year";
 
 export type ReviewTimelineRow = {
   /** Sıralama için ham anahtar */
@@ -46,6 +46,9 @@ function bucketSortKey(d: Date, mode: ReviewTimeBucketMode): string {
   if (mode === "month") {
     return `${y}-${pad2(mo)}`;
   }
+  if (mode === "year") {
+    return `${y}`;
+  }
   const mon = mondayOfWeekUtc(d);
   return `w:${mon.getUTCFullYear()}-${pad2(mon.getUTCMonth() + 1)}-${pad2(mon.getUTCDate())}`;
 }
@@ -57,6 +60,9 @@ function formatBucketLabel(d: Date, mode: ReviewTimeBucketMode, locale: string):
   if (mode === "month") {
     return new Intl.DateTimeFormat(locale, { year: "numeric", month: "short", timeZone: "UTC" }).format(d);
   }
+  if (mode === "year") {
+    return new Intl.DateTimeFormat(locale, { year: "numeric", timeZone: "UTC" }).format(d);
+  }
   const mon = mondayOfWeekUtc(d);
   const sun = new Date(mon);
   sun.setUTCDate(sun.getUTCDate() + 6);
@@ -65,6 +71,11 @@ function formatBucketLabel(d: Date, mode: ReviewTimeBucketMode, locale: string):
 }
 
 function anchorDateForSortKey(sortKey: string, mode: ReviewTimeBucketMode): Date {
+  if (mode === "year") {
+    const y = Number(sortKey);
+    const yy = Number.isFinite(y) ? y : 1970;
+    return new Date(Date.UTC(yy, 0, 1));
+  }
   if (mode === "month") {
     const parts = sortKey.split("-").map(Number);
     const y = parts[0] ?? 1970;

@@ -165,6 +165,7 @@
     "timelineBucketDay": "按日",
     "timelineBucketWeek": "每周",
     "timelineBucketMonth": "每月",
+    "timelineBucketYear": "按年",
     "timelineVolumeTitle": "按时期划分的审核量",
     "timelineStarsStackTitle": "按时期划分的明星组合 (1–5)",
     "timelineAvgRatingTitle": "按时期划分的平均评分",

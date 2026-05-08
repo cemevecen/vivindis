@@ -165,6 +165,7 @@
     "timelineBucketDay": "日次",
     "timelineBucketWeek": "毎週",
     "timelineBucketMonth": "毎月",
+    "timelineBucketYear": "年次",
     "timelineVolumeTitle": "期間ごとのレビュー件数",
     "timelineStarsStackTitle": "期間別スターミックス（1～5）",
     "timelineAvgRatingTitle": "期間別の平均評価",

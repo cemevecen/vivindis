@@ -165,6 +165,7 @@
     "timelineBucketDay": "يومي",
     "timelineBucketWeek": "أسبوعي",
     "timelineBucketMonth": "شهريا",
+    "timelineBucketYear": "سنوي",
     "timelineVolumeTitle": "حجم المراجعة حسب الفترة",
     "timelineStarsStackTitle": "مزيج النجوم حسب الفترة (1-5)",
     "timelineAvgRatingTitle": "متوسط ​​التصنيف حسب الفترة",

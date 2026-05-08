@@ -386,6 +386,7 @@
     "timelineBucketDay": "Günlük",
     "timelineBucketWeek": "Haftalık",
     "timelineBucketMonth": "Aylık",
+    "timelineBucketYear": "Yıllık",
     "timelineVolumeTitle": "Dönem başına yorum sayısı",
     "timelineStarsStackTitle": "Dönem başına yıldız dağılımı (1–5)",
     "timelineAvgRatingTitle": "Dönem başına ortalama puan",

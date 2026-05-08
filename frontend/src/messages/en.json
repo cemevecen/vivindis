@@ -386,6 +386,7 @@
     "timelineBucketDay": "Daily",
     "timelineBucketWeek": "Weekly",
     "timelineBucketMonth": "Monthly",
+    "timelineBucketYear": "Yearly",
     "timelineVolumeTitle": "Review volume by period",
     "timelineStarsStackTitle": "Star mix by period (1–5)",
     "timelineAvgRatingTitle": "Average rating by period",

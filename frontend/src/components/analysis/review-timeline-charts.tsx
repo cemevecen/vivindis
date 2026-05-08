@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -15,6 +15,7 @@ import {
 } from "recharts";
 
 import { buildReviewTimeline, type ReviewTimeBucketMode, type ReviewTimelineRow } from "@/lib/review-time-buckets";
+import { defaultTimelineBucket } from "@/lib/timeline-bucket-defaults";
 import { cn } from "@/lib/utils";
 import type { ReviewListItemDto } from "@/types/app";
 
@@ -31,6 +32,7 @@ type Labels = {
   bucketDay: string;
   bucketWeek: string;
   bucketMonth: string;
+  bucketYear: string;
   volumeTitle: string;
   starsStackTitle: string;
   avgRatingTitle: string;
@@ -46,11 +48,32 @@ type Props = {
   /** Tam veri yüklenmeden kısmi gösterim */
   isPartial: boolean;
   totalExpected: number;
+  fetchFromDate: string;
+  fetchToDate: string;
   className?: string;
 };
 
-export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, totalExpected, className }: Props) {
-  const [bucket, setBucket] = useState<ReviewTimeBucketMode>("week");
+export function ReviewTimelineCharts({
+  reviews,
+  locale,
+  labels,
+  isPartial,
+  totalExpected,
+  fetchFromDate,
+  fetchToDate,
+  className,
+}: Props) {
+  const rangeKey = `${fetchFromDate}\0${fetchToDate}`;
+  const { defaultMode, showYear } = useMemo(
+    () => defaultTimelineBucket(fetchFromDate, fetchToDate),
+    [fetchFromDate, fetchToDate],
+  );
+
+  const [bucket, setBucket] = useState<ReviewTimeBucketMode>(defaultMode);
+
+  useEffect(() => {
+    setBucket(defaultMode);
+  }, [rangeKey, defaultMode]);
 
   const rows = useMemo(() => buildReviewTimeline(reviews, bucket, locale), [reviews, bucket, locale]);
 
@@ -61,11 +84,56 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
     }));
   }, [rows]);
 
-  const bucketButtons: { id: ReviewTimeBucketMode; label: string }[] = [
-    { id: "day", label: labels.bucketDay },
-    { id: "week", label: labels.bucketWeek },
-    { id: "month", label: labels.bucketMonth },
-  ];
+  const renderSparseXTick = useCallback(
+    (props: { x?: number | string; y?: number | string; payload?: { value?: string }; index?: number }) => {
+      const x = typeof props.x === "number" ? props.x : Number(props.x ?? 0);
+      const y = typeof props.y === "number" ? props.y : Number(props.y ?? 0);
+      const { payload, index = 0 } = props;
+      const n = chartData.length;
+      if (!payload?.value || n === 0) {
+        return <g key={`tx-${index}`} />;
+      }
+      const last = n - 1;
+      let show: boolean;
+      if (n <= 14) {
+        show = true;
+      } else {
+        const step = Math.max(1, Math.ceil((n - 1) / 11));
+        show = index === 0 || index === last || index % step === 0;
+      }
+      if (!show) {
+        return <g key={`tx-${index}`} />;
+      }
+      return (
+        <text
+          key={`tx-${index}`}
+          x={x}
+          y={y}
+          dy={12}
+          fill="currentColor"
+          fontSize={10}
+          textAnchor="end"
+          transform={`rotate(-28,${x},${y})`}
+          className="fill-muted-foreground"
+        >
+          {payload.value}
+        </text>
+      );
+    },
+    [chartData.length],
+  );
+
+  const bucketButtons: { id: ReviewTimeBucketMode; label: string }[] = useMemo(() => {
+    const base: { id: ReviewTimeBucketMode; label: string }[] = [
+      { id: "day", label: labels.bucketDay },
+      { id: "week", label: labels.bucketWeek },
+      { id: "month", label: labels.bucketMonth },
+    ];
+    if (showYear) {
+      base.push({ id: "year", label: labels.bucketYear });
+    }
+    return base;
+  }, [labels.bucketDay, labels.bucketMonth, labels.bucketWeek, labels.bucketYear, showYear]);
 
   if (reviews.length === 0) {
     return (
@@ -116,7 +184,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
+                <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
                   cursor={false}
@@ -139,7 +207,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
+                <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 11 }} width={40} />
                 <Tooltip
                   cursor={false}
@@ -171,7 +239,7 @@ export function ReviewTimelineCharts({ reviews, locale, labels, isPartial, total
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={chartData} margin={{ top: 8, right: 8, left: 0, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="labelShort" tick={{ fontSize: 10 }} interval={0} angle={-28} textAnchor="end" height={70} />
+                <XAxis dataKey="labelShort" interval={0} tick={renderSparseXTick} height={70} />
                 <YAxis domain={[0, 5]} tick={{ fontSize: 11 }} width={32} />
                 <Tooltip
                   cursor={false}
