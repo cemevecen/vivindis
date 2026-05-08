@@ -1645,7 +1645,7 @@ function AnalyzeHubConnected() {
                     value={pastedText}
                     onChange={(e) => setPastedText(e.target.value)}
                     placeholder={t("textPlaceholder")}
-                    className="min-h-[160px] w-full rounded-2xl border border-border bg-card px-3 py-2 text-sm text-foreground shadow-inner"
+                    className="min-h-[160px] w-full rounded-2xl border border-border bg-card px-3 py-2 text-base text-foreground shadow-inner md:text-sm"
                   />
                 </div>
                 <Button
