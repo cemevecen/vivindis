@@ -35,8 +35,12 @@ def _enqueue_review_fetch(
     review_scope: str,
     lang: str | None,
     country: str | None,
+    global_langs: list[str] | None,
 ) -> None:
-    review_fetch_task.apply_async(args=[fetch_id, review_scope, lang, country], queue="scraper")
+    review_fetch_task.apply_async(
+        args=[fetch_id, review_scope, lang, country, global_langs],
+        queue="scraper",
+    )
 
 
 def _store_platform_for_app(app: App) -> StorePlatform:
@@ -138,6 +142,7 @@ async def create_fetch(
         body.review_scope,
         body.lang,
         body.country,
+        body.global_langs,
     )
     return fetch
 

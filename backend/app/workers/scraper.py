@@ -116,6 +116,7 @@ async def _scrape_google_play(
     review_scope: str,
     req_lang: str | None,
     req_country: str | None,
+    global_langs: list[str] | None,
     limiter: AsyncTokenBucketRateLimiter,
 ) -> int:
     pkg = (app.package_name or "").strip()
@@ -170,7 +171,13 @@ async def _scrape_google_play(
         ]
     else:
         max_global_locales = max(2, int(getattr(settings, "scrape_play_global_locale_limit", 12) or 12))
-        locale_candidates = PLAY_STORE_MATRIX[:max_global_locales]
+        requested_langs = {x.strip().lower() for x in (global_langs or []) if x and x.strip()}
+        if requested_langs:
+            locale_candidates = [pair for pair in PLAY_STORE_MATRIX if pair[0] in requested_langs][:max_global_locales]
+            if not locale_candidates:
+                locale_candidates = PLAY_STORE_MATRIX[:max_global_locales]
+        else:
+            locale_candidates = PLAY_STORE_MATRIX[:max_global_locales]
 
     max_inserted = int(settings.scrape_max_reviews or 250000)
     lo, hi = fetch.from_date, fetch.to_date
@@ -383,6 +390,7 @@ async def _scrape_app_store(
     review_scope: str,
     req_lang: str | None,
     req_country: str | None,
+    global_langs: list[str] | None,
     limiter: AsyncTokenBucketRateLimiter,
 ) -> int:
     _ = settings, req_lang
@@ -438,7 +446,33 @@ async def _scrape_app_store(
             4,
             int(getattr(settings, "scrape_app_store_global_country_limit", 16) or 16),
         )
-        countries = APP_STORE_COUNTRIES[:max_global_countries]
+        requested_langs = [x.strip().lower() for x in (global_langs or []) if x and x.strip()]
+        if requested_langs:
+            lang_country_map = {
+                "tr": ["tr"],
+                "en": ["us", "gb", "ca", "au"],
+                "de": ["de", "at", "ch"],
+                "fr": ["fr", "ca", "be"],
+                "es": ["es", "mx"],
+                "it": ["it"],
+                "pt": ["br", "pt"],
+                "ru": ["ru", "kz"],
+                "ar": ["sa", "ae", "eg"],
+                "ja": ["jp"],
+                "ko": ["kr"],
+                "zh": ["hk", "tw"],
+                "nl": ["nl", "be"],
+                "sv": ["se"],
+                "no": ["no"],
+                "da": ["dk"],
+            }
+            expanded: list[str] = []
+            for lang in requested_langs:
+                expanded.extend(lang_country_map.get(lang, []))
+            deduped = [c for c in dict.fromkeys(expanded) if c in APP_STORE_COUNTRIES]
+            countries = (deduped or APP_STORE_COUNTRIES)[:max_global_countries]
+        else:
+            countries = APP_STORE_COUNTRIES[:max_global_countries]
     max_inserted = int(settings.scrape_max_reviews or 250000)
     max_pages_per_country = max(1, int(getattr(settings, "scrape_app_store_max_pages", 250) or 250))
     country_parallelism = 2 if review_scope == "local" else 6
@@ -596,6 +630,7 @@ async def _execute_review_fetch(
     review_scope: str,
     req_lang: str | None,
     req_country: str | None,
+    global_langs: list[str] | None,
 ) -> tuple[list[str], list[str]]:
     settings = get_settings()
     rps = float(settings.scrape_requests_per_second or 7.0)
@@ -630,6 +665,7 @@ async def _execute_review_fetch(
                 review_scope=review_scope,
                 req_lang=req_lang,
                 req_country=req_country,
+                global_langs=global_langs,
                 limiter=limiter,
             )
             fetch.review_count = total_inserted
@@ -644,6 +680,7 @@ async def _execute_review_fetch(
                 review_scope=review_scope,
                 req_lang=req_lang,
                 req_country=req_country,
+                global_langs=global_langs,
                 limiter=limiter,
             )
             fetch.review_count = total_inserted
@@ -707,6 +744,7 @@ def review_fetch_task(
     review_scope: str = "global",
     lang: str | None = None,
     country: str | None = None,
+    global_langs: list[str] | None = None,
 ) -> None:
     fid = uuid.UUID(fetch_id)
     normalized_scope = "local" if review_scope == "local" else "global"
@@ -717,6 +755,7 @@ def review_fetch_task(
             normalized_scope,
             (lang or "").strip().lower() or None,
             (country or "").strip().lower() or None,
+            [x.strip().lower() for x in (global_langs or []) if x and str(x).strip()] or None,
         )
     except Exception as exc:
         try:

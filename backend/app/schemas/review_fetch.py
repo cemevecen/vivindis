@@ -16,6 +16,7 @@ class ReviewFetchCreate(BaseModel):
     review_scope: str = "global"
     lang: str | None = None
     country: str | None = None
+    global_langs: list[str] | None = None
 
     @model_validator(mode="after")
     def check_range(self) -> ReviewFetchCreate:
@@ -29,6 +30,16 @@ class ReviewFetchCreate(BaseModel):
             self.lang = self.lang.strip().lower()[:8] or None
         if self.country is not None:
             self.country = self.country.strip().lower()[:8] or None
+        if self.global_langs is not None:
+            normalized: list[str] = []
+            seen: set[str] = set()
+            for item in self.global_langs:
+                clean = str(item).strip().lower()[:8]
+                if not clean or clean in seen:
+                    continue
+                seen.add(clean)
+                normalized.append(clean)
+            self.global_langs = normalized[:24] or None
         return self
 
 

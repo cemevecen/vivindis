@@ -91,6 +91,7 @@ type Props = {
 };
 
 const TIMELINE_REVIEW_CAP = 20_000;
+const GLOBAL_LANG_OPTIONS = ["tr", "en", "de", "fr", "es", "it", "pt", "ar", "ru", "ja", "ko", "zh"] as const;
 
 export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const t = useTranslations("analysis");
@@ -111,6 +112,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const [reviewSort, setReviewSort] = useState<"newest" | "oldest" | "rating_desc" | "rating_asc">("newest");
   const [timelineReviews, setTimelineReviews] = useState<ReviewListItemDto[] | null>(null);
   const [timelineLoadState, setTimelineLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [globalLangs, setGlobalLangs] = useState<string[]>([]);
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
@@ -166,6 +168,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           from_date: fetchQuery.data.from_date,
           to_date: fetchQuery.data.to_date,
           review_scope: "global",
+          global_langs: globalLangs,
         },
         getToken,
       });
@@ -186,6 +189,14 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       toast.error(err instanceof ApiError ? err.message : tCommon("error"));
     },
   });
+
+  useEffect(() => {
+    const primary = locale.toLowerCase().split("-")[0] ?? "en";
+    const preferred = Array.from(new Set([primary, "en"])).filter((lang) =>
+      GLOBAL_LANG_OPTIONS.includes(lang as (typeof GLOBAL_LANG_OPTIONS)[number]),
+    );
+    setGlobalLangs(preferred.length > 0 ? preferred : ["en"]);
+  }, [locale]);
 
   const loadReviewChunk = useCallback(
     async (nextOffset: number, reset: boolean) => {
@@ -567,12 +578,39 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       <section className="rounded-lg border border-primary/20 bg-primary/5 p-4">
         <p className="text-sm font-medium text-foreground">{t("localResultNotice")}</p>
         <p className="mt-1 text-sm text-muted-foreground">{t("globalUpsellHint")}</p>
+        <div className="mt-3">
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            {t("globalLangsLabel")}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {GLOBAL_LANG_OPTIONS.map((lang) => {
+              const selected = globalLangs.includes(lang);
+              return (
+                <Button
+                  key={lang}
+                  type="button"
+                  size="sm"
+                  variant={selected ? "default" : "outline"}
+                  className="h-8 rounded-full px-3 text-xs"
+                  onClick={() =>
+                    setGlobalLangs((prev) =>
+                      prev.includes(lang) ? prev.filter((item) => item !== lang) : [...prev, lang],
+                    )
+                  }
+                >
+                  {lang.toUpperCase()}
+                </Button>
+              );
+            })}
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">{t("globalLangsHint")}</p>
+        </div>
         <Button
           type="button"
           className="mt-3"
           variant="outline"
           onClick={() => deepResearchMutation.mutate()}
-          disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
+          disabled={deepResearchMutation.isPending || fetch.status !== "completed" || globalLangs.length === 0}
         >
           {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
         </Button>

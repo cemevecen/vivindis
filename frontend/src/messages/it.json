@@ -175,7 +175,9 @@
     "localResultNotice": "These results belong to your local market.",
     "globalUpsellHint": "You can get broader insights with a global scan.",
     "deepResearchCta": "Run deep research",
-    "globalQueued": "Global scan and analysis have been queued."
+    "globalQueued": "Global scan and analysis have been queued.",
+    "globalLangsLabel": "Global scan languages",
+    "globalLangsHint": "Select one or more languages. Global store reviews will focus on these languages."
   },
   "auth": {
     "signIn": "Accedi",

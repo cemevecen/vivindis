@@ -392,7 +392,9 @@
     "localResultNotice": "Bu sonuçlar yerel pazarınıza aittir.",
     "globalUpsellHint": "Global tarama ile daha geniş içgörü alabilirsiniz.",
     "deepResearchCta": "Derin araştırma yap",
-    "globalQueued": "Global tarama ve analiz kuyruğa alındı."
+    "globalQueued": "Global tarama ve analiz kuyruğa alındı.",
+    "globalLangsLabel": "Global tarama dilleri",
+    "globalLangsHint": "Bir veya daha fazla dil seçin. Seçtiğiniz dillere göre global mağaza yorumları çekilir."
   },
   "about": {
     "title": "Vivindis hakkında",
