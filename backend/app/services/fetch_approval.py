@@ -58,7 +58,13 @@ def parse_pending_enqueue(payload_json: str | None) -> tuple[str, str | None, st
     return review_scope, lang_n, country_n, langs
 
 
-def send_telegram_to_admins(*, settings: Settings, text: str) -> None:
+def send_telegram_to_admins(
+    *,
+    settings: Settings,
+    text: str,
+    parse_mode: str | None = None,
+    reply_markup: dict[str, Any] | None = None,
+) -> None:
     token = (settings.telegram_bot_token or "").strip()
     if not token:
         return
@@ -70,10 +76,15 @@ def send_telegram_to_admins(*, settings: Settings, text: str) -> None:
         chat_id = part.strip()
         if not chat_id:
             continue
+        payload: dict[str, Any] = {"chat_id": chat_id, "text": text}
+        if parse_mode:
+            payload["parse_mode"] = parse_mode
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
         try:
             resp = httpx.post(
                 url,
-                json={"chat_id": chat_id, "text": text},
+                json=payload,
                 timeout=20.0,
             )
             resp.raise_for_status()

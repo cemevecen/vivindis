@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html as html_module
 import secrets
 import uuid
 from datetime import datetime, timezone
@@ -48,16 +49,25 @@ def _notify_fetch_approval_needed(
 ) -> None:
     settings = get_settings()
     limit_txt = "limitsiz (sunucu tavanı)" if review_limit is None else str(review_limit)
-    text = (
-        "Vivindis — çekim onayı gerekli\n"
-        f"Fetch ID: {fetch_id}\n"
-        f"Uygulama: {app_name}\n"
-        f"Kullanıcı: {user_email}\n"
-        f"İstenen üst sınır: {limit_txt}\n"
-        f"Onayla: {approve_url}"
+    # Inline keyboard: Telegram uzun URL’leri satır kırarak linkify ederken token’ı kesebiliyor.
+    text_html = (
+        "<b>Vivindis — çekim onayı gerekli</b>\n\n"
+        f"Fetch ID: <code>{html_module.escape(fetch_id)}</code>\n"
+        f"Uygulama: {html_module.escape(app_name or '—')}\n"
+        f"Kullanıcı: {html_module.escape(user_email)}\n"
+        f"Üst sınır: {html_module.escape(limit_txt)}\n\n"
+        "Onay için aşağıdaki düğmeye dokunun."
     )
+    reply_markup: dict[str, list[list[dict[str, str]]]] = {
+        "inline_keyboard": [[{"text": "Çekimi onayla", "url": approve_url}]],
+    }
     try:
-        send_telegram_to_admins(settings=settings, text=text)
+        send_telegram_to_admins(
+            settings=settings,
+            text=text_html,
+            parse_mode="HTML",
+            reply_markup=reply_markup,
+        )
     except Exception:
         log.exception("fetch_approval_notify_failed", fetch_id=fetch_id)
 
@@ -217,7 +227,7 @@ async def create_fetch(
         )
         await session.commit()
         base = settings.public_api_base_url.strip().rstrip("/")
-        approve_url = f"{base}/api/v1/fetch-approvals/approve?token={raw_token}"
+        approve_url = f"{base}/api/v1/fetch-approvals/approve/{raw_token}"
         background_tasks.add_task(
             _notify_fetch_approval_needed,
             fetch_id=str(fetch.id),

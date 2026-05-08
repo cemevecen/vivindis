@@ -2,12 +2,34 @@
 
 from __future__ import annotations
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from app.api.v1.router import api_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
+
+
+async def _utf8_http_exception_handler(request: Request, exc: HTTPException) -> JSONResponse:
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": jsonable_encoder(exc.detail)},
+        media_type="application/json; charset=utf-8",
+    )
+
+
+async def _utf8_validation_exception_handler(
+    request: Request,
+    exc: RequestValidationError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=422,
+        content={"detail": jsonable_encoder(exc.errors())},
+        media_type="application/json; charset=utf-8",
+    )
 
 
 def create_app() -> FastAPI:
@@ -45,6 +67,9 @@ def create_app() -> FastAPI:
 
     application.include_router(api_router, prefix="/api/v1")
     # Mağaza araması: ``GET /api/v1/store/search`` — ``app.api.v1.store`` router’ı ``api_router`` ile dahil edilir.
+
+    application.add_exception_handler(HTTPException, _utf8_http_exception_handler)
+    application.add_exception_handler(RequestValidationError, _utf8_validation_exception_handler)
 
     @application.get("/health")
     def health() -> dict[str, str]:
