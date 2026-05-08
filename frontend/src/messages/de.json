@@ -190,6 +190,7 @@
     "deepResearchInvalidRange": "Geben Sie einen gültigen Bereich ein: Enddatum nicht vor Startdatum.",
     "deepResearchSelectAll24": "Empfohlene 24 Sprachen",
     "deepResearchClearLangs": "Alle löschen",
+    "deepResearchLangCheckboxAll": "Alle",
     "deepResearchPlannedParams": "Dieser Scan",
     "deepResearchParamRange": "Datumsbereich: {from} → {to}",
     "deepResearchParamLangs": "{count} Sprachen: {list}",

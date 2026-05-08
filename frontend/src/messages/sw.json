@@ -189,6 +189,7 @@
     "deepResearchInvalidRange": "Kipindi si sahihi: tarehe ya mwisho lazima iwe siku ya kwanza au baadaye.",
     "deepResearchSelectAll24": "Lugha 24 zinazopendekezwa",
     "deepResearchClearLangs": "Futa zote",
+    "deepResearchLangCheckboxAll": "Zote",
     "deepResearchPlannedParams": "Utaftaji huu",
     "deepResearchParamRange": "Kipindi cha tarehe: {from} → {to}",
     "deepResearchParamLangs": "Lugha {count}: {list}",

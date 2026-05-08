@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Globe } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -388,6 +388,22 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const clearDeepLangs = useCallback(() => {
     setDeepLangs(new Set());
   }, []);
+
+  const isDeepLangsFirst24Preset = useMemo(() => {
+    if (deepLangs.size !== MAX_GLOBAL_FETCH_LANGS) {
+      return false;
+    }
+    return GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS).every((c) => deepLangs.has(c));
+  }, [deepLangs]);
+
+  const deepLangSelectAllRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const el = deepLangSelectAllRef.current;
+    if (!el) {
+      return;
+    }
+    el.indeterminate = deepLangs.size > 0 && !isDeepLangsFirst24Preset;
+  }, [deepLangs, isDeepLangsFirst24Preset]);
 
   const deepResearchMutation = useMutation({
     mutationFn: async () => {
@@ -944,25 +960,43 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                     {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
                   </span>
                 </div>
-                <div className="max-h-40 overflow-y-auto rounded-md border border-border bg-card/50 p-2">
-                  {langOptions.map(({ code, label }) => (
-                    <label
-                      key={code}
-                      className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-muted/60"
-                    >
+                <div className="max-h-[min(22rem,50vh)] overflow-y-auto rounded-md border border-border bg-card/50 p-2">
+                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 md:grid-cols-4">
+                    <label className="col-span-full mb-1 flex cursor-pointer items-center gap-2 border-b border-border/60 pb-2 text-sm font-medium hover:bg-muted/40">
                       <input
+                        ref={deepLangSelectAllRef}
                         type="checkbox"
                         className="size-4 rounded border-border"
-                        checked={deepLangs.has(code)}
+                        checked={isDeepLangsFirst24Preset}
                         onChange={() => {
-                          toggleDeepLang(code);
+                          if (isDeepLangsFirst24Preset) {
+                            clearDeepLangs();
+                          } else {
+                            selectFirst24DeepLangs();
+                          }
                         }}
                       />
-                      <span>
-                        {label} <span className="text-muted-foreground">({code})</span>
-                      </span>
+                      <span>{t("deepResearchLangCheckboxAll")}</span>
                     </label>
-                  ))}
+                    {langOptions.map(({ code, label }) => (
+                      <label
+                        key={code}
+                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-muted/60 sm:text-sm"
+                      >
+                        <input
+                          type="checkbox"
+                          className="size-4 shrink-0 rounded border-border"
+                          checked={deepLangs.has(code)}
+                          onChange={() => {
+                            toggleDeepLang(code);
+                          }}
+                        />
+                        <span className="min-w-0 truncate" title={`${label} (${code})`}>
+                          {label} <span className="text-muted-foreground">({code})</span>
+                        </span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

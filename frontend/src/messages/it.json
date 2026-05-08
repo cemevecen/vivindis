@@ -189,6 +189,7 @@
     "deepResearchInvalidRange": "Intervallo non valido: la data di fine non può precedere l’inizio.",
     "deepResearchSelectAll24": "24 lingue suggerite",
     "deepResearchClearLangs": "Cancella tutto",
+    "deepResearchLangCheckboxAll": "Tutti",
     "deepResearchPlannedParams": "Questa scansione",
     "deepResearchParamRange": "Intervallo date: {from} → {to}",
     "deepResearchParamLangs": "{count} lingue: {list}",
