@@ -274,11 +274,39 @@ type Props = {
   splitPane?: boolean;
   /** Analiz sayfasında grafikleri ayrı geniş kartlara böl. */
   chartLayout?: "compact" | "featured";
+  /**
+   * Heuristik üstte (featured dikey), AI (Gemini) altta tek satırda üç grafik (yatay ızgara).
+   * Karşılaştırma (splitPane) ile birlikte kullanılmaz.
+   */
+  stackAiBelow?: boolean;
 };
 
-export function AnalysisCharts({ heuristic, ai, chartLabels, splitPane = false, chartLayout = "compact" }: Props) {
+export function AnalysisCharts({
+  heuristic,
+  ai,
+  chartLabels,
+  splitPane = false,
+  chartLayout = "compact",
+  stackAiBelow = false,
+}: Props) {
   const { heuristicTitle, aiTitle, ...labels } = chartLabels;
   const featured = chartLayout === "featured" && !splitPane;
+
+  if (stackAiBelow && !splitPane) {
+    return (
+      <div className="space-y-8">
+        <ChartBlock
+          title={heuristicTitle}
+          analysis={heuristic}
+          labels={labels}
+          compact={false}
+          featured={featured}
+        />
+        <ChartBlock title={aiTitle} analysis={ai} labels={labels} compact={false} featured={false} />
+      </div>
+    );
+  }
+
   return (
     <div className={splitPane ? "grid grid-cols-1 gap-4" : "grid gap-8 lg:grid-cols-2"}>
       <ChartBlock

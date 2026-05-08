@@ -802,7 +802,13 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         ) : null
       ) : null}
 
-      <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} chartLayout="featured" />
+      <AnalysisCharts
+        heuristic={heuristic}
+        ai={ai}
+        chartLabels={chartLabels}
+        chartLayout="featured"
+        stackAiBelow
+      />
 
       {insightsQuery.data ? (
         <section className="space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm">
