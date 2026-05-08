@@ -300,7 +300,7 @@ async def list_reviews(
     result = await session.execute(
         select(Review)
         .where(*filters)
-        .order_by(Review.review_date.desc(), Review.created_at.desc())
+        .order_by(Review.review_date.desc(), Review.created_at.desc(), Review.id.desc())
         .limit(limit)
         .offset(offset),
     )
