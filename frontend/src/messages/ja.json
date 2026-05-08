@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "同じストア ID が複数回保存されました。",
     "duplicateOpen": "開ける",
     "duplicateDelete": "コピーの削除",
-    "duplicateSavedAt": "保存されました{date}"
+    "duplicateSavedAt": "保存されました{date}",
+    "recentResearchHeading": "最近の調査",
+    "recentResearchEmpty": "レビュー取得はまだありません。アプリ画面または分析から開始してください。",
+    "researchKindLocal": "ローカル",
+    "researchKindDeep": "詳細",
+    "recentResearchOpen": "結果を開く"
   },
   "analysis": {
     "startAnalysis": "分析を開始する",

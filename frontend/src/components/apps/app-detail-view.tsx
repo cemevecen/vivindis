@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, X } from "lucide-react";
+import { ChevronDown, ChevronRight, X } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -16,7 +16,7 @@ import { findDuplicateAppsForApp } from "@/lib/app-dedupe";
 import { ApiError, apiFetch } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
-import type { AppDto, FetchStatus, ReviewFetchDto } from "@/types/app";
+import type { AppDto, FetchStatus, ReviewFetchDto, ReviewScope } from "@/types/app";
 
 function parseApiDate(isoDate: string): Date {
   const [y, m, d] = isoDate.split("-").map(Number);
@@ -44,6 +44,12 @@ function statusClass(status: FetchStatus): string {
     default:
       return "bg-muted text-muted-foreground";
   }
+}
+
+function researchScopeBadgeClass(scope: ReviewScope): string {
+  return scope === "local"
+    ? "border-violet-500/40 bg-violet-500/10 text-violet-800 dark:text-violet-200"
+    : "border-sky-500/40 bg-sky-500/10 text-sky-900 dark:text-sky-100";
 }
 
 type Props = {
@@ -156,6 +162,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.detail(effectiveAppId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(effectiveAppId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       toast.success(t("deleteSuccess"));
     },
     onError: (error) => {
@@ -350,50 +357,64 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
           <p className="text-sm text-muted-foreground">{t("noFetches")}</p>
         ) : (
           <ul className="divide-y divide-border rounded-lg border border-border">
-            {sorted.map((row) => (
-              <li
-                key={row.id}
-                className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
-              >
-                <div className="space-y-1 text-sm">
-                  <p>
-                    {dateFmt.format(parseApiDate(row.from_date))} — {dateFmt.format(parseApiDate(row.to_date))}
-                  </p>
-                  {row.status === "pending" || row.status === "running" ? null : (
-                    <p className="text-muted-foreground">
-                      {t("reviews")}: {row.review_count}
-                    </p>
-                  )}
-                  {row.status === "failed" && row.error_message ? (
-                    <p className="text-xs text-destructive">
-                      {t("fetchError")}: {row.error_message}
-                    </p>
-                  ) : null}
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={cn(
-                      "inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium",
-                      statusClass(row.status),
-                    )}
-                  >
-                    {row.status === "pending"
-                      ? t("statusPending")
-                      : row.status === "running"
-                        ? t("statusRunning")
-                        : row.status === "completed"
-                          ? t("statusCompleted")
-                          : t("statusFailed")}
-                  </span>
+            {sorted.map((row) => {
+              const scope: ReviewScope = row.review_scope === "local" ? "local" : "global";
+              return (
+                <li key={row.id}>
                   <Link
                     href={`/apps/${effectiveAppId}/analysis?fetchId=${row.id}`}
-                    className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+                    className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
-                    {ta("viewAnalytics")}
+                    <div className="space-y-1 text-sm">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p>
+                          {dateFmt.format(parseApiDate(row.from_date))} —{" "}
+                          {dateFmt.format(parseApiDate(row.to_date))}
+                        </p>
+                        <span
+                          className={cn(
+                            "inline-flex w-fit rounded-full border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                            researchScopeBadgeClass(scope),
+                          )}
+                        >
+                          {scope === "local" ? t("researchKindLocal") : t("researchKindDeep")}
+                        </span>
+                      </div>
+                      {row.status === "pending" || row.status === "running" ? null : (
+                        <p className="text-muted-foreground">
+                          {t("reviews")}: {row.review_count}
+                        </p>
+                      )}
+                      {row.status === "failed" && row.error_message ? (
+                        <p className="text-xs text-destructive">
+                          {t("fetchError")}: {row.error_message}
+                        </p>
+                      ) : null}
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span
+                        className={cn(
+                          "inline-flex w-fit rounded-full px-2.5 py-0.5 text-xs font-medium",
+                          statusClass(row.status),
+                        )}
+                      >
+                        {row.status === "pending"
+                          ? t("statusPending")
+                          : row.status === "running"
+                            ? t("statusRunning")
+                            : row.status === "completed"
+                              ? t("statusCompleted")
+                              : t("statusFailed")}
+                      </span>
+                      <span className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+                        {ta("viewAnalytics")}
+                        <ChevronRight className="size-3.5" aria-hidden />
+                      </span>
+                    </div>
                   </Link>
-                </div>
-              </li>
-            ))}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>

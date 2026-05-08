@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "Одни и те же идентификаторы магазина были сохранены более одного раза. ",
     "duplicateOpen": "Открыть",
     "duplicateDelete": "Удалить копию",
-    "duplicateSavedAt": "Сохранено{date}"
+    "duplicateSavedAt": "Сохранено{date}",
+    "recentResearchHeading": "Недавние исследования",
+    "recentResearchEmpty": "Пока нет загрузок отзывов. Запустите с страницы приложения или раздела «Анализ».",
+    "researchKindLocal": "Локально",
+    "researchKindDeep": "Глубокий",
+    "recentResearchOpen": "Открыть результаты"
   },
   "analysis": {
     "startAnalysis": "Начать анализ",

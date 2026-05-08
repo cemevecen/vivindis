@@ -66,8 +66,15 @@ class ReviewFetchResponse(BaseModel):
     from_date: date
     to_date: date
     review_limit: int | None
+    review_scope: str
     review_count: int
     error_message: str | None
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
+
+
+class ReviewFetchWithAppNameResponse(ReviewFetchResponse):
+    """Kullanıcının tüm uygulamalarındaki son çekimler listesi için."""
+
+    app_name: str

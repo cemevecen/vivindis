@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "Les mêmes identifiants de magasin ont été enregistrés plusieurs fois. ",
     "duplicateOpen": "Ouvrir",
     "duplicateDelete": "Supprimer la copie",
-    "duplicateSavedAt": "Enregistré{date}"
+    "duplicateSavedAt": "Enregistré{date}",
+    "recentResearchHeading": "Recherches récentes",
+    "recentResearchEmpty": "Aucune extraction d’avis pour l’instant. Lancez-en une depuis une app ou Analyser.",
+    "researchKindLocal": "Locale",
+    "researchKindDeep": "Approfondie",
+    "recentResearchOpen": "Ouvrir les résultats"
   },
   "analysis": {
     "startAnalysis": "Démarrer l'analyse",

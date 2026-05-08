@@ -323,6 +323,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdA) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdB) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : tCommon("error"));

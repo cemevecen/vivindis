@@ -58,6 +58,7 @@ export function StartFetchForm({ appId }: Props) {
       const body = {
         from_date: values.from_date,
         to_date: values.to_date,
+        review_scope: "global" as const,
       };
       return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
         method: "POST",
@@ -67,6 +68,7 @@ export function StartFetchForm({ appId }: Props) {
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       toast.success(t("fetchStarted"));
       form.reset(defaultDateRange());
     },

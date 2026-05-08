@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "تم حفظ معرفات المتجر نفسها أكثر من مرة. ",
     "duplicateOpen": "يفتح",
     "duplicateDelete": "حذف النسخة",
-    "duplicateSavedAt": "أنقذ{date}"
+    "duplicateSavedAt": "أنقذ{date}",
+    "recentResearchHeading": "أبحاث حديثة",
+    "recentResearchEmpty": "لا توجد عمليات جلب مراجعات بعد. ابدأ من صفحة التطبيق أو التحليل.",
+    "researchKindLocal": "محلي",
+    "researchKindDeep": "عميق",
+    "recentResearchOpen": "فتح النتائج"
   },
   "analysis": {
     "startAnalysis": "ابدأ التحليل",

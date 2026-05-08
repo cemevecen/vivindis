@@ -471,6 +471,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         /* storage full or unavailable */
       }
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
       toast.success(t("globalQueued"));
       router.push(`/apps/${appId}/analysis?fetchId=${created.id}&deep=1`);

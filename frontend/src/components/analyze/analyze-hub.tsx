@@ -275,6 +275,7 @@ function AnalyzeHubConnected() {
         reason: t("fetchEventCreatedReason"),
       });
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       void queryClient.invalidateQueries({ queryKey: ["apps", String(row.app_id), "stats"] });
     },
     onError: (err) => {
@@ -486,6 +487,7 @@ function AnalyzeHubConnected() {
         toast.error(formatClientFetchError(e));
       }
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
       router.push(`/apps/${appId}/analysis?fetchId=${fetchId}`);
     },
@@ -712,6 +714,7 @@ function AnalyzeHubConnected() {
           getToken,
         });
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+        await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
         await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
         router.push(`/apps/${appId}/analysis?fetchId=${storeFetchId}`);
       } catch (e) {

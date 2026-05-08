@@ -22,7 +22,7 @@ from app.models.user import User
 from app.schemas.analysis import AnalysisListResponse, AnalysisResponse
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
-from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse
+from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse, ReviewFetchWithAppNameResponse
 from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
 from app.workers.scraper import review_fetch_task
 
@@ -58,6 +58,27 @@ async def list_apps(
         select(App).where(App.user_id == current_user.id).order_by(App.created_at.desc()),
     )
     return list(result.scalars().all())
+
+
+@router.get("/recent-fetches", response_model=list[ReviewFetchWithAppNameResponse])
+async def list_recent_fetches_for_user(
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    limit: Annotated[int, Query(ge=1, le=50)] = 20,
+) -> list[ReviewFetchWithAppNameResponse]:
+    """Kullanıcının tüm uygulamalarına ait son yorum çekimleri (uygulamalar listesi özeti)."""
+    result = await session.execute(
+        select(ReviewFetch, App.name)
+        .join(App, App.id == ReviewFetch.app_id)
+        .where(App.user_id == current_user.id)
+        .order_by(ReviewFetch.created_at.desc())
+        .limit(limit),
+    )
+    out: list[ReviewFetchWithAppNameResponse] = []
+    for fetch_row, app_name in result.all():
+        base = ReviewFetchResponse.model_validate(fetch_row).model_dump()
+        out.append(ReviewFetchWithAppNameResponse(**base, app_name=app_name or ""))
+    return out
 
 
 @router.post("", response_model=AppResponse, status_code=status.HTTP_201_CREATED)
@@ -123,12 +144,14 @@ async def create_fetch(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     background_tasks: BackgroundTasks,
 ) -> ReviewFetch:
+    scope = "local" if body.review_scope == "local" else "global"
     fetch = ReviewFetch(
         app_id=app.id,
         status=FetchStatus.PENDING,
         from_date=body.from_date,
         to_date=body.to_date,
         review_limit=body.review_limit,
+        review_scope=scope,
         review_count=0,
     )
     session.add(fetch)
@@ -166,6 +189,7 @@ async def import_manual_reviews(
         status=FetchStatus.COMPLETED,
         from_date=body.from_date,
         to_date=body.to_date,
+        review_scope="global",
         review_count=len(body.items),
         started_at=now,
         completed_at=now,

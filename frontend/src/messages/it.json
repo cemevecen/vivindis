@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "Gli stessi identificatori del negozio sono stati salvati più di una volta. ",
     "duplicateOpen": "Aprire",
     "duplicateDelete": "Elimina copia",
-    "duplicateSavedAt": "Salvato{date}"
+    "duplicateSavedAt": "Salvato{date}",
+    "recentResearchHeading": "Ricerche recenti",
+    "recentResearchEmpty": "Nessun recupero recensioni. Avviane uno dalla app o da Analizza.",
+    "researchKindLocal": "Locale",
+    "researchKindDeep": "Approfondita",
+    "recentResearchOpen": "Apri risultati"
   },
   "analysis": {
     "startAnalysis": "Avvia l'analisi",

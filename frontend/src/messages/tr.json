@@ -302,7 +302,12 @@
     "duplicateRegistrationsHint": "Aynı mağaza tanımlayıcıları birden fazla kez kaydedilmiş. Uygulamalar listesinde mağaza başına tek kart gösterilir; fazla kayıtları burada açabilir veya silebilirsiniz.",
     "duplicateOpen": "Aç",
     "duplicateDelete": "Bu kaydı sil",
-    "duplicateSavedAt": "Kayıt: {date}"
+    "duplicateSavedAt": "Kayıt: {date}",
+    "recentResearchHeading": "Yapılan araştırmalar",
+    "recentResearchEmpty": "Henüz yorum çekimi yok. Bir uygulama sayfasından veya Analiz’den başlatın.",
+    "researchKindLocal": "Yerel",
+    "researchKindDeep": "Derin",
+    "recentResearchOpen": "Sonuçlara git"
   },
   "analysis": {
     "startAnalysis": "Analizi başlat",

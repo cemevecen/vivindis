@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 
+import { AppsRecentResearch } from "@/components/apps/apps-recent-research";
 import { AppsListPanel } from "@/components/apps/apps-list-panel";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/routing";
@@ -22,6 +23,7 @@ export default async function AppsPage() {
           </Link>
         ) : null}
       </div>
+      <AppsRecentResearch clerkEnabled={clerkEnabled} />
       <AppsListPanel clerkEnabled={clerkEnabled} />
     </div>
   );

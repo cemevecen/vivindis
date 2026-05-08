@@ -84,6 +84,11 @@
     "duplicateOpen": "Öffnen",
     "duplicateDelete": "Kopie löschen",
     "duplicateSavedAt": "Gespeichert {date}",
+    "recentResearchHeading": "Letzte Recherchen",
+    "recentResearchEmpty": "Noch keine Bewertungsabfragen. Starten Sie eine auf der App-Seite oder unter Analysieren.",
+    "researchKindLocal": "Lokal",
+    "researchKindDeep": "Tief",
+    "recentResearchOpen": "Ergebnisse öffnen",
     "openStoreLink": "Im Store öffnen"
   },
   "analysis": {

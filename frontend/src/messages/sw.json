@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "Vitambulishi sawa vya duka vilihifadhiwa zaidi ya mara moja. ",
     "duplicateOpen": "Fungua",
     "duplicateDelete": "Futa nakala",
-    "duplicateSavedAt": "Imehifadhiwa{date}"
+    "duplicateSavedAt": "Imehifadhiwa{date}",
+    "recentResearchHeading": "Utafiti wa hivi karibuni",
+    "recentResearchEmpty": "Bado hakuna upakiaji wa ukaguzi. Anza kutoka ukurasa wa programu au Uchambuzi.",
+    "researchKindLocal": "Ndani",
+    "researchKindDeep": "Kina",
+    "recentResearchOpen": "Fungua matokeo"
   },
   "analysis": {
     "startAnalysis": "Anza uchambuzi",

@@ -302,7 +302,12 @@
     "duplicateRegistrationsHint": "The same store identifiers were saved more than once. The apps list shows one card per store app; open or delete each extra registration here.",
     "duplicateOpen": "Open",
     "duplicateDelete": "Delete copy",
-    "duplicateSavedAt": "Saved {date}"
+    "duplicateSavedAt": "Saved {date}",
+    "recentResearchHeading": "Recent research",
+    "recentResearchEmpty": "No review pulls yet. Start one from an app page or Analyze.",
+    "researchKindLocal": "Local",
+    "researchKindDeep": "Deep",
+    "recentResearchOpen": "Open results"
   },
   "analysis": {
     "startAnalysis": "Start analysis",

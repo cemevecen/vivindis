@@ -19,6 +19,9 @@ export type AppDto = {
   updated_at: string;
 };
 
+/** Mağaza çekimi: `local` = yerel (tek dil/bölge), `global` = derin / geniş çekim. */
+export type ReviewScope = "local" | "global";
+
 export type ReviewFetchDto = {
   id: string;
   app_id: string;
@@ -26,11 +29,16 @@ export type ReviewFetchDto = {
   from_date: string;
   to_date: string;
   review_limit?: number | null;
+  review_scope: ReviewScope;
   review_count: number;
   error_message: string | null;
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
+};
+
+export type RecentReviewFetchDto = ReviewFetchDto & {
+  app_name: string;
 };
 
 export type ReviewImportResponseDto = {

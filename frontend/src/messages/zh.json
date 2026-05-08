@@ -83,7 +83,12 @@
     "duplicateRegistrationsHint": "相同的商店标识符被保存多次。",
     "duplicateOpen": "打开",
     "duplicateDelete": "删除副本",
-    "duplicateSavedAt": "已保存{date}"
+    "duplicateSavedAt": "已保存{date}",
+    "recentResearchHeading": "近期研究",
+    "recentResearchEmpty": "尚无评论拉取。请从应用页或分析页开始。",
+    "researchKindLocal": "本地",
+    "researchKindDeep": "深入",
+    "recentResearchOpen": "查看结果"
   },
   "analysis": {
     "startAnalysis": "开始分析",

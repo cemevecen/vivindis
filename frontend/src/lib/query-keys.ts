@@ -5,6 +5,7 @@ export const queryKeys = {
   },
   apps: {
     all: ["apps"] as const,
+    recentFetches: ["apps", "recent-fetches"] as const,
     detail: (id: string) => ["apps", id] as const,
     fetches: (id: string) => ["apps", id, "fetches"] as const,
     fetchDetail: (appId: string, fetchId: string) => ["apps", appId, "fetches", fetchId] as const,
