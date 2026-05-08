@@ -179,6 +179,17 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     enabled: Boolean(clerkEnabled && appId && fetchId && fetchQuery.data?.status === "completed"),
   });
 
+  const filteredInsightAlerts = useMemo(() => {
+    const alerts = insightsQuery.data?.alerts ?? [];
+    if (insightAlertFilter === "all") {
+      return alerts;
+    }
+    if (insightAlertFilter === "triggered") {
+      return alerts.filter((a) => a.triggered);
+    }
+    return alerts.filter((a) => a.severity === insightAlertFilter);
+  }, [insightAlertFilter, insightsQuery.data?.alerts]);
+
   const startMutation = useMutation({
     mutationFn: async () => {
       if (!fetchId) {
@@ -535,17 +546,6 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     heuristicTitle: t("heuristic"),
     aiTitle: t("ai"),
   };
-
-  const filteredInsightAlerts = useMemo(() => {
-    const alerts = insightsQuery.data?.alerts ?? [];
-    if (insightAlertFilter === "all") {
-      return alerts;
-    }
-    if (insightAlertFilter === "triggered") {
-      return alerts.filter((a) => a.triggered);
-    }
-    return alerts.filter((a) => a.severity === insightAlertFilter);
-  }, [insightAlertFilter, insightsQuery.data?.alerts]);
 
   return (
     <div className="space-y-8">
