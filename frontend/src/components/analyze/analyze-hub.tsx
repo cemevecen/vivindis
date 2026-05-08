@@ -133,6 +133,7 @@ function AnalyzeHubConnected() {
   const [nowTick, setNowTick] = useState<number>(() => Date.now());
   const [isPinningStore, setIsPinningStore] = useState(false);
   const [analysisKickoffBusy, setAnalysisKickoffBusy] = useState(false);
+  const [progressHintIdx, setProgressHintIdx] = useState(0);
   const prevCanStartCompareRef = useRef(false);
   const pinRequestRef = useRef(0);
   const sessionAppRef = useRef<AppDto | null>(null);
@@ -682,6 +683,27 @@ function AnalyzeHubConnected() {
       return { ...ev, time };
     });
   }, [fetchProgressEvents, locale]);
+
+  const rotatingProgressHints = useMemo(() => {
+    const hints = [fetchStageLabel, fetchDynamicHint, t("estimatedTimeHint")]
+      .map((v) => v.trim())
+      .filter((v, i, arr) => v.length > 0 && arr.indexOf(v) === i);
+    return hints.length > 0 ? hints : [tCommon("loading")];
+  }, [fetchDynamicHint, fetchStageLabel, t, tCommon]);
+
+  useEffect(() => {
+    setProgressHintIdx(0);
+  }, [storeFetchId, fetchRowQuery.data?.status]);
+
+  useEffect(() => {
+    if (rotatingProgressHints.length <= 1) {
+      return;
+    }
+    const timer = window.setInterval(() => {
+      setProgressHintIdx((prev) => (prev + 1) % rotatingProgressHints.length);
+    }, 1500);
+    return () => window.clearInterval(timer);
+  }, [rotatingProgressHints]);
 
   const fetchElapsedText = useMemo(() => formatDuration(fetchElapsedSec), [fetchElapsedSec]);
 
@@ -1315,21 +1337,13 @@ function AnalyzeHubConnected() {
                       </div>
                     ) : null}
                     <p className="text-xs text-muted-foreground">{fetchDynamicHint}</p>
-                    <p className="text-xs font-semibold text-foreground">{fetchStageLabel}</p>
-                  </div>
-                ) : null}
-                {fetchTimeline.length > 0 ? (
-                  <div className="space-y-2 rounded-xl border border-border bg-card/70 p-3">
-                    <p className="text-sm font-medium text-foreground">{t("fetchLiveLogTitle")}</p>
-                    <div className="max-h-44 space-y-2 overflow-y-auto pr-1">
-                      {fetchTimeline.map((ev) => (
-                        <div key={ev.key} className="rounded-md border border-border bg-muted/80 px-2 py-1.5">
-                          <p className="text-xs font-semibold text-foreground">
-                            [{ev.time}] {ev.label}
-                          </p>
-                          <p className="text-xs text-muted-foreground">{ev.reason}</p>
-                        </div>
-                      ))}
+                    <div className="rounded-xl border border-border bg-card/70 px-3 py-2">
+                      <p
+                        key={`${storeFetchId ?? "idle"}-${progressHintIdx}`}
+                        className="text-xs font-medium text-foreground animate-in fade-in duration-300"
+                      >
+                        {rotatingProgressHints[progressHintIdx]}
+                      </p>
                     </div>
                   </div>
                 ) : null}
