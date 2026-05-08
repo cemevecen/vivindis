@@ -1438,7 +1438,6 @@ function AnalyzeHubConnected() {
               </div>
             ) : null}
 
-            <p className="text-xs text-muted-foreground">{t("storeFooter")}</p>
           </section>
         ) : null}
 
@@ -2188,9 +2187,6 @@ function AnalyzeHubConnected() {
             >
               {analysisKickoffBusy || importMutation.isPending ? tCommon("loading") : t("startSentimentCta")}
             </Button>
-            {!canRunUnifiedAnalysis ? (
-              <p className="text-center text-xs text-muted-foreground">{t("analyzeFooterDisabledHint")}</p>
-            ) : null}
           </div>
         ) : null}
       </div>
