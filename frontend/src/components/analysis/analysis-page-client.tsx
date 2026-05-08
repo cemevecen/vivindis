@@ -2,7 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Globe } from "lucide-react";
+import { ChevronDown, Globe } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
@@ -27,8 +27,7 @@ import { GLOBAL_SCAN_LANG_CODES, MAX_GLOBAL_FETCH_LANGS } from "@/lib/global-sca
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto, InsightsDto } from "@/types/analysis";
-import type { AppDto } from "@/types/app";
-import type { FetchStatus, ReviewFetchDto, ReviewListItemDto, ReviewListResponseDto } from "@/types/app";
+import type { AppDto, FetchStatus, ReviewFetchDto, ReviewListItemDto, ReviewListResponseDto } from "@/types/app";
 
 function analysesForFetch(items: AnalysisDto[], fetchId: string) {
   return items.filter((a) => a.fetch_id === fetchId);
@@ -145,6 +144,23 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       return s === "pending" || s === "running" ? 1000 : false;
     },
   });
+
+  const deepFetchBusy = Boolean(
+    deepParam &&
+      fetchQuery.data &&
+      (fetchQuery.data.status === "pending" || fetchQuery.data.status === "running"),
+  );
+  const [deepSettingsOpen, setDeepSettingsOpen] = useState(true);
+  const prevDeepFetchBusyRef = useRef(false);
+  useEffect(() => {
+    if (deepFetchBusy && !prevDeepFetchBusyRef.current) {
+      setDeepSettingsOpen(false);
+    }
+    if (!deepFetchBusy && prevDeepFetchBusyRef.current && deepParam) {
+      setDeepSettingsOpen(true);
+    }
+    prevDeepFetchBusyRef.current = deepFetchBusy;
+  }, [deepFetchBusy, deepParam]);
 
   const analysesQuery = useQuery({
     queryKey: queryKeys.analyses.byApp(appId),
@@ -913,20 +929,51 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             <Globe className="h-6 w-6" strokeWidth={2} />
           </div>
           <div className="min-w-0 flex-1 space-y-3">
-            {!deepParam ? (
-              <>
-                <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
-                <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
-              </>
-            ) : (
-              <>
-                <p className="text-base font-semibold tracking-tight text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
-                <p className="text-sm text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
-              </>
-            )}
-            <p className="text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0 space-y-1">
+                {!deepParam ? (
+                  <>
+                    <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
+                    <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-base font-semibold tracking-tight text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
+                    <p className="text-sm text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
+                  </>
+                )}
+              </div>
+              {deepFetchBusy ? (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="-mr-1 size-9 shrink-0 text-muted-foreground hover:text-foreground"
+                  aria-expanded={deepSettingsOpen}
+                  aria-label={
+                    deepSettingsOpen ? t("deepResearchSettingsCollapseAria") : t("deepResearchSettingsExpandAria")
+                  }
+                  onClick={() => {
+                    setDeepSettingsOpen((open) => !open);
+                  }}
+                >
+                  <ChevronDown
+                    className={cn("size-5 transition-transform duration-200", deepSettingsOpen && "rotate-180")}
+                    aria-hidden
+                  />
+                </Button>
+              ) : null}
+            </div>
 
-            <div className="space-y-4 rounded-xl border border-white/40 bg-background/60 p-4 dark:border-white/10 dark:bg-background/40">
+            {deepFetchBusy && !deepSettingsOpen ? (
+              <p className="text-xs text-muted-foreground">{t("deepResearchSettingsRunningCollapsedHint")}</p>
+            ) : null}
+
+            {(!deepFetchBusy || deepSettingsOpen) && (
+              <>
+                <p className="text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
+
+                <div className="space-y-4 rounded-xl border border-white/40 bg-background/60 p-4 dark:border-white/10 dark:bg-background/40">
               <p className="text-sm font-semibold text-foreground">{t("deepResearchPrepTitle")}</p>
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="space-y-1.5 sm:col-span-2">
@@ -1041,17 +1088,19 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               </div>
             </div>
 
-            <Button
-              type="button"
-              size="lg"
-              className="w-full rounded-xl font-semibold shadow-sm sm:w-auto"
-              onClick={() => {
-                runDeepResearch();
-              }}
-              disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
-            >
-              {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
-            </Button>
+                <Button
+                  type="button"
+                  size="lg"
+                  className="w-full rounded-xl font-semibold shadow-sm sm:w-auto"
+                  onClick={() => {
+                    runDeepResearch();
+                  }}
+                  disabled={deepResearchMutation.isPending || fetch.status !== "completed"}
+                >
+                  {deepResearchMutation.isPending ? tCommon("loading") : t("deepResearchCta")}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </section>
