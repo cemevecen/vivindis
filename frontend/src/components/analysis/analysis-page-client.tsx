@@ -612,7 +612,23 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
       {isDeepResearchFlow ? (
         <section className="rounded-lg border border-border bg-card p-4">
-          <p className="text-sm font-semibold text-foreground">{t("deepResearchStatusTitle")}</p>
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <p className="text-sm font-semibold text-foreground">{t("deepResearchStatusTitle")}</p>
+            <span
+              className={cn(
+                "inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium",
+                statusClass(fetch.status),
+              )}
+            >
+              {fetch.status === "pending"
+                ? tApps("statusPending")
+                : fetch.status === "running"
+                  ? tApps("statusRunning")
+                  : fetch.status === "completed"
+                    ? tApps("statusCompleted")
+                    : tApps("statusFailed")}
+            </span>
+          </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {fetch.status === "pending" || fetch.status === "running"
               ? t("deepResearchStatusRunning")
@@ -620,6 +636,24 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 ? t("deepResearchStatusCompleted")
                 : t("deepResearchStatusFailed")}
           </p>
+          <div className="mt-3 rounded-lg border border-border bg-muted/30 p-3">
+            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+              <span>{t("deepResearchCollectedLabel")}</span>
+              <span className="font-semibold text-foreground">{fetch.review_count}</span>
+            </div>
+            <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className={cn(
+                  "h-full rounded-full transition-all",
+                  fetch.status === "failed"
+                    ? "w-full bg-destructive/80"
+                    : fetch.status === "completed"
+                      ? "w-full bg-emerald-500"
+                      : "w-1/3 animate-pulse bg-primary",
+                )}
+              />
+            </div>
+          </div>
         </section>
       ) : null}
 
