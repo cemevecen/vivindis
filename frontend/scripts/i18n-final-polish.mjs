@@ -30,7 +30,6 @@ const PATCHES = {
       pairBannerIntro:
         "Sie haben diese App zusammen mit {name} erstellt. Öffnen Sie die Partner-App oder vergleichen Sie beide.",
       deleteConfirm: "„{name}“ löschen? Dadurch werden auch zugehörige Bewertungen und Analysen entfernt.",
-      openStoreLink: "Im Store öffnen",
     },
     analysis: {
       timelineTruncatedHint:

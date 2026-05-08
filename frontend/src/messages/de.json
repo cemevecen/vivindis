@@ -88,8 +88,7 @@
     "recentResearchEmpty": "Noch keine Bewertungsabfragen. Starten Sie eine auf der App-Seite oder unter Analysieren.",
     "researchKindLocal": "Lokal",
     "researchKindDeep": "Tief",
-    "recentResearchOpen": "Ergebnisse öffnen",
-    "openStoreLink": "Im Store öffnen"
+    "recentResearchOpen": "Ergebnisse öffnen"
   },
   "analysis": {
     "startAnalysis": "Analyse starten",

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "node scripts/check-i18n-parity.mjs && next lint",
+    "i18n:check": "node scripts/check-i18n-parity.mjs",
     "clean": "rm -rf .next",
     "dev:clean": "npm run clean && npm run dev",
     "i18n:fill": "node scripts/translate-locale-strings.mjs"
