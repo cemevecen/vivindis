@@ -104,7 +104,8 @@ export function AppsRecentResearch({ clerkEnabled }: Props) {
   return (
     <section className="space-y-3">
       <h2 className="text-lg font-medium">{t("recentResearchHeading")}</h2>
-      <ul className="divide-y divide-border rounded-lg border border-border">
+      <div className="max-h-[min(28rem,50vh)] overflow-y-auto overscroll-y-contain rounded-lg border border-border">
+        <ul className="divide-y divide-border">
         {items.map((row) => {
           const scope: ReviewScope = row.review_scope === "local" ? "local" : "global";
           const href = `/apps/${row.app_id}/analysis?fetchId=${row.id}`;
@@ -154,7 +155,8 @@ export function AppsRecentResearch({ clerkEnabled }: Props) {
             </li>
           );
         })}
-      </ul>
+        </ul>
+      </div>
     </section>
   );
 }
