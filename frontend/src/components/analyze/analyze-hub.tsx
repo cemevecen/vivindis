@@ -966,6 +966,19 @@ function AnalyzeHubConnected() {
 
     setCompareBusy(true);
     try {
+      const queueFetchForCompareApp = async (appId: string, scope: ReviewScope) => {
+        await apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
+          method: "POST",
+          body: {
+            from_date: dateRange.from,
+            to_date: dateRange.to,
+            review_scope: scope,
+            ...(scope === "local" ? { lang: searchLang, country: searchCountry } : {}),
+          },
+          getToken,
+        });
+      };
+
       if (regA && regB) {
         toast.success(t("compareOpenedRegistryPair"));
         router.push(`/compare?app_a=${regA.id}&app_b=${regB.id}&split=1`);
@@ -982,6 +995,10 @@ function AnalyzeHubConnected() {
           body: appBodyFromHit(hitB),
           getToken,
         });
+        await Promise.all([
+          queueFetchForCompareApp(a.id, compareReviewScopeA),
+          queueFetchForCompareApp(b.id, compareReviewScopeB),
+        ]);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareCreatedBoth", { a: a.name, b: b.name }));
         router.push(`/compare?app_a=${a.id}&app_b=${b.id}&split=1`);
@@ -993,6 +1010,7 @@ function AnalyzeHubConnected() {
           body: appBodyFromHit(hitB),
           getToken,
         });
+        await queueFetchForCompareApp(b.id, compareReviewScopeB);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareMixedCreatedOne", { created: b.name, existing: regA.name }));
         router.push(`/compare?app_a=${regA.id}&app_b=${b.id}&split=1`);
@@ -1004,6 +1022,7 @@ function AnalyzeHubConnected() {
           body: appBodyFromHit(hitA),
           getToken,
         });
+        await queueFetchForCompareApp(a.id, compareReviewScopeA);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareMixedCreatedOne", { created: a.name, existing: regB.name }));
         router.push(`/compare?app_a=${a.id}&app_b=${regB.id}&split=1`);
