@@ -190,7 +190,14 @@
     "insightsActionsTitle": "AI Action Recommendations",
     "insightsReleaseTitle": "Release Impact",
     "insightsSegmentsTitle": "User Segments",
-    "insightsAvgRating": "Avg rating:"
+    "insightsAvgRating": "Avg rating:",
+    "insightsAlertFilterAria": "Alert filter",
+    "insightsFilterAll": "All",
+    "insightsFilterTriggered": "Triggered",
+    "insightsFilterHigh": "High",
+    "insightsFilterMedium": "Medium",
+    "insightsFilterLow": "Low",
+    "insightsNoAlertsInFilter": "No alerts for this filter."
   },
   "auth": {
     "signIn": "Iniciar sesión",

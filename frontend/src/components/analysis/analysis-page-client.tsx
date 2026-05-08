@@ -145,6 +145,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   const [reviewSort, setReviewSort] = useState<"newest" | "oldest" | "rating_desc" | "rating_asc">("newest");
   const [timelineReviews, setTimelineReviews] = useState<ReviewListItemDto[] | null>(null);
   const [timelineLoadState, setTimelineLoadState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [insightAlertFilter, setInsightAlertFilter] = useState<"all" | "triggered" | "high" | "medium" | "low">("all");
 
   const fetchQuery = useQuery({
     queryKey: fetchId ? queryKeys.reviews.fetchById(fetchId) : ["analysis", "fetch", "idle"],
@@ -535,6 +536,17 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     aiTitle: t("ai"),
   };
 
+  const filteredInsightAlerts = useMemo(() => {
+    const alerts = insightsQuery.data?.alerts ?? [];
+    if (insightAlertFilter === "all") {
+      return alerts;
+    }
+    if (insightAlertFilter === "triggered") {
+      return alerts.filter((a) => a.triggered);
+    }
+    return alerts.filter((a) => a.severity === insightAlertFilter);
+  }, [insightAlertFilter, insightsQuery.data?.alerts]);
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -776,16 +788,47 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
             <article className="rounded-lg border border-border bg-muted/20 p-3">
-              <h3 className="text-sm font-semibold">{t("insightsAlertsTitle")}</h3>
+              <div className="flex items-center justify-between gap-2">
+                <h3 className="text-sm font-semibold">{t("insightsAlertsTitle")}</h3>
+                <select
+                  value={insightAlertFilter}
+                  onChange={(e) => setInsightAlertFilter(e.target.value as typeof insightAlertFilter)}
+                  className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  aria-label={t("insightsAlertFilterAria")}
+                >
+                  <option value="all">{t("insightsFilterAll")}</option>
+                  <option value="triggered">{t("insightsFilterTriggered")}</option>
+                  <option value="high">{t("insightsFilterHigh")}</option>
+                  <option value="medium">{t("insightsFilterMedium")}</option>
+                  <option value="low">{t("insightsFilterLow")}</option>
+                </select>
+              </div>
               <div className="mt-2 space-y-2">
-                {insightsQuery.data.alerts.map((a) => (
+                {filteredInsightAlerts.map((a) => (
                   <div key={a.key} className="rounded-md border border-border bg-card p-2">
-                    <p className="text-sm font-medium text-foreground">
-                      {a.title} {a.triggered ? "•" : ""}
-                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-sm font-medium text-foreground">
+                        {a.title} {a.triggered ? "•" : ""}
+                      </p>
+                      <span
+                        className={cn(
+                          "inline-flex rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                          a.severity === "high"
+                            ? "bg-red-500/15 text-red-700 dark:text-red-300"
+                            : a.severity === "medium"
+                              ? "bg-amber-500/15 text-amber-700 dark:text-amber-300"
+                              : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300",
+                        )}
+                      >
+                        {a.severity}
+                      </span>
+                    </div>
                     <p className="text-xs text-muted-foreground">{a.detail}</p>
                   </div>
                 ))}
+                {filteredInsightAlerts.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">{t("insightsNoAlertsInFilter")}</p>
+                ) : null}
               </div>
             </article>
             <article className="rounded-lg border border-border bg-muted/20 p-3">

@@ -407,7 +407,14 @@
     "insightsActionsTitle": "AI Aksiyon Önerileri",
     "insightsReleaseTitle": "Release Etkisi",
     "insightsSegmentsTitle": "Kullanıcı Segmentleri",
-    "insightsAvgRating": "Ort. puan:"
+    "insightsAvgRating": "Ort. puan:",
+    "insightsAlertFilterAria": "Uyarı filtresi",
+    "insightsFilterAll": "Tümü",
+    "insightsFilterTriggered": "Tetiklenen",
+    "insightsFilterHigh": "Yüksek",
+    "insightsFilterMedium": "Orta",
+    "insightsFilterLow": "Düşük",
+    "insightsNoAlertsInFilter": "Bu filtre için uyarı yok."
   },
   "about": {
     "title": "Vivindis hakkında",

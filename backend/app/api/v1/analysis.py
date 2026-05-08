@@ -95,6 +95,90 @@ def _trend_direction(delta: float, eps: float = 0.05) -> str:
     return "flat"
 
 
+def compute_keyword_counts(text_blob: str, keyword_groups: dict[str, list[str]]) -> dict[str, int]:
+    return {k: sum(text_blob.count(t) for t in terms) for k, terms in keyword_groups.items()}
+
+
+def is_low_star_spike(cur_ratio: float, prev_ratio: float, cur_total: int) -> bool:
+    return cur_ratio > (prev_ratio + 0.08) and cur_total >= 10
+
+
+def build_alert_items(
+    *,
+    cur_ratio: float,
+    prev_ratio: float,
+    cur_total: int,
+    keyword_counts: dict[str, int],
+) -> list[AlertItem]:
+    low_star_spike = is_low_star_spike(cur_ratio, prev_ratio, cur_total)
+    alerts = [
+        AlertItem(
+            key="low_star_spike",
+            title="1-2 yıldız artışı",
+            severity="high" if low_star_spike else "low",
+            detail=f"Son 7 gün düşük yıldız oranı: %{cur_ratio*100:.1f} (önceki: %{prev_ratio*100:.1f})",
+            triggered=low_star_spike,
+        ),
+    ]
+    total_kw = sum(keyword_counts.values()) or 1
+    for key, count in keyword_counts.items():
+        share = count / total_kw
+        alerts.append(
+            AlertItem(
+                key=f"{key}_burst",
+                title=f"{key} konusu artışı",
+                severity="medium" if share >= 0.2 else "low",
+                detail=f"Toplam kritik anahtar eşleşmesi içinde payı %{share*100:.1f} (adet: {count})",
+                triggered=share >= 0.2 and count >= 8,
+            ),
+        )
+    return alerts
+
+
+def build_action_items(keyword_counts: dict[str, int], low_star_spike: bool) -> list[ActionItem]:
+    actions: list[ActionItem] = []
+    for key, count in sorted(keyword_counts.items(), key=lambda x: x[1], reverse=True):
+        if count <= 0:
+            continue
+        if key == "crash":
+            actions.append(
+                ActionItem(
+                    problem="Çökme/kitlenme şikayetleri artıyor",
+                    recommendation="Crash-free oranını release bazında kır ve en çok etkilenen sürümler için hotfix planla.",
+                    owner="Engineering",
+                    priority="P0",
+                ),
+            )
+        elif key == "payment":
+            actions.append(
+                ActionItem(
+                    problem="Ödeme akışıyla ilgili olumsuz geri bildirim yoğun",
+                    recommendation="Ödeme funnel’ında drop noktalarını ölç, başarısız ödeme hatalarını kullanıcıya anlaşılır mesajlarla geri ver.",
+                    owner="Product",
+                    priority="P1",
+                ),
+            )
+        elif key == "login":
+            actions.append(
+                ActionItem(
+                    problem="Giriş/hesap erişimi sorunları tekrarlanıyor",
+                    recommendation="OTP, şifre sıfırlama ve device binding adımlarında friction analizini tamamla, destek makrolarını güncelle.",
+                    owner="Support",
+                    priority="P1",
+                ),
+            )
+    if low_star_spike:
+        actions.append(
+            ActionItem(
+                problem="Düşük yıldız oranı son dönemde anlamlı arttı",
+                recommendation="Son release notlarıyla olumsuz konuları eşleştirip rollback/hotfix kararını 24 saat içinde netleştir.",
+                owner="PM",
+                priority="P0",
+            ),
+        )
+    return actions[:5]
+
+
 @router.post(
     "/fetches/{fetch_id}/analyze",
     response_model=list[AnalysisResponse],
@@ -264,7 +348,7 @@ async def get_app_insights(
 
     cur_ratio = float((cur_low or 0) / int(cur_total or 1))
     prev_ratio = float((prev_low or 0) / int(prev_total or 1))
-    low_star_spike = cur_ratio > (prev_ratio + 0.08) and int(cur_total or 0) >= 10
+    low_star_spike = is_low_star_spike(cur_ratio, prev_ratio, int(cur_total or 0))
 
     review_rows = (
         await session.execute(
@@ -277,72 +361,14 @@ async def get_app_insights(
         "payment": ["payment", "ödeme", "kart", "checkout"],
         "login": ["login", "giriş", "otp", "şifre"],
     }
-    keyword_counts = {k: sum(text_blob.count(t) for t in terms) for k, terms in keyword_groups.items()}
-    total_kw = sum(keyword_counts.values()) or 1
-
-    alerts = [
-        AlertItem(
-            key="low_star_spike",
-            title="1-2 yıldız artışı",
-            severity="high" if low_star_spike else "low",
-            detail=f"Son 7 gün düşük yıldız oranı: %{cur_ratio*100:.1f} (önceki: %{prev_ratio*100:.1f})",
-            triggered=low_star_spike,
-        ),
-    ]
-    for key, count in keyword_counts.items():
-        share = count / total_kw
-        alerts.append(
-            AlertItem(
-                key=f"{key}_burst",
-                title=f"{key} konusu artışı",
-                severity="medium" if share >= 0.2 else "low",
-                detail=f"Toplam kritik anahtar eşleşmesi içinde payı %{share*100:.1f} (adet: {count})",
-                triggered=share >= 0.2 and count >= 8,
-            ),
-        )
-
-    # Action items (top 5)
-    actions: list[ActionItem] = []
-    for key, count in sorted(keyword_counts.items(), key=lambda x: x[1], reverse=True):
-        if count <= 0:
-            continue
-        if key == "crash":
-            actions.append(
-                ActionItem(
-                    problem="Çökme/kitlenme şikayetleri artıyor",
-                    recommendation="Crash-free oranını release bazında kır ve en çok etkilenen sürümler için hotfix planla.",
-                    owner="Engineering",
-                    priority="P0",
-                ),
-            )
-        elif key == "payment":
-            actions.append(
-                ActionItem(
-                    problem="Ödeme akışıyla ilgili olumsuz geri bildirim yoğun",
-                    recommendation="Ödeme funnel’ında drop noktalarını ölç, başarısız ödeme hatalarını kullanıcıya anlaşılır mesajlarla geri ver.",
-                    owner="Product",
-                    priority="P1",
-                ),
-            )
-        elif key == "login":
-            actions.append(
-                ActionItem(
-                    problem="Giriş/hesap erişimi sorunları tekrarlanıyor",
-                    recommendation="OTP, şifre sıfırlama ve device binding adımlarında friction analizini tamamla, destek makrolarını güncelle.",
-                    owner="Support",
-                    priority="P1",
-                ),
-            )
-    if low_star_spike:
-        actions.append(
-            ActionItem(
-                problem="Düşük yıldız oranı son dönemde anlamlı arttı",
-                recommendation="Son release notlarıyla olumsuz konuları eşleştirip rollback/hotfix kararını 24 saat içinde netleştir.",
-                owner="PM",
-                priority="P0",
-            ),
-        )
-    actions = actions[:5]
+    keyword_counts = compute_keyword_counts(text_blob, keyword_groups)
+    alerts = build_alert_items(
+        cur_ratio=cur_ratio,
+        prev_ratio=prev_ratio,
+        cur_total=int(cur_total or 0),
+        keyword_counts=keyword_counts,
+    )
+    actions = build_action_items(keyword_counts, low_star_spike)
 
     # Release impact
     version_rows = (
