@@ -230,15 +230,6 @@ function AnalyzeHubConnected() {
     [appsQuery.data],
   );
 
-  /** Pazaryeri çekimini hangi Vivindis uygulama kaydına bağlayacağız (Play/App Store ikonları burada kullanılmaz). */
-  const marketplaceVivindisAppOptions = useMemo(() => {
-    const apps = [...registeredAppsDeduped];
-    if (sessionApp && !apps.some((a) => a.id === sessionApp.id)) {
-      apps.unshift(sessionApp);
-    }
-    return apps;
-  }, [registeredAppsDeduped, sessionApp]);
-
   const marketplaceUrlFieldPlaceholder = useMemo(() => {
     switch (marketplaceSite) {
       case "trendyol":
@@ -823,9 +814,9 @@ function AnalyzeHubConnected() {
     if (!requireSignedIn()) {
       return;
     }
-    const appId = effectiveAppId;
+    const appId = sessionApp?.id;
     if (!appId) {
-      toast.error(t("analyzeFooterNeedApp"));
+      toast.error(t("marketplaceNeedStorePinToast"));
       return;
     }
     const cls = classifyMarketplaceSellerUrl(marketplaceSellerUrl);
@@ -864,13 +855,13 @@ function AnalyzeHubConnected() {
     marketplacePullMutation.mutate({ appId, sellerUrl: marketplaceSellerUrl.trim() });
   }, [
     addFetchProgressEvent,
-    effectiveAppId,
     externalScraperQuery.data?.enabled,
     marketplacePullMutation,
     marketplaceSellerUrl,
     marketplaceSite,
     requireSignedIn,
     resetFetchProgressTimeline,
+    sessionApp?.id,
     t,
   ]);
 
@@ -1220,7 +1211,13 @@ function AnalyzeHubConnected() {
     }
   };
 
-  const hideStoreResultGrid = Boolean(selectedStoreHit || isPinningStore);
+  /** Pin kartı görünürken sonuç ızgarasını gizle; yalnızca mağaza kataloğu + aktif pin akışında. */
+  const hideStoreResultGrid = useMemo(
+    () =>
+      storeSourceMode === "catalog" &&
+      Boolean(selectedStoreHit && (sessionApp || isPinningStore)),
+    [storeSourceMode, selectedStoreHit, sessionApp, isPinningStore],
+  );
 
   const formatReviewDate = useCallback(
     (iso: string) => {
@@ -1463,32 +1460,15 @@ function AnalyzeHubConnected() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="marketplace-vivindis-app" className="text-foreground">
-                    {t("marketplaceTargetVivindisLabel")}
-                  </Label>
-                  <p className="text-xs leading-relaxed text-muted-foreground">{t("marketplaceTargetVivindisHint")}</p>
-                  <SelectNative
-                    id="marketplace-vivindis-app"
-                    className="h-11 rounded-xl"
-                    value={effectiveAppId}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      setTargetAppId(v);
-                      const app = marketplaceVivindisAppOptions.find((a) => a.id === v);
-                      setTargetAppPickerText(app ? formatTargetAppOptionLabel(app) : "");
-                    }}
-                    disabled={marketplaceVivindisAppOptions.length === 0}
-                  >
-                    <option value="">{t("marketplaceSelectVivindisPlaceholder")}</option>
-                    {marketplaceVivindisAppOptions.map((a) => (
-                      <option key={a.id} value={a.id}>
-                        {formatTargetAppOptionLabel(a)}
-                      </option>
-                    ))}
-                  </SelectNative>
-                  {sessionApp && !targetAppId.trim() ? (
-                    <p className="text-xs text-muted-foreground">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
-                  ) : null}
+                  {sessionApp ? (
+                    <p className="text-sm text-foreground">
+                      {t("marketplacePinnedAppBanner", { name: sessionApp.name })}
+                    </p>
+                  ) : (
+                    <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-sm text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
+                      {t("marketplaceNeedStorePin")}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="marketplace-seller-url" className="text-foreground">
@@ -1533,7 +1513,7 @@ function AnalyzeHubConnected() {
                       className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
                       onClick={() => void handlePullMarketplaceReviews()}
                       disabled={
-                        !effectiveAppId ||
+                        !sessionApp ||
                         !marketplacePullInputReady ||
                         !externalScraperQuery.data?.enabled ||
                         externalScraperQuery.isPending ||
@@ -1553,7 +1533,7 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 </div>
-                {effectiveAppId && storeFetchId && fetchRowQuery.isError ? (
+                {sessionApp && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
                     <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
                     <p className="text-xs break-words text-red-800/90">
@@ -1566,7 +1546,7 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 ) : null}
-                {effectiveAppId &&
+                {sessionApp &&
                 (marketplacePullMutation.isPending ||
                   (Boolean(storeFetchId) &&
                     (fetchRowQuery.isPending ||
@@ -1604,15 +1584,15 @@ function AnalyzeHubConnected() {
                     </div>
                   </div>
                 ) : null}
-                {effectiveAppId && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
+                {sessionApp && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
                   <p className="text-sm text-red-700">{fetchRowQuery.data.error_message}</p>
                 ) : null}
-                {effectiveAppId && fetchRowQuery.data?.status === "completed" ? (
+                {sessionApp && fetchRowQuery.data?.status === "completed" ? (
                   <p className="text-sm font-medium text-emerald-800">
                     {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
                   </p>
                 ) : null}
-                {isHydratingPool ? (
+                {sessionApp && isHydratingPool ? (
                   <div className="space-y-2 rounded-xl border border-orange-200/35 bg-orange-50/20 p-3 dark:border-orange-800/28 dark:bg-orange-950/12">
                     <p className="text-sm font-semibold text-foreground">{t("hydratePoolTitle")}</p>
                     <p className="text-xs text-muted-foreground">
@@ -1628,7 +1608,7 @@ function AnalyzeHubConnected() {
                     </div>
                   </div>
                 ) : null}
-                {hydratedReviews.length > 0 ? (
+                {sessionApp && hydratedReviews.length > 0 ? (
                   <details className="rounded-xl border border-border bg-card/80 p-3">
                     <summary className="cursor-pointer select-none text-sm font-semibold text-foreground">
                       {t("inspectReviewsSummary", { count: hydratedReviews.length })}

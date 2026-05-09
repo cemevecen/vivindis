@@ -515,13 +515,13 @@
     "marketplaceBrandTrendyol": "Trendyol",
     "marketplaceBrandHepsiburada": "Hepsiburada",
     "marketplaceBrandN11": "N11",
-    "marketplaceTargetVivindisLabel": "Vivindis app (analysis container)",
-    "marketplaceTargetVivindisHint": "Choose which saved project this fetch attaches to. It does not need to be a Trendyol/Hepsiburada/N11 app—only a container for this pull in your account.",
-    "marketplaceSelectVivindisPlaceholder": "Select a saved app…",
     "marketplaceUrlPlaceholderTrendyol": "https://www.trendyol.com/magaza/…",
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
-    "marketplaceUrlSiteMismatch": "The link does not match the selected marketplace platform."
+    "marketplaceUrlSiteMismatch": "The link does not match the selected marketplace platform.",
+    "marketplaceNeedStorePin": "On the Store catalog tab, search for an app and use “Select — pin on this page”. Then come back here to run the seller pull for that app.",
+    "marketplacePinnedAppBanner": "Using pinned app: {name}",
+    "marketplaceNeedStorePinToast": "Pin an app from the Store catalog tab first (Select — pin on this page)."
   },
   "about": {
     "title": "关于维文迪斯",
