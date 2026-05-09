@@ -1,3 +1,4 @@
+import type { AppDto } from "@/types/app";
 import type { StoreSearchResultItem } from "@/types/store-search";
 
 /** Mağaza arama + dosya/yapıştırma + karşılaştırma sekmeleri. */
@@ -72,4 +73,65 @@ export function appBodyFromHit(hit: StoreSearchResultItem): Record<string, unkno
     icon_url: hit.icon ?? null,
     is_active: true,
   };
+}
+
+/** Kayıtlı uygulamayı mağaza pin kartı / arama sonucu gösterimi için sentetik mağaza satırına çevirir. */
+export function storeHitFromRegisteredApp(app: AppDto): StoreSearchResultItem | null {
+  if (app.platform === "google_play") {
+    if (!app.package_name.trim()) {
+      return null;
+    }
+    return {
+      id: app.package_name,
+      name: app.name,
+      developer: app.developer,
+      icon: app.icon_url,
+      rating: null,
+      review_count: null,
+      platform: "google_play",
+      store_url: null,
+    };
+  }
+  if (app.platform === "app_store") {
+    const bid = app.bundle_id?.trim();
+    if (!bid) {
+      return null;
+    }
+    return {
+      id: bid,
+      name: app.name,
+      developer: app.developer,
+      icon: app.icon_url,
+      rating: null,
+      review_count: null,
+      platform: "app_store",
+      store_url: null,
+    };
+  }
+  if (app.package_name.trim()) {
+    return {
+      id: app.package_name,
+      name: app.name,
+      developer: app.developer,
+      icon: app.icon_url,
+      rating: null,
+      review_count: null,
+      platform: "google_play",
+      store_url: null,
+    };
+  }
+  const bundleOnly = app.bundle_id?.trim();
+  if (bundleOnly) {
+    return {
+      id: bundleOnly,
+      name: app.name,
+      developer: app.developer,
+      icon: app.icon_url,
+      rating: null,
+      review_count: null,
+      platform: "app_store",
+      store_url: null,
+    };
+  }
+  return null;
 }

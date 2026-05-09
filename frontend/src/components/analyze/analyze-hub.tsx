@@ -27,6 +27,7 @@ import {
   appBodyFromHit,
   parseAnalyzeHubMode,
   rangeFromPreset,
+  storeHitFromRegisteredApp,
   type AnalysisMode,
   type DatePresetId,
   type ReviewScope,
@@ -145,6 +146,7 @@ function AnalyzeHubConnected() {
   const [compareRegistryAppA, setCompareRegistryAppA] = useState<AppDto | null>(null);
   const [compareRegistryAppB, setCompareRegistryAppB] = useState<AppDto | null>(null);
   const [compareQuickPickExpanded, setCompareQuickPickExpanded] = useState(true);
+  const [storeCatalogQuickPickExpanded, setStoreCatalogQuickPickExpanded] = useState(true);
   const [compareBusy, setCompareBusy] = useState(false);
 
   const [targetAppId, setTargetAppId] = useState<string>("");
@@ -691,6 +693,31 @@ function AnalyzeHubConnected() {
       }
     },
     [getToken, queryClient, requireSignedIn, t, tCommon],
+  );
+
+  const selectRegisteredCatalogApp = useCallback(
+    (app: AppDto) => {
+      if (!requireSignedIn()) {
+        return;
+      }
+      const hit = storeHitFromRegisteredApp(app);
+      if (!hit) {
+        toast.error(t("storeCatalogRegisteredPickUnavailable"));
+        return;
+      }
+      pinRequestRef.current += 1;
+      setIsPinningStore(false);
+      setSelectedStoreHit(hit);
+      setSessionApp(app);
+      setStoreFetchId(null);
+      setHydratedReviews([]);
+      setIsHydratingPool(false);
+      setHydratedPoolCount(0);
+      lastFetchHydratedToPoolRef.current = null;
+      storeFetchFailedToastRef.current = null;
+      storeFetchPollErrorToastRef.current = null;
+    },
+    [requireSignedIn, t],
   );
 
   const handlePullStoreReviews = useCallback(() => {
@@ -1395,6 +1422,66 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 </div>
+
+                {registeredAppsDeduped.length > 0 ? (
+                  <div className="space-y-2 rounded-2xl border border-border bg-card p-4 sm:p-5">
+                    <button
+                      type="button"
+                      id="store-catalog-registered-quick-pick-toggle"
+                      className="flex w-full items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
+                      onClick={() => setStoreCatalogQuickPickExpanded((open) => !open)}
+                      aria-expanded={storeCatalogQuickPickExpanded}
+                      aria-controls="store-catalog-registered-quick-pick-panel"
+                      aria-label={
+                        storeCatalogQuickPickExpanded
+                          ? t("storeCatalogRegisteredQuickPickCollapse")
+                          : t("storeCatalogRegisteredQuickPickExpand")
+                      }
+                    >
+                      <span className="text-sm font-semibold text-foreground">{t("storeCatalogRegisteredListTitle")}</span>
+                      <ChevronDown
+                        className={cn(
+                          "size-4 shrink-0 opacity-70 transition-transform",
+                          storeCatalogQuickPickExpanded && "rotate-180",
+                        )}
+                        aria-hidden
+                      />
+                    </button>
+                    {storeCatalogQuickPickExpanded ? (
+                      <div
+                        id="store-catalog-registered-quick-pick-panel"
+                        role="region"
+                        aria-labelledby="store-catalog-registered-quick-pick-toggle"
+                        className="space-y-2"
+                      >
+                        <p className="text-xs text-muted-foreground">{t("storeCatalogRegisteredListHint")}</p>
+                        <div className="max-h-[22rem] overflow-y-auto rounded-xl border border-border p-2">
+                          <div
+                            className="grid gap-2"
+                            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
+                          >
+                            {registeredAppsDeduped.map((app) => (
+                              <button
+                                key={app.id}
+                                type="button"
+                                className={cn(
+                                  "flex flex-col items-center gap-1.5 rounded-lg border p-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                  sessionApp?.id === app.id
+                                    ? "border-primary bg-primary/5"
+                                    : "border-border/80 bg-card/40 hover:bg-muted/40",
+                                )}
+                                onClick={() => selectRegisteredCatalogApp(app)}
+                                aria-label={t("storeCatalogRegisteredPickAria", { name: app.name })}
+                              >
+                                <RegisteredAppTileVisual app={app} platformLabel={registryPlatformLabel(app.platform)} />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                ) : null}
               </>
             ) : (
               <div className="space-y-4 rounded-2xl border border-teal-200/35 bg-teal-50/10 p-4 dark:border-teal-800/25 dark:bg-teal-950/12 sm:p-5">
