@@ -85,6 +85,14 @@ class Settings(BaseSettings):
         validation_alias="SCRAPE_HTTP_TIMEOUT_SECONDS",
         description="Store HTTP istek timeout süresi (saniye). Uzun global taramalarda artırılabilir.",
     )
+    scrape_play_sync_timeout_seconds: float = Field(
+        default=120.0,
+        validation_alias="SCRAPE_PLAY_SYNC_TIMEOUT_SECONDS",
+        description=(
+            "google-play-scraper senkron çağrıları için asyncio üst zaman aşımı (saniye). "
+            "Tek bir shard takılırsa tüm global çekimin kilitlenmesini önler."
+        ),
+    )
     scrape_requests_per_second: float = Field(
         default=7.0,
         validation_alias="SCRAPE_REQUESTS_PER_SECOND",

@@ -303,6 +303,8 @@ async def _scrape_google_play_baseline(
 ) -> int:
     inserted = 0
     loop = asyncio.get_running_loop()
+    settings = get_settings()
+    sync_timeout = max(45.0, float(getattr(settings, "scrape_play_sync_timeout_seconds", 120.0) or 120.0))
     for lang, country in locales:
         await limiter.acquire()
         try:
@@ -315,7 +317,16 @@ async def _scrape_google_play_baseline(
                     sort=Sort.NEWEST,
                 )
 
-            rows = await loop.run_in_executor(None, _sync_all)
+            rows = await asyncio.wait_for(loop.run_in_executor(None, _sync_all), timeout=sync_timeout)
+        except asyncio.TimeoutError:
+            log.warning(
+                "play_baseline_sync_timeout",
+                pkg=pkg,
+                lang=lang,
+                country=country,
+                timeout_seconds=sync_timeout,
+            )
+            continue
         except Exception as exc:
             log.warning("play_baseline_failed", pkg=pkg, lang=lang, country=country, error=str(exc))
             continue
@@ -376,6 +387,8 @@ async def _scrape_locale_score(
     batches = 0
     max_batches = 100
     loop = asyncio.get_running_loop()
+    settings = get_settings()
+    sync_timeout = max(45.0, float(getattr(settings, "scrape_play_sync_timeout_seconds", 120.0) or 120.0))
 
     while batches < max_batches:
         await limiter.acquire()
@@ -387,7 +400,20 @@ async def _scrape_locale_score(
                     target_pkg, lang=lang, country=country, sort=Sort.NEWEST,
                     count=200, filter_score_with=score, continuation_token=cont
                 )
-            batch, next_tok = await loop.run_in_executor(None, _sync)
+            batch, next_tok = await asyncio.wait_for(
+                loop.run_in_executor(None, _sync),
+                timeout=sync_timeout,
+            )
+        except asyncio.TimeoutError:
+            log.warning(
+                "play_shard_sync_timeout",
+                pkg=target_pkg,
+                lang=lang,
+                country=country,
+                score=score,
+                timeout_seconds=sync_timeout,
+            )
+            break
         except Exception as exc:
             log.warning("play_shard_failed", pkg=target_pkg, lang=lang, country=country, error=str(exc))
             break
