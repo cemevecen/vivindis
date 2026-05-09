@@ -1403,7 +1403,6 @@ function AnalyzeHubConnected() {
               <div className="space-y-4 rounded-2xl border border-teal-200/35 bg-teal-50/10 p-4 dark:border-teal-800/25 dark:bg-teal-950/12 sm:p-5">
                 <div>
                   <p className="text-base font-semibold text-foreground">{t("marketplacePanelTitle")}</p>
-                  <p className="mt-1 text-sm text-muted-foreground">{t("marketplaceHint")}</p>
                 </div>
                 {!externalScraperQuery.data?.enabled && !externalScraperQuery.isPending ? (
                   <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">

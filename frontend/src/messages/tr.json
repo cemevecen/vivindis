@@ -42,7 +42,6 @@
     "storeSourceCatalog": "Mağaza kataloğu",
     "storeSourceMarketplace": "Pazaryeri",
     "marketplacePanelTitle": "Türk pazaryeri (Trendyol · Hepsiburada · N11)",
-    "marketplaceHint": "Satıcı mağaza bağlantısını yapıştırın. Vivindis Apify Türk pazaryeri satıcı zekâsı aktörünü çalıştırır, profil verilerini saklar, sezgisel boru hattı için tek bir sentetik yorum satırı oluşturur ve satıcı metriklerini nihai skora %20 ağırlıkla dahil eder.",
     "marketplaceUrlLabel": "Satıcı mağaza URL’si",
     "marketplaceUrlPlaceholder": "Örn. https://www.trendyol.com/magaza/…",
     "marketplaceUrlInvalid": "Trendyol, Hepsiburada veya N11 satıcı bağlantısı kullanın.",
