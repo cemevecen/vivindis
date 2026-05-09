@@ -1727,7 +1727,7 @@ function AnalyzeHubConnected() {
                 ) : null}
                 <div className="space-y-2">
                   <span className="block text-sm font-medium text-foreground">{t("marketplaceSiteLabel")}</span>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="grid min-w-0 grid-cols-3 gap-1.5 sm:gap-2 max-[359px]:grid-cols-1">
                     {MARKETPLACE_CHIP_SITES.map((site) => (
                       <Button
                         key={site}
@@ -1735,12 +1735,13 @@ function AnalyzeHubConnected() {
                         size="sm"
                         variant={marketplaceSite === site ? "default" : "outline"}
                         className={cn(
-                          "rounded-full gap-2 pr-3",
+                          "w-full min-w-0 justify-center gap-1.5 rounded-full px-2 text-[11px] font-medium leading-tight sm:gap-2 sm:px-3 sm:text-sm",
+                          "h-9 min-h-9 max-[359px]:h-auto max-[359px]:min-h-10 max-[359px]:whitespace-normal max-[359px]:py-2",
                           marketplaceSite === site ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
                         )}
                         onClick={() => setMarketplaceSite(site)}
                       >
-                        <span className="relative size-6 shrink-0 overflow-hidden rounded-md bg-background/90 ring-1 ring-border/60 dark:bg-background/80">
+                        <span className="relative size-5 shrink-0 overflow-hidden rounded-md bg-background/90 ring-1 ring-border/60 dark:bg-background/80 sm:size-6">
                           <Image
                             src={marketplaceChipIconSrc(site)}
                             alt=""
@@ -1750,7 +1751,9 @@ function AnalyzeHubConnected() {
                             sizes="24px"
                           />
                         </span>
-                        <span>{t(MARKETPLACE_CHIP_LABEL[site])}</span>
+                        <span className="min-w-0 text-center max-[359px]:whitespace-normal min-[360px]:truncate">
+                          {t(MARKETPLACE_CHIP_LABEL[site])}
+                        </span>
                       </Button>
                     ))}
                   </div>
