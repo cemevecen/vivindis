@@ -11,7 +11,7 @@ import { AnalysisCharts } from "@/components/analysis/analysis-charts";
 import { StartFetchForm } from "@/components/apps/start-fetch-form";
 import { CompareSplitReviewsSection } from "@/components/compare/compare-split-reviews-section";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Link, usePathname, useRouter } from "@/i18n/routing";
+import { Link, useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch } from "@/lib/api";
 import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { queryKeys } from "@/lib/query-keys";
@@ -191,7 +191,12 @@ function CompareAppSplitPane({
           </Button>
           {fetchRow.status === "completed" ? (
             <Link
-              href={`/apps/${app.id}/analysis?fetchId=${fetchRow.id}#deep-global-scan-panel`}
+              href={{
+                pathname: "/apps/[id]/analysis",
+                params: { id: app.id },
+                query: { fetchId: fetchRow.id },
+                hash: "deep-global-scan-panel",
+              }}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center sm:w-auto")}
             >
               {ta("viewAnalytics")}
@@ -208,7 +213,7 @@ function CompareAppSplitPane({
       </section>
 
       <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
-        <Link href={`/apps/${app.id}`} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
+        <Link href={{ pathname: "/apps/[id]", params: { id: app.id } }} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
           {tApps("detailTitle")}
         </Link>
       </div>
@@ -225,7 +230,6 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const router = useRouter();
 
   const splitOn =
@@ -244,7 +248,8 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       p.delete("split");
       p.delete("layout");
     }
-    router.push(`${pathname}?${p.toString()}`);
+    const query = Object.fromEntries(p);
+    router.push(Object.keys(query).length > 0 ? { pathname: "/compare", query } : "/compare");
   };
 
   const setChartsWide = (wide: boolean) => {
@@ -254,7 +259,8 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     } else {
       p.delete("charts");
     }
-    router.push(`${pathname}?${p.toString()}`);
+    const query = Object.fromEntries(p);
+    router.push(Object.keys(query).length > 0 ? { pathname: "/compare", query } : "/compare");
   };
 
   const queries = useQueries({
@@ -461,12 +467,16 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
         </div>
       </dl>
       <div className="mt-4 flex flex-wrap gap-2">
-        <Link href={`/apps/${app.id}`} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
+        <Link href={{ pathname: "/apps/[id]", params: { id: app.id } }} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
           {tApps("detailTitle")}
         </Link>
         {fetchRow?.status === "completed" ? (
           <Link
-            href={`/apps/${app.id}/analysis?fetchId=${fetchRow.id}`}
+            href={{
+              pathname: "/apps/[id]/analysis",
+              params: { id: app.id },
+              query: { fetchId: fetchRow.id },
+            }}
             className={cn(buttonVariants({ size: "sm" }))}
           >
             {ta("viewAnalytics")}

@@ -706,7 +706,11 @@ function AnalyzeHubConnected() {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
-      router.push(`/apps/${appId}/analysis?fetchId=${fetchId}`);
+      router.push({
+        pathname: "/apps/[id]/analysis",
+        params: { id: appId },
+        query: { fetchId },
+      });
     },
     [getToken, queryClient, router, runAnalysisTypes],
   );
@@ -1013,7 +1017,11 @@ function AnalyzeHubConnected() {
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
         await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
-        router.push(`/apps/${appId}/analysis?fetchId=${storeFetchId}`);
+        router.push({
+          pathname: "/apps/[id]/analysis",
+          params: { id: appId },
+          query: { fetchId: storeFetchId },
+        });
       } catch (e) {
         toast.error(formatClientFetchError(e));
       } finally {
@@ -1356,7 +1364,10 @@ function AnalyzeHubConnected() {
 
       if (regA && regB) {
         toast.success(t("compareOpenedRegistryPair"));
-        router.push(`/compare?app_a=${regA.id}&app_b=${regB.id}&split=1`);
+        router.push({
+          pathname: "/compare",
+          query: { app_a: regA.id, app_b: regB.id, split: "1" },
+        });
         return;
       }
       if (hitA && hitB) {
@@ -1376,7 +1387,10 @@ function AnalyzeHubConnected() {
         ]);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareCreatedBoth", { a: a.name, b: b.name }));
-        router.push(`/compare?app_a=${a.id}&app_b=${b.id}&split=1`);
+        router.push({
+          pathname: "/compare",
+          query: { app_a: a.id, app_b: b.id, split: "1" },
+        });
         return;
       }
       if (regA && hitB) {
@@ -1388,7 +1402,10 @@ function AnalyzeHubConnected() {
         await queueFetchForCompareApp(b.id, compareReviewScopeB);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareMixedCreatedOne", { created: b.name, existing: regA.name }));
-        router.push(`/compare?app_a=${regA.id}&app_b=${b.id}&split=1`);
+        router.push({
+          pathname: "/compare",
+          query: { app_a: regA.id, app_b: b.id, split: "1" },
+        });
         return;
       }
       if (hitA && regB) {
@@ -1400,7 +1417,10 @@ function AnalyzeHubConnected() {
         await queueFetchForCompareApp(a.id, compareReviewScopeA);
         await queryClient.invalidateQueries({ queryKey: queryKeys.apps.all });
         toast.success(t("compareMixedCreatedOne", { created: a.name, existing: regB.name }));
-        router.push(`/compare?app_a=${a.id}&app_b=${regB.id}&split=1`);
+        router.push({
+          pathname: "/compare",
+          query: { app_a: a.id, app_b: regB.id, split: "1" },
+        });
         return;
       }
       toast.error(t("compareNeedBothSlots"));
@@ -2118,7 +2138,7 @@ function AnalyzeHubConnected() {
                     <h3 className="text-sm font-medium text-muted-foreground">
                       {t("resultsHeading", { count: catalogHeadlineCount })}
                     </h3>
-                    {showCatalogPagination && platform !== "both" ? (
+                    {showCatalogPagination ? (
                       <p className="text-xs text-muted-foreground">
                         {t("storeResultsRange", {
                           from: storeCatalogPage * STORE_CATALOG_PAGE_SIZE + 1,
@@ -2161,7 +2181,7 @@ function AnalyzeHubConnected() {
                           <span className="text-xs font-medium">{t("storeResultsLayoutGrid")}</span>
                         </Button>
                       </div>
-                      {platform !== "both" && showCatalogPagination ? (
+                      {showCatalogPagination ? (
                         <div className="flex items-center gap-1">
                           <Button
                             type="button"

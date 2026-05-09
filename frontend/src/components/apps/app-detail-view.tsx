@@ -232,13 +232,16 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             <Link
-              href={`/apps/${pairParam}`}
+              href={{ pathname: "/apps/[id]", params: { id: pairParam } }}
               className={cn(buttonVariants({ variant: "default", size: "sm" }))}
             >
               {t("pairBannerOpenPartner")}
             </Link>
             <Link
-              href={`/compare?app_a=${effectiveAppId}&app_b=${pairParam}`}
+              href={{
+                pathname: "/compare",
+                query: { app_a: effectiveAppId, app_b: pairParam },
+              }}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               {t("pairBannerCompare")}
@@ -305,7 +308,7 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <Link
-                      href={`/apps/${d.id}`}
+                      href={{ pathname: "/apps/[id]", params: { id: d.id } }}
                       className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
                     >
                       {t("duplicateOpen")}
@@ -368,7 +371,11 @@ export function AppDetailView({ appId, clerkEnabled }: Props) {
               return (
                 <li key={row.id}>
                   <Link
-                    href={`/apps/${effectiveAppId}/analysis?fetchId=${row.id}`}
+                    href={{
+                      pathname: "/apps/[id]/analysis",
+                      params: { id: effectiveAppId },
+                      query: { fetchId: row.id },
+                    }}
                     className="flex flex-col gap-3 p-4 transition-colors hover:bg-muted/40 sm:flex-row sm:items-center sm:justify-between sm:gap-4"
                   >
                     <div className="space-y-1 text-sm">

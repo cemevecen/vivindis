@@ -31,7 +31,7 @@ export function AppCard({ app, onDelete, isDeleting = false }: Props) {
   return (
     <div className="group relative flex min-h-0 rounded-lg border border-border bg-card shadow-sm transition-colors hover:border-primary/40 hover:bg-muted/30">
       <Link
-        href={`/apps/${app.id}`}
+        href={{ pathname: "/apps/[id]", params: { id: app.id } }}
         className="flex min-h-0 min-w-0 flex-1 items-center gap-2.5 py-2 pl-2 pr-[4.5rem] sm:pr-[4.75rem]"
       >
         <div className="relative size-11 shrink-0 overflow-hidden rounded-lg border border-border bg-muted/40">

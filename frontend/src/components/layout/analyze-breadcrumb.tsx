@@ -3,6 +3,7 @@
 import { ChevronRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import type { ComponentProps } from "react";
 
 import { Link, usePathname } from "@/i18n/routing";
 import { parseAnalyzeHubMode } from "@/lib/analyze-hub-utils";
@@ -20,7 +21,8 @@ export function AnalyzeBreadcrumb() {
 
   const mode = parseAnalyzeHubMode(searchParams.get("mode"));
 
-  const crumbs: { href?: string; label: string }[] = [{ href: "/", label: tNav("breadcrumbHome") }];
+  type AppHref = ComponentProps<typeof Link>["href"];
+  const crumbs: { href?: AppHref; label: string }[] = [{ href: "/", label: tNav("breadcrumbHome") }];
 
   if (pathname.endsWith("/analyze/store")) {
     crumbs.push({ href: "/analyze/store", label: tNav("analyze") });

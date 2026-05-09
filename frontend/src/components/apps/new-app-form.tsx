@@ -88,12 +88,16 @@ export function NewAppForm() {
       const fd = searchParams.get("from_date")?.trim();
       const td = searchParams.get("to_date")?.trim();
       const pair = searchParams.get("pair_app_id")?.trim();
-      const q = new URLSearchParams();
-      if (fd) q.set("from_date", fd);
-      if (td) q.set("to_date", td);
-      if (pair) q.set("pair_app_id", pair);
-      const qs = q.toString();
-      router.push(`/apps/${data.id}${qs ? `?${qs}` : ""}`);
+      const query: Record<string, string> = {};
+      if (fd) query.from_date = fd;
+      if (td) query.to_date = td;
+      if (pair) query.pair_app_id = pair;
+      const hasQuery = Object.keys(query).length > 0;
+      router.push(
+        hasQuery
+          ? { pathname: "/apps/[id]", params: { id: data.id }, query }
+          : { pathname: "/apps/[id]", params: { id: data.id } },
+      );
     },
     onError: (err) => {
       const msg = err instanceof ApiError ? err.message : tCommon("error");

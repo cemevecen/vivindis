@@ -491,7 +491,11 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           ? tApps("fetchWaitingApprovalToast")
           : t("deepResearchToastNewImportStarted"),
       );
-      router.push(`/apps/${appId}/analysis?fetchId=${created.id}&deep=1`);
+      router.push({
+        pathname: "/apps/[id]/analysis",
+        params: { id: appId },
+        query: { fetchId: created.id, deep: "1" },
+      });
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : tCommon("error"));
@@ -760,7 +764,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     return (
       <div className="space-y-4 rounded-lg border border-border bg-card p-8">
         <p className="text-sm text-muted-foreground">{t("missingFetch")}</p>
-        <Link href={`/apps/${appId}`} className={cn(buttonVariants())}>
+        <Link href={{ pathname: "/apps/[id]", params: { id: appId } }} className={cn(buttonVariants())}>
           {t("backToApp")}
         </Link>
       </div>
@@ -785,7 +789,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
           {tCommon("retry")}
         </Button>
         <div className="mt-4">
-          <Link href={`/apps/${appId}`} className={cn(buttonVariants({ variant: "ghost" }))}>
+          <Link href={{ pathname: "/apps/[id]", params: { id: appId } }} className={cn(buttonVariants({ variant: "ghost" }))}>
             {t("backToApp")}
           </Link>
         </div>
@@ -829,7 +833,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     <div className="space-y-8">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="space-y-1">
-          <Link href={`/apps/${appId}`} className="text-sm text-muted-foreground hover:text-foreground">
+          <Link href={{ pathname: "/apps/[id]", params: { id: appId } }} className="text-sm text-muted-foreground hover:text-foreground">
             ← {t("backToApp")}
           </Link>
           <h1 className="text-2xl font-semibold tracking-tight">{t("pageTitle")}</h1>
@@ -1255,7 +1259,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             <p>{t("deepResearchSeparateImportsHint")}</p>
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <Link
-                href={`/apps/${appId}`}
+                href={{ pathname: "/apps/[id]", params: { id: appId } }}
                 className="font-medium text-primary underline-offset-4 hover:underline"
               >
                 {t("deepResearchImportHistoryCta")}

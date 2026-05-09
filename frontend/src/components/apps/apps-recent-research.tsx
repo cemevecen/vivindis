@@ -108,7 +108,11 @@ export function AppsRecentResearch({ clerkEnabled }: Props) {
         <ul className="divide-y divide-border">
         {items.map((row) => {
           const scope: ReviewScope = row.review_scope === "local" ? "local" : "global";
-          const href = `/apps/${row.app_id}/analysis?fetchId=${row.id}`;
+          const href = {
+            pathname: "/apps/[id]/analysis" as const,
+            params: { id: row.app_id },
+            query: { fetchId: row.id },
+          };
           return (
             <li key={row.id}>
               <Link

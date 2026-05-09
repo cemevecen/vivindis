@@ -117,7 +117,7 @@ function DashboardHeaderContent() {
             return (
               <Link
                 key={id}
-                href={id === "store" ? "/analyze/store" : `/analyze?mode=${id}`}
+                href={id === "store" ? "/analyze/store" : { pathname: "/analyze", query: { mode: id } }}
                 className={cn(
                   "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
                   active

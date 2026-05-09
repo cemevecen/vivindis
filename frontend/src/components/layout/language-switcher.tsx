@@ -2,9 +2,10 @@
 
 import { useLocale, useTranslations } from "next-intl";
 import { Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import type { ComponentProps } from "react";
+import { useParams, useSearchParams } from "next/navigation";
 
-import { usePathname, routing } from "@/i18n/routing";
+import { Link, usePathname, useRouter, routing } from "@/i18n/routing";
 
 const localeLabels: Record<(typeof routing.locales)[number], string> = {
   tr: "Türkçe",
@@ -26,11 +27,28 @@ type LanguageSwitcherProps = {
   selectClassName?: string;
 };
 
+function urlSearchParamsToQuery(
+  sp: URLSearchParams,
+): Record<string, string | string[]> | undefined {
+  if (sp.size === 0) {
+    return undefined;
+  }
+  const out: Record<string, string | string[]> = {};
+  for (const key of Array.from(sp.keys())) {
+    const all = sp.getAll(key);
+    out[key] = all.length === 1 ? all[0]! : all;
+  }
+  return out;
+}
+
 function LanguageSwitcherImpl({ selectClassName }: LanguageSwitcherProps) {
-  const locale = useLocale() as (typeof routing.locales)[number];
   const pathname = usePathname();
+  const params = useParams();
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const locale = useLocale();
   const tCommon = useTranslations("common");
+  const currentLocale = (params.locale as string | undefined) ?? locale;
 
   return (
     <label className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -40,17 +58,33 @@ function LanguageSwitcherImpl({ selectClassName }: LanguageSwitcherProps) {
           selectClassName ??
           "rounded-md border border-input bg-background px-2 py-1.5 text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         }
-        value={locale}
+        value={currentLocale}
         onChange={(e) => {
           const next = e.target.value as (typeof routing.locales)[number];
           if (!routing.locales.includes(next)) {
             return;
           }
-          const qs = searchParams.toString();
-          const pathSegment = !pathname || pathname === "/" ? "" : pathname;
-          const search = qs ? `?${qs}` : "";
-          /** Tam sayfa geçişi: istemci ağacı + RSC aynı locale mesajlarıyla yeniden yüklenir (soft replace bazen metinleri güncellemez). */
-          window.location.assign(`/${next}${pathSegment}${search}`);
+          const query = urlSearchParamsToQuery(searchParams);
+          const routeParams: Record<string, string> = {};
+          for (const [key, value] of Object.entries(params)) {
+            if (key === "locale" || value === undefined) {
+              continue;
+            }
+            routeParams[key] = Array.isArray(value) ? String(value[0]) : String(value);
+          }
+          type AppHref = NonNullable<ComponentProps<typeof Link>["href"]>;
+          const href = (
+            pathname.includes("[")
+              ? { pathname, params: routeParams, ...(query ? { query } : {}) }
+              : query
+                ? { pathname, query }
+                : pathname
+          ) as AppHref;
+          router.replace(
+            // next-intl `Link` href widens `UrlObject.query` vs `router.replace` input; values are built from URLSearchParams only.
+            href as Parameters<ReturnType<typeof useRouter>["replace"]>[0],
+            { locale: next },
+          );
         }}
       >
         {routing.locales.map((loc) => (
