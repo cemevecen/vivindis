@@ -2509,7 +2509,6 @@ function AnalyzeHubConnected() {
 
         {mode === "compare" ? (
           <section className="space-y-6">
-            <p className="text-sm text-muted-foreground">{t("compareHint")}</p>
             <div className="grid gap-6 lg:grid-cols-2">
               <div className="space-y-3 rounded-2xl border border-border/80 bg-muted/20 p-4 sm:p-5">
                 <Label htmlFor="compare-reg-a" className="text-foreground">
