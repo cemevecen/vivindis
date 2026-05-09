@@ -15,6 +15,7 @@ import {
   X,
 } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -107,6 +108,18 @@ function classifyMarketplaceSellerUrl(url: string): "ok" | "amazon" | "invalid" 
 }
 
 type MarketplaceSiteId = "trendyol" | "hepsiburada" | "n11";
+
+const MARKETPLACE_CHIP_SITES: MarketplaceSiteId[] = ["trendyol", "hepsiburada", "n11"];
+
+const MARKETPLACE_CHIP_LABEL: Record<MarketplaceSiteId, "marketplaceBrandTrendyol" | "marketplaceBrandHepsiburada" | "marketplaceBrandN11"> = {
+  trendyol: "marketplaceBrandTrendyol",
+  hepsiburada: "marketplaceBrandHepsiburada",
+  n11: "marketplaceBrandN11",
+};
+
+function marketplaceChipIconSrc(site: MarketplaceSiteId): string {
+  return `/marketplace/${site}-app.jpg`;
+}
 
 function marketplaceUrlMatchesSite(url: string, site: MarketplaceSiteId): boolean {
   const u = url.trim().toLowerCase();
@@ -1674,42 +1687,31 @@ function AnalyzeHubConnected() {
                 <div className="space-y-2">
                   <span className="block text-sm font-medium text-foreground">{t("marketplaceSiteLabel")}</span>
                   <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={marketplaceSite === "trendyol" ? "default" : "outline"}
-                      className={cn(
-                        "rounded-full",
-                        marketplaceSite === "trendyol" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
-                      )}
-                      onClick={() => setMarketplaceSite("trendyol")}
-                    >
-                      {t("marketplaceBrandTrendyol")}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={marketplaceSite === "hepsiburada" ? "default" : "outline"}
-                      className={cn(
-                        "rounded-full",
-                        marketplaceSite === "hepsiburada" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
-                      )}
-                      onClick={() => setMarketplaceSite("hepsiburada")}
-                    >
-                      {t("marketplaceBrandHepsiburada")}
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={marketplaceSite === "n11" ? "default" : "outline"}
-                      className={cn(
-                        "rounded-full",
-                        marketplaceSite === "n11" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
-                      )}
-                      onClick={() => setMarketplaceSite("n11")}
-                    >
-                      {t("marketplaceBrandN11")}
-                    </Button>
+                    {MARKETPLACE_CHIP_SITES.map((site) => (
+                      <Button
+                        key={site}
+                        type="button"
+                        size="sm"
+                        variant={marketplaceSite === site ? "default" : "outline"}
+                        className={cn(
+                          "rounded-full gap-2 pr-3",
+                          marketplaceSite === site ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                        )}
+                        onClick={() => setMarketplaceSite(site)}
+                      >
+                        <span className="relative size-6 shrink-0 overflow-hidden rounded-md bg-background/90 ring-1 ring-border/60 dark:bg-background/80">
+                          <Image
+                            src={marketplaceChipIconSrc(site)}
+                            alt=""
+                            width={24}
+                            height={24}
+                            className="size-full object-cover"
+                            sizes="24px"
+                          />
+                        </span>
+                        <span>{t(MARKETPLACE_CHIP_LABEL[site])}</span>
+                      </Button>
+                    ))}
                   </div>
                 </div>
                 <div className="space-y-2">
