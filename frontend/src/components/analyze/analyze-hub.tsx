@@ -148,8 +148,8 @@ function AnalyzeHubConnected() {
   const [compareHitB, setCompareHitB] = useState<StoreSearchResultItem | null>(null);
   const [comparePlatformA, setComparePlatformA] = useState<SearchPlatform>("google_play");
   const [comparePlatformB, setComparePlatformB] = useState<SearchPlatform>("google_play");
-  const [compareReviewScopeA, setCompareReviewScopeA] = useState<ReviewScope>("global");
-  const [compareReviewScopeB, setCompareReviewScopeB] = useState<ReviewScope>("global");
+  const [compareReviewScopeA, setCompareReviewScopeA] = useState<ReviewScope>("local");
+  const [compareReviewScopeB, setCompareReviewScopeB] = useState<ReviewScope>("local");
   const [compareRegistryAppA, setCompareRegistryAppA] = useState<AppDto | null>(null);
   const [compareRegistryAppB, setCompareRegistryAppB] = useState<AppDto | null>(null);
   const [compareQuickPickExpanded, setCompareQuickPickExpanded] = useState(true);

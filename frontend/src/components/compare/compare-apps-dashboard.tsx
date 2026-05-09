@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 
@@ -13,6 +13,7 @@ import { CompareSplitReviewsSection } from "@/components/compare/compare-split-r
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch } from "@/lib/api";
+import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto } from "@/types/analysis";
@@ -189,7 +190,7 @@ function CompareAppSplitPane({
           </Button>
           {fetchRow.status === "completed" ? (
             <Link
-              href={`/apps/${app.id}/analysis?fetchId=${fetchRow.id}`}
+              href={`/apps/${app.id}/analysis?fetchId=${fetchRow.id}#deep-global-scan-panel`}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
             >
               {ta("viewAnalytics")}
@@ -219,6 +220,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const tApps = useTranslations("apps");
   const ta = useTranslations("analysis");
   const tCommon = useTranslations("common");
+  const locale = useLocale();
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
   const searchParams = useSearchParams();
@@ -310,6 +312,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
 
   const bootstrapFetchMutation = useMutation({
     mutationFn: async (args: { appIds: string[]; fromDate: string; toDate: string }) => {
+      const { lang, country } = storeLocaleFromUiLocale(locale);
       await Promise.all(
         args.appIds.map((id) =>
           apiFetch<ReviewFetchDto>(`/api/v1/apps/${id}/fetch`, {
@@ -317,7 +320,9 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
             body: {
               from_date: args.fromDate,
               to_date: args.toDate,
-              review_scope: "global",
+              review_scope: "local" as const,
+              lang,
+              country,
               review_limit: 1000,
             },
             getToken,

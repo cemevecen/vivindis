@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ApiError, apiFetch } from "@/lib/api";
+import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { queryKeys } from "@/lib/query-keys";
 import { createFetchCreateSchema, type FetchCreateFormValues } from "@/schemas/fetch-create";
 import type { ReviewFetchDto } from "@/types/app";
@@ -55,10 +56,13 @@ export function StartFetchForm({ appId }: Props) {
 
   const mutation = useMutation({
     mutationFn: async (values: FetchCreateFormValues) => {
+      const { lang, country } = storeLocaleFromUiLocale(locale);
       const body = {
         from_date: values.from_date,
         to_date: values.to_date,
-        review_scope: "global" as const,
+        review_scope: "local" as const,
+        lang,
+        country,
         review_limit: 1000,
       };
       return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
