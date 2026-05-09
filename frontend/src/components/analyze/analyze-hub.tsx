@@ -1705,8 +1705,11 @@ function AnalyzeHubConnected() {
               </>
             ) : (
               <div className="min-w-0 space-y-4 rounded-2xl border border-teal-200/35 bg-teal-50/10 p-4 dark:border-teal-800/25 dark:bg-teal-950/12 sm:p-5">
-                <div className="min-w-0">
+                <div className="min-w-0 space-y-2">
                   <p className="break-words text-base font-semibold text-foreground">{t("marketplacePanelTitle")}</p>
+                  <p className="border-l-2 border-teal-500/45 pl-3 text-sm leading-relaxed text-muted-foreground dark:border-teal-400/35">
+                    {t("marketplaceIntroLead")}
+                  </p>
                 </div>
                 {!externalScraperQuery.data?.enabled && !externalScraperQuery.isPending ? (
                   <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
@@ -1758,17 +1761,11 @@ function AnalyzeHubConnected() {
                     ))}
                   </div>
                 </div>
-                <div className="space-y-2">
-                  {sessionApp ? (
-                    <p className="text-sm text-foreground">
-                      {t("marketplacePinnedAppBanner", { name: sessionApp.name })}
-                    </p>
-                  ) : (
-                    <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-sm text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
-                      {t("marketplaceNeedStorePin")}
-                    </p>
-                  )}
-                </div>
+                {sessionApp ? (
+                  <p className="text-sm text-foreground">
+                    {t("marketplacePinnedAppBanner", { name: sessionApp.name })}
+                  </p>
+                ) : null}
                 <div className="space-y-2">
                   <Label htmlFor="marketplace-seller-url" className="text-foreground">
                     {t("marketplaceUrlLabel")}
@@ -1782,7 +1779,7 @@ function AnalyzeHubConnected() {
                     className="rounded-xl border-border bg-card"
                   />
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_2fr] sm:items-end">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_1fr_1fr_2fr] sm:items-end">
                   <div className="flex flex-col gap-2">
                     <Label htmlFor="marketplace-fetch-date-preset" className="text-sm font-medium text-foreground">
                       {t("dateRangeLabel")}
@@ -1792,6 +1789,7 @@ function AnalyzeHubConnected() {
                       value={datePreset}
                       onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
                       className="h-11 rounded-xl"
+                      disabled={!sessionApp}
                     >
                       <option value="7d">{t("datePresetLast7")}</option>
                       <option value="30d">{t("datePresetLast30")}</option>
@@ -1802,6 +1800,26 @@ function AnalyzeHubConnected() {
                       <option value="5y">{t("datePresetLast5y")}</option>
                       <option value="all">{t("datePresetAll")}</option>
                     </SelectNative>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-medium text-foreground sm:whitespace-nowrap">
+                      {t("marketplaceSnapshotLabel")}
+                    </Label>
+                    <div className="flex h-11 min-w-0 items-center justify-center rounded-full border border-teal-500/30 bg-teal-500/10 px-2 sm:px-3">
+                      <span className="text-center text-[11px] font-semibold leading-tight text-teal-900 dark:text-teal-100 sm:text-xs">
+                        {t("marketplaceSnapshotValue")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label className="text-sm font-medium text-foreground sm:whitespace-nowrap">
+                      {t("marketplaceImportSizeLabel")}
+                    </Label>
+                    <div className="flex h-11 min-w-0 items-center justify-center rounded-xl border border-border bg-card/80 px-2 sm:px-3">
+                      <span className="text-center text-xs font-semibold tabular-nums text-muted-foreground">
+                        {t("marketplaceImportSizeValue")}
+                      </span>
+                    </div>
                   </div>
                   <div className="flex flex-col gap-2">
                     <div className="h-5 invisible select-none" aria-hidden>
