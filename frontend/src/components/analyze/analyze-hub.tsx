@@ -175,6 +175,8 @@ function AnalyzeHubConnected() {
   const [compareRegistryAppB, setCompareRegistryAppB] = useState<AppDto | null>(null);
   const [compareQuickPickExpanded, setCompareQuickPickExpanded] = useState(true);
   const [storeCatalogQuickPickExpanded, setStoreCatalogQuickPickExpanded] = useState(true);
+  const [compareRegPickerNonceA, setCompareRegPickerNonceA] = useState(0);
+  const [compareRegPickerNonceB, setCompareRegPickerNonceB] = useState(0);
   const [compareBusy, setCompareBusy] = useState(false);
 
   const [targetAppId, setTargetAppId] = useState<string>("");
@@ -1090,16 +1092,34 @@ function AnalyzeHubConnected() {
     if (activeQuery.length < 2) {
       return;
     }
-    if (searchQuery.isSuccess && catalogRawResults.length > 0) {
+    if (searchQuery.isSuccess) {
       setStoreCatalogQuickPickExpanded(false);
     }
-  }, [
-    storeSourceMode,
-    activeQuery,
-    searchQuery.isSuccess,
-    searchQuery.dataUpdatedAt,
-    catalogRawResults.length,
-  ]);
+  }, [storeSourceMode, activeQuery, searchQuery.isSuccess, searchQuery.dataUpdatedAt]);
+
+  useEffect(() => {
+    if (mode !== "compare") {
+      return;
+    }
+    if (activeCompareA.length < 2) {
+      return;
+    }
+    if (searchQueryA.isSuccess) {
+      setCompareRegPickerNonceA((n) => n + 1);
+    }
+  }, [mode, activeCompareA, searchQueryA.isSuccess, searchQueryA.dataUpdatedAt]);
+
+  useEffect(() => {
+    if (mode !== "compare") {
+      return;
+    }
+    if (activeCompareB.length < 2) {
+      return;
+    }
+    if (searchQueryB.isSuccess) {
+      setCompareRegPickerNonceB((n) => n + 1);
+    }
+  }, [mode, activeCompareB, searchQueryB.isSuccess, searchQueryB.dataUpdatedAt]);
 
   const appChoices = useMemo(() => {
     const raw = appsQuery.data ?? [];
@@ -1272,6 +1292,25 @@ function AnalyzeHubConnected() {
     }
     prevCanStartCompareRef.current = canStartCompare;
   }, [canStartCompare]);
+
+  useEffect(() => {
+    if (mode !== "compare") {
+      return;
+    }
+    const aDone = activeCompareA.length >= 2 && searchQueryA.isSuccess;
+    const bDone = activeCompareB.length >= 2 && searchQueryB.isSuccess;
+    if (aDone || bDone) {
+      setCompareQuickPickExpanded(false);
+    }
+  }, [
+    mode,
+    activeCompareA,
+    activeCompareB,
+    searchQueryA.isSuccess,
+    searchQueryA.dataUpdatedAt,
+    searchQueryB.isSuccess,
+    searchQueryB.dataUpdatedAt,
+  ]);
 
   const handleCompareStart = async () => {
     if (!requireSignedIn()) {
@@ -2436,6 +2475,7 @@ function AnalyzeHubConnected() {
                   placeholder={t("compareRegisteredSelectPlaceholder")}
                   clearLabel={t("compareRegisteredPickerClear")}
                   getPlatformLabel={registryPlatformLabel}
+                  collapseNonce={compareRegPickerNonceA}
                 />
                 <Label className="text-foreground">{t("compareApp1Label")}</Label>
                 <div className="space-y-2">
@@ -2644,6 +2684,7 @@ function AnalyzeHubConnected() {
                   placeholder={t("compareRegisteredSelectPlaceholder")}
                   clearLabel={t("compareRegisteredPickerClear")}
                   getPlatformLabel={registryPlatformLabel}
+                  collapseNonce={compareRegPickerNonceB}
                 />
                 <Label className="text-foreground">{t("compareApp2Label")}</Label>
                 <div className="space-y-2">

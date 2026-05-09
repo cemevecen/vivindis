@@ -66,6 +66,8 @@ type RegisteredAppGridPickerProps = {
   clearLabel: string;
   getPlatformLabel: (platform: AppPlatform) => string;
   className?: string;
+  /** Üst bileşen mağaza araması bittiğinde artırır; açık açılır liste kapanır. */
+  collapseNonce?: number;
 };
 
 export function RegisteredAppGridPicker({
@@ -78,10 +80,22 @@ export function RegisteredAppGridPicker({
   clearLabel,
   getPlatformLabel,
   className,
+  collapseNonce,
 }: RegisteredAppGridPickerProps) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const listId = useId();
+  const prevCollapseNonce = useRef(0);
+
+  useEffect(() => {
+    if (collapseNonce === undefined) {
+      return;
+    }
+    if (collapseNonce > prevCollapseNonce.current) {
+      setOpen(false);
+      prevCollapseNonce.current = collapseNonce;
+    }
+  }, [collapseNonce]);
 
   useEffect(() => {
     if (!open) {
