@@ -38,11 +38,11 @@ async def run_marketplace_review_aggregator(
     if not plats:
         raise RuntimeError("platforms boş.")
 
+    # Do not send minRating when unset: actor schema is integer 1–5; null fails validation (400).
     payload: dict[str, Any] = {
         "searchQuery": q[:500],
         "platforms": plats[:3],
         "maxReviewsPerProduct": max(5, min(200, int(max_reviews_per_product))),
-        "minRating": None,
         "sortBy": "recent",
         "proxyConfig": {
             "useApifyProxy": True,
@@ -53,7 +53,13 @@ async def run_marketplace_review_aggregator(
     timeout_seconds = max(120, int(settings.external_scraper_timeout_seconds or 180) * 2)
     async with httpx.AsyncClient(timeout=timeout_seconds) as client:
         resp = await client.post(url, json=payload)
-        resp.raise_for_status()
+        if resp.status_code >= 400:
+            detail = (resp.text or "").strip()
+            if len(detail) > 800:
+                detail = detail[:800] + "…"
+            raise RuntimeError(
+                f"Apify yorum aktörü HTTP {resp.status_code}: {detail or 'gövde yok'}"
+            )
         data = resp.json()
     if not isinstance(data, list):
         raise RuntimeError("Apify beklenmeyen yanıt döndü (liste değil).")
