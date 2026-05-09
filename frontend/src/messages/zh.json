@@ -536,7 +536,6 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/hepsepete",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/irie",
     "marketplaceUrlSiteMismatch": "链接与所选电商平台不一致。",
-    "marketplaceIntroLead": "粘贴 Trendyol、Hepsiburada 或 N11 的卖家店铺链接。Vivindis 会为已固定的应用导入一行结构化的卖家情报，并启动与商店评论拉取相同的启发式与 AI 分析任务。由你选择日期区间，用于在仪表盘和导出中标记本次导入。这是实时卖家档案快照（评分、总量、徽章等），并非逐条下载店铺里每条商品评论。",
     "marketplaceSnapshotLabel": "数据类型",
     "marketplaceSnapshotValue": "卖家档案快照",
     "marketplaceImportSizeLabel": "导入行数",

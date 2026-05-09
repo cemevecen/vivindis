@@ -60,7 +60,6 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/hepsepete",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/irie",
     "marketplaceUrlSiteMismatch": "The link does not match the selected marketplace platform.",
-    "marketplaceIntroLead": "Paste a Trendyol, Hepsiburada, or N11 seller store URL. Vivindis imports one structured seller-intelligence row for your pinned app and runs the same heuristic and AI analysis jobs as a store review pull. You choose the date window—it labels this import in dashboards and exports. This path is a live profile snapshot (ratings, totals, badges, etc.), not a line-by-line download of every product review on the storefront.",
     "marketplaceSnapshotLabel": "Input type",
     "marketplaceSnapshotValue": "Seller profile snapshot",
     "marketplaceImportSizeLabel": "Rows imported",

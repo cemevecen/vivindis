@@ -536,7 +536,6 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/hepsepete",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/irie",
     "marketplaceUrlSiteMismatch": "Ссылка не соответствует выбранной платформе маркетплейса.",
-    "marketplaceIntroLead": "Вставьте URL магазина продавца на Trendyol, Hepsiburada или N11. Vivindis импортирует одну структурированную строку данных о продавце для закреплённого приложения и запускает те же эвристические и ИИ-анализы, что и при загрузке отзывов из стора. Диапазон дат вы выбираете сами — он подписывает импорт в дашбордах и экспортах. Это живой снимок профиля (рейтинг, суммы, бейджи и т. п.), а не построчная выгрузка каждого отзыва о товаре.",
     "marketplaceSnapshotLabel": "Тип данных",
     "marketplaceSnapshotValue": "Снимок профиля продавца",
     "marketplaceImportSizeLabel": "Импортировано строк",

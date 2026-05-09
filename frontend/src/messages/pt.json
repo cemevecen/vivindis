@@ -536,7 +536,6 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/hepsepete",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/irie",
     "marketplaceUrlSiteMismatch": "O link não corresponde à plataforma do mercado online selecionada.",
-    "marketplaceIntroLead": "Cole o URL da loja do vendedor na Trendyol, Hepsiburada ou N11. A Vivindis importa uma linha agregada de inteligência do vendedor para a sua app fixada e executa as mesmas análises heurísticas e de IA que num pull de avaliações da loja. Escolhe o intervalo de datas para etiquetar a importação nos painéis e exportações. É um instantâneo vivo do perfil (classificações, totais, distintivos, etc.), não a descarga linha a linha de cada avaliação de produto.",
     "marketplaceSnapshotLabel": "Tipo de dados",
     "marketplaceSnapshotValue": "Instantâneo do perfil do vendedor",
     "marketplaceImportSizeLabel": "Linhas importadas",

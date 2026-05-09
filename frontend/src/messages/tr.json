@@ -60,7 +60,6 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/hepsepete",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/irie",
     "marketplaceUrlSiteMismatch": "Bağlantı, seçilen pazaryeri platformu ile uyuşmuyor.",
-    "marketplaceIntroLead": "Trendyol, Hepsiburada veya N11 satıcı mağaza bağlantısını girin. Vivindis, sabitlediğiniz uygulama için pazaryerinden yapılandırılmış satıcı zekâ özetini tek satır olarak içe aktarır ve mağaza yorum çekimiyle aynı heuristik ile yapay zeka analiz kuyruklarını başlatır. Tarih aralığını siz seçersiniz; bu aralık pano ve dışa aktarımlarda içe aktarma etiketi olarak kullanılır. Bu akış canlı satıcı profil özetidir (puan, toplam yorum, rozetler vb.); mağaza sayfasındaki her ürün yorumunu satır satır indirmez.",
     "marketplaceSnapshotLabel": "Veri türü",
     "marketplaceSnapshotValue": "Satıcı profili özeti",
     "marketplaceImportSizeLabel": "İçe aktarılan satır",

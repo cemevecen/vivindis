@@ -536,7 +536,6 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/hepsepete",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/irie",
     "marketplaceUrlSiteMismatch": "リンクが選択したマーケットプレイスと一致しません。",
-    "marketplaceIntroLead": "Trendyol・Hepsiburada・N11 の販売者ストア URL を貼り付けます。Vivindis はピン留めしたアプリ向けに構造化された販売者インテリジェンスを 1 行で取り込み、ストアレビュー取得と同じヒューリスティック分析と AI 分析ジョブを起動します。日付範囲はダッシュボードとエクスポートの取り込みラベルに使います。これは評価・合計・バッジなどのライブプロフィールのスナップショットであり、店頭の全商品レビューを一行ずつ取得するものではありません。",
     "marketplaceSnapshotLabel": "データ種別",
     "marketplaceSnapshotValue": "販売者プロフィールのスナップショット",
     "marketplaceImportSizeLabel": "取り込み行数",
