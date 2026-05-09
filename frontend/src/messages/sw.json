@@ -413,7 +413,14 @@
     "searchFailed": "Utafutaji wa duka umeshindwa.",
     "searchNetworkHint": "Kawaida hakuna jibu kutoka kwa API (nyuma chini, URL isiyo sahihi, HTTP/HTTPS iliyochanganywa, au kivinjari kilizuia ombi la asili tofauti). ",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL haijawekwa. ",
-    "selectAppPin": "Chagua - bandika kwenye ukurasa huu",
+    "selectAppPin": "Chagua",
+    "selectAppPinAria": "Bandika matokeo haya ya utafutaji kama programu hai kwenye ukurasa huu kwa vuta kutoka kwenye katalogi",
+    "storeResultsLayoutList": "Orodha",
+    "storeResultsLayoutGrid": "Gridi",
+    "storeResultsLayoutGroup": "Muonekano wa matokeo",
+    "storeResultsPaginationPrev": "Uliopita",
+    "storeResultsPaginationNext": "Ujao",
+    "storeResultsRange": "Mistari {from}–{to} · {loaded} imepakuliwa",
     "storeAppPinned": "Programu imebandikwa kwenye skrini hii. ",
     "pinnedCardLabel": "Programu iliyochaguliwa",
     "activeAppCardLabel": "Programu inayotumika",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "Kiungo hakilingani na jukwaa la soko lililochaguliwa.",
-    "marketplaceNeedStorePin": "Kwenye kichupo cha «Katalogi ya duka», tafuta programu tumia «Chagua — bandika kwenye ukurasa huu». Kisha rudi hapa kuendesha uvuto wa muuzaji kwa programu hiyo.",
+    "marketplaceNeedStorePin": "Kwenye kichupo cha «Katalogi ya duka», tafuta programu kisha gusa «Chagua» kwenye matokeo ya utafutaji ili kuibandika. Kisha rudi hapa kuendesha uvuto wa muuzaji.",
     "marketplacePinnedAppBanner": "Inatumia programu iliyobandika: {name}",
-    "marketplaceNeedStorePinToast": "Bandika programu kwanza kutoka kwa kichupo cha «Katalogi ya duka» («Chagua — bandika kwenye ukurasa huu»)."
+    "marketplaceNeedStorePinToast": "Bandika programu kwanza kutoka kwa kichupo cha «Katalogi ya duka» (matokeo → «Chagua»)."
   },
   "about": {
     "title": "Kuhusu Vivindis",

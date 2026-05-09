@@ -413,7 +413,14 @@
     "searchFailed": "Falha na pesquisa na loja.",
     "searchNetworkHint": "Normalmente, nenhuma resposta da API (back-end desativado, URL errado, HTTP/HTTPS misto ou navegador bloqueou uma solicitação de origem cruzada). ",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL não está definido. ",
-    "selectAppPin": "Selecione – fixe nesta página",
+    "selectAppPin": "Selecionar",
+    "selectAppPinAria": "Fixar este resultado de pesquisa como o app ativo nesta página para extrações do catálogo",
+    "storeResultsLayoutList": "Lista",
+    "storeResultsLayoutGrid": "Grelha",
+    "storeResultsLayoutGroup": "Disposição dos resultados",
+    "storeResultsPaginationPrev": "Página anterior",
+    "storeResultsPaginationNext": "Página seguinte",
+    "storeResultsRange": "Linhas {from}–{to} · {loaded} carregados",
     "storeAppPinned": "Aplicativo fixado nesta tela. ",
     "pinnedCardLabel": "Aplicativo selecionado",
     "activeAppCardLabel": "Aplicativo ativo",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "O link não corresponde à plataforma do mercado online selecionada.",
-    "marketplaceNeedStorePin": "No separador «Catálogo da loja», procure uma app e use «Selecionar — fixar nesta página». Depois volte aqui para executar a obtenção do vendedor.",
+    "marketplaceNeedStorePin": "No separador «Catálogo da loja», procure uma app e toque em «Selecionar» num resultado. Depois volte aqui para executar a obtenção do vendedor.",
     "marketplacePinnedAppBanner": "A usar app fixada: {name}",
-    "marketplaceNeedStorePinToast": "Primeiro fixe uma app no separador «Catálogo da loja» («Selecionar — fixar nesta página»)."
+    "marketplaceNeedStorePinToast": "Primeiro fixe uma app no separador «Catálogo da loja» (resultado → «Selecionar»)."
   },
   "about": {
     "title": "Sobre Vivindis",

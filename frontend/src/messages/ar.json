@@ -413,7 +413,14 @@
     "searchFailed": "فشل البحث في المتجر.",
     "searchNetworkHint": "عادةً لا توجد استجابة من واجهة برمجة التطبيقات (الواجهة الخلفية معطلة، أو عنوان URL خاطئ، أو HTTP/HTTPS مختلط، أو المتصفح يحظر طلبًا عبر الأصل). ",
     "apiUrlMissing": "لم يتم تعيين NEXT_PUBLIC_API_URL. ",
-    "selectAppPin": "اختر — قم بالتثبيت على هذه الصفحة",
+    "selectAppPin": "اختر",
+    "selectAppPinAria": "تثبيت نتيجة البحث هذه كتطبيق نشط في هذه الصفحة لسحب بيانات الكتالوج",
+    "storeResultsLayoutList": "قائمة",
+    "storeResultsLayoutGrid": "شبكة",
+    "storeResultsLayoutGroup": "تخطيط النتائج",
+    "storeResultsPaginationPrev": "الصفحة السابقة",
+    "storeResultsPaginationNext": "الصفحة التالية",
+    "storeResultsRange": "الصفوف {from}–{to} · تم التحميل {loaded}",
     "storeAppPinned": "التطبيق مثبت على هذه الشاشة ",
     "pinnedCardLabel": "التطبيق المحدد",
     "activeAppCardLabel": "التطبيق النشط",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "الرابط لا يطابق منصة السوق المختارة.",
-    "marketplaceNeedStorePin": "في تبويب «كتالوج المتجر» ابحث عن تطبيق واستخدم «تحديد — تثبيت في هذه الصفحة». ثم عد هنا لتشغيل جلب البائع.",
+    "marketplaceNeedStorePin": "في تبويب «كتالوج المتجر» ابحث عن تطبيق واضغط «اختر» على أحد نتائج البحث لتثبيته. ثم عد هنا لتشغيل جلب البائع.",
     "marketplacePinnedAppBanner": "استخدام التطبيق المثبت: {name}",
-    "marketplaceNeedStorePinToast": "ثبّت تطبيقًا أولاً من تبويب «كتالوج المتجر» («تحديد — تثبيت في هذه الصفحة»)."
+    "marketplaceNeedStorePinToast": "ثبّت تطبيقًا أولاً من تبويب «كتالوج المتجر» (نتيجة البحث → «اختر»)."
   },
   "about": {
     "title": "حول فيفينديس",

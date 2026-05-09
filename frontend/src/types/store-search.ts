@@ -13,4 +13,6 @@ export type StoreSearchResultItem = {
 
 export type StoreSearchResponse = {
   results: StoreSearchResultItem[];
+  has_more?: boolean;
+  offset?: number;
 };

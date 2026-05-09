@@ -181,8 +181,15 @@ def _itunes_row_to_item(row: dict[str, Any], country: str) -> StoreSearchResultI
     )
 
 
-async def _app_store_search_async(query: str, lang: str, country: str, num: int) -> list[StoreSearchResultItem]:
-    raw_rows = await app_store_catalog.search(query, lang, country, num=num)
+async def _app_store_search_async(
+    query: str,
+    lang: str,
+    country: str,
+    num: int,
+    *,
+    offset: int = 0,
+) -> list[StoreSearchResultItem]:
+    raw_rows = await app_store_catalog.search(query, lang, country, num=num, offset=offset)
     out: list[StoreSearchResultItem] = []
     for row in raw_rows:
         item = _itunes_row_to_item(row, country)
@@ -199,6 +206,7 @@ async def search_stores(
     lang: Annotated[str, Query(min_length=2, max_length=8)] = "tr",
     country: Annotated[str, Query(min_length=2, max_length=8)] = "tr",
     num: Annotated[int, Query(ge=1, le=50)] = 20,
+    offset: Annotated[int, Query(ge=0, le=500)] = 0,
 ) -> StoreSearchResponse:
     """Google Play, App Store veya her ikisinde uygulama arar."""
     _ = current_user
@@ -209,7 +217,11 @@ async def search_stores(
     if platform == "google_play":
         try:
             rows = await asyncio.to_thread(_google_play_search_sync, query, lang, country, num)
-            return StoreSearchResponse(results=rows)
+            return StoreSearchResponse(
+                results=rows,
+                has_more=len(rows) >= num,
+                offset=0,
+            )
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
@@ -218,8 +230,12 @@ async def search_stores(
 
     if platform == "app_store":
         try:
-            rows = await _app_store_search_async(query, lang, country, num)
-            return StoreSearchResponse(results=rows)
+            rows = await _app_store_search_async(query, lang, country, num, offset=offset)
+            return StoreSearchResponse(
+                results=rows,
+                has_more=len(rows) >= num,
+                offset=offset,
+            )
         except httpx.HTTPError as exc:
             raise HTTPException(
                 status_code=status.HTTP_502_BAD_GATEWAY,
@@ -228,9 +244,13 @@ async def search_stores(
 
     try:
         gp_task = asyncio.to_thread(_google_play_search_sync, query, lang, country, num)
-        as_task = _app_store_search_async(query, lang, country, num)
+        as_task = _app_store_search_async(query, lang, country, num, offset=0)
         gp_rows, as_rows = await asyncio.gather(gp_task, as_task)
-        return StoreSearchResponse(results=list(gp_rows) + list(as_rows))
+        return StoreSearchResponse(
+            results=list(gp_rows) + list(as_rows),
+            has_more=False,
+            offset=0,
+        )
     except httpx.HTTPError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,

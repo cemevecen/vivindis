@@ -24,3 +24,8 @@ class StoreSearchResultItem(BaseModel):
 
 class StoreSearchResponse(BaseModel):
     results: list[StoreSearchResultItem] = Field(default_factory=list)
+    has_more: bool = Field(
+        default=False,
+        description="True when the same query may return more rows (next offset / larger n_hits).",
+    )
+    offset: int = Field(default=0, ge=0, description="Echo of the requested App Store offset (0 for Play-only).")

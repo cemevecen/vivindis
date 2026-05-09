@@ -413,7 +413,14 @@
     "searchFailed": "Поиск магазина не удался.",
     "searchNetworkHint": "Обычно нет ответа от API (серверная часть отключена, неправильный URL-адрес, смешанный HTTP/HTTPS или браузер заблокировал запрос из разных источников). ",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL не установлен. ",
-    "selectAppPin": "Выбрать — закрепить на этой странице",
+    "selectAppPin": "Выбрать",
+    "selectAppPinAria": "Закрепить этот результат поиска как активное приложение на этой странице для выборки из каталога",
+    "storeResultsLayoutList": "Список",
+    "storeResultsLayoutGrid": "Сетка",
+    "storeResultsLayoutGroup": "Вид результатов",
+    "storeResultsPaginationPrev": "Предыдущая страница",
+    "storeResultsPaginationNext": "Следующая страница",
+    "storeResultsRange": "Строки {from}–{to} · загружено {loaded}",
     "storeAppPinned": "Приложение закреплено на этом экране. ",
     "pinnedCardLabel": "Выбранное приложение",
     "activeAppCardLabel": "Активное приложение",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "Ссылка не соответствует выбранной платформе маркетплейса.",
-    "marketplaceNeedStorePin": "На вкладке «Каталог стора» найдите приложение и нажмите «Выбрать — закрепить на этой странице». Затем вернитесь сюда для загрузки данных продавца.",
+    "marketplaceNeedStorePin": "На вкладке «Каталог стора» найдите приложение и нажмите «Выбрать» в результате поиска, чтобы закрепить его. Затем вернитесь сюда для загрузки данных продавца.",
     "marketplacePinnedAppBanner": "Используется закреплённое приложение: {name}",
-    "marketplaceNeedStorePinToast": "Сначала закрепите приложение на вкладке «Каталог стора» («Выбрать — закрепить на этой странице»)."
+    "marketplaceNeedStorePinToast": "Сначала закрепите приложение на вкладке «Каталог стора» (результат → «Выбрать»)."
   },
   "about": {
     "title": "О Вивиндис",

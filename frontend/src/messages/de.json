@@ -413,7 +413,14 @@
     "searchFailed": "Filialsuche fehlgeschlagen.",
     "searchNetworkHint": "In der Regel keine Antwort von der API (Backend-Down, falsche URL, gemischtes HTTP/HTTPS oder Browser blockierte eine Cross-Origin-Anfrage). Verwenden Sie Vercel BACKEND_ORIGIN mit einer leeren NEXT_PUBLIC_API_URL für den Proxy desselben Ursprungs oder fügen Sie die vollständige URL dieser Website zu CORS_ORIGINS on Railway hinzu. Bestätige, dass die neueste Eisenbahnbereitstellung in Ordnung ist. Wenn es bestehen → bleibt: DevTools-Netzwerk (fehlgeschlagene Anforderungs-URL) und Konsole (CORS-Zeile).",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL ist nicht festgelegt. Anfragen gehen an diese Website anstelle des FastAPI-Backends — legen Sie die URL in Ihrer Bereitstellung fest (z. B. Vercel env) oder fügen Sie eine Neuschreibung für /api/v1 hinzu.",
-    "selectAppPin": "Wählen Sie — auf dieser Seite anheften",
+    "selectAppPin": "Auswählen",
+    "selectAppPinAria": "Dieses Suchergebnis als aktive App auf dieser Seite für Katalogabrufe anheften",
+    "storeResultsLayoutList": "Liste",
+    "storeResultsLayoutGrid": "Raster",
+    "storeResultsLayoutGroup": "Darstellung der Suchergebnisse",
+    "storeResultsPaginationPrev": "Vorherige Seite",
+    "storeResultsPaginationNext": "Nächste Seite",
+    "storeResultsRange": "Zeilen {from}–{to} · {loaded} geladen",
     "storeAppPinned": "App auf diesem Bildschirm angeheftet. Legen Sie den Datumsbereich fest und rufen Sie unten Bewertungen ab.",
     "pinnedCardLabel": "Ausgewählte App",
     "activeAppCardLabel": "Aktive App",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "Der Link passt nicht zur gewählten Marktplatz-Plattform.",
-    "marketplaceNeedStorePin": "Wechseln Sie zur Registerkarte „Store-Katalog“, suchen Sie eine App und nutzen Sie „Auswählen — auf dieser Seite anheften“. Kehren Sie dann hierher zurück, um den Verkäuferabruf zu starten.",
+    "marketplaceNeedStorePin": "Wechseln Sie zur Registerkarte „Store-Katalog“, suchen Sie eine App und tippen Sie bei einem Suchergebnis auf „Auswählen“, um sie anzuheften. Kehren Sie dann hierher zurück, um den Verkäuferabruf zu starten.",
     "marketplacePinnedAppBanner": "Verwendete angeheftete App: {name}",
-    "marketplaceNeedStorePinToast": "Heften Sie zuerst eine App auf der Registerkarte „Store-Katalog“ an („Auswählen — auf dieser Seite anheften“)."
+    "marketplaceNeedStorePinToast": "Heften Sie zuerst eine App auf der Registerkarte „Store-Katalog“ an (Suchergebnis → „Auswählen“)."
   },
   "about": {
     "title": "Über Vivindis",

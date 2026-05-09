@@ -2,7 +2,18 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, Download, RotateCcw, Search, Upload, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Download,
+  LayoutGrid,
+  List,
+  RotateCcw,
+  Search,
+  Upload,
+  X,
+} from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -78,6 +89,9 @@ function formatDuration(totalSec: number): string {
 const TARGET_APP_UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+const STORE_CATALOG_PAGE_SIZE = 20;
+const STORE_CATALOG_LAYOUT_LS_KEY = "vivindis.storeCatalogResultsLayout";
+
 function classifyMarketplaceSellerUrl(url: string): "ok" | "amazon" | "invalid" {
   const u = url.trim().toLowerCase();
   if (u.length < 12) {
@@ -144,6 +158,8 @@ function AnalyzeHubConnected() {
   const [marketplaceSellerUrl, setMarketplaceSellerUrl] = useState("");
   const [draftQuery, setDraftQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
+  const [storeCatalogPage, setStoreCatalogPage] = useState(0);
+  const [storeCatalogLayout, setStoreCatalogLayout] = useState<"list" | "grid">("list");
 
   const [compareDraftA, setCompareDraftA] = useState("");
   const [compareDraftB, setCompareDraftB] = useState("");
@@ -203,31 +219,67 @@ function AnalyzeHubConnected() {
     return true;
   }, [isLoaded, isSignedIn, router]);
 
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(STORE_CATALOG_LAYOUT_LS_KEY);
+      if (raw === "grid" || raw === "list") {
+        setStoreCatalogLayout(raw);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const setStoreCatalogLayoutPersisted = useCallback((next: "list" | "grid") => {
+    setStoreCatalogLayout(next);
+    try {
+      localStorage.setItem(STORE_CATALOG_LAYOUT_LS_KEY, next);
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  useEffect(() => {
+    setStoreCatalogPage(0);
+  }, [activeQuery, platform]);
+
+  const catalogBackendOffset =
+    platform === "app_store" ? storeCatalogPage * STORE_CATALOG_PAGE_SIZE : 0;
+  const catalogFetchNum =
+    platform === "google_play" ? 50 : platform === "app_store" ? STORE_CATALOG_PAGE_SIZE : 20;
+
   const searchQuery = useQuery({
-    queryKey: queryKeys.store.search(activeQuery, platform, searchLang, searchCountry),
+    queryKey: queryKeys.store.search(
+      activeQuery,
+      platform,
+      searchLang,
+      searchCountry,
+      catalogBackendOffset,
+      catalogFetchNum,
+    ),
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
-        `/api/v1/store/search?q=${encodeURIComponent(activeQuery)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=20`,
+        `/api/v1/store/search?q=${encodeURIComponent(activeQuery)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=${catalogFetchNum}&offset=${catalogBackendOffset}`,
         { getToken },
       ),
     enabled: activeQuery.length >= 2 && Boolean(isSignedIn),
   });
 
   const searchQueryA = useQuery({
-    queryKey: queryKeys.store.search(`${activeCompareA}:cmpA`, comparePlatformA, searchLang, searchCountry),
+    queryKey: queryKeys.store.search(`${activeCompareA}:cmpA`, comparePlatformA, searchLang, searchCountry, 0, 12),
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
-        `/api/v1/store/search?q=${encodeURIComponent(activeCompareA)}&platform=${comparePlatformA}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
+        `/api/v1/store/search?q=${encodeURIComponent(activeCompareA)}&platform=${comparePlatformA}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12&offset=0`,
         { getToken },
       ),
     enabled: activeCompareA.length >= 2 && Boolean(isSignedIn),
   });
 
   const searchQueryB = useQuery({
-    queryKey: queryKeys.store.search(`${activeCompareB}:cmpB`, comparePlatformB, searchLang, searchCountry),
+    queryKey: queryKeys.store.search(`${activeCompareB}:cmpB`, comparePlatformB, searchLang, searchCountry, 0, 12),
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
-        `/api/v1/store/search?q=${encodeURIComponent(activeCompareB)}&platform=${comparePlatformB}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12`,
+        `/api/v1/store/search?q=${encodeURIComponent(activeCompareB)}&platform=${comparePlatformB}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12&offset=0`,
         { getToken },
       ),
     enabled: activeCompareB.length >= 2 && Boolean(isSignedIn),
@@ -997,9 +1049,39 @@ function AnalyzeHubConnected() {
     tCommon,
   ]);
 
-  const results = useMemo(() => searchQuery.data?.results ?? [], [searchQuery.data?.results]);
+  const catalogRawResults = useMemo(() => searchQuery.data?.results ?? [], [searchQuery.data?.results]);
+  const results = catalogRawResults;
+  const catalogPageSlice = useMemo(() => {
+    if (platform !== "google_play") {
+      return catalogRawResults;
+    }
+    const start = storeCatalogPage * STORE_CATALOG_PAGE_SIZE;
+    return catalogRawResults.slice(start, start + STORE_CATALOG_PAGE_SIZE);
+  }, [catalogRawResults, platform, storeCatalogPage]);
+
   const androidHits = useMemo(() => results.filter((r) => r.platform === "google_play"), [results]);
   const iosHits = useMemo(() => results.filter((r) => r.platform === "app_store"), [results]);
+
+  const catalogPaginationActivePlay =
+    platform === "google_play" &&
+    (catalogRawResults.length > STORE_CATALOG_PAGE_SIZE ||
+      (catalogRawResults.length === 50 && Boolean(searchQuery.data?.has_more)));
+  const catalogPaginationActiveAppStore =
+    platform === "app_store" && (storeCatalogPage > 0 || Boolean(searchQuery.data?.has_more));
+  const showCatalogPagination = catalogPaginationActivePlay || catalogPaginationActiveAppStore;
+
+  const catalogHasPrevPage = storeCatalogPage > 0;
+  const catalogHasNextPage =
+    platform === "google_play"
+      ? (storeCatalogPage + 1) * STORE_CATALOG_PAGE_SIZE < catalogRawResults.length
+      : Boolean(searchQuery.data?.has_more);
+
+  const catalogHeadlineCount =
+    platform === "both"
+      ? results.length
+      : platform === "google_play"
+        ? catalogRawResults.length
+        : catalogBackendOffset + catalogRawResults.length;
 
   useEffect(() => {
     if (storeSourceMode !== "catalog") {
@@ -1008,7 +1090,7 @@ function AnalyzeHubConnected() {
     if (activeQuery.length < 2) {
       return;
     }
-    if (searchQuery.isSuccess && results.length > 0) {
+    if (searchQuery.isSuccess && catalogRawResults.length > 0) {
       setStoreCatalogQuickPickExpanded(false);
     }
   }, [
@@ -1016,7 +1098,7 @@ function AnalyzeHubConnected() {
     activeQuery,
     searchQuery.isSuccess,
     searchQuery.dataUpdatedAt,
-    results.length,
+    catalogRawResults.length,
   ]);
 
   const appChoices = useMemo(() => {
@@ -1990,9 +2072,83 @@ function AnalyzeHubConnected() {
 
             {storeSourceMode === "catalog" && activeQuery.length >= 2 && !hideStoreResultGrid ? (
               <div className="space-y-3">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  {t("resultsHeading", { count: results.length })}
-                </h3>
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 space-y-1">
+                    <h3 className="text-sm font-medium text-muted-foreground">
+                      {t("resultsHeading", { count: catalogHeadlineCount })}
+                    </h3>
+                    {showCatalogPagination && platform !== "both" ? (
+                      <p className="text-xs text-muted-foreground">
+                        {t("storeResultsRange", {
+                          from: storeCatalogPage * STORE_CATALOG_PAGE_SIZE + 1,
+                          to: storeCatalogPage * STORE_CATALOG_PAGE_SIZE + catalogPageSlice.length,
+                          loaded:
+                            platform === "google_play"
+                              ? catalogRawResults.length
+                              : catalogBackendOffset + catalogRawResults.length,
+                        })}
+                      </p>
+                    ) : null}
+                  </div>
+                  {!searchQuery.isPending && !searchQuery.isError && results.length > 0 ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <div
+                        className="inline-flex rounded-lg border border-border bg-muted/40 p-0.5"
+                        role="group"
+                        aria-label={t("storeResultsLayoutGroup")}
+                      >
+                        <Button
+                          type="button"
+                          variant={storeCatalogLayout === "list" ? "secondary" : "ghost"}
+                          size="sm"
+                          className="h-8 gap-1.5 px-2.5"
+                          onClick={() => setStoreCatalogLayoutPersisted("list")}
+                          aria-pressed={storeCatalogLayout === "list"}
+                        >
+                          <List className="size-4 shrink-0" aria-hidden />
+                          <span className="text-xs font-medium">{t("storeResultsLayoutList")}</span>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant={storeCatalogLayout === "grid" ? "secondary" : "ghost"}
+                          size="sm"
+                          className="h-8 gap-1.5 px-2.5"
+                          onClick={() => setStoreCatalogLayoutPersisted("grid")}
+                          aria-pressed={storeCatalogLayout === "grid"}
+                        >
+                          <LayoutGrid className="size-4 shrink-0" aria-hidden />
+                          <span className="text-xs font-medium">{t("storeResultsLayoutGrid")}</span>
+                        </Button>
+                      </div>
+                      {platform !== "both" && showCatalogPagination ? (
+                        <div className="flex items-center gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-2"
+                            disabled={!catalogHasPrevPage || searchQuery.isPending}
+                            onClick={() => setStoreCatalogPage((p) => Math.max(0, p - 1))}
+                            aria-label={t("storeResultsPaginationPrev")}
+                          >
+                            <ChevronLeft className="size-4" aria-hidden />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 px-2"
+                            disabled={!catalogHasNextPage || searchQuery.isPending}
+                            onClick={() => setStoreCatalogPage((p) => p + 1)}
+                            aria-label={t("storeResultsPaginationNext")}
+                          >
+                            <ChevronRight className="size-4" aria-hidden />
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
                 {searchQuery.isPending ? (
                   <p className="text-sm text-muted-foreground">{tCommon("loading")}</p>
                 ) : searchQuery.isError ? (
@@ -2013,13 +2169,22 @@ function AnalyzeHubConnected() {
                     <div className="space-y-3">
                       <h4 className="text-sm font-semibold text-foreground">{t("platformAndroid")}</h4>
                       {androidHits.length ? (
-                        <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
+                        <ul
+                          className={cn(
+                            "grid gap-2",
+                            storeCatalogLayout === "grid"
+                              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+                              : "grid-cols-1 lg:grid-cols-2",
+                          )}
+                        >
                           {androidHits.map((hit) => (
                             <StoreResultCard
                               key={`gp-${hit.id}-${hit.name}`}
                               hit={hit}
+                              layout={storeCatalogLayout}
                               onPin={(h) => void pinStoreHit(h)}
                               selectLabel={t("selectAppPin")}
+                              selectAriaLabel={t("selectAppPinAria")}
                               pinDisabled={isPinningStore}
                             />
                           ))}
@@ -2031,13 +2196,22 @@ function AnalyzeHubConnected() {
                     <div className="space-y-3">
                       <h4 className="text-sm font-semibold text-foreground">{t("platformIos")}</h4>
                       {iosHits.length ? (
-                        <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
+                        <ul
+                          className={cn(
+                            "grid gap-2",
+                            storeCatalogLayout === "grid"
+                              ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+                              : "grid-cols-1 lg:grid-cols-2",
+                          )}
+                        >
                           {iosHits.map((hit) => (
                             <StoreResultCard
                               key={`ios-${hit.id}-${hit.name}`}
                               hit={hit}
+                              layout={storeCatalogLayout}
                               onPin={(h) => void pinStoreHit(h)}
                               selectLabel={t("selectAppPin")}
+                              selectAriaLabel={t("selectAppPinAria")}
                               pinDisabled={isPinningStore}
                             />
                           ))}
@@ -2048,13 +2222,22 @@ function AnalyzeHubConnected() {
                     </div>
                   </div>
                 ) : (
-                  <ul className="grid gap-3 sm:grid-cols-1 lg:grid-cols-2">
-                    {results.map((hit) => (
+                  <ul
+                    className={cn(
+                      "grid gap-2",
+                      storeCatalogLayout === "grid"
+                        ? "grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+                        : "grid-cols-1 lg:grid-cols-2",
+                    )}
+                  >
+                    {catalogPageSlice.map((hit) => (
                       <StoreResultCard
                         key={`${hit.platform}-${hit.id}-${hit.name}`}
                         hit={hit}
+                        layout={storeCatalogLayout}
                         onPin={(h) => void pinStoreHit(h)}
                         selectLabel={t("selectAppPin")}
+                        selectAriaLabel={t("selectAppPinAria")}
                         pinDisabled={isPinningStore}
                       />
                     ))}
@@ -2429,13 +2612,15 @@ function AnalyzeHubConnected() {
                       <StoreResultCard
                         key={`ca-${hit.platform}-${hit.id}`}
                         hit={hit}
+                        layout="list"
                         onPin={() => {
                           setCompareRegistryAppA(null);
                           setCompareHitA(hit);
                           setActiveCompareA("");
                           setCompareDraftA("");
                         }}
-                        selectLabel={t("comparePickSlotA")}
+                        selectLabel={t("selectApp")}
+                        selectAriaLabel={t("comparePickSlotA")}
                       />
                     ))}
                   </ul>
@@ -2635,13 +2820,15 @@ function AnalyzeHubConnected() {
                       <StoreResultCard
                         key={`cb-${hit.platform}-${hit.id}`}
                         hit={hit}
+                        layout="list"
                         onPin={() => {
                           setCompareRegistryAppB(null);
                           setCompareHitB(hit);
                           setActiveCompareB("");
                           setCompareDraftB("");
                         }}
-                        selectLabel={t("comparePickSlotB")}
+                        selectLabel={t("selectApp")}
+                        selectAriaLabel={t("comparePickSlotB")}
                       />
                     ))}
                   </ul>

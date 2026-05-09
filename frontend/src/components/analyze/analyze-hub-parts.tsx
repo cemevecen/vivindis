@@ -3,7 +3,7 @@
 import { ExternalLink, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { AppDto } from "@/types/app";
 import type { StoreSearchResultItem } from "@/types/store-search";
@@ -184,65 +184,117 @@ export function StoreResultCard({
   hit,
   onPin,
   selectLabel,
+  selectAriaLabel,
   pinDisabled,
+  layout = "list",
 }: {
   hit: StoreSearchResultItem;
   onPin: (hit: StoreSearchResultItem) => void;
   selectLabel: string;
+  /** Görünür etiket kısa olduğunda (ör. «Seç») ekran okuyucu için tam açıklama. */
+  selectAriaLabel?: string;
   pinDisabled?: boolean;
+  layout?: "list" | "grid";
 }) {
   const t = useTranslations("analyzeHub");
-  return (
-    <li className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/25">
-      <div className="flex min-w-0 gap-3 p-4">
-        {hit.icon ? (
-          // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
-          <img
-            src={hit.icon}
-            alt=""
-            width={56}
-            height={56}
-            className="size-14 shrink-0 rounded-xl border border-border bg-muted object-cover"
-          />
-        ) : (
-          <div className="size-14 shrink-0 rounded-xl border border-dashed border-border bg-muted" />
-        )}
-        <div className="min-w-0 flex-1 space-y-1">
-          <p className="truncate font-medium text-foreground">{hit.name}</p>
-          <p className="truncate text-xs text-muted-foreground">
-            {hit.platform === "google_play" ? hit.id : `id: ${hit.id}`}
+  const selectA11y = selectAriaLabel ?? selectLabel;
+
+  if (layout === "grid") {
+    return (
+      <li className="flex min-h-0 min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/25">
+        <div className="flex min-w-0 flex-1 flex-col items-center gap-1 px-2 pb-1.5 pt-2.5 text-center">
+          {hit.icon ? (
+            // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
+            <img
+              src={hit.icon}
+              alt=""
+              width={44}
+              height={44}
+              className="size-11 shrink-0 rounded-lg border border-border bg-muted object-cover"
+            />
+          ) : (
+            <div className="size-11 shrink-0 rounded-lg border border-dashed border-border bg-muted" />
+          )}
+          <p className="line-clamp-2 min-h-[2.25rem] text-[11px] font-semibold leading-tight text-foreground sm:min-h-[2.5rem] sm:text-xs">
+            {hit.name}
           </p>
-          {hit.developer ? <p className="truncate text-xs text-muted-foreground">{hit.developer}</p> : null}
           {hit.rating != null ? (
-            <p className="text-xs font-medium text-foreground">{t("ratingShort", { score: hit.rating.toFixed(1) })}</p>
-          ) : null}
-          {hit.review_count != null ? (
-            <p className="text-xs text-muted-foreground">
-              {hit.review_count.toLocaleString()} {t("reviewsCount")}
+            <p className="text-[10px] font-medium text-muted-foreground">
+              {t("ratingShort", { score: hit.rating.toFixed(1) })}
             </p>
           ) : null}
-          {hit.store_url ? (
-            <a
-              href={hit.store_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex min-w-0 max-w-full items-center gap-1 break-all text-xs text-primary underline-offset-4 hover:underline"
-            >
-              {t("openStoreLink")}
-              <ExternalLink className="size-3 shrink-0" aria-hidden />
-            </a>
-          ) : null}
         </div>
-      </div>
-      <div className="border-t border-border bg-muted/40 px-3 py-3">
         <Button
           type="button"
-          className={cn(buttonVariants(), "h-10 w-full rounded-lg")}
+          variant="secondary"
+          size="sm"
+          className="h-8 w-full shrink-0 rounded-none rounded-b-lg border-x-0 border-b-0 text-xs font-medium shadow-none"
           disabled={pinDisabled}
+          aria-label={selectA11y}
           onClick={() => onPin(hit)}
         >
           {selectLabel}
         </Button>
+      </li>
+    );
+  }
+
+  return (
+    <li className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/25">
+      <div className="flex min-w-0 flex-col gap-3 p-3 sm:flex-row sm:items-stretch sm:gap-3 sm:p-3.5">
+        <div className="flex min-w-0 gap-3 sm:flex-1">
+          {hit.icon ? (
+            // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
+            <img
+              src={hit.icon}
+              alt=""
+              width={56}
+              height={56}
+              className="size-12 shrink-0 rounded-xl border border-border bg-muted object-cover sm:size-14"
+            />
+          ) : (
+            <div className="size-12 shrink-0 rounded-xl border border-dashed border-border bg-muted sm:size-14" />
+          )}
+          <div className="min-w-0 flex-1 space-y-1">
+            <p className="line-clamp-2 font-medium leading-snug text-foreground sm:line-clamp-1 sm:truncate">{hit.name}</p>
+            <p className="truncate text-xs text-muted-foreground">
+              {hit.platform === "google_play" ? hit.id : `id: ${hit.id}`}
+            </p>
+            {hit.developer ? <p className="truncate text-xs text-muted-foreground">{hit.developer}</p> : null}
+            {hit.rating != null ? (
+              <p className="text-xs font-medium text-foreground">{t("ratingShort", { score: hit.rating.toFixed(1) })}</p>
+            ) : null}
+            {hit.review_count != null ? (
+              <p className="text-xs text-muted-foreground">
+                {hit.review_count.toLocaleString()} {t("reviewsCount")}
+              </p>
+            ) : null}
+            {hit.store_url ? (
+              <a
+                href={hit.store_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-w-0 max-w-full items-center gap-1 break-all text-xs text-primary underline-offset-4 hover:underline"
+              >
+                {t("openStoreLink")}
+                <ExternalLink className="size-3 shrink-0" aria-hidden />
+              </a>
+            ) : null}
+          </div>
+        </div>
+        <div className="flex shrink-0 sm:flex-col sm:justify-center">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            className="h-9 w-full font-medium sm:w-[min(100%,7.5rem)]"
+            disabled={pinDisabled}
+            aria-label={selectA11y}
+            onClick={() => onPin(hit)}
+          >
+            {selectLabel}
+          </Button>
+        </div>
       </div>
     </li>
   );

@@ -413,7 +413,14 @@
     "searchFailed": "La búsqueda de tienda falló.",
     "searchNetworkHint": "Por lo general, no hay respuesta de la API (backend inactivo, URL incorrecta, HTTP/HTTPS mixto o el navegador bloqueó una solicitud de origen cruzado). ",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL no está configurado. ",
-    "selectAppPin": "Seleccionar: fijar en esta página",
+    "selectAppPin": "Seleccionar",
+    "selectAppPinAria": "Fijar este resultado de búsqueda como la app activa en esta página para extracciones del catálogo",
+    "storeResultsLayoutList": "Lista",
+    "storeResultsLayoutGrid": "Cuadrícula",
+    "storeResultsLayoutGroup": "Disposición de resultados",
+    "storeResultsPaginationPrev": "Página anterior",
+    "storeResultsPaginationNext": "Página siguiente",
+    "storeResultsRange": "Filas {from}–{to} · {loaded} cargados",
     "storeAppPinned": "Aplicación fijada en esta pantalla. ",
     "pinnedCardLabel": "Aplicación seleccionada",
     "activeAppCardLabel": "Aplicación activa",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "El enlace no coincide con la plataforma del mercado seleccionada.",
-    "marketplaceNeedStorePin": "En la pestaña «Catálogo de la tienda», busque una app y use «Seleccionar — fijar en esta página». Luego vuelva aquí para ejecutar la obtención del vendedor.",
+    "marketplaceNeedStorePin": "En la pestaña «Catálogo de la tienda», busque una app y pulse «Seleccionar» en un resultado. Luego vuelva aquí para ejecutar la obtención del vendedor.",
     "marketplacePinnedAppBanner": "Usando la app fijada: {name}",
-    "marketplaceNeedStorePinToast": "Primero fije una app desde la pestaña «Catálogo de la tienda» («Seleccionar — fijar en esta página»)."
+    "marketplaceNeedStorePinToast": "Primero fije una app desde la pestaña «Catálogo de la tienda» (resultado → «Seleccionar»)."
   },
   "about": {
     "title": "Acerca de Vivindis",

@@ -413,7 +413,14 @@
     "searchFailed": "商店搜索失败。",
     "searchNetworkHint": "通常 API 没有响应（后端关闭、URL 错误、HTTP/HTTPS 混合或浏览器阻止跨源请求）。",
     "apiUrlMissing": "未设置 NEXT_PUBLIC_API_URL。",
-    "selectAppPin": "选择 — 固定在该页面上",
+    "selectAppPin": "选择",
+    "selectAppPinAria": "将此搜索结果固定为本页用于目录拉取的活动应用",
+    "storeResultsLayoutList": "列表",
+    "storeResultsLayoutGrid": "网格",
+    "storeResultsLayoutGroup": "结果布局",
+    "storeResultsPaginationPrev": "上一页",
+    "storeResultsPaginationNext": "下一页",
+    "storeResultsRange": "第 {from}–{to} 行 · 已加载 {loaded}",
     "storeAppPinned": "应用程序固定在此屏幕上。",
     "pinnedCardLabel": "选定的应用程序",
     "activeAppCardLabel": "活跃的应用程序",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "链接与所选电商平台不一致。",
-    "marketplaceNeedStorePin": "在「应用商店目录」标签页搜索应用并使用「选择 — 在本页固定」。然后返回此处执行卖家数据拉取。",
+    "marketplaceNeedStorePin": "在「应用商店目录」标签页搜索应用，并在搜索结果上点「选择」以固定。然后返回此处执行卖家数据拉取。",
     "marketplacePinnedAppBanner": "正在使用已固定的应用：{name}",
-    "marketplaceNeedStorePinToast": "请先在「应用商店目录」标签页固定应用（「选择 — 在本页固定」）。"
+    "marketplaceNeedStorePinToast": "请先在「应用商店目录」标签页从搜索结果点「选择」固定应用。"
   },
   "about": {
     "title": "关于维文迪斯",

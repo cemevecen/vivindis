@@ -413,7 +413,14 @@
     "searchFailed": "ストア検索に失敗しました。",
     "searchNetworkHint": "通常、API からの応答はありません (バックエンドがダウンしている、間違った URL、HTTP/HTTPS が混在している、またはブラウザがクロスオリジンリクエストをブロックしている)。",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL が設定されていません。",
-    "selectAppPin": "選択 — このページにピン留めする",
+    "selectAppPin": "選択",
+    "selectAppPinAria": "この検索結果をカタログ取得用のこのページでのアクティブなアプリとしてピン留めする",
+    "storeResultsLayoutList": "リスト",
+    "storeResultsLayoutGrid": "グリッド",
+    "storeResultsLayoutGroup": "結果の表示",
+    "storeResultsPaginationPrev": "前のページ",
+    "storeResultsPaginationNext": "次のページ",
+    "storeResultsRange": "{from}–{to} 行 · {loaded} 件読み込み",
     "storeAppPinned": "この画面にアプリが固定されています。",
     "pinnedCardLabel": "選択したアプリ",
     "activeAppCardLabel": "アクティブなアプリ",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "リンクが選択したマーケットプレイスと一致しません。",
-    "marketplaceNeedStorePin": "「ストアカタログ」タブでアプリを検索し、「選択 — このページにピン留め」を使ってください。その後、このタブに戻り販売者データの取得を実行します。",
+    "marketplaceNeedStorePin": "「ストアカタログ」タブでアプリを検索し、検索結果の「選択」でピン留めしてください。その後、このタブに戻り販売者データの取得を実行します。",
     "marketplacePinnedAppBanner": "ピン留めしたアプリを使用中: {name}",
-    "marketplaceNeedStorePinToast": "先にストアカタログタブでアプリをピン留めしてください（「選択 — このページにピン留め」）。"
+    "marketplaceNeedStorePinToast": "先にストアカタログタブで検索結果から「選択」でピン留めしてください。"
   },
   "about": {
     "title": "ビビンディスについて",

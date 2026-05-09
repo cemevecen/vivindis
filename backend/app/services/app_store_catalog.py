@@ -15,13 +15,23 @@ import httpx
 _ITUNES_SEARCH = "https://itunes.apple.com/search"
 
 
-async def search(q: str, lang: str, country: str, num: int = 20) -> list[dict[str, Any]]:
+async def search(
+    q: str,
+    lang: str,
+    country: str,
+    num: int = 20,
+    *,
+    offset: int = 0,
+) -> list[dict[str, Any]]:
     """iTunes Search API — ``lang`` şimdilik yanıtta yerelleştirme için saklanır (isteğe bağlı genişletme)."""
     _ = lang
+    lim = max(1, min(num, 200))
+    off = max(0, min(offset, 10_000))
     params = {
         "term": q,
         "entity": "software",
-        "limit": str(max(1, min(num, 50))),
+        "limit": str(lim),
+        "offset": str(off),
         "country": country.lower(),
     }
     async with httpx.AsyncClient(timeout=25.0) as client:

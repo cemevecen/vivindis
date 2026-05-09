@@ -413,7 +413,14 @@
     "searchFailed": "La recherche dans le magasin a échoué.",
     "searchNetworkHint": "Généralement aucune réponse de l'API (backend arrêté, URL erronée, HTTP/HTTPS mixte ou navigateur bloqué une requête d'origine croisée). ",
     "apiUrlMissing": "NEXT_PUBLIC_API_URL n'est pas défini. ",
-    "selectAppPin": "Sélectionnez — épingler sur cette page",
+    "selectAppPin": "Sélectionner",
+    "selectAppPinAria": "Épingler ce résultat de recherche comme application active sur cette page pour les extractions catalogue",
+    "storeResultsLayoutList": "Liste",
+    "storeResultsLayoutGrid": "Grille",
+    "storeResultsLayoutGroup": "Affichage des résultats",
+    "storeResultsPaginationPrev": "Page précédente",
+    "storeResultsPaginationNext": "Page suivante",
+    "storeResultsRange": "Lignes {from}–{to} · {loaded} chargés",
     "storeAppPinned": "Application épinglée sur cet écran. ",
     "pinnedCardLabel": "Application sélectionnée",
     "activeAppCardLabel": "Application active",
@@ -527,9 +534,9 @@
     "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
     "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
     "marketplaceUrlSiteMismatch": "Le lien ne correspond pas à la plateforme de vente sélectionnée.",
-    "marketplaceNeedStorePin": "Dans l’onglet « Catalogue du store », recherchez une app et utilisez « Sélectionner — épingler sur cette page ». Revenez ensuite ici pour lancer la récupération vendeur.",
+    "marketplaceNeedStorePin": "Dans l’onglet « Catalogue du store », recherchez une app et appuyez sur « Sélectionner » sur un résultat. Revenez ensuite ici pour lancer la récupération vendeur.",
     "marketplacePinnedAppBanner": "Application épinglée utilisée : {name}",
-    "marketplaceNeedStorePinToast": "Épinglez d’abord une app depuis l’onglet « Catalogue du store » (« Sélectionner — épingler sur cette page »)."
+    "marketplaceNeedStorePinToast": "Épinglez d’abord une app depuis l’onglet « Catalogue du store » (résultat → « Sélectionner »)."
   },
   "about": {
     "title": "À propos de Vivindis",
