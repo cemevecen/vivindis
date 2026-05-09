@@ -1675,17 +1675,14 @@ function AnalyzeHubConnected() {
                         className="space-y-2"
                       >
                         <p className="text-xs text-muted-foreground">{t("storeCatalogRegisteredListHint")}</p>
-                        <div className="max-h-[22rem] rounded-xl border border-border p-2 scrollbar-stable-visible">
-                          <div
-                            className="grid gap-2"
-                            style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
-                          >
+                        <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-border p-2 pb-2.5 scrollbar-stable-visible [-webkit-overflow-scrolling:touch]">
+                          <div className="flex w-max min-w-full flex-nowrap gap-2">
                             {registeredAppsDeduped.map((app) => (
                               <button
                                 key={app.id}
                                 type="button"
                                 className={cn(
-                                  "flex flex-col items-center gap-1.5 rounded-lg border p-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                                  "flex w-[5.25rem] shrink-0 flex-col items-center gap-1.5 rounded-lg border p-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
                                   sessionApp?.id === app.id
                                     ? "border-primary bg-primary/5"
                                     : "border-border/80 bg-card/40 hover:bg-muted/40",
@@ -2981,15 +2978,12 @@ function AnalyzeHubConnected() {
                     className="space-y-2"
                   >
                     <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
-                    <div className="max-h-[22rem] rounded-xl border border-border p-2 scrollbar-stable-visible">
-                      <div
-                        className="grid gap-2"
-                        style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
-                      >
+                    <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-border p-2 pb-2.5 scrollbar-stable-visible [-webkit-overflow-scrolling:touch]">
+                      <div className="flex w-max min-w-full flex-nowrap gap-2">
                         {registeredAppsDeduped.map((app) => (
                           <div
                             key={app.id}
-                            className="flex flex-col items-center gap-1.5 rounded-lg border border-border/80 bg-card/40 p-2"
+                            className="flex w-[7.5rem] shrink-0 flex-col items-center gap-1.5 rounded-lg border border-border/80 bg-card/40 p-2"
                           >
                             <div className="flex w-full flex-col items-center gap-1">
                               <RegisteredAppTileVisual app={app} platformLabel={registryPlatformLabel(app.platform)} />
