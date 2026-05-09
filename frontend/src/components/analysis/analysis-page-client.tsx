@@ -829,10 +829,13 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     aiTitle: t("ai"),
   };
 
+  const exportActionButtonClass =
+    "min-w-0 w-full justify-center whitespace-normal text-center leading-snug sm:w-auto sm:whitespace-nowrap";
+
   return (
-    <div className="space-y-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-1">
+    <div className="min-w-0 space-y-8">
+      <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+        <div className="min-w-0 space-y-1">
           <Link href={{ pathname: "/apps/[id]", params: { id: appId } }} className="text-sm text-muted-foreground hover:text-foreground">
             ← {t("backToApp")}
           </Link>
@@ -976,22 +979,23 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
         ) : null}
       </section>
 
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <Button
           type="button"
+          className="w-full shrink-0 sm:w-auto"
           disabled={fetch.status !== "completed" || busy || startMutation.isPending}
           onClick={() => startMutation.mutate()}
         >
           {startMutation.isPending ? t("runAnalysisBusy") : busy ? t("analyzing") : t("runAnalysis")}
         </Button>
         {fetch.status !== "completed" ? (
-          <span className="text-sm text-muted-foreground">{t("fetchNotCompleted")}</span>
+          <span className="min-w-0 text-sm text-muted-foreground">{t("fetchNotCompleted")}</span>
         ) : null}
       </div>
 
       <section
         className={cn(
-          "relative overflow-hidden rounded-xl border border-violet-500/35 bg-gradient-to-br from-violet-500/[0.09] via-primary/[0.05] to-amber-500/[0.07] p-3 shadow-sm ring-1 ring-violet-500/12 sm:p-3.5",
+          "relative min-w-0 overflow-hidden rounded-xl border border-violet-500/35 bg-gradient-to-br from-violet-500/[0.09] via-primary/[0.05] to-amber-500/[0.07] p-3 shadow-sm ring-1 ring-violet-500/12 sm:p-3.5",
           "dark:border-violet-400/28 dark:from-violet-500/[0.11] dark:via-primary/[0.07] dark:to-amber-500/[0.07] dark:ring-violet-400/14",
         )}
       >
@@ -1049,7 +1053,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 aria-labelledby="deep-global-scan-trigger"
                 className="space-y-2"
               >
-                <div className="space-y-2 rounded-lg border border-white/35 bg-background/55 p-2.5 dark:border-white/10 dark:bg-background/35">
+                <div className="min-w-0 space-y-2 rounded-lg border border-white/35 bg-background/55 p-2.5 dark:border-white/10 dark:bg-background/35">
                   <div className="grid gap-2 sm:grid-cols-2">
                     <div className="space-y-1 sm:col-span-2">
                       <Label className="text-xs" htmlFor="deep-date-preset">
@@ -1130,7 +1134,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                         {t("deepResearchClearLangs")}
                       </Button>
                     </div>
-                    <div className="max-h-[min(12rem,36vh)] overflow-y-auto rounded border border-border bg-card/50 p-1.5 sm:max-h-[min(13rem,38vh)]">
+                    <div className="max-h-[min(12rem,36vh)] rounded border border-border bg-card/50 p-1.5 scrollbar-stable-visible sm:max-h-[min(13rem,38vh)]">
                       <div className="grid grid-cols-2 gap-x-1.5 gap-y-0 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
                         <label className="col-span-full flex cursor-pointer items-center gap-1.5 border-b border-border/50 pb-1 text-xs font-medium hover:bg-muted/40">
                           <input
@@ -1278,15 +1282,16 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       {((heuristic?.status === "completed" && heuristic.result) ||
         (ai?.status === "completed" && ai.result)) &&
       fetchId ? (
-        <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
+        <section className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
           <h2 className="mb-3 text-sm font-semibold">{t("exportHeading")}</h2>
-          <div className="flex flex-wrap gap-2">
+          <div className="grid min-w-0 grid-cols-1 gap-2 sm:grid-cols-2">
             {heuristic?.status === "completed" && heuristic.result ? (
               <>
                 <Button
                   type="button"
                   variant="outline"
                   size="sm"
+                  className={exportActionButtonClass}
                   onClick={() => downloadAnalysisJson(fetchId, "heuristic", heuristic)}
                 >
                   {t("exportJsonHeuristic")}
@@ -1295,6 +1300,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                   type="button"
                   variant="outline"
                   size="sm"
+                  className={exportActionButtonClass}
                   onClick={() => downloadAnalysisCsvExport(fetchId, "heuristic", heuristic)}
                 >
                   {t("exportCsvHeuristic")}
@@ -1307,6 +1313,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                   type="button"
                   variant="outline"
                   size="sm"
+                  className={exportActionButtonClass}
                   onClick={() => downloadAnalysisJson(fetchId, "ai", ai)}
                 >
                   {t("exportJsonAi")}
@@ -1315,6 +1322,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                   type="button"
                   variant="outline"
                   size="sm"
+                  className={exportActionButtonClass}
                   onClick={() => downloadAnalysisCsvExport(fetchId, "ai", ai)}
                 >
                   {t("exportCsvAi")}
@@ -1477,9 +1485,9 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       ) : null}
 
       {fetch.status === "completed" ? (
-        <section className="rounded-lg border border-border bg-card p-4 shadow-sm">
-          <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
-            <div>
+        <section className="min-w-0 rounded-lg border border-border bg-card p-4 shadow-sm">
+          <div className="mb-3 flex min-w-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+            <div className="min-w-0">
               <h2 className="text-sm font-semibold">{t("analyzedReviewsHeading")}</h2>
               <p className="text-xs text-muted-foreground">
                 {t("reviewsLoadedMeta", {
@@ -1489,11 +1497,11 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 })}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex min-w-0 w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
               <select
                 value={reviewFilter}
                 onChange={(e) => setReviewFilter(e.target.value as typeof reviewFilter)}
-                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                className="min-w-0 w-full rounded-md border border-border bg-background px-2 py-1 text-xs sm:w-auto sm:min-w-[8.5rem]"
                 aria-label={t("reviewsFilterAria")}
               >
                 <option value="all">{t("filterAll")}</option>
@@ -1504,7 +1512,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               <select
                 value={reviewSort}
                 onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
-                className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                className="min-w-0 w-full rounded-md border border-border bg-background px-2 py-1 text-xs sm:w-auto sm:min-w-[8.5rem]"
                 aria-label={t("reviewsSortAria")}
               >
                 <option value="newest">{t("sortNewest")}</option>
