@@ -987,43 +987,36 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
       <section
         className={cn(
-          "relative overflow-hidden rounded-2xl border-2 border-violet-500/40 bg-gradient-to-br from-violet-500/[0.14] via-primary/[0.09] to-amber-500/[0.12] p-5 shadow-md ring-1 ring-violet-500/15",
-          "dark:border-violet-400/35 dark:from-violet-500/[0.18] dark:via-primary/[0.12] dark:to-amber-500/[0.1] dark:ring-violet-400/20",
+          "relative overflow-hidden rounded-xl border border-violet-500/35 bg-gradient-to-br from-violet-500/[0.09] via-primary/[0.05] to-amber-500/[0.07] p-3 shadow-sm ring-1 ring-violet-500/12 sm:p-3.5",
+          "dark:border-violet-400/28 dark:from-violet-500/[0.11] dark:via-primary/[0.07] dark:to-amber-500/[0.07] dark:ring-violet-400/14",
         )}
       >
         <div
-          className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-violet-500/20 blur-2xl dark:bg-violet-400/15"
+          className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-violet-500/12 blur-xl dark:bg-violet-400/10"
           aria-hidden
         />
-        <div className="relative flex flex-col gap-4 sm:flex-row sm:items-start">
+        <div className="relative flex gap-2.5 sm:items-start">
           <div
-            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-600 to-primary text-white shadow-lg dark:from-violet-500 dark:to-primary"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-primary text-white shadow-sm dark:from-violet-500 dark:to-primary"
             aria-hidden
           >
-            <Globe className="h-6 w-6" strokeWidth={2} />
+            <Globe className="h-4 w-4" strokeWidth={2} />
           </div>
-          <div className="min-w-0 flex-1 space-y-3">
-            <div className="min-w-0 space-y-1">
-              {!deepParam ? (
-                <>
-                  <p className="text-base font-semibold tracking-tight text-foreground">{t("localResultNotice")}</p>
-                  <p className="text-sm font-medium text-foreground/95">{t("globalUpsellHint")}</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-base font-semibold tracking-tight text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
-                  <p className="text-sm text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
-                </>
-              )}
-            </div>
+          <div className="min-w-0 flex-1 space-y-2">
+            {deepParam ? (
+              <div className="min-w-0 space-y-0.5">
+                <p className="text-sm font-semibold leading-snug text-foreground">{t("deepResearchGlobalResultsTitle")}</p>
+                <p className="text-[11px] leading-snug text-muted-foreground">{t("deepResearchRunAnotherHint")}</p>
+              </div>
+            ) : null}
 
             <button
               type="button"
               id="deep-global-scan-trigger"
               className={cn(
-                "flex w-full items-center justify-between gap-3 rounded-lg px-1 py-2 text-left",
+                "flex w-full items-center justify-between gap-2 rounded-md px-0.5 py-1 text-left",
                 "text-sm font-semibold text-foreground outline-none transition-colors",
-                "hover:bg-background/50 focus-visible:ring-2 focus-visible:ring-ring",
+                "hover:bg-background/40 focus-visible:ring-2 focus-visible:ring-ring",
               )}
               aria-expanded={deepSettingsOpen}
               aria-controls="deep-global-scan-panel"
@@ -1034,7 +1027,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               <span className="min-w-0">{t("deepResearchPrepTitle")}</span>
               <ChevronDown
                 className={cn(
-                  "size-5 shrink-0 text-muted-foreground transition-transform duration-200",
+                  "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
                   deepSettingsOpen && "rotate-180",
                 )}
                 aria-hidden
@@ -1042,7 +1035,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             </button>
 
             {deepFetchBusy && !deepSettingsOpen ? (
-              <p className="text-xs text-muted-foreground">{t("deepResearchSettingsRunningCollapsedHint")}</p>
+              <p className="text-[11px] text-muted-foreground">{t("deepResearchSettingsRunningCollapsedHint")}</p>
             ) : null}
 
             {deepSettingsOpen ? (
@@ -1050,128 +1043,133 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 id="deep-global-scan-panel"
                 role="region"
                 aria-labelledby="deep-global-scan-trigger"
-                className="space-y-3"
+                className="space-y-2"
               >
-                <p className="text-xs leading-relaxed text-muted-foreground">{t("globalTop30Hint")}</p>
-
-                <div className="space-y-4 rounded-xl border border-white/40 bg-background/60 p-4 dark:border-white/10 dark:bg-background/40">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div className="space-y-1.5 sm:col-span-2">
-                  <Label htmlFor="deep-date-preset">{tAnalyzeHub("dateRangeLabel")}</Label>
-                  <SelectNative
-                    id="deep-date-preset"
-                    value={deepDatePreset}
-                    onChange={(e) => {
-                      const v = e.target.value as DeepResearchDatePreset;
-                      setDeepDatePreset(v);
-                      if (v === "custom") {
-                        return;
-                      }
-                      const r = rangeFromPreset(v);
-                      setDeepFrom(r.from);
-                      setDeepTo(r.to);
-                    }}
-                    className="h-11 w-full rounded-xl"
-                  >
-                    <option value="7d">{tAnalyzeHub("datePresetLast7")}</option>
-                    <option value="30d">{tAnalyzeHub("datePresetLast30")}</option>
-                    <option value="90d">{tAnalyzeHub("datePresetLast90")}</option>
-                    <option value="180d">{tAnalyzeHub("datePresetLast180")}</option>
-                    <option value="365d">{tAnalyzeHub("datePresetLast365")}</option>
-                    <option value="2y">{tAnalyzeHub("datePresetLast2y")}</option>
-                    <option value="5y">{tAnalyzeHub("datePresetLast5y")}</option>
-                    <option value="all">{tAnalyzeHub("datePresetAll")}</option>
-                    <option value="custom">{t("deepResearchDatePresetCustom")}</option>
-                  </SelectNative>
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="deep-from">{t("deepResearchDateFromLabel")}</Label>
-                  <Input
-                    id="deep-from"
-                    type="date"
-                    value={deepFrom}
-                    max={deepTo || undefined}
-                    onChange={(e) => {
-                      setDeepDatePreset("custom");
-                      setDeepFrom(e.target.value);
-                    }}
-                  />
-                </div>
-                <div className="space-y-1.5">
-                  <Label htmlFor="deep-to">{t("deepResearchDateToLabel")}</Label>
-                  <Input
-                    id="deep-to"
-                    type="date"
-                    value={deepTo}
-                    min={deepFrom || undefined}
-                    onChange={(e) => {
-                      setDeepDatePreset("custom");
-                      setDeepTo(e.target.value);
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>{t("globalLangsLabel")}</Label>
-                <p className="text-xs text-muted-foreground">{t("globalLangsHint")}</p>
-                <p className="text-xs text-amber-800 dark:text-amber-200">{t("deepResearchLangCapHint")}</p>
-                <p className="text-xs text-muted-foreground">{t("deepResearchWiderHint")}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button type="button" variant="outline" size="sm" onClick={selectFirst24DeepLangs}>
-                    {t("deepResearchSelectAll24")}
-                  </Button>
-                  <Button type="button" variant="outline" size="sm" onClick={clearDeepLangs}>
-                    {t("deepResearchClearLangs")}
-                  </Button>
-                  <span className="text-xs text-muted-foreground">
-                    {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
-                  </span>
-                </div>
-                <div className="max-h-[min(22rem,50vh)] overflow-y-auto rounded-md border border-border bg-card/50 p-2">
-                  <div className="grid grid-cols-2 gap-x-2 gap-y-1 sm:grid-cols-3 md:grid-cols-4">
-                    <label className="col-span-full mb-1 flex cursor-pointer items-center gap-2 border-b border-border/60 pb-2 text-sm font-medium hover:bg-muted/40">
-                      <input
-                        ref={deepLangSelectAllRef}
-                        type="checkbox"
-                        className="size-4 rounded border-border"
-                        checked={allGlobalLangsSelected}
-                        onChange={() => {
-                          if (isDeepLangsFirst24Preset) {
-                            clearDeepLangs();
-                          } else {
-                            selectFirst24DeepLangs();
+                <div className="space-y-2 rounded-lg border border-white/35 bg-background/55 p-2.5 dark:border-white/10 dark:bg-background/35">
+                  <div className="grid gap-2 sm:grid-cols-2">
+                    <div className="space-y-1 sm:col-span-2">
+                      <Label className="text-xs" htmlFor="deep-date-preset">
+                        {tAnalyzeHub("dateRangeLabel")}
+                      </Label>
+                      <SelectNative
+                        id="deep-date-preset"
+                        value={deepDatePreset}
+                        onChange={(e) => {
+                          const v = e.target.value as DeepResearchDatePreset;
+                          setDeepDatePreset(v);
+                          if (v === "custom") {
+                            return;
                           }
+                          const r = rangeFromPreset(v);
+                          setDeepFrom(r.from);
+                          setDeepTo(r.to);
                         }}
-                      />
-                      <span>{t("deepResearchLangCheckboxAll")}</span>
-                    </label>
-                    {langOptions.map(({ code, label }) => (
-                      <label
-                        key={code}
-                        className="flex min-w-0 cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs hover:bg-muted/60 sm:text-sm"
+                        className="h-9 w-full rounded-lg text-sm"
                       >
-                        <input
-                          type="checkbox"
-                          className="size-4 shrink-0 rounded border-border"
-                          checked={deepLangs.has(code)}
-                          onChange={() => {
-                            toggleDeepLang(code);
-                          }}
-                        />
-                        <span className="min-w-0 truncate" title={`${label} (${code})`}>
-                          {label} <span className="text-muted-foreground">({code})</span>
-                        </span>
-                      </label>
-                    ))}
+                        <option value="7d">{tAnalyzeHub("datePresetLast7")}</option>
+                        <option value="30d">{tAnalyzeHub("datePresetLast30")}</option>
+                        <option value="90d">{tAnalyzeHub("datePresetLast90")}</option>
+                        <option value="180d">{tAnalyzeHub("datePresetLast180")}</option>
+                        <option value="365d">{tAnalyzeHub("datePresetLast365")}</option>
+                        <option value="2y">{tAnalyzeHub("datePresetLast2y")}</option>
+                        <option value="5y">{tAnalyzeHub("datePresetLast5y")}</option>
+                        <option value="all">{tAnalyzeHub("datePresetAll")}</option>
+                        <option value="custom">{t("deepResearchDatePresetCustom")}</option>
+                      </SelectNative>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs" htmlFor="deep-from">
+                        {t("deepResearchDateFromLabel")}
+                      </Label>
+                      <Input
+                        id="deep-from"
+                        type="date"
+                        value={deepFrom}
+                        max={deepTo || undefined}
+                        onChange={(e) => {
+                          setDeepDatePreset("custom");
+                          setDeepFrom(e.target.value);
+                        }}
+                        className="h-9"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs" htmlFor="deep-to">
+                        {t("deepResearchDateToLabel")}
+                      </Label>
+                      <Input
+                        id="deep-to"
+                        type="date"
+                        value={deepTo}
+                        min={deepFrom || undefined}
+                        onChange={(e) => {
+                          setDeepDatePreset("custom");
+                          setDeepTo(e.target.value);
+                        }}
+                        className="h-9"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5 border-t border-border/50 pt-2">
+                    <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                      <Label className="text-xs">{t("globalLangsLabel")}</Label>
+                      <span className="text-[11px] text-muted-foreground">
+                        {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
+                      </span>
+                    </div>
+                    <p className="text-[11px] leading-snug text-amber-800 dark:text-amber-200">{t("deepResearchLangCapHint")}</p>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={selectFirst24DeepLangs}>
+                        {t("deepResearchSelectAll24")}
+                      </Button>
+                      <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={clearDeepLangs}>
+                        {t("deepResearchClearLangs")}
+                      </Button>
+                    </div>
+                    <div className="max-h-[min(12rem,36vh)] overflow-y-auto rounded border border-border bg-card/50 p-1.5 sm:max-h-[min(13rem,38vh)]">
+                      <div className="grid grid-cols-2 gap-x-1.5 gap-y-0 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                        <label className="col-span-full flex cursor-pointer items-center gap-1.5 border-b border-border/50 pb-1 text-xs font-medium hover:bg-muted/40">
+                          <input
+                            ref={deepLangSelectAllRef}
+                            type="checkbox"
+                            className="size-3.5 shrink-0 rounded border-border"
+                            checked={allGlobalLangsSelected}
+                            onChange={() => {
+                              if (isDeepLangsFirst24Preset) {
+                                clearDeepLangs();
+                              } else {
+                                selectFirst24DeepLangs();
+                              }
+                            }}
+                          />
+                          <span className="leading-tight">{t("deepResearchLangCheckboxAll")}</span>
+                        </label>
+                        {langOptions.map(({ code, label }) => (
+                          <label
+                            key={code}
+                            className="flex min-w-0 cursor-pointer items-center gap-1 rounded px-0.5 py-0 text-[11px] hover:bg-muted/50 sm:text-xs"
+                          >
+                            <input
+                              type="checkbox"
+                              className="size-3.5 shrink-0 rounded border-border"
+                              checked={deepLangs.has(code)}
+                              onChange={() => {
+                                toggleDeepLang(code);
+                              }}
+                            />
+                            <span className="min-w-0 truncate" title={`${label} (${code})`}>
+                              {label} <span className="text-muted-foreground">({code})</span>
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
                 <Button
                   type="button"
-                  size="lg"
-                  className="w-full rounded-xl font-semibold shadow-sm sm:w-auto"
+                  className="h-9 w-full rounded-lg text-sm font-semibold shadow-sm sm:w-auto"
                   onClick={() => {
                     runDeepResearch();
                   }}
@@ -1253,7 +1251,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
               />
             </div>
           </div>
-          <div className="mt-4 space-y-3 rounded-lg border border-border/80 bg-muted/15 p-3 text-xs leading-relaxed text-muted-foreground">
+          <div className="mt-3 space-y-1.5 rounded-lg border border-border/80 bg-muted/15 p-2 text-[11px] leading-snug text-muted-foreground">
             <p>{t("deepResearchSeparateImportsHint")}</p>
             <p className="flex flex-wrap items-center gap-x-2 gap-y-1">
               <Link
@@ -1265,7 +1263,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
             </p>
             {(appQuery.data?.platform === "app_store" || appQuery.data?.platform === "both") &&
             fetch.status === "completed" ? (
-              <p className="border-t border-border/60 pt-3 text-amber-900/90 dark:text-amber-100/90">
+              <p className="border-t border-border/60 pt-1.5 text-amber-900/90 dark:text-amber-100/90">
                 {t("deepResearchAppStoreFeedHint")}
               </p>
             ) : null}
