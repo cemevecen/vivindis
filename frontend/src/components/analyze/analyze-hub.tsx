@@ -996,6 +996,24 @@ function AnalyzeHubConnected() {
   const androidHits = useMemo(() => results.filter((r) => r.platform === "google_play"), [results]);
   const iosHits = useMemo(() => results.filter((r) => r.platform === "app_store"), [results]);
 
+  useEffect(() => {
+    if (storeSourceMode !== "catalog") {
+      return;
+    }
+    if (activeQuery.length < 2) {
+      return;
+    }
+    if (searchQuery.isSuccess && results.length > 0) {
+      setStoreCatalogQuickPickExpanded(false);
+    }
+  }, [
+    storeSourceMode,
+    activeQuery,
+    searchQuery.isSuccess,
+    searchQuery.dataUpdatedAt,
+    results.length,
+  ]);
+
   const appChoices = useMemo(() => {
     const raw = appsQuery.data ?? [];
     const merged =
