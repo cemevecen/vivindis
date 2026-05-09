@@ -293,6 +293,12 @@ async def create_google_maps_fetch(
     session: Annotated[AsyncSession, Depends(get_async_session)],
     background_tasks: BackgroundTasks,
 ) -> ReviewFetch:
+    settings = get_settings()
+    if not settings.external_scraper_apify_token.strip():
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Google Maps connector yapılandırılmamış (EXTERNAL_SCRAPER_APIFY_TOKEN).",
+        )
     fetch = ReviewFetch(
         app_id=app.id,
         status=FetchStatus.PENDING,

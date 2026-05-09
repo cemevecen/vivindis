@@ -906,11 +906,16 @@ async def _execute_google_maps_fetch(
         )
         for item in rows:
             rating_raw = item.get("rating")
-            body = str(item.get("original_review") or item.get("english_review") or "").strip()
+            body = str(
+                item.get("original_review")
+                or item.get("translated_review")
+                or item.get("english_review")
+                or ""
+            ).strip()
             if body == "":
                 continue
             try:
-                rating = int(rating_raw)
+                rating = int(float(rating_raw))
             except Exception:
                 rating = 3
             review_date = _parse_google_maps_review_date(item.get("timestamp"), fetch.to_date)
@@ -948,7 +953,7 @@ async def _execute_google_maps_fetch(
     except Exception:
         fetch.status = FetchStatus.FAILED
         fetch.completed_at = datetime.now(UTC)
-        fetch.error_message = "Google Maps external scraper başarısız oldu."
+        fetch.error_message = "Google Maps external scraper başarısız oldu. Lütfen actor ve token ayarlarını kontrol edin."
         await session.flush()
         log.exception("google_maps_fetch_failed", fetch_id=str(fetch_id))
         raise
