@@ -9,7 +9,12 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { AnimatedPoolCount } from "@/components/analyze/animated-pool-count";
-import { PinnedStoreAppCard, SegmentedTwo, StoreResultCard } from "@/components/analyze/analyze-hub-parts";
+import {
+  DualPillSwitch,
+  PinnedStoreAppCard,
+  SegmentedTwo,
+  StoreResultCard,
+} from "@/components/analyze/analyze-hub-parts";
 import { RegisteredAppGridPicker, RegisteredAppTileVisual } from "@/components/analyze/registered-app-grid-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -1370,11 +1375,12 @@ function AnalyzeHubConnected() {
             </h2>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm font-medium text-foreground">{t("storeSourceLabel")}</span>
-              <SegmentedTwo
+              <DualPillSwitch
                 ariaLabel={t("storeSourceAria")}
                 left={t("storeSourceCatalog")}
                 right={t("storeSourceMarketplace")}
                 value={storeSourceMode === "catalog" ? "left" : "right"}
+                className="sm:shrink-0"
                 onChange={(v) => {
                   router.replace(v === "left" ? "/analyze/store" : "/analyze/marketplace");
                 }}

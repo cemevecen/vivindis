@@ -8,6 +8,59 @@ import { cn } from "@/lib/utils";
 import type { AppDto } from "@/types/app";
 import type { StoreSearchResultItem } from "@/types/store-search";
 
+/** Mağaza kataloğu ↔ pazaryeri gibi iki seçenekli, yumuşak renkli ikili pill geçişi. */
+export function DualPillSwitch({
+  ariaLabel,
+  left,
+  right,
+  value,
+  onChange,
+  className,
+}: {
+  ariaLabel: string;
+  left: string;
+  right: string;
+  value: "left" | "right";
+  onChange: (v: "left" | "right") => void;
+  className?: string;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={ariaLabel}
+      className={cn(
+        "inline-flex w-full max-w-full gap-1 rounded-full border border-border/60 bg-muted/35 p-1 shadow-inner sm:max-w-[min(24rem,100%)]",
+        className,
+      )}
+    >
+      <button
+        type="button"
+        onClick={() => onChange("left")}
+        className={cn(
+          "min-h-[2.75rem] min-w-0 flex-1 rounded-full px-3 py-2 text-center text-sm font-semibold leading-snug outline-none transition-[color,background-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          value === "left"
+            ? "bg-sky-100/90 text-sky-950 shadow-sm ring-1 ring-sky-200/60 dark:bg-sky-950/50 dark:text-sky-50 dark:ring-sky-800/40"
+            : "text-muted-foreground hover:bg-background/55 active:scale-[0.99] dark:hover:bg-background/10",
+        )}
+      >
+        {left}
+      </button>
+      <button
+        type="button"
+        onClick={() => onChange("right")}
+        className={cn(
+          "min-h-[2.75rem] min-w-0 flex-1 rounded-full px-3 py-2 text-center text-sm font-semibold leading-snug outline-none transition-[color,background-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          value === "right"
+            ? "bg-violet-100/90 text-violet-950 shadow-sm ring-1 ring-violet-200/60 dark:bg-violet-950/50 dark:text-violet-50 dark:ring-violet-800/40"
+            : "text-muted-foreground hover:bg-background/55 active:scale-[0.99] dark:hover:bg-background/10",
+        )}
+      >
+        {right}
+      </button>
+    </div>
+  );
+}
+
 export function SegmentedTwo({
   ariaLabel,
   left,
