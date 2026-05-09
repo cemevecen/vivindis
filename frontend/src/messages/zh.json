@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "导入行数",
     "marketplaceImportSizeValue": "1（聚合）",
     "marketplacePinnedAppBanner": "正在使用已固定的应用：{name}",
-    "marketplaceNeedStorePinToast": "请先在「应用商店目录」标签页从搜索结果点「选择」固定应用。"
+    "marketplaceNeedStorePinToast": "请选择目标应用：在此点击已保存的应用，或在「应用商店目录」标签页从搜索结果点「选择」固定应用。",
+    "marketplaceRegisteredListTitle": "已保存的应用程序 - 快速选择",
+    "marketplaceRegisteredListHint": "点击应用以将此次市场抓取关联到该应用（与在商店标签页固定相同）。",
+    "marketplaceRegisteredQuickPickExpand": "显示市场用的已保存应用快速选择",
+    "marketplaceRegisteredQuickPickCollapse": "隐藏市场用的已保存应用快速选择"
   },
   "about": {
     "title": "关于维文迪斯",

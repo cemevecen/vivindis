@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "Mistari iliyoingizwa",
     "marketplaceImportSizeValue": "1 (iliyounganishwa)",
     "marketplacePinnedAppBanner": "Inatumia programu iliyobandika: {name}",
-    "marketplaceNeedStorePinToast": "Bandika programu kwanza kutoka kwa kichupo cha «Katalogi ya duka» (matokeo → «Chagua»)."
+    "marketplaceNeedStorePinToast": "Chagua programu lengwa: gusa programu iliyohifadhiwa hapa au bandika kutoka kwa kichupo cha «Katalogi ya duka» (Chagua kwenye matokeo).",
+    "marketplaceRegisteredListTitle": "Programu zilizohifadhiwa - chagua haraka",
+    "marketplaceRegisteredListHint": "Gusa programu ili kuunganisha upakiaji huu wa soko (kama vile kubandika kutoka kichupo cha Duka).",
+    "marketplaceRegisteredQuickPickExpand": "Onyesha uchaguzi wa haraka wa programu zilizohifadhiwa kwa soko",
+    "marketplaceRegisteredQuickPickCollapse": "Ficha uchaguzi wa haraka wa programu zilizohifadhiwa kwa soko"
   },
   "about": {
     "title": "Kuhusu Vivindis",

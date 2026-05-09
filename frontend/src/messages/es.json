@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "Filas importadas",
     "marketplaceImportSizeValue": "1 (agregada)",
     "marketplacePinnedAppBanner": "Usando la app fijada: {name}",
-    "marketplaceNeedStorePinToast": "Primero fije una app desde la pestaña «Catálogo de la tienda» (resultado → «Seleccionar»)."
+    "marketplaceNeedStorePinToast": "Elija una app de destino: toque una app guardada aquí o fije una desde la pestaña «Catálogo de la tienda» (Seleccionar en un resultado).",
+    "marketplaceRegisteredListTitle": "Aplicaciones guardadas: selección rápida",
+    "marketplaceRegisteredListHint": "Toque una aplicación para vincular esta descarga del marketplace (igual que fijar desde la pestaña Tienda).",
+    "marketplaceRegisteredQuickPickExpand": "Mostrar selección rápida de apps guardadas para el marketplace",
+    "marketplaceRegisteredQuickPickCollapse": "Ocultar selección rápida de apps guardadas para el marketplace"
   },
   "about": {
     "title": "Acerca de Vivindis",

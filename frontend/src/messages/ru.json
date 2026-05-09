@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "Импортировано строк",
     "marketplaceImportSizeValue": "1 (агрегат)",
     "marketplacePinnedAppBanner": "Используется закреплённое приложение: {name}",
-    "marketplaceNeedStorePinToast": "Сначала закрепите приложение на вкладке «Каталог стора» (результат → «Выбрать»)."
+    "marketplaceNeedStorePinToast": "Выберите целевое приложение: нажмите сохранённое приложение здесь или закрепите его во вкладке «Каталог стора» (Выбрать в результате поиска).",
+    "marketplaceRegisteredListTitle": "Сохраненные приложения — быстрый выбор",
+    "marketplaceRegisteredListHint": "Нажмите приложение, чтобы привязать к нему эту выгрузку маркетплейса (как закрепление во вкладке Store).",
+    "marketplaceRegisteredQuickPickExpand": "Показать быстрый выбор сохранённых приложений для маркетплейса",
+    "marketplaceRegisteredQuickPickCollapse": "Скрыть быстрый выбор сохранённых приложений для маркетплейса"
   },
   "about": {
     "title": "О Вивиндис",

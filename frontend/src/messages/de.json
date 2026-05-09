@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "Importierte Zeilen",
     "marketplaceImportSizeValue": "1 (aggregiert)",
     "marketplacePinnedAppBanner": "Verwendete angeheftete App: {name}",
-    "marketplaceNeedStorePinToast": "Heften Sie zuerst eine App auf der Registerkarte „Store-Katalog“ an (Suchergebnis → „Auswählen“)."
+    "marketplaceNeedStorePinToast": "Wählen Sie eine Ziel-App: tippen Sie hier auf eine gespeicherte App oder heften Sie eine im Store-Katalog an (Auswählen im Suchergebnis).",
+    "marketplaceRegisteredListTitle": "Gespeicherte Apps — schnelle Auswahl",
+    "marketplaceRegisteredListHint": "Tippen Sie auf eine App, um diesen Marktplatz-Abruf damit zu verknüpfen (wie beim Anheften im Store-Tab).",
+    "marketplaceRegisteredQuickPickExpand": "Schnellauswahl gespeicherter Apps für den Marktplatz einblenden",
+    "marketplaceRegisteredQuickPickCollapse": "Schnellauswahl gespeicherter Apps für den Marktplatz ausblenden"
   },
   "about": {
     "title": "Über Vivindis",

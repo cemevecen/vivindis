@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "取り込み行数",
     "marketplaceImportSizeValue": "1（集約）",
     "marketplacePinnedAppBanner": "ピン留めしたアプリを使用中: {name}",
-    "marketplaceNeedStorePinToast": "先にストアカタログタブで検索結果から「選択」でピン留めしてください。"
+    "marketplaceNeedStorePinToast": "対象アプリを選んでください。このタブで保存済みアプリをタップするか、ストアカタログタブで検索結果から「選択」してピン留めしてください。",
+    "marketplaceRegisteredListTitle": "保存されたアプリ — クイックピック",
+    "marketplaceRegisteredListHint": "アプリをタップしてこのマーケットプレイス取得を紐付けます（ストアタブからのピン留めと同じ）。",
+    "marketplaceRegisteredQuickPickExpand": "マーケットプレイス用の保存アプリのクイック選択を表示",
+    "marketplaceRegisteredQuickPickCollapse": "マーケットプレイス用の保存アプリのクイック選択を隠す"
   },
   "about": {
     "title": "ビビンディスについて",

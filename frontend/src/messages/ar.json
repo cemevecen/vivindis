@@ -541,7 +541,11 @@
     "marketplaceImportSizeLabel": "الصفوف المستوردة",
     "marketplaceImportSizeValue": "1 (مجمّع)",
     "marketplacePinnedAppBanner": "استخدام التطبيق المثبت: {name}",
-    "marketplaceNeedStorePinToast": "ثبّت تطبيقًا أولاً من تبويب «كتالوج المتجر» (نتيجة البحث → «اختر»)."
+    "marketplaceNeedStorePinToast": "اختر تطبيقًا مستهدفًا: انقر على تطبيق محفوظ هنا أو ثبّت تطبيقًا من تبويب «كتالوج المتجر» (اختر من نتيجة البحث).",
+    "marketplaceRegisteredListTitle": "التطبيقات المحفوظة – اختيار سريع",
+    "marketplaceRegisteredListHint": "انقر على تطبيق لربط سحب السوق به (كالتثبيت من تبويب المتجر).",
+    "marketplaceRegisteredQuickPickExpand": "إظهار الاختيار السريع للتطبيقات المحفوظة للسوق",
+    "marketplaceRegisteredQuickPickCollapse": "إخفاء الاختيار السريع للتطبيقات المحفوظة للسوق"
   },
   "about": {
     "title": "حول فيفينديس",
