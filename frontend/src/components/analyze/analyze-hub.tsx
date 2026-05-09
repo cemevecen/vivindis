@@ -85,6 +85,19 @@ function classifyMarketplaceSellerUrl(url: string): "ok" | "amazon" | "invalid" 
   return "invalid";
 }
 
+type MarketplaceSiteId = "trendyol" | "hepsiburada" | "n11";
+
+function marketplaceUrlMatchesSite(url: string, site: MarketplaceSiteId): boolean {
+  const u = url.trim().toLowerCase();
+  if (site === "trendyol") {
+    return u.includes("trendyol.com");
+  }
+  if (site === "hepsiburada") {
+    return u.includes("hepsiburada.com");
+  }
+  return u.includes("n11.com");
+}
+
 function formatTargetAppOptionLabel(app: AppDto): string {
   return `${app.name} — ${app.package_name || app.bundle_id || app.id.slice(0, 8)}`;
 }
@@ -114,6 +127,7 @@ function AnalyzeHubConnected() {
 
   const [platform, setPlatform] = useState<SearchPlatform>("google_play");
   const [storeSourceMode, setStoreSourceMode] = useState<"catalog" | "marketplace">("catalog");
+  const [marketplaceSite, setMarketplaceSite] = useState<MarketplaceSiteId>("trendyol");
   const [marketplaceSellerUrl, setMarketplaceSellerUrl] = useState("");
   const [draftQuery, setDraftQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
@@ -215,6 +229,52 @@ function AnalyzeHubConnected() {
     () => dedupeAppsForList(appsQuery.data ?? []),
     [appsQuery.data],
   );
+
+  /** Pazaryeri çekimini hangi Vivindis uygulama kaydına bağlayacağız (Play/App Store ikonları burada kullanılmaz). */
+  const marketplaceVivindisAppOptions = useMemo(() => {
+    const apps = [...registeredAppsDeduped];
+    if (sessionApp && !apps.some((a) => a.id === sessionApp.id)) {
+      apps.unshift(sessionApp);
+    }
+    return apps;
+  }, [registeredAppsDeduped, sessionApp]);
+
+  const marketplaceUrlFieldPlaceholder = useMemo(() => {
+    switch (marketplaceSite) {
+      case "trendyol":
+        return t("marketplaceUrlPlaceholderTrendyol");
+      case "hepsiburada":
+        return t("marketplaceUrlPlaceholderHepsiburada");
+      case "n11":
+        return t("marketplaceUrlPlaceholderN11");
+      default:
+        return t("marketplaceUrlPlaceholder");
+    }
+  }, [marketplaceSite, t]);
+
+  const marketplacePullInputReady = useMemo(() => {
+    if (classifyMarketplaceSellerUrl(marketplaceSellerUrl) !== "ok") {
+      return false;
+    }
+    return marketplaceUrlMatchesSite(marketplaceSellerUrl, marketplaceSite);
+  }, [marketplaceSellerUrl, marketplaceSite]);
+
+  useEffect(() => {
+    if (storeSourceMode !== "marketplace") {
+      return;
+    }
+    if (classifyMarketplaceSellerUrl(marketplaceSellerUrl) !== "ok") {
+      return;
+    }
+    const u = marketplaceSellerUrl.trim().toLowerCase();
+    if (u.includes("hepsiburada.com")) {
+      setMarketplaceSite("hepsiburada");
+    } else if (u.includes("n11.com")) {
+      setMarketplaceSite("n11");
+    } else if (u.includes("trendyol.com")) {
+      setMarketplaceSite("trendyol");
+    }
+  }, [marketplaceSellerUrl, storeSourceMode]);
 
   const registryPlatformLabel = useCallback(
     (p: AppPlatform) =>
@@ -777,6 +837,10 @@ function AnalyzeHubConnected() {
       toast.error(t("marketplaceUrlInvalid"));
       return;
     }
+    if (!marketplaceUrlMatchesSite(marketplaceSellerUrl, marketplaceSite)) {
+      toast.error(t("marketplaceUrlSiteMismatch"));
+      return;
+    }
     if (!externalScraperQuery.data?.enabled) {
       toast.error(t("marketplaceApifyDisabled"));
       return;
@@ -804,6 +868,7 @@ function AnalyzeHubConnected() {
     externalScraperQuery.data?.enabled,
     marketplacePullMutation,
     marketplaceSellerUrl,
+    marketplaceSite,
     requireSignedIn,
     resetFetchProgressTimeline,
     t,
@@ -1358,26 +1423,70 @@ function AnalyzeHubConnected() {
                   </p>
                 ) : null}
                 <div className="space-y-2">
-                  <Label htmlFor="marketplace-reg-picker" className="text-foreground">
-                    {t("targetAppLabel")}
+                  <span className="block text-sm font-medium text-foreground">{t("marketplaceSiteLabel")}</span>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={marketplaceSite === "trendyol" ? "default" : "outline"}
+                      className={cn(
+                        "rounded-full",
+                        marketplaceSite === "trendyol" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                      )}
+                      onClick={() => setMarketplaceSite("trendyol")}
+                    >
+                      {t("marketplaceBrandTrendyol")}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={marketplaceSite === "hepsiburada" ? "default" : "outline"}
+                      className={cn(
+                        "rounded-full",
+                        marketplaceSite === "hepsiburada" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                      )}
+                      onClick={() => setMarketplaceSite("hepsiburada")}
+                    >
+                      {t("marketplaceBrandHepsiburada")}
+                    </Button>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant={marketplaceSite === "n11" ? "default" : "outline"}
+                      className={cn(
+                        "rounded-full",
+                        marketplaceSite === "n11" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                      )}
+                      onClick={() => setMarketplaceSite("n11")}
+                    >
+                      {t("marketplaceBrandN11")}
+                    </Button>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="marketplace-vivindis-app" className="text-foreground">
+                    {t("marketplaceTargetVivindisLabel")}
                   </Label>
-                  <RegisteredAppGridPicker
-                    id="marketplace-reg-picker"
-                    apps={registeredAppsDeduped}
-                    value={registeredAppsDeduped.find((a) => a.id === targetAppId.trim()) ?? sessionApp ?? null}
-                    onChange={(app) => {
-                      setTargetAppId(app?.id ?? "");
-                      if (app) {
-                        setTargetAppPickerText(formatTargetAppOptionLabel(app));
-                      } else {
-                        setTargetAppPickerText("");
-                      }
+                  <p className="text-xs leading-relaxed text-muted-foreground">{t("marketplaceTargetVivindisHint")}</p>
+                  <SelectNative
+                    id="marketplace-vivindis-app"
+                    className="h-11 rounded-xl"
+                    value={effectiveAppId}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setTargetAppId(v);
+                      const app = marketplaceVivindisAppOptions.find((a) => a.id === v);
+                      setTargetAppPickerText(app ? formatTargetAppOptionLabel(app) : "");
                     }}
-                    disabled={!registeredAppsDeduped.length && !sessionApp}
-                    placeholder={t("compareRegisteredSelectPlaceholder")}
-                    clearLabel={t("compareRegisteredPickerClear")}
-                    getPlatformLabel={registryPlatformLabel}
-                  />
+                    disabled={marketplaceVivindisAppOptions.length === 0}
+                  >
+                    <option value="">{t("marketplaceSelectVivindisPlaceholder")}</option>
+                    {marketplaceVivindisAppOptions.map((a) => (
+                      <option key={a.id} value={a.id}>
+                        {formatTargetAppOptionLabel(a)}
+                      </option>
+                    ))}
+                  </SelectNative>
                   {sessionApp && !targetAppId.trim() ? (
                     <p className="text-xs text-muted-foreground">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
                   ) : null}
@@ -1390,7 +1499,7 @@ function AnalyzeHubConnected() {
                     id="marketplace-seller-url"
                     value={marketplaceSellerUrl}
                     onChange={(e) => setMarketplaceSellerUrl(e.target.value)}
-                    placeholder={t("marketplaceUrlPlaceholder")}
+                    placeholder={marketplaceUrlFieldPlaceholder}
                     autoComplete="off"
                     className="rounded-xl border-border bg-card"
                   />
@@ -1426,7 +1535,7 @@ function AnalyzeHubConnected() {
                       onClick={() => void handlePullMarketplaceReviews()}
                       disabled={
                         !effectiveAppId ||
-                        classifyMarketplaceSellerUrl(marketplaceSellerUrl) !== "ok" ||
+                        !marketplacePullInputReady ||
                         !externalScraperQuery.data?.enabled ||
                         externalScraperQuery.isPending ||
                         marketplacePullMutation.isPending ||

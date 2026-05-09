@@ -511,7 +511,18 @@
     "marketplaceUrlInvalid": "Use a seller link from Trendyol, Hepsiburada, or N11.",
     "marketplaceAmazonNotSupported": "Amazon seller URLs are not supported by this integration.",
     "marketplaceApifyDisabled": "Marketplace analysis needs EXTERNAL_SCRAPER_APIFY_TOKEN on the server.",
-    "marketplacePullCta": "Pull marketplace seller intelligence"
+    "marketplacePullCta": "Pull marketplace seller intelligence",
+    "marketplaceSiteLabel": "Marketplace platform",
+    "marketplaceBrandTrendyol": "Trendyol",
+    "marketplaceBrandHepsiburada": "Hepsiburada",
+    "marketplaceBrandN11": "N11",
+    "marketplaceTargetVivindisLabel": "Vivindis app (analysis container)",
+    "marketplaceTargetVivindisHint": "Choose which saved project this fetch attaches to. It does not need to be a Trendyol/Hepsiburada/N11 app—only a container for this pull in your account.",
+    "marketplaceSelectVivindisPlaceholder": "Select a saved app…",
+    "marketplaceUrlPlaceholderTrendyol": "https://www.trendyol.com/magaza/…",
+    "marketplaceUrlPlaceholderHepsiburada": "https://www.hepsiburada.com/magaza/…",
+    "marketplaceUrlPlaceholderN11": "https://www.n11.com/magaza/…",
+    "marketplaceUrlSiteMismatch": "The link does not match the selected marketplace platform."
   },
   "about": {
     "title": "حول فيفينديس",
