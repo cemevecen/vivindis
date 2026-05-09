@@ -11,7 +11,7 @@ export default function SignInPage({ params }: Props) {
       routing="path"
       path={`/${locale}/sign-in`}
       signUpUrl={`/${locale}/sign-up`}
-      fallbackRedirectUrl={`/${locale}/analyze`}
+      fallbackRedirectUrl={`/${locale}/analyze/store`}
     />
   );
 }

@@ -5,7 +5,9 @@
     "compare": "Сравнение",
     "sidebarNav": "Главное меню",
     "analyze": "Анализ",
-    "about": "О проекте"
+    "about": "О проекте",
+    "breadcrumbHome": "Главная",
+    "breadcrumbNavLabel": "Навигационная цепочка"
   },
   "footer": {
     "rights": "Все права защищены."

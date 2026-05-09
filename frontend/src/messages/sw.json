@@ -5,7 +5,9 @@
     "compare": "Linganisha",
     "sidebarNav": "Menyu kuu",
     "analyze": "Changanua",
-    "about": "Kuhusu"
+    "about": "Kuhusu",
+    "breadcrumbHome": "Nyumbani",
+    "breadcrumbNavLabel": "Njia ya ukurasa"
   },
   "footer": {
     "rights": "Haki zote zimehifadhiwa."

@@ -5,7 +5,9 @@
     "compare": "Comparar",
     "sidebarNav": "Menú principal",
     "analyze": "Analizar",
-    "about": "Acerca de"
+    "about": "Acerca de",
+    "breadcrumbHome": "Inicio",
+    "breadcrumbNavLabel": "Migas de pan"
   },
   "footer": {
     "rights": "Todos los derechos reservados."

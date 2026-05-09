@@ -24,7 +24,7 @@ export function AppList({ apps, deletingAppId = null, onDeleteApp }: Props) {
           <p className="font-medium">{t("emptyTitle")}</p>
           <p className="max-w-sm text-sm text-muted-foreground">{t("emptyDescription")}</p>
         </div>
-        <Link href="/analyze?mode=store" className={cn(buttonVariants())}>
+        <Link href="/analyze/store" className={cn(buttonVariants())}>
           {t("createFirst")}
         </Link>
       </div>

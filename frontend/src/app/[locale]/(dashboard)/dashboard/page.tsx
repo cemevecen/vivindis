@@ -6,5 +6,5 @@ type Props = {
 
 /** Eski /dashboard bağlantıları ve yer imleri → Analiz. */
 export default function DashboardRedirectPage({ params }: Props) {
-  redirect(`/${params.locale}/analyze`);
+  redirect(`/${params.locale}/analyze/store`);
 }

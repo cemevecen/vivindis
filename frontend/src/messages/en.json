@@ -5,7 +5,9 @@
     "apps": "Apps",
     "compare": "Compare",
     "about": "About",
-    "sidebarNav": "Main menu"
+    "sidebarNav": "Main menu",
+    "breadcrumbHome": "Home",
+    "breadcrumbNavLabel": "Breadcrumb"
   },
   "footer": {
     "rights": "All rights reserved."

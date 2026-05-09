@@ -41,10 +41,11 @@ function DashboardHeaderContent() {
   const tAnalyze = useTranslations("analyzeHub");
 
   const analyzeMode = parseAnalyzeHubMode(searchParams.get("mode"));
-  const isAnalyzePage = pathname === "/analyze";
+  const isAnalyzePage =
+    pathname === "/analyze" || pathname === "/analyze/store" || pathname === "/analyze/marketplace";
 
   const links = [
-    { href: "/analyze" as const, label: t("analyze"), Icon: Search },
+    { href: "/analyze/store" as const, label: t("analyze"), Icon: Search },
     { href: "/apps" as const, label: t("apps"), Icon: Smartphone },
   ];
 
@@ -61,9 +62,12 @@ function DashboardHeaderContent() {
         >
           {links.map(({ href, label, Icon }) => {
             const active =
-              pathname === href ||
-              pathname.startsWith(`${href}/`) ||
-              (href === "/analyze" && pathname === "/compare");
+              href === "/analyze/store"
+                ? pathname === "/analyze" ||
+                  pathname === "/analyze/store" ||
+                  pathname === "/analyze/marketplace" ||
+                  pathname === "/compare"
+                : pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
@@ -113,7 +117,7 @@ function DashboardHeaderContent() {
             return (
               <Link
                 key={id}
-                href={`/analyze?mode=${id}`}
+                href={id === "store" ? "/analyze/store" : `/analyze?mode=${id}`}
                 className={cn(
                   "inline-flex shrink-0 items-center gap-2 rounded-full px-3 py-2 text-sm font-medium transition-colors",
                   active

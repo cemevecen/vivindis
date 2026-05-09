@@ -5,7 +5,9 @@
     "compare": "比較",
     "sidebarNav": "メインメニュー",
     "analyze": "分析",
-    "about": "概要"
+    "about": "概要",
+    "breadcrumbHome": "ホーム",
+    "breadcrumbNavLabel": "パンくずリスト"
   },
   "footer": {
     "rights": "無断転載を禁じます。"

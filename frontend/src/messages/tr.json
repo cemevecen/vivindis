@@ -5,7 +5,9 @@
     "apps": "Uygulamalar",
     "compare": "Karşılaştır",
     "about": "Hakkında",
-    "sidebarNav": "Ana menü"
+    "sidebarNav": "Ana menü",
+    "breadcrumbHome": "Ana sayfa",
+    "breadcrumbNavLabel": "Sayfa yolu"
   },
   "footer": {
     "rights": "Tüm hakları saklıdır."

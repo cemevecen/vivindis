@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectNative } from "@/components/ui/select-native";
-import { useRouter } from "@/i18n/routing";
+import { usePathname, useRouter } from "@/i18n/routing";
 import {
   ApiError,
   apiFetch,
@@ -24,6 +24,7 @@ import {
   isPublicApiBaseUrlConfigured,
 } from "@/lib/api";
 import {
+  analyzeStoreSourceFromPathname,
   appBodyFromHit,
   parseAnalyzeHubMode,
   rangeFromPreset,
@@ -109,11 +110,18 @@ function AnalyzeHubConnected() {
   const tCommon = useTranslations("common");
   const { getToken, isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const locale = useLocale();
   const queryClient = useQueryClient();
 
   const searchParams = useSearchParams();
   const mode = useMemo(() => parseAnalyzeHubMode(searchParams.get("mode")), [searchParams]);
+
+  const storeSourceMode = useMemo((): "catalog" | "marketplace" => {
+    const fromPath = analyzeStoreSourceFromPathname(pathname);
+    return fromPath ?? "catalog";
+  }, [pathname]);
+
   const [datePreset, setDatePreset] = useState<DatePresetId>("30d");
   const reviewScope: ReviewScope = "local";
   const [reviewSampleLimit, setReviewSampleLimit] = useState<ReviewSampleLimitOption>(1000);
@@ -127,7 +135,6 @@ function AnalyzeHubConnected() {
   );
 
   const [platform, setPlatform] = useState<SearchPlatform>("google_play");
-  const [storeSourceMode, setStoreSourceMode] = useState<"catalog" | "marketplace">("catalog");
   const [marketplaceSite, setMarketplaceSite] = useState<MarketplaceSiteId>("trendyol");
   const [marketplaceSellerUrl, setMarketplaceSellerUrl] = useState("");
   const [draftQuery, setDraftQuery] = useState("");
@@ -297,6 +304,16 @@ function AnalyzeHubConnected() {
       setTargetAppId(sessionApp.id);
     }
   }, [sessionApp]);
+
+  useEffect(() => {
+    if (pathname !== "/analyze") {
+      return;
+    }
+    if (mode !== "store") {
+      return;
+    }
+    router.replace("/analyze/store");
+  }, [pathname, mode, router]);
 
   useEffect(() => {
     if (!targetAppId) {
@@ -1340,7 +1357,9 @@ function AnalyzeHubConnected() {
                 left={t("storeSourceCatalog")}
                 right={t("storeSourceMarketplace")}
                 value={storeSourceMode === "catalog" ? "left" : "right"}
-                onChange={(v) => setStoreSourceMode(v === "left" ? "catalog" : "marketplace")}
+                onChange={(v) => {
+                  router.replace(v === "left" ? "/analyze/store" : "/analyze/marketplace");
+                }}
               />
             </div>
 
@@ -2149,7 +2168,7 @@ function AnalyzeHubConnected() {
                   <button
                     type="button"
                     className="font-medium text-primary/90 underline"
-                    onClick={() => router.push("/analyze?mode=store")}
+                    onClick={() => router.push("/analyze/store")}
                   >
                     {t("goCreateApp")}
                   </button>

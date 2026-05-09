@@ -11,7 +11,7 @@ export default function SignUpPage({ params }: Props) {
       routing="path"
       path={`/${locale}/sign-up`}
       signInUrl={`/${locale}/sign-in`}
-      afterSignUpUrl={`/${locale}/analyze`}
+      afterSignUpUrl={`/${locale}/analyze/store`}
     />
   );
 }

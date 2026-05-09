@@ -545,7 +545,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       )}
 
       <div className="flex flex-wrap gap-2">
-        <Link href="/analyze" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
+        <Link href="/analyze/store" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
           {t("backToAnalyze")}
         </Link>
         <Link href="/compare" className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}>

@@ -5,7 +5,9 @@
     "compare": "对比",
     "sidebarNav": "主菜单",
     "analyze": "分析",
-    "about": "关于"
+    "about": "关于",
+    "breadcrumbHome": "首页",
+    "breadcrumbNavLabel": "面包屑导航"
   },
   "footer": {
     "rights": "保留所有权利。"

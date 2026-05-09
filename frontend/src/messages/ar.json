@@ -5,7 +5,9 @@
     "compare": "مقارنة",
     "sidebarNav": "القائمة الرئيسية",
     "analyze": "تحليل",
-    "about": "حول"
+    "about": "حول",
+    "breadcrumbHome": "الرئيسية",
+    "breadcrumbNavLabel": "مسار التنقل"
   },
   "footer": {
     "rights": "جميع الحقوق محفوظة."

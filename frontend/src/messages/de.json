@@ -5,7 +5,9 @@
     "compare": "Vergleich",
     "sidebarNav": "Hauptmenü",
     "analyze": "Analyse",
-    "about": "Über uns"
+    "about": "Über uns",
+    "breadcrumbHome": "Startseite",
+    "breadcrumbNavLabel": "Brotkrümelnavigation"
   },
   "footer": {
     "rights": "Alle Rechte vorbehalten."

@@ -10,6 +10,17 @@ export function parseAnalyzeHubMode(raw: string | null): AnalyzeHubMode {
   }
   return "store";
 }
+
+/** `next-intl` pathname (locale’siz): `/analyze/store` → katalog, `/analyze/marketplace` → pazaryeri. */
+export function analyzeStoreSourceFromPathname(pathname: string): "catalog" | "marketplace" | null {
+  if (pathname.endsWith("/analyze/marketplace")) {
+    return "marketplace";
+  }
+  if (pathname.endsWith("/analyze/store")) {
+    return "catalog";
+  }
+  return null;
+}
 export type SearchPlatform = "google_play" | "app_store" | "both";
 export type DatePresetId = "7d" | "30d" | "90d" | "180d" | "365d" | "2y" | "5y" | "all";
 export type ReviewScope = "local" | "global";
