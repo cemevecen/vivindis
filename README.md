@@ -162,7 +162,7 @@ docker compose up --build
 ```
 
 - Frontend: http://localhost:3000 — URL’ler locale önekli: `/tr/...`, `/en/...`  
-- Analiz merkezi: `/tr/analyze` (mağaza araması, dosya/metin için yer tutucu, karşılaştırma sekmesi)  
+- Analiz merkezi: mağaza kataloğu **`/tr/analyze/store`**, pazaryeri **`/tr/analyze/marketplace`**; dosya/metin/karşılaştırma **`/tr/analyze?mode=file|text|compare`** (eski `/tr/analyze` mağaza için sunucuda `/tr/analyze/store` yönlendirmesi)  
 - API Swagger: http://localhost:8001/docs (host **8001**; konteyner içi **8000**)  
 - Sağlık: http://localhost:8001/health  
 - Flower: http://localhost:5555  
