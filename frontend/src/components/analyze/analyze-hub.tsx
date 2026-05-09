@@ -1783,7 +1783,6 @@ function AnalyzeHubConnected() {
                       value={datePreset}
                       onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
                       className="h-11 rounded-xl"
-                      disabled={!sessionApp}
                     >
                       <option value="7d">{t("datePresetLast7")}</option>
                       <option value="30d">{t("datePresetLast30")}</option>
