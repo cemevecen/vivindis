@@ -6,8 +6,7 @@ from pydantic import BaseModel
 
 
 class ExternalScraperStatusResponse(BaseModel):
-    provider: str
+    """Apify pazaryeri çekimi: token tanımlıysa tam yetki."""
+
     enabled: bool
-    actor: str
-    timeout_seconds: int
-    missing: list[str]
+    marketplace_analysis_ready: bool

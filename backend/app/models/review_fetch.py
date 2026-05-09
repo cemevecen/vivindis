@@ -4,10 +4,10 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Date, DateTime, Enum as SAEnum, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
@@ -55,6 +55,7 @@ class ReviewFetch(Base):
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     approval_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)
     pending_enqueue_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    seller_intelligence_json: Mapped[dict[str, Any] | None] = mapped_column(JSONB, nullable=True)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

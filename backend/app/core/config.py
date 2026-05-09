@@ -113,10 +113,10 @@ class Settings(BaseSettings):
         description="Onay linki için API kökü (örn. https://api.vivindis.com), sondaki / olmadan.",
     )
     external_scraper_apify_token: str = Field(default="", validation_alias="EXTERNAL_SCRAPER_APIFY_TOKEN")
-    external_scraper_google_maps_actor: str = Field(
-        default="dadhalfdev/google-maps-reviews-scraper",
-        validation_alias="EXTERNAL_SCRAPER_GOOGLE_MAPS_ACTOR",
-        description="Apify actor id (owner/name) for Google Maps external scraper.",
+    external_scraper_marketplace_actor: str = Field(
+        default="seralifatih/turkish-marketplace-seller-intelligence",
+        validation_alias="EXTERNAL_SCRAPER_MARKETPLACE_ACTOR",
+        description="Apify actor id for TR marketplace seller intelligence.",
     )
     external_scraper_timeout_seconds: int = Field(
         default=120,

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import uuid
 from datetime import date, datetime
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict, field_validator, model_validator
 
@@ -70,6 +71,7 @@ class ReviewFetchResponse(BaseModel):
     source: str
     review_count: int
     error_message: str | None
+    seller_intelligence_json: dict[str, Any] | None = None
     started_at: datetime | None
     completed_at: datetime | None
     created_at: datetime
@@ -81,29 +83,35 @@ class ReviewFetchWithAppNameResponse(ReviewFetchResponse):
     app_name: str
 
 
-class GoogleMapsFetchCreate(BaseModel):
+class MarketplaceSellerFetchCreate(BaseModel):
+    """TR pazaryeri satıcı profili — Apify `turkish-marketplace-seller-intelligence`."""
+
     from_date: date
     to_date: date
-    search_term: str
-    max_reviews: int = 200
-    sort_by: str = "Newest"
-    target_language: str = "en"
+    seller_url: str
+    max_sellers: int = 1
+
+    @staticmethod
+    def _normalize_tr_marketplace_url(raw: str) -> str:
+        u = raw.strip()
+        if len(u) < 12:
+            msg = "seller_url geçerli bir bağlantı olmalıdır."
+            raise ValueError(msg)
+        lower = u.lower()
+        if "amazon." in lower or "amazon.com" in lower:
+            msg = "Amazon satıcı URL'leri bu entegrasyonla desteklenmiyor (aktör yalnızca TR pazaryerleri)."
+            raise ValueError(msg)
+        hosts = ("trendyol.com", "hepsiburada.com", "n11.com")
+        if not any(h in lower for h in hosts):
+            msg = "Yalnızca Trendyol, Hepsiburada veya N11 satıcı mağaza bağlantıları kabul edilir."
+            raise ValueError(msg)
+        return u[:2048]
 
     @model_validator(mode="after")
-    def validate_google_maps_request(self) -> GoogleMapsFetchCreate:
+    def validate_marketplace_request(self) -> MarketplaceSellerFetchCreate:
         if self.from_date > self.to_date:
             msg = "from_date, to_date'den sonra olamaz."
             raise ValueError(msg)
-        term = self.search_term.strip()
-        if len(term) < 2:
-            msg = "search_term en az 2 karakter olmalı."
-            raise ValueError(msg)
-        self.search_term = term[:240]
-        self.max_reviews = max(50, min(500, int(self.max_reviews)))
-        allowed = {"Newest", "Most relevant", "Highest rating", "Lowest rating"}
-        if self.sort_by not in allowed:
-            msg = "sort_by yalnızca 'Newest', 'Most relevant', 'Highest rating' veya 'Lowest rating' olabilir."
-            raise ValueError(msg)
-        lang = self.target_language.strip().lower()
-        self.target_language = (lang[:8] or "en")
+        self.seller_url = self._normalize_tr_marketplace_url(self.seller_url)
+        self.max_sellers = max(1, min(10, int(self.max_sellers)))
         return self

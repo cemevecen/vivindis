@@ -1,4 +1,4 @@
-"""Apify actor üzerinden Google Maps yorumlarını çeker."""
+"""Apify: Turkish Marketplace Seller Intelligence (TR pazaryeri satıcı profili)."""
 
 from __future__ import annotations
 
@@ -10,40 +10,40 @@ import httpx
 from app.core.config import Settings
 
 
-async def run_google_maps_actor(
+async def run_marketplace_seller_intelligence(
     *,
     settings: Settings,
-    search_term: str,
-    max_reviews: int,
-    sort_by: str,
-    target_language: str,
+    seller_urls: list[str],
+    max_sellers: int = 1,
 ) -> list[dict[str, Any]]:
     token = (settings.external_scraper_apify_token or "").strip()
     if not token:
         raise RuntimeError("EXTERNAL_SCRAPER_APIFY_TOKEN eksik.")
 
-    actor_raw = (settings.external_scraper_google_maps_actor or "").strip()
+    actor_raw = (settings.external_scraper_marketplace_actor or "").strip()
     if not actor_raw:
-        raise RuntimeError("EXTERNAL_SCRAPER_GOOGLE_MAPS_ACTOR eksik.")
+        raise RuntimeError("EXTERNAL_SCRAPER_MARKETPLACE_ACTOR eksik.")
     actor_enc = quote(actor_raw, safe="")
 
     url = (
         f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items"
         f"?token={token}&format=json&clean=1"
     )
-    payload = {
-        "search_term": search_term,
-        "max_reviews": max(50, min(500, int(max_reviews))),
-        "sort_by": sort_by,
-        "target_language": target_language,
+    urls = [u.strip() for u in seller_urls if u and str(u).strip()]
+    if not urls:
+        raise RuntimeError("seller_urls boş.")
+
+    payload: dict[str, Any] = {
+        "sellerUrls": urls[:50],
+        "maxSellers": max(1, min(100, int(max_sellers))),
     }
-    timeout_seconds = max(30, int(settings.external_scraper_timeout_seconds or 120))
+    timeout_seconds = max(60, int(settings.external_scraper_timeout_seconds or 180))
     async with httpx.AsyncClient(timeout=timeout_seconds) as client:
         resp = await client.post(url, json=payload)
         resp.raise_for_status()
         data = resp.json()
     if not isinstance(data, list):
-        raise RuntimeError("External scraper beklenmeyen yanıt döndü (liste değil).")
+        raise RuntimeError("Apify beklenmeyen yanıt döndü (liste değil).")
     rows: list[dict[str, Any]] = []
     for item in data:
         if isinstance(item, dict):

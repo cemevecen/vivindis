@@ -25,7 +25,7 @@ from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.db.session import get_async_session_maker
 from app.services.async_rate_limiter import AsyncTokenBucketRateLimiter
-from app.services.external_google_maps_scraper import run_google_maps_actor
+from app.services.apify_marketplace_seller import run_marketplace_seller_intelligence
 from app.services.play_scraper_headers import ensure_play_request_user_agents
 from app.services.user_agents import pick_user_agent
 from app.workers.runtime import run_async_db
@@ -855,28 +855,44 @@ async def _mark_fetch_failed(session: Any, fetch_id: uuid.UUID, message: str) ->
     fetch.completed_at = datetime.now(UTC)
 
 
-def _parse_google_maps_review_date(raw: Any, fallback: date) -> date:
+def _build_tr_marketplace_synthetic_body(profile: dict[str, Any]) -> str:
+    """Heuristic lexicon için satıcı profilinden tek metin üretir."""
+    name = str(profile.get("sellerName") or "").strip()
+    plat = str(profile.get("platform") or "").strip()
+    rating = profile.get("overallRating")
+    total_rev = profile.get("totalReviews")
+    followers = profile.get("followerCount")
+    badges = profile.get("badges")
+    badge_txt = ""
+    if isinstance(badges, list) and badges:
+        badge_txt = ", ".join(str(b) for b in badges[:8])
+    parts = [
+        f"Mağaza satıcısı: {name}" if name else "",
+        f"Pazaryeri: {plat}" if plat else "",
+        f"Genel mağaza puanı: {rating}" if rating is not None else "",
+        f"Toplam yorum sayısı (profil): {total_rev}" if total_rev is not None else "",
+        f"Takipçi sayısı: {followers}" if followers is not None else "",
+        f"Rozetler: {badge_txt}" if badge_txt else "",
+    ]
+    return ". ".join(p for p in parts if p)
+
+
+def _profile_review_date(profile: dict[str, Any], fallback: date) -> date:
+    raw = profile.get("scrapedAt")
     if isinstance(raw, str) and raw.strip():
-        txt = raw.strip()
         try:
-            dt = datetime.fromisoformat(txt.replace("Z", "+00:00"))
+            dt = datetime.fromisoformat(raw.strip().replace("Z", "+00:00"))
             return dt.date()
         except Exception:
             pass
-        try:
-            return date.fromisoformat(txt[:10])
-        except Exception:
-            return fallback
     return fallback
 
 
-async def _execute_google_maps_fetch(
+async def _execute_marketplace_seller_fetch(
     session: Any,
     fetch_id: uuid.UUID,
-    search_term: str,
-    max_reviews: int,
-    sort_by: str,
-    target_language: str,
+    seller_url: str,
+    max_sellers: int,
 ) -> tuple[list[str], list[str]]:
     settings = get_settings()
     res = await session.execute(
@@ -892,70 +908,82 @@ async def _execute_google_maps_fetch(
     fetch.status = FetchStatus.RUNNING
     fetch.started_at = datetime.now(UTC)
     fetch.error_message = None
+    fetch.seller_intelligence_json = None
     await session.flush()
     await session.commit()
 
-    inserted = 0
     try:
-        rows = await run_google_maps_actor(
+        rows = await run_marketplace_seller_intelligence(
             settings=settings,
-            search_term=search_term,
-            max_reviews=max_reviews,
-            sort_by=sort_by,
-            target_language=target_language,
+            seller_urls=[seller_url],
+            max_sellers=max_sellers,
         )
+        profiles: list[dict[str, Any]] = []
         for item in rows:
-            rating_raw = item.get("rating")
-            body = str(
-                item.get("original_review")
-                or item.get("translated_review")
-                or item.get("english_review")
-                or ""
-            ).strip()
-            if body == "":
+            if not isinstance(item, dict):
                 continue
-            try:
-                rating = int(float(rating_raw))
-            except Exception:
-                rating = 3
-            review_date = _parse_google_maps_review_date(item.get("timestamp"), fetch.to_date)
-            if review_date < fetch.from_date or review_date > fetch.to_date:
+            if item.get("recordType") == "RUN_SUMMARY" or item.get("type") == "RUN_SUMMARY":
                 continue
-            rid = str(item.get("review_id") or "")[:255]
-            if not rid:
-                rid = f"gms-{uuid.uuid4().hex}"
-            await _upsert_review(
-                session,
-                app_id=app.id,
-                fetch_id=fetch.id,
-                platform=StorePlatform.GOOGLE_MAPS_SCRAPER,
-                store_review_id=rid,
-                rating=rating,
-                title=None,
-                body=body,
-                author=str(item.get("author_name") or "") or None,
-                author_uri=str(item.get("author_profile_link") or item.get("review_url") or "") or None,
-                app_version_label=None,
-                lang=str(item.get("language") or target_language or "und")[:16],
-                review_date=review_date,
-                thumbs_up=0,
-                developer_reply=None,
-                reply_date=None,
-            )
-            inserted += 1
+            dv = str(item.get("dataVersion") or "")
+            if "run_summary" in dv.lower():
+                continue
+            if item.get("sellerId") or dv.startswith("seller-profile"):
+                profiles.append(item)
+
+        if not profiles:
+            raise RuntimeError("Apify satıcı profili döndürmedi; bağlantı veya aktör çıktısını kontrol edin.")
+
+        primary = profiles[0]
+        fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
+
+        rating_raw = primary.get("overallRating")
+        try:
+            rating_int = int(round(float(rating_raw)))
+        except (TypeError, ValueError):
+            rating_int = 3
+        rating_int = max(1, min(5, rating_int))
+
+        body = _build_tr_marketplace_synthetic_body(primary)
+        if not body.strip():
+            body = f"Satıcı profili: {primary.get('sellerName') or seller_url}"
+
+        rd = _profile_review_date(primary, fetch.to_date)
+        if rd < fetch.from_date or rd > fetch.to_date:
+            rd = fetch.to_date
+
+        sid = str(primary.get("sellerId") or "unknown")[:200]
+        await _upsert_review(
+            session,
+            app_id=app.id,
+            fetch_id=fetch.id,
+            platform=StorePlatform.MARKETPLACE_SELLER_TR,
+            store_review_id=f"mp-{sid}"[:255],
+            rating=rating_int,
+            title=str(primary.get("sellerName") or "")[:1024] or None,
+            body=body,
+            author=str(primary.get("sellerName") or "") or None,
+            author_uri=str(primary.get("sellerUrl") or primary.get("sourceUrl") or seller_url)[:2048]
+            or None,
+            app_version_label=str(primary.get("platform") or "")[:64] or None,
+            lang="tr",
+            review_date=rd,
+            thumbs_up=0,
+            developer_reply=None,
+            reply_date=None,
+        )
 
         await _commit_reviews_and_sync_fetch_count(session, fetch.id)
         fetch.status = FetchStatus.COMPLETED
         fetch.completed_at = datetime.now(UTC)
         fetch.error_message = None
         await session.flush()
-        log.info("google_maps_fetch_completed", fetch_id=str(fetch_id), reviews=inserted)
+        log.info("marketplace_seller_fetch_completed", fetch_id=str(fetch_id))
     except Exception:
         fetch.status = FetchStatus.FAILED
         fetch.completed_at = datetime.now(UTC)
-        fetch.error_message = "Google Maps external scraper başarısız oldu. Lütfen actor ve token ayarlarını kontrol edin."
+        fetch.error_message = "Pazaryeri satıcı çekimi başarısız (Apify / bağlantı)."
         await session.flush()
-        log.exception("google_maps_fetch_failed", fetch_id=str(fetch_id))
+        log.exception("marketplace_seller_fetch_failed", fetch_id=str(fetch_id))
         raise
 
     ar = await session.execute(select(Analysis).where(Analysis.fetch_id == fetch.id))
@@ -1020,29 +1048,25 @@ def review_fetch_task(
         ai_analysis_task.apply_async(args=[aid], queue="analysis")
 
 
-@celery_app.task(name="app.workers.scraper.google_maps_fetch_task")
-def google_maps_fetch_task(
+@celery_app.task(name="app.workers.scraper.marketplace_seller_fetch_task")
+def marketplace_seller_fetch_task(
     fetch_id: str,
-    search_term: str,
-    max_reviews: int = 200,
-    sort_by: str = "Newest",
-    target_language: str = "en",
+    seller_url: str,
+    max_sellers: int = 1,
 ) -> None:
     fid = uuid.UUID(fetch_id)
     try:
         heuristic_ids, ai_ids = run_async_db(
-            _execute_google_maps_fetch,
+            _execute_marketplace_seller_fetch,
             fid,
-            search_term,
-            int(max_reviews),
-            sort_by,
-            target_language,
+            seller_url,
+            int(max_sellers),
         )
     except Exception as exc:
         try:
             run_async_db(_mark_fetch_failed, fid, str(exc))
         except Exception:
-            log.exception("google_maps_fetch_failed_mark_error", fetch_id=fetch_id)
+            log.exception("marketplace_seller_fetch_failed_mark_error", fetch_id=fetch_id)
         raise
 
     from app.workers.ai import ai_analysis_task

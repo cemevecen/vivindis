@@ -15,6 +15,7 @@ from app.core.logging import get_logger
 from app.models.analysis import Analysis
 from app.models.enums import AnalysisStatus, AnalysisType
 from app.models.review import Review
+from app.models.review_fetch import ReviewFetch
 from app.services.heuristic_engine import (
     heuristic_analysis,
     lexicon_negative_tokens,
@@ -53,6 +54,58 @@ def _tokens(text: str) -> list[str]:
 def _review_text_for_heuristic(r: Review) -> str:
     parts = [r.title or "", r.body or ""]
     return " ".join(p.strip() for p in parts if p and p.strip()).strip() or (r.body or "").strip()
+
+
+def _try_float(*vals: object) -> float | None:
+    for v in vals:
+        if v is None:
+            continue
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def _seller_intel_score_from_profile(profile: dict[str, Any]) -> float | None:
+    """Apify profil alanlarından 0–10 skor (overall rating + yanıt oranı)."""
+    rating = _try_float(
+        profile.get("overallRating"),
+        profile.get("store_puan"),
+        profile.get("storeRating"),
+        profile.get("rating"),
+    )
+    score_r: float | None = None
+    if rating is not None:
+        r = max(1.0, min(5.0, rating))
+        score_r = (r - 1.0) / 4.0 * 10.0
+
+    ans_raw = _try_float(
+        profile.get("answer_rate"),
+        profile.get("answerRate"),
+        profile.get("yanitOrani"),
+        profile.get("responseRate"),
+        profile.get("mesajYanitOrani"),
+    )
+    score_a: float | None = None
+    if ans_raw is not None:
+        if ans_raw <= 1.0:
+            score_a = ans_raw * 10.0
+        else:
+            score_a = min(10.0, ans_raw / 10.0)
+
+    if score_r is not None and score_a is not None:
+        return round(0.7 * score_r + 0.3 * score_a, 4)
+    return score_r if score_r is not None else score_a
+
+
+def _seller_intel_score_from_fetch_json(intel: dict[str, Any] | None) -> float | None:
+    if not intel:
+        return None
+    profile = intel.get("profile")
+    if isinstance(profile, dict):
+        return _seller_intel_score_from_profile(profile)
+    return None
 
 
 def _detect_lang(text: str) -> str:
@@ -141,7 +194,17 @@ async def _run_heuristic(session: Any, analysis_id: uuid.UUID) -> None:
     sentiment = {k: round(v / ssum, 4) for k, v in sentiment.items()}
 
     avg_rating = sum(int(r.rating) for r in revs) / len(revs)
-    overall_score = round(max(0.0, min(10.0, (avg_rating - 1) / 4 * 10)), 2)
+    base_overall_score = round(max(0.0, min(10.0, (avg_rating - 1) / 4 * 10)), 2)
+
+    fetch_row = await session.get(ReviewFetch, row.fetch_id)
+    seller_intel = fetch_row.seller_intelligence_json if fetch_row else None
+    seller_component = _seller_intel_score_from_fetch_json(
+        seller_intel if isinstance(seller_intel, dict) else None,
+    )
+    if seller_component is not None:
+        overall_score = round(0.8 * base_overall_score + 0.2 * seller_component, 2)
+    else:
+        overall_score = base_overall_score
 
     dated.sort(key=lambda x: x[0])
     mid = len(dated) // 2 or 1
@@ -218,6 +281,12 @@ async def _run_heuristic(session: Any, analysis_id: uuid.UUID) -> None:
             "rating_trend": trend,
             "reply_rate": reply_rate,
             "heuristic_lexicon": "app/data/heuristic_lexicon.json",
+            "seller_intelligence_blend": {
+                "weight": 0.2,
+                "base_overall_score": base_overall_score,
+                "seller_profile_score": seller_component,
+                "blended_overall_score": overall_score,
+            },
         },
     }
     row.status = AnalysisStatus.COMPLETED

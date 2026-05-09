@@ -71,6 +71,20 @@ function formatDuration(totalSec: number): string {
 const TARGET_APP_UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
+function classifyMarketplaceSellerUrl(url: string): "ok" | "amazon" | "invalid" {
+  const u = url.trim().toLowerCase();
+  if (u.length < 12) {
+    return "invalid";
+  }
+  if (u.includes("amazon.")) {
+    return "amazon";
+  }
+  if (u.includes("trendyol.com") || u.includes("hepsiburada.com") || u.includes("n11.com")) {
+    return "ok";
+  }
+  return "invalid";
+}
+
 function formatTargetAppOptionLabel(app: AppDto): string {
   return `${app.name} — ${app.package_name || app.bundle_id || app.id.slice(0, 8)}`;
 }
@@ -99,6 +113,8 @@ function AnalyzeHubConnected() {
   );
 
   const [platform, setPlatform] = useState<SearchPlatform>("google_play");
+  const [storeSourceMode, setStoreSourceMode] = useState<"catalog" | "marketplace">("catalog");
+  const [marketplaceSellerUrl, setMarketplaceSellerUrl] = useState("");
   const [draftQuery, setDraftQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");
 
@@ -288,6 +304,52 @@ function AnalyzeHubConnected() {
     },
   });
 
+  const externalScraperQuery = useQuery({
+    queryKey: ["integrations", "external-scraper", "status"],
+    queryFn: () =>
+      apiFetch<{ enabled: boolean; marketplace_analysis_ready: boolean }>(
+        "/api/v1/integrations/external-scraper/status",
+        { getToken },
+      ),
+    enabled: Boolean(isSignedIn && isLoaded),
+    staleTime: 60_000,
+  });
+
+  const marketplacePullMutation = useMutation({
+    mutationFn: async (payload: { appId: string; sellerUrl: string }) => {
+      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${payload.appId}/fetch-marketplace-seller`, {
+        method: "POST",
+        body: {
+          from_date: dateRange.from,
+          to_date: dateRange.to,
+          seller_url: payload.sellerUrl,
+          max_sellers: 1,
+        },
+        getToken,
+      });
+    },
+    onSuccess: (row) => {
+      setStoreFetchId(String(row.id).trim());
+      addFetchProgressEvent({
+        key: `${row.id}:created`,
+        at: new Date().toISOString(),
+        label: t("fetchEventCreatedLabel"),
+        reason: t("fetchEventCreatedReason"),
+      });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
+      void queryClient.invalidateQueries({ queryKey: ["apps", String(row.app_id), "stats"] });
+    },
+    onError: (err) => {
+      if (err instanceof ApiError && err.status >= 500) {
+        toast.error(t("storeReviewsPullFailed"));
+        return;
+      }
+      const msg = err instanceof ApiError ? err.message : tCommon("error");
+      toast.error(msg);
+    },
+  });
+
   const fetchRowQuery = useQuery({
     queryKey: storeFetchId ? queryKeys.reviews.fetchById(storeFetchId) : ["analyzeHub", "fetch", "idle"],
     queryFn: async () => {
@@ -376,12 +438,13 @@ function AnalyzeHubConnected() {
 
   useEffect(() => {
     const row = fetchRowQuery.data;
-    if (!sessionApp || !storeFetchId || row?.id !== storeFetchId || row.status !== "completed") {
+    const appIdForHydrate = (sessionApp?.id ?? targetAppId.trim()) || "";
+    if (!appIdForHydrate || !storeFetchId || row?.id !== storeFetchId || row.status !== "completed") {
       return;
     }
     const runToken = ++hydrateRunTokenRef.current;
     let cancelled = false;
-    const appId = sessionApp.id;
+    const appId = appIdForHydrate;
     void (async () => {
       setIsHydratingPool(true);
       setHydratedPoolCount(0);
@@ -450,7 +513,7 @@ function AnalyzeHubConnected() {
     return () => {
       cancelled = true;
     };
-  }, [addFetchProgressEvent, sessionApp, storeFetchId, fetchRowQuery.data, getToken, t, tCommon]);
+  }, [addFetchProgressEvent, sessionApp, targetAppId, storeFetchId, fetchRowQuery.data, getToken, t, tCommon]);
 
   useEffect(() => {
     const row = fetchRowQuery.data;
@@ -695,6 +758,56 @@ function AnalyzeHubConnected() {
     }
     return sessionApp?.id ?? "";
   }, [targetAppId, sessionApp?.id]);
+
+  const handlePullMarketplaceReviews = useCallback(() => {
+    if (!requireSignedIn()) {
+      return;
+    }
+    const appId = effectiveAppId;
+    if (!appId) {
+      toast.error(t("analyzeFooterNeedApp"));
+      return;
+    }
+    const cls = classifyMarketplaceSellerUrl(marketplaceSellerUrl);
+    if (cls === "amazon") {
+      toast.error(t("marketplaceAmazonNotSupported"));
+      return;
+    }
+    if (cls !== "ok") {
+      toast.error(t("marketplaceUrlInvalid"));
+      return;
+    }
+    if (!externalScraperQuery.data?.enabled) {
+      toast.error(t("marketplaceApifyDisabled"));
+      return;
+    }
+    resetFetchProgressTimeline();
+    addFetchProgressEvent({
+      key: `${appId}:marketplace-request-start`,
+      at: new Date().toISOString(),
+      label: t("fetchEventRequestSentLabel"),
+      reason: t("fetchEventRequestSentReason"),
+    });
+    setStoreFetchId(null);
+    setPoolLines([]);
+    setHydratedReviews([]);
+    setIsHydratingPool(false);
+    setHydratedPoolCount(0);
+    hydrateRunTokenRef.current += 1;
+    lastFetchHydratedToPoolRef.current = null;
+    storeFetchFailedToastRef.current = null;
+    storeFetchPollErrorToastRef.current = null;
+    marketplacePullMutation.mutate({ appId, sellerUrl: marketplaceSellerUrl.trim() });
+  }, [
+    addFetchProgressEvent,
+    effectiveAppId,
+    externalScraperQuery.data?.enabled,
+    marketplacePullMutation,
+    marketplaceSellerUrl,
+    requireSignedIn,
+    resetFetchProgressTimeline,
+    t,
+  ]);
 
   const canRunUnifiedAnalysis = useMemo(() => {
     if (poolLines.length > 0) {
@@ -1131,82 +1244,317 @@ function AnalyzeHubConnected() {
             <h2 id="analyze-store-heading" className="sr-only">
               {t("tabStore")}
             </h2>
-            <div className="space-y-2">
-              <Label htmlFor="store-search" className="text-foreground">
-                {t("searchLabel")}
-              </Label>
-              <Input
-                id="store-search"
-                value={draftQuery}
-                onChange={(e) => setDraftQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    e.preventDefault();
-                    if (requireSignedIn()) {
-                      setActiveQuery(draftQuery.trim());
-                    }
-                  }
-                }}
-                placeholder={t("searchPlaceholder")}
-                autoComplete="off"
-                className="rounded-xl border-border bg-card"
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="text-sm font-medium text-foreground">{t("storeSourceLabel")}</span>
+              <SegmentedTwo
+                ariaLabel={t("storeSourceAria")}
+                left={t("storeSourceCatalog")}
+                right={t("storeSourceMarketplace")}
+                value={storeSourceMode === "catalog" ? "left" : "right"}
+                onChange={(v) => setStoreSourceMode(v === "left" ? "catalog" : "marketplace")}
               />
             </div>
 
-            <div className="space-y-2">
-              <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
-              <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                <Button
-                  type="button"
-                  variant={platform === "google_play" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "rounded-full",
-                    platform === "google_play" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
-                  )}
-                  onClick={() => setPlatform("google_play")}
-                >
-                  {t("platformAndroid")}
-                </Button>
-                <Button
-                  type="button"
-                  variant={platform === "app_store" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "rounded-full",
-                    platform === "app_store" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
-                  )}
-                  onClick={() => setPlatform("app_store")}
-                >
-                  {t("platformIos")}
-                </Button>
-                <Button
-                  type="button"
-                  variant={platform === "both" ? "default" : "outline"}
-                  size="sm"
-                  className={cn(
-                    "rounded-full",
-                    platform === "both" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
-                  )}
-                  onClick={() => setPlatform("both")}
-                >
-                  {t("platformBoth")}
-                </Button>
-                <Button
-                  type="button"
-                  className="h-10 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
-                  onClick={() => {
-                    if (requireSignedIn()) {
-                      setActiveQuery(draftQuery.trim());
-                    }
-                  }}
-                  disabled={!isLoaded || draftQuery.trim().length < 2}
-                >
-                  <Search className="mr-2 size-4" aria-hidden />
-                  {t("searchCatalogCta")}
-                </Button>
+            {storeSourceMode === "catalog" ? (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="store-search" className="text-foreground">
+                    {t("searchLabel")}
+                  </Label>
+                  <Input
+                    id="store-search"
+                    value={draftQuery}
+                    onChange={(e) => setDraftQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (requireSignedIn()) {
+                          setActiveQuery(draftQuery.trim());
+                        }
+                      }
+                    }}
+                    placeholder={t("searchPlaceholder")}
+                    autoComplete="off"
+                    className="rounded-xl border-border bg-card"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <span className="block text-sm font-medium text-foreground">{t("platformRowLabel")}</span>
+                  <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                    <Button
+                      type="button"
+                      variant={platform === "google_play" ? "default" : "outline"}
+                      size="sm"
+                      className={cn(
+                        "rounded-full",
+                        platform === "google_play" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                      )}
+                      onClick={() => setPlatform("google_play")}
+                    >
+                      {t("platformAndroid")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={platform === "app_store" ? "default" : "outline"}
+                      size="sm"
+                      className={cn(
+                        "rounded-full",
+                        platform === "app_store" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                      )}
+                      onClick={() => setPlatform("app_store")}
+                    >
+                      {t("platformIos")}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={platform === "both" ? "default" : "outline"}
+                      size="sm"
+                      className={cn(
+                        "rounded-full",
+                        platform === "both" ? "bg-primary text-primary-foreground hover:bg-primary/90" : "",
+                      )}
+                      onClick={() => setPlatform("both")}
+                    >
+                      {t("platformBoth")}
+                    </Button>
+                    <Button
+                      type="button"
+                      className="h-10 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
+                      onClick={() => {
+                        if (requireSignedIn()) {
+                          setActiveQuery(draftQuery.trim());
+                        }
+                      }}
+                      disabled={!isLoaded || draftQuery.trim().length < 2}
+                    >
+                      <Search className="mr-2 size-4" aria-hidden />
+                      {t("searchCatalogCta")}
+                    </Button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="space-y-4 rounded-2xl border border-teal-200/35 bg-teal-50/10 p-4 dark:border-teal-800/25 dark:bg-teal-950/12 sm:p-5">
+                <div>
+                  <p className="text-base font-semibold text-foreground">{t("marketplacePanelTitle")}</p>
+                  <p className="mt-1 text-sm text-muted-foreground">{t("marketplaceHint")}</p>
+                </div>
+                {!externalScraperQuery.data?.enabled && !externalScraperQuery.isPending ? (
+                  <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
+                    {t("marketplaceApifyDisabled")}
+                  </p>
+                ) : null}
+                {!appsQuery.isPending && registeredAppsDeduped.length === 0 && !sessionApp ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t("noAppsYet")}{" "}
+                    <button
+                      type="button"
+                      className="font-medium text-primary/90 underline"
+                      onClick={() => router.push("/apps/new")}
+                    >
+                      {t("goCreateApp")}
+                    </button>
+                  </p>
+                ) : null}
+                <div className="space-y-2">
+                  <Label htmlFor="marketplace-reg-picker" className="text-foreground">
+                    {t("targetAppLabel")}
+                  </Label>
+                  <RegisteredAppGridPicker
+                    id="marketplace-reg-picker"
+                    apps={registeredAppsDeduped}
+                    value={registeredAppsDeduped.find((a) => a.id === targetAppId.trim()) ?? sessionApp ?? null}
+                    onChange={(app) => {
+                      setTargetAppId(app?.id ?? "");
+                      if (app) {
+                        setTargetAppPickerText(formatTargetAppOptionLabel(app));
+                      } else {
+                        setTargetAppPickerText("");
+                      }
+                    }}
+                    disabled={!registeredAppsDeduped.length && !sessionApp}
+                    placeholder={t("compareRegisteredSelectPlaceholder")}
+                    clearLabel={t("compareRegisteredPickerClear")}
+                    getPlatformLabel={registryPlatformLabel}
+                  />
+                  {sessionApp && !targetAppId.trim() ? (
+                    <p className="text-xs text-muted-foreground">{t("sessionAppLinkedHint", { name: sessionApp.name })}</p>
+                  ) : null}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="marketplace-seller-url" className="text-foreground">
+                    {t("marketplaceUrlLabel")}
+                  </Label>
+                  <Input
+                    id="marketplace-seller-url"
+                    value={marketplaceSellerUrl}
+                    onChange={(e) => setMarketplaceSellerUrl(e.target.value)}
+                    placeholder={t("marketplaceUrlPlaceholder")}
+                    autoComplete="off"
+                    className="rounded-xl border-border bg-card"
+                  />
+                </div>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[2fr_2fr] sm:items-end">
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="marketplace-fetch-date-preset" className="text-sm font-medium text-foreground">
+                      {t("dateRangeLabel")}
+                    </Label>
+                    <SelectNative
+                      id="marketplace-fetch-date-preset"
+                      value={datePreset}
+                      onChange={(e) => setDatePreset(e.target.value as DatePresetId)}
+                      className="h-11 rounded-xl"
+                    >
+                      <option value="7d">{t("datePresetLast7")}</option>
+                      <option value="30d">{t("datePresetLast30")}</option>
+                      <option value="90d">{t("datePresetLast90")}</option>
+                      <option value="180d">{t("datePresetLast180")}</option>
+                      <option value="365d">{t("datePresetLast365")}</option>
+                      <option value="2y">{t("datePresetLast2y")}</option>
+                      <option value="5y">{t("datePresetLast5y")}</option>
+                      <option value="all">{t("datePresetAll")}</option>
+                    </SelectNative>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <div className="h-5 invisible select-none" aria-hidden>
+                      &nbsp;
+                    </div>
+                    <Button
+                      type="button"
+                      className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
+                      onClick={() => void handlePullMarketplaceReviews()}
+                      disabled={
+                        !effectiveAppId ||
+                        classifyMarketplaceSellerUrl(marketplaceSellerUrl) !== "ok" ||
+                        !externalScraperQuery.data?.enabled ||
+                        externalScraperQuery.isPending ||
+                        marketplacePullMutation.isPending ||
+                        fetchRowQuery.data?.status === "pending" ||
+                        fetchRowQuery.data?.status === "running" ||
+                        (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                      }
+                    >
+                      {marketplacePullMutation.isPending ||
+                      fetchRowQuery.data?.status === "pending" ||
+                      (Boolean(storeFetchId) && fetchRowQuery.isPending)
+                        ? tCommon("loading")
+                        : fetchRowQuery.data?.status === "running"
+                          ? t("fetchRunningShort")
+                          : t("marketplacePullCta")}
+                    </Button>
+                  </div>
+                </div>
+                {effectiveAppId && storeFetchId && fetchRowQuery.isError ? (
+                  <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
+                    <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
+                    <p className="text-xs break-words text-red-800/90">
+                      {fetchRowQuery.error instanceof ApiError && fetchRowQuery.error.status === 404
+                        ? t("fetchHintPending")
+                        : formatClientFetchError(fetchRowQuery.error)}
+                    </p>
+                    <Button type="button" variant="outline" size="sm" onClick={() => void fetchRowQuery.refetch()}>
+                      {tCommon("retry")}
+                    </Button>
+                  </div>
+                ) : null}
+                {effectiveAppId &&
+                (marketplacePullMutation.isPending ||
+                  (Boolean(storeFetchId) &&
+                    (fetchRowQuery.isPending ||
+                      fetchRowQuery.data?.status === "pending" ||
+                      fetchRowQuery.data?.status === "running" ||
+                      fetchRowQuery.data?.status === "completed"))) ? (
+                  <div className="space-y-2">
+                    <p className="text-sm font-medium text-foreground">{t("fetchProgressLabel")}</p>
+                    <div className="grid gap-2 sm:grid-cols-1">
+                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t("progressSectionElapsed")}
+                        </p>
+                        <p className="text-lg font-bold tabular-nums text-foreground">{fetchElapsedText}</p>
+                      </div>
+                    </div>
+                    {fetchRowQuery.data?.status === "completed" ? (
+                      <div className="rounded-xl border border-border bg-card/80 px-3 py-2 sm:max-w-md">
+                        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                          {t("progressSectionCollected")}
+                        </p>
+                        <p className="text-lg font-bold tabular-nums text-foreground">
+                          {fetchRowQuery.data?.review_count ?? 0}
+                        </p>
+                      </div>
+                    ) : null}
+                    <p className="text-xs text-muted-foreground">{fetchDynamicHint}</p>
+                    <div className="rounded-xl border border-border bg-card/70 px-3 py-2">
+                      <p
+                        key={`${storeFetchId ?? "idle"}-${progressHintIdx}`}
+                        className="text-xs font-medium text-foreground animate-in fade-in duration-300"
+                      >
+                        {rotatingProgressHints[progressHintIdx]}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
+                {effectiveAppId && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
+                  <p className="text-sm text-red-700">{fetchRowQuery.data.error_message}</p>
+                ) : null}
+                {effectiveAppId && fetchRowQuery.data?.status === "completed" ? (
+                  <p className="text-sm font-medium text-emerald-800">
+                    {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
+                  </p>
+                ) : null}
+                {isHydratingPool ? (
+                  <div className="space-y-2 rounded-xl border border-orange-200/35 bg-orange-50/20 p-3 dark:border-orange-800/28 dark:bg-orange-950/12">
+                    <p className="text-sm font-semibold text-foreground">{t("hydratePoolTitle")}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {fetchRowQuery.data?.review_count
+                        ? t("hydratePoolRowsTotal", {
+                            loaded: hydratedPoolCount,
+                            total: fetchRowQuery.data.review_count,
+                          })
+                        : t("hydratePoolRows", { loaded: hydratedPoolCount })}
+                    </p>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-orange-100/50 dark:bg-orange-950/30">
+                      <div className="h-full w-1/3 animate-pulse rounded-full bg-orange-500/55" />
+                    </div>
+                  </div>
+                ) : null}
+                {hydratedReviews.length > 0 ? (
+                  <details className="rounded-xl border border-border bg-card/80 p-3">
+                    <summary className="cursor-pointer select-none text-sm font-semibold text-foreground">
+                      {t("inspectReviewsSummary", { count: hydratedReviews.length })}
+                    </summary>
+                    <div className="mt-3 space-y-3">
+                      <div className="flex flex-wrap gap-2">
+                        <Button type="button" variant="outline" size="sm" onClick={downloadReviewsCsv}>
+                          <Download className="mr-2 size-4" aria-hidden />
+                          {t("downloadCsv")}
+                        </Button>
+                        <Button type="button" variant="outline" size="sm" onClick={() => void downloadReviewsExcel()}>
+                          <Download className="mr-2 size-4" aria-hidden />
+                          {t("downloadExcel")}
+                        </Button>
+                      </div>
+                      <div className="max-h-[420px] space-y-2 overflow-y-auto pr-1">
+                        {hydratedReviews.map((row, idx) => (
+                          <article key={row.id} className="rounded-xl border border-border bg-muted/80 px-3 py-2">
+                            <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
+                              <p>
+                                #{idx + 1} | {t("hubReviewLineRating", { rating: row.rating })}
+                              </p>
+                              <p>{t("hubReviewLineDate", { date: formatReviewDate(row.review_date) })}</p>
+                            </div>
+                            {row.title ? <p className="mt-1 text-sm font-medium text-foreground">{row.title}</p> : null}
+                            <p className="mt-1 whitespace-pre-wrap text-sm text-foreground">{row.body}</p>
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  </details>
+                ) : null}
               </div>
-            </div>
+            )}
 
             {!isPublicApiBaseUrlConfigured() ? (
               <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
@@ -1214,7 +1562,7 @@ function AnalyzeHubConnected() {
               </p>
             ) : null}
 
-            {selectedStoreHit && (sessionApp || isPinningStore) ? (
+            {storeSourceMode === "catalog" && selectedStoreHit && (sessionApp || isPinningStore) ? (
               <div
                 ref={pinnedPanelRef}
                 className="space-y-4 rounded-2xl border border-orange-200/30 bg-orange-50/12 p-4 dark:border-orange-800/22 dark:bg-orange-950/10 sm:p-5"
@@ -1420,7 +1768,7 @@ function AnalyzeHubConnected() {
               </div>
             ) : null}
 
-            {activeQuery.length >= 2 && !hideStoreResultGrid ? (
+            {storeSourceMode === "catalog" && activeQuery.length >= 2 && !hideStoreResultGrid ? (
               <div className="space-y-3">
                 <h3 className="text-sm font-medium text-muted-foreground">
                   {t("resultsHeading", { count: results.length })}

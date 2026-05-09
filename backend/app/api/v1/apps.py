@@ -26,7 +26,7 @@ from app.schemas.analysis import AnalysisListResponse, AnalysisResponse
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
 from app.schemas.review_fetch import (
-    GoogleMapsFetchCreate,
+    MarketplaceSellerFetchCreate,
     ReviewFetchCreate,
     ReviewFetchResponse,
     ReviewFetchWithAppNameResponse,
@@ -38,7 +38,7 @@ from app.services.fetch_approval import (
     review_fetch_requires_admin_approval,
     send_telegram_to_admins,
 )
-from app.workers.scraper import google_maps_fetch_task, review_fetch_task
+from app.workers.scraper import marketplace_seller_fetch_task, review_fetch_task
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 log = get_logger(__name__)
@@ -90,15 +90,9 @@ def _enqueue_review_fetch(
     )
 
 
-def _enqueue_google_maps_fetch(
-    fetch_id: str,
-    search_term: str,
-    max_reviews: int,
-    sort_by: str,
-    target_language: str,
-) -> None:
-    google_maps_fetch_task.apply_async(
-        args=[fetch_id, search_term, max_reviews, sort_by, target_language],
+def _enqueue_marketplace_seller_fetch(fetch_id: str, seller_url: str, max_sellers: int) -> None:
+    marketplace_seller_fetch_task.apply_async(
+        args=[fetch_id, seller_url, max_sellers],
         queue="scraper",
     )
 
@@ -283,12 +277,12 @@ async def create_fetch(
 
 
 @router.post(
-    "/{app_id}/fetch-google-maps",
+    "/{app_id}/fetch-marketplace-seller",
     response_model=ReviewFetchResponse,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_google_maps_fetch(
-    body: GoogleMapsFetchCreate,
+async def create_marketplace_seller_fetch(
+    body: MarketplaceSellerFetchCreate,
     app: Annotated[App, Depends(require_app_owned)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
     background_tasks: BackgroundTasks,
@@ -297,29 +291,27 @@ async def create_google_maps_fetch(
     if not settings.external_scraper_apify_token.strip():
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Google Maps connector yapılandırılmamış (EXTERNAL_SCRAPER_APIFY_TOKEN).",
+            detail="Pazaryeri bağlayıcı yapılandırılmamış (EXTERNAL_SCRAPER_APIFY_TOKEN).",
         )
     fetch = ReviewFetch(
         app_id=app.id,
         status=FetchStatus.PENDING,
         from_date=body.from_date,
         to_date=body.to_date,
-        review_limit=body.max_reviews,
+        review_limit=None,
         review_scope="global",
-        source="google_maps_scraper",
+        source="marketplace_seller_tr",
         review_count=0,
     )
     session.add(fetch)
     await session.flush()
-    log.info("google_maps_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
+    log.info("marketplace_seller_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
     await session.commit()
     background_tasks.add_task(
-        _enqueue_google_maps_fetch,
+        _enqueue_marketplace_seller_fetch,
         str(fetch.id),
-        body.search_term,
-        body.max_reviews,
-        body.sort_by,
-        body.target_language,
+        body.seller_url,
+        body.max_sellers,
     )
     return fetch
 

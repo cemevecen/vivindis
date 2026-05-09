@@ -30,9 +30,10 @@ export type ReviewFetchDto = {
   to_date: string;
   review_limit?: number | null;
   review_scope: ReviewScope;
-  source?: "store" | "manual_import" | "google_maps_scraper" | string;
+  source?: "store" | "manual_import" | "google_maps_scraper" | "marketplace_seller_tr" | string;
   review_count: number;
   error_message: string | null;
+  seller_intelligence_json?: Record<string, unknown> | null;
   started_at: string | null;
   completed_at: string | null;
   created_at: string;
@@ -55,7 +56,7 @@ export type ReviewListItemDto = {
   body: string;
   title: string | null;
   review_date: string;
-  platform: "google_play" | "app_store" | "google_maps_scraper";
+  platform: "google_play" | "app_store" | "google_maps_scraper" | "marketplace_seller_tr";
   author: string | null;
 };
 
