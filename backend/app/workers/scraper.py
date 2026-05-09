@@ -25,6 +25,7 @@ from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.db.session import get_async_session_maker
 from app.services.async_rate_limiter import AsyncTokenBucketRateLimiter
+from app.services.apify_marketplace_reviews import run_marketplace_review_aggregator
 from app.services.apify_marketplace_seller import run_marketplace_seller_intelligence
 from app.services.play_scraper_headers import ensure_play_request_user_agents
 from app.services.user_agents import pick_user_agent
@@ -914,6 +915,40 @@ def _profile_review_date(profile: dict[str, Any], fallback: date) -> date:
     return fallback
 
 
+def _marketplace_slug_seed_from_seller_url(seller_url: str) -> str:
+    u = seller_url.strip()
+    low = u.lower()
+    idx = low.find("/magaza/")
+    if idx < 0:
+        return ""
+    tail = u[idx + len("/magaza/") :]
+    part = tail.split("?")[0].split("/")[0].strip("-_/")
+    if not part:
+        return ""
+    base = part.split("-m-", 1)[0] if "-m-" in part else part
+    return base.replace("-", " ").strip()
+
+
+def _marketplace_platforms_for_seller_url(seller_url: str) -> list[str]:
+    low = seller_url.lower()
+    if "trendyol.com" in low:
+        return ["trendyol"]
+    if "hepsiburada.com" in low:
+        return ["hepsiburada"]
+    if "n11.com" in low:
+        return ["n11"]
+    return ["trendyol", "hepsiburada", "n11"]
+
+
+def _parse_marketplace_review_date(raw: object, fallback: date) -> date:
+    if not isinstance(raw, str) or not raw.strip():
+        return fallback
+    try:
+        return datetime.fromisoformat(raw.strip().replace("Z", "+00:00")).date()
+    except Exception:
+        return fallback
+
+
 async def _execute_marketplace_seller_fetch(
     session: Any,
     fetch_id: uuid.UUID,
@@ -961,53 +996,100 @@ async def _execute_marketplace_seller_fetch(
 
         primary = profiles[0]
         fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
+        await session.flush()
 
-        rating_raw = primary.get("overallRating")
-        try:
-            rating_int = int(round(float(rating_raw)))
-        except (TypeError, ValueError):
-            rating_int = 3
-        rating_int = max(1, min(5, rating_int))
+        name_q = str(primary.get("sellerName") or "").strip()
+        slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
+        search_query = name_q if len(name_q) >= 2 else slug_q
+        if len(search_query) < 2:
+            raise RuntimeError("Satıcı adı veya mağaza URL'sinden arama terimi üretilemedi.")
 
-        body = _build_tr_marketplace_synthetic_body(primary)
-        if not body.strip():
-            body = f"Satıcı profili: {primary.get('sellerName') or seller_url}"
-
-        rd = _profile_review_date(primary, fetch.to_date)
-        if rd < fetch.from_date or rd > fetch.to_date:
-            rd = fetch.to_date
-
-        sid = str(primary.get("sellerId") or "unknown")[:200]
-        await _upsert_review(
-            session,
-            app_id=app.id,
-            fetch_id=fetch.id,
-            platform=StorePlatform.MARKETPLACE_SELLER_TR,
-            store_review_id=f"mp-{sid}"[:255],
-            rating=rating_int,
-            title=str(primary.get("sellerName") or "")[:1024] or None,
-            body=body,
-            author=str(primary.get("sellerName") or "") or None,
-            author_uri=str(primary.get("sellerUrl") or primary.get("sourceUrl") or seller_url)[:2048]
-            or None,
-            app_version_label=str(primary.get("platform") or "")[:64] or None,
-            lang="tr",
-            review_date=rd,
-            thumbs_up=0,
-            developer_reply=None,
-            reply_date=None,
+        review_cap = int(settings.external_scraper_marketplace_review_max_per_product)
+        review_rows = await run_marketplace_review_aggregator(
+            settings=settings,
+            search_query=search_query,
+            platforms=_marketplace_platforms_for_seller_url(seller_url),
+            max_reviews_per_product=review_cap,
         )
 
+        from_d = fetch.from_date
+        to_d = fetch.to_date
+        for item in review_rows:
+            if not isinstance(item, dict):
+                continue
+            if item.get("recordType") == "RUN_SUMMARY" or item.get("type") == "RUN_SUMMARY":
+                continue
+            dv = str(item.get("dataVersion") or "")
+            if "run_summary" in dv.lower():
+                continue
+            if "review" not in dv.lower() and not item.get("reviewId"):
+                continue
+            rid = str(item.get("reviewId") or "").strip()
+            if not rid:
+                continue
+            rd = _parse_marketplace_review_date(item.get("reviewDate"), to_d)
+            if rd < from_d or rd > to_d:
+                continue
+            rating_raw = item.get("rating")
+            try:
+                rating_int = int(round(float(rating_raw)))
+            except (TypeError, ValueError):
+                rating_int = 3
+            rating_int = max(1, min(5, rating_int))
+            title = str(item.get("title") or "").strip()[:1024] or None
+            body = str(item.get("body") or "").strip()
+            if not body:
+                body = "(Yorum metni yok)"
+            if len(body) > 12000:
+                body = body[:12000]
+            author = str(item.get("reviewerName") or "").strip()[:512] or None
+            purl = str(item.get("productUrl") or item.get("sourceUrl") or "").strip()
+            mplat = str(item.get("platform") or "").strip()[:60] or None
+            hc = item.get("helpfulCount")
+            try:
+                thumbs = int(hc) if hc is not None else 0
+            except (TypeError, ValueError):
+                thumbs = 0
+            await _upsert_review(
+                session,
+                app_id=app.id,
+                fetch_id=fetch.id,
+                platform=StorePlatform.MARKETPLACE_SELLER_TR,
+                store_review_id=rid[:255],
+                rating=rating_int,
+                title=title,
+                body=body,
+                author=author,
+                author_uri=purl[:2048] if purl else None,
+                app_version_label=mplat,
+                lang="tr",
+                review_date=rd,
+                thumbs_up=max(0, thumbs),
+                developer_reply=None,
+                reply_date=None,
+            )
+
         await _commit_reviews_and_sync_fetch_count(session, fetch.id)
+        cnt_r = await session.execute(select(func.count()).select_from(Review).where(Review.fetch_id == fetch.id))
+        total_ins = int(cnt_r.scalar_one())
+        if total_ins == 0:
+            raise RuntimeError(
+                "Seçilen tarih aralığında pazaryeri ürün yorumu bulunamadı. "
+                "Tarih aralığını genişletin; arama sonuçları bu satıcıyla eşleşmeyebilir."
+            )
+
         fetch.status = FetchStatus.COMPLETED
         fetch.completed_at = datetime.now(UTC)
         fetch.error_message = None
         await session.flush()
-        log.info("marketplace_seller_fetch_completed", fetch_id=str(fetch_id))
-    except Exception:
+        log.info("marketplace_seller_fetch_completed", fetch_id=str(fetch_id), reviews=total_ins)
+    except Exception as exc:
         fetch.status = FetchStatus.FAILED
         fetch.completed_at = datetime.now(UTC)
-        fetch.error_message = "Pazaryeri satıcı çekimi başarısız (Apify / bağlantı)."
+        detail = str(exc).strip()
+        fetch.error_message = (
+            detail[:8000] if detail else "Pazaryeri satıcı çekimi başarısız (Apify / bağlantı)."
+        )
         await session.flush()
         log.exception("marketplace_seller_fetch_failed", fetch_id=str(fetch_id))
         raise

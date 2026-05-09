@@ -126,6 +126,16 @@ class Settings(BaseSettings):
         validation_alias="EXTERNAL_SCRAPER_MARKETPLACE_ACTOR",
         description="Apify actor id for TR marketplace seller intelligence.",
     )
+    external_scraper_marketplace_reviews_actor: str = Field(
+        default="seralifatih/turkish-e-commerce-review-aggregator",
+        validation_alias="EXTERNAL_SCRAPER_MARKETPLACE_REVIEWS_ACTOR",
+        description="Apify actor id for TR marketplace product reviews (searchQuery flow).",
+    )
+    external_scraper_marketplace_review_max_per_product: int = Field(
+        default=80,
+        validation_alias="EXTERNAL_SCRAPER_MARKETPLACE_REVIEW_MAX_PER_PRODUCT",
+        description="Cap passed to review aggregator maxReviewsPerProduct for marketplace pulls.",
+    )
     external_scraper_timeout_seconds: int = Field(
         default=120,
         validation_alias="EXTERNAL_SCRAPER_TIMEOUT_SECONDS",

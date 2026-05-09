@@ -174,7 +174,6 @@ function AnalyzeHubConnected() {
   const [activeQuery, setActiveQuery] = useState("");
   const [storeCatalogPage, setStoreCatalogPage] = useState(0);
   const [storeCatalogLayout, setStoreCatalogLayout] = useState<"list" | "grid">("list");
-  const [marketplaceRegisteredExpanded, setMarketplaceRegisteredExpanded] = useState(true);
 
   const [compareDraftA, setCompareDraftA] = useState("");
   const [compareDraftB, setCompareDraftB] = useState("");
@@ -312,6 +311,20 @@ function AnalyzeHubConnected() {
     () => dedupeAppsForList(appsQuery.data ?? []),
     [appsQuery.data],
   );
+
+  const marketplaceAttachAppId = useMemo(() => {
+    if (sessionApp?.id) {
+      return sessionApp.id;
+    }
+    return registeredAppsDeduped[0]?.id ?? "";
+  }, [sessionApp?.id, registeredAppsDeduped]);
+
+  const marketplaceAttachAppName = useMemo(() => {
+    if (sessionApp) {
+      return sessionApp.name;
+    }
+    return registeredAppsDeduped[0]?.name ?? "";
+  }, [sessionApp, registeredAppsDeduped]);
 
   const marketplaceUrlFieldPlaceholder = useMemo(() => {
     switch (marketplaceSite) {
@@ -507,7 +520,7 @@ function AnalyzeHubConnected() {
   const fetchRowQuery = useQuery({
     queryKey: storeFetchId ? queryKeys.reviews.fetchById(storeFetchId) : ["analyzeHub", "fetch", "idle"],
     queryFn: async () => {
-      const recoveryAppId = sessionApp?.id ?? targetAppId.trim();
+      const recoveryAppId = sessionApp?.id ?? (targetAppId.trim() || marketplaceAttachAppId);
       try {
         return await apiFetch<ReviewFetchDto>(`/api/v1/fetches/${storeFetchId}`, { getToken });
       } catch (err) {
@@ -826,26 +839,6 @@ function AnalyzeHubConnected() {
     [requireSignedIn, t],
   );
 
-  const selectRegisteredMarketplaceApp = useCallback(
-    (app: AppDto) => {
-      if (!requireSignedIn()) {
-        return;
-      }
-      pinRequestRef.current += 1;
-      setIsPinningStore(false);
-      setSelectedStoreHit(storeHitFromRegisteredApp(app));
-      setSessionApp(app);
-      setStoreFetchId(null);
-      setHydratedReviews([]);
-      setIsHydratingPool(false);
-      setHydratedPoolCount(0);
-      lastFetchHydratedToPoolRef.current = null;
-      storeFetchFailedToastRef.current = null;
-      storeFetchPollErrorToastRef.current = null;
-    },
-    [requireSignedIn],
-  );
-
   const handlePullStoreReviews = useCallback(() => {
     if (!requireSignedIn()) {
       return;
@@ -973,25 +966,13 @@ function AnalyzeHubConnected() {
     return sessionApp?.id ?? "";
   }, [targetAppId, sessionApp?.id]);
 
-  const marketplaceTargetLabel = useMemo(() => {
-    const id = effectiveAppId.trim();
-    if (!id) {
-      return "";
-    }
-    if (sessionApp?.id === id) {
-      return sessionApp.name;
-    }
-    const fromRegistry = registeredAppsDeduped.find((a) => a.id === id);
-    return fromRegistry?.name ?? id;
-  }, [effectiveAppId, registeredAppsDeduped, sessionApp?.id, sessionApp?.name]);
-
   const handlePullMarketplaceReviews = useCallback(() => {
     if (!requireSignedIn()) {
       return;
     }
-    const appId = effectiveAppId.trim();
+    const appId = marketplaceAttachAppId.trim();
     if (!appId) {
-      toast.error(t("marketplaceNeedStorePinToast"));
+      toast.error(t("marketplaceNeedAppToast"));
       return;
     }
     const cls = classifyMarketplaceSellerUrl(marketplaceSellerUrl);
@@ -1030,8 +1011,8 @@ function AnalyzeHubConnected() {
     marketplacePullMutation.mutate({ appId, sellerUrl: marketplaceSellerUrl.trim() });
   }, [
     addFetchProgressEvent,
-    effectiveAppId,
     externalScraperQuery.data?.enabled,
+    marketplaceAttachAppId,
     marketplacePullMutation,
     marketplaceSellerUrl,
     marketplaceSite,
@@ -1756,64 +1737,6 @@ function AnalyzeHubConnected() {
                     </button>
                   </p>
                 ) : null}
-                {registeredAppsDeduped.length > 0 ? (
-                  <div className="space-y-2 rounded-2xl border border-border bg-card p-4 sm:p-5">
-                    <button
-                      type="button"
-                      id="marketplace-registered-quick-pick-toggle"
-                      className="flex w-full min-w-0 items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
-                      onClick={() => setMarketplaceRegisteredExpanded((open) => !open)}
-                      aria-expanded={marketplaceRegisteredExpanded}
-                      aria-controls="marketplace-registered-quick-pick-panel"
-                      aria-label={
-                        marketplaceRegisteredExpanded
-                          ? t("marketplaceRegisteredQuickPickCollapse")
-                          : t("marketplaceRegisteredQuickPickExpand")
-                      }
-                    >
-                      <span className="min-w-0 flex-1 break-words pr-1 text-sm font-semibold text-foreground">
-                        {t("marketplaceRegisteredListTitle")}
-                      </span>
-                      <ChevronDown
-                        className={cn(
-                          "size-4 shrink-0 opacity-70 transition-transform",
-                          marketplaceRegisteredExpanded && "rotate-180",
-                        )}
-                        aria-hidden
-                      />
-                    </button>
-                    {marketplaceRegisteredExpanded ? (
-                      <div
-                        id="marketplace-registered-quick-pick-panel"
-                        role="region"
-                        aria-labelledby="marketplace-registered-quick-pick-toggle"
-                        className="space-y-2"
-                      >
-                        <p className="text-xs text-muted-foreground">{t("marketplaceRegisteredListHint")}</p>
-                        <div className="overflow-x-auto overflow-y-hidden rounded-xl border border-border p-2 pb-2.5 scrollbar-stable-visible [-webkit-overflow-scrolling:touch]">
-                          <div className="flex w-max min-w-full flex-nowrap gap-2">
-                            {registeredAppsDeduped.map((app) => (
-                              <button
-                                key={app.id}
-                                type="button"
-                                className={cn(
-                                  "flex w-[5.25rem] shrink-0 flex-col items-center gap-1.5 rounded-lg border p-2 transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                                  effectiveAppId === app.id
-                                    ? "border-primary bg-primary/5"
-                                    : "border-border/80 bg-card/40 hover:bg-muted/40",
-                                )}
-                                onClick={() => selectRegisteredMarketplaceApp(app)}
-                                aria-label={t("storeCatalogRegisteredPickAria", { name: app.name })}
-                              >
-                                <RegisteredAppTileVisual app={app} platformLabel={registryPlatformLabel(app.platform)} />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
                 <div className="space-y-2">
                   <span className="block text-sm font-medium text-foreground">{t("marketplaceSiteLabel")}</span>
                   <div className="grid min-w-0 grid-cols-3 gap-1.5 sm:gap-2 max-[359px]:grid-cols-1">
@@ -1847,9 +1770,9 @@ function AnalyzeHubConnected() {
                     ))}
                   </div>
                 </div>
-                {effectiveAppId.trim() && marketplaceTargetLabel ? (
-                  <p className="text-sm text-foreground">
-                    {t("marketplacePinnedAppBanner", { name: marketplaceTargetLabel })}
+                {marketplaceAttachAppId.trim() && marketplaceAttachAppName ? (
+                  <p className="text-sm text-muted-foreground">
+                    {t("marketplacePinnedAppBanner", { name: marketplaceAttachAppName })}
                   </p>
                 ) : null}
                 <div className="space-y-2">
@@ -1915,7 +1838,7 @@ function AnalyzeHubConnected() {
                       className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
                       onClick={() => void handlePullMarketplaceReviews()}
                       disabled={
-                        !effectiveAppId.trim() ||
+                        !marketplaceAttachAppId.trim() ||
                         !marketplacePullInputReady ||
                         !externalScraperQuery.data?.enabled ||
                         externalScraperQuery.isPending ||
@@ -1938,7 +1861,7 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 </div>
-                {effectiveAppId.trim() && storeFetchId && fetchRowQuery.isError ? (
+                {marketplaceAttachAppId.trim() && storeFetchId && fetchRowQuery.isError ? (
                   <div className="space-y-2 rounded-xl border border-red-200 bg-red-50/80 p-3">
                     <p className="text-sm font-medium text-red-800">{t("storeFetchPollFailed")}</p>
                     <p className="text-xs break-words text-red-800/90">
@@ -1951,7 +1874,7 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 ) : null}
-                {effectiveAppId.trim() &&
+                {marketplaceAttachAppId.trim() &&
                 (marketplacePullMutation.isPending ||
                   (Boolean(storeFetchId) &&
                     (fetchRowQuery.isPending ||
@@ -1990,15 +1913,15 @@ function AnalyzeHubConnected() {
                     </div>
                   </div>
                 ) : null}
-                {effectiveAppId.trim() && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
+                {marketplaceAttachAppId.trim() && fetchRowQuery.data?.status === "failed" && fetchRowQuery.data.error_message ? (
                   <p className="text-sm text-red-700">{fetchRowQuery.data.error_message}</p>
                 ) : null}
-                {effectiveAppId.trim() && fetchRowQuery.data?.status === "completed" ? (
+                {marketplaceAttachAppId.trim() && fetchRowQuery.data?.status === "completed" ? (
                   <p className="text-sm font-medium text-emerald-800">
                     {t("fetchCompletedHint", { count: fetchRowQuery.data.review_count })}
                   </p>
                 ) : null}
-                {effectiveAppId.trim() && isHydratingPool ? (
+                {marketplaceAttachAppId.trim() && isHydratingPool ? (
                   <div className="space-y-2 rounded-xl border border-orange-200/35 bg-orange-50/20 p-3 dark:border-orange-800/28 dark:bg-orange-950/12">
                     <p className="text-sm font-semibold text-foreground">{t("hydratePoolTitle")}</p>
                     <p className="text-xs text-muted-foreground">
@@ -2014,7 +1937,7 @@ function AnalyzeHubConnected() {
                     </div>
                   </div>
                 ) : null}
-                {effectiveAppId.trim() && hydratedReviews.length > 0 ? (
+                {marketplaceAttachAppId.trim() && hydratedReviews.length > 0 ? (
                   <details className="rounded-xl border border-border bg-card/80 p-3">
                     <summary className="cursor-pointer select-none text-sm font-semibold text-foreground">
                       {t("inspectReviewsSummary", { count: hydratedReviews.length })}
