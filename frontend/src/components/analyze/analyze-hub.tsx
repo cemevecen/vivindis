@@ -138,6 +138,7 @@ function formatTargetAppOptionLabel(app: AppDto): string {
 
 function AnalyzeHubConnected() {
   const t = useTranslations("analyzeHub");
+  const tApps = useTranslations("apps");
   const tNav = useTranslations("navigation");
   const tCommon = useTranslations("common");
   const { getToken, isLoaded, isSignedIn } = useAuth();
@@ -426,19 +427,24 @@ function AnalyzeHubConnected() {
     },
     onSuccess: (row) => {
       setStoreFetchId(String(row.id).trim());
+      const waiting = row.status === "waiting_approval";
       addFetchProgressEvent({
-        key: `${row.id}:created`,
+        key: `${row.id}:${waiting ? "waiting-approval" : "created"}`,
         at: new Date().toISOString(),
-        label: t("fetchEventCreatedLabel"),
-        reason: t("fetchEventCreatedReason"),
+        label: waiting ? t("fetchEventWaitingApprovalLabel") : t("fetchEventCreatedLabel"),
+        reason: waiting ? t("fetchEventWaitingApprovalReason") : t("fetchEventCreatedReason"),
       });
+      if (waiting) {
+        toast.success(tApps("fetchWaitingApprovalToast"));
+      }
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       void queryClient.invalidateQueries({ queryKey: ["apps", String(row.app_id), "stats"] });
     },
     onError: (err) => {
       if (err instanceof ApiError && err.status >= 500) {
-        toast.error(t("storeReviewsPullFailed"));
+        const detail = err.message.trim();
+        toast.error(detail.length > 0 ? detail : t("storeReviewsPullFailed"));
         return;
       }
       const msg = err instanceof ApiError ? err.message : tCommon("error");
@@ -472,19 +478,24 @@ function AnalyzeHubConnected() {
     },
     onSuccess: (row) => {
       setStoreFetchId(String(row.id).trim());
+      const waiting = row.status === "waiting_approval";
       addFetchProgressEvent({
-        key: `${row.id}:created`,
+        key: `${row.id}:${waiting ? "waiting-approval" : "created"}`,
         at: new Date().toISOString(),
-        label: t("fetchEventCreatedLabel"),
-        reason: t("fetchEventCreatedReason"),
+        label: waiting ? t("fetchEventWaitingApprovalLabel") : t("fetchEventCreatedLabel"),
+        reason: waiting ? t("fetchEventWaitingApprovalReason") : t("fetchEventCreatedReason"),
       });
+      if (waiting) {
+        toast.success(tApps("fetchWaitingApprovalToast"));
+      }
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(row.app_id) });
       void queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
       void queryClient.invalidateQueries({ queryKey: ["apps", String(row.app_id), "stats"] });
     },
     onError: (err) => {
       if (err instanceof ApiError && err.status >= 500) {
-        toast.error(t("storeReviewsPullFailed"));
+        const detail = err.message.trim();
+        toast.error(detail.length > 0 ? detail : t("storeReviewsPullFailed"));
         return;
       }
       const msg = err instanceof ApiError ? err.message : tCommon("error");
@@ -867,6 +878,9 @@ function AnalyzeHubConnected() {
     if (!row || !storeFetchId) {
       return "";
     }
+    if (row.status === "waiting_approval") {
+      return t("fetchHintWaitingApproval");
+    }
     if (row.status === "pending") {
       return t("fetchHintPending");
     }
@@ -884,6 +898,9 @@ function AnalyzeHubConnected() {
     if (!row || !storeFetchId || row.id !== storeFetchId) {
       return "";
     }
+    if (row.status === "waiting_approval") {
+      return t("fetchStageWaitingApproval");
+    }
     if (row.status === "pending") {
       return t("fetchStage1");
     }
@@ -900,11 +917,15 @@ function AnalyzeHubConnected() {
   }, [fetchRowQuery.data, isHydratingPool, storeFetchId, t]);
 
   const rotatingProgressHints = useMemo(() => {
-    const hints = [fetchStageLabel, fetchDynamicHint, t("estimatedTimeHint")]
+    const row = fetchRowQuery.data;
+    const isWaitingApproval =
+      Boolean(storeFetchId) && row?.id === storeFetchId && row?.status === "waiting_approval";
+    const tail = isWaitingApproval ? [] : [t("estimatedTimeHint")];
+    const hints = [fetchStageLabel, fetchDynamicHint, ...tail]
       .map((v) => v.trim())
       .filter((v, i, arr) => v.length > 0 && arr.indexOf(v) === i);
     return hints.length > 0 ? hints : [tCommon("loading")];
-  }, [fetchDynamicHint, fetchStageLabel, t, tCommon]);
+  }, [fetchDynamicHint, fetchRowQuery.data, fetchStageLabel, storeFetchId, t, tCommon]);
 
   useEffect(() => {
     setProgressHintIdx(0);
@@ -1795,6 +1816,7 @@ function AnalyzeHubConnected() {
                         marketplacePullMutation.isPending ||
                         fetchRowQuery.data?.status === "pending" ||
                         fetchRowQuery.data?.status === "running" ||
+                        fetchRowQuery.data?.status === "waiting_approval" ||
                         (Boolean(storeFetchId) && fetchRowQuery.isPending)
                       }
                     >
@@ -1804,7 +1826,9 @@ function AnalyzeHubConnected() {
                         ? tCommon("loading")
                         : fetchRowQuery.data?.status === "running"
                           ? t("fetchRunningShort")
-                          : t("marketplacePullCta")}
+                          : fetchRowQuery.data?.status === "waiting_approval"
+                            ? t("fetchWaitingApprovalShort")
+                            : t("marketplacePullCta")}
                     </Button>
                   </div>
                 </div>
@@ -1827,6 +1851,7 @@ function AnalyzeHubConnected() {
                     (fetchRowQuery.isPending ||
                       fetchRowQuery.data?.status === "pending" ||
                       fetchRowQuery.data?.status === "running" ||
+                      fetchRowQuery.data?.status === "waiting_approval" ||
                       fetchRowQuery.data?.status === "completed"))) ? (
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-foreground">{t("fetchProgressLabel")}</p>
@@ -2007,6 +2032,7 @@ function AnalyzeHubConnected() {
                         storePullMutation.isPending ||
                         fetchRowQuery.data?.status === "pending" ||
                         fetchRowQuery.data?.status === "running" ||
+                        fetchRowQuery.data?.status === "waiting_approval" ||
                         (Boolean(storeFetchId) && fetchRowQuery.isPending)
                       }
                     >
@@ -2016,7 +2042,9 @@ function AnalyzeHubConnected() {
                         ? tCommon("loading")
                         : fetchRowQuery.data?.status === "running"
                           ? t("fetchRunningShort")
-                          : t("pullStoreReviewsCta")}
+                          : fetchRowQuery.data?.status === "waiting_approval"
+                            ? t("fetchWaitingApprovalShort")
+                            : t("pullStoreReviewsCta")}
                     </Button>
                   </div>
                 </div>
@@ -2039,6 +2067,7 @@ function AnalyzeHubConnected() {
                     (fetchRowQuery.isPending ||
                       fetchRowQuery.data?.status === "pending" ||
                       fetchRowQuery.data?.status === "running" ||
+                      fetchRowQuery.data?.status === "waiting_approval" ||
                       fetchRowQuery.data?.status === "completed"))) ? (
                   <div className="space-y-2">
                     <p className="text-sm font-medium text-foreground">{t("fetchProgressLabel")}</p>
@@ -3041,6 +3070,7 @@ function AnalyzeHubConnected() {
                     storePullMutation.isPending ||
                     fetchRowQuery.data?.status === "pending" ||
                     fetchRowQuery.data?.status === "running" ||
+                    fetchRowQuery.data?.status === "waiting_approval" ||
                     (Boolean(storeFetchId) && fetchRowQuery.isPending)
                   }
                 >
@@ -3050,7 +3080,9 @@ function AnalyzeHubConnected() {
                     ? tCommon("loading")
                     : fetchRowQuery.data?.status === "running"
                       ? t("fetchRunningShort")
-                      : t("pullStoreReviewsCta")}
+                      : fetchRowQuery.data?.status === "waiting_approval"
+                        ? t("fetchWaitingApprovalShort")
+                        : t("pullStoreReviewsCta")}
                 </Button>
               </div>
             </div>
