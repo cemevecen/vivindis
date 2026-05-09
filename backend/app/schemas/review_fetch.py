@@ -67,6 +67,7 @@ class ReviewFetchResponse(BaseModel):
     to_date: date
     review_limit: int | None
     review_scope: str
+    source: str
     review_count: int
     error_message: str | None
     started_at: datetime | None
@@ -78,3 +79,31 @@ class ReviewFetchWithAppNameResponse(ReviewFetchResponse):
     """Kullanıcının tüm uygulamalarındaki son çekimler listesi için."""
 
     app_name: str
+
+
+class GoogleMapsFetchCreate(BaseModel):
+    from_date: date
+    to_date: date
+    search_term: str
+    max_reviews: int = 200
+    sort_by: str = "Newest"
+    target_language: str = "en"
+
+    @model_validator(mode="after")
+    def validate_google_maps_request(self) -> GoogleMapsFetchCreate:
+        if self.from_date > self.to_date:
+            msg = "from_date, to_date'den sonra olamaz."
+            raise ValueError(msg)
+        term = self.search_term.strip()
+        if len(term) < 2:
+            msg = "search_term en az 2 karakter olmalı."
+            raise ValueError(msg)
+        self.search_term = term[:240]
+        self.max_reviews = max(50, min(500, int(self.max_reviews)))
+        allowed = {"Newest", "Most relevant", "Highest rating", "Lowest rating"}
+        if self.sort_by not in allowed:
+            msg = "sort_by yalnızca 'Newest', 'Most relevant', 'Highest rating' veya 'Lowest rating' olabilir."
+            raise ValueError(msg)
+        lang = self.target_language.strip().lower()
+        self.target_language = (lang[:8] or "en")
+        return self

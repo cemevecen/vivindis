@@ -25,7 +25,12 @@ from app.models.user import User
 from app.schemas.analysis import AnalysisListResponse, AnalysisResponse
 from app.schemas.app import AppCreate, AppResponse, AppUpdate
 from app.schemas.review import ReviewListResponse, ReviewResponse
-from app.schemas.review_fetch import ReviewFetchCreate, ReviewFetchResponse, ReviewFetchWithAppNameResponse
+from app.schemas.review_fetch import (
+    GoogleMapsFetchCreate,
+    ReviewFetchCreate,
+    ReviewFetchResponse,
+    ReviewFetchWithAppNameResponse,
+)
 from app.schemas.review_import import ReviewImportCreate, ReviewImportResponse
 from app.services.fetch_approval import (
     hash_approval_token,
@@ -33,7 +38,7 @@ from app.services.fetch_approval import (
     review_fetch_requires_admin_approval,
     send_telegram_to_admins,
 )
-from app.workers.scraper import review_fetch_task
+from app.workers.scraper import google_maps_fetch_task, review_fetch_task
 
 router = APIRouter(prefix="/apps", tags=["apps"])
 log = get_logger(__name__)
@@ -81,6 +86,19 @@ def _enqueue_review_fetch(
 ) -> None:
     review_fetch_task.apply_async(
         args=[fetch_id, review_scope, lang, country, global_langs],
+        queue="scraper",
+    )
+
+
+def _enqueue_google_maps_fetch(
+    fetch_id: str,
+    search_term: str,
+    max_reviews: int,
+    sort_by: str,
+    target_language: str,
+) -> None:
+    google_maps_fetch_task.apply_async(
+        args=[fetch_id, search_term, max_reviews, sort_by, target_language],
         queue="scraper",
     )
 
@@ -213,6 +231,7 @@ async def create_fetch(
             to_date=body.to_date,
             review_limit=body.review_limit,
             review_scope=scope,
+            source="store",
             review_count=0,
             approval_token_hash=hash_approval_token(raw_token),
             pending_enqueue_json=pending_enqueue_json_from_create(body),
@@ -245,6 +264,7 @@ async def create_fetch(
         to_date=body.to_date,
         review_limit=body.review_limit,
         review_scope=scope,
+        source="store",
         review_count=0,
     )
     session.add(fetch)
@@ -258,6 +278,42 @@ async def create_fetch(
         body.lang,
         body.country,
         body.global_langs,
+    )
+    return fetch
+
+
+@router.post(
+    "/{app_id}/fetch-google-maps",
+    response_model=ReviewFetchResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_google_maps_fetch(
+    body: GoogleMapsFetchCreate,
+    app: Annotated[App, Depends(require_app_owned)],
+    session: Annotated[AsyncSession, Depends(get_async_session)],
+    background_tasks: BackgroundTasks,
+) -> ReviewFetch:
+    fetch = ReviewFetch(
+        app_id=app.id,
+        status=FetchStatus.PENDING,
+        from_date=body.from_date,
+        to_date=body.to_date,
+        review_limit=body.max_reviews,
+        review_scope="global",
+        source="google_maps_scraper",
+        review_count=0,
+    )
+    session.add(fetch)
+    await session.flush()
+    log.info("google_maps_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
+    await session.commit()
+    background_tasks.add_task(
+        _enqueue_google_maps_fetch,
+        str(fetch.id),
+        body.search_term,
+        body.max_reviews,
+        body.sort_by,
+        body.target_language,
     )
     return fetch
 
@@ -281,6 +337,7 @@ async def import_manual_reviews(
         from_date=body.from_date,
         to_date=body.to_date,
         review_scope="global",
+        source="manual_import",
         review_count=len(body.items),
         started_at=now,
         completed_at=now,

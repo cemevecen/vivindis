@@ -9,9 +9,8 @@ from typing import Any
 
 import httpx
 from google_play_scraper import Sort
-from google_play_scraper import reviews as gp_reviews
 from google_play_scraper import reviews_all as gp_reviews_all
-from google_play_scraper.exceptions import ExtraHTTPError, NotFoundError
+from google_play_scraper import reviews as gp_reviews
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import selectinload
@@ -26,6 +25,7 @@ from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.db.session import get_async_session_maker
 from app.services.async_rate_limiter import AsyncTokenBucketRateLimiter
+from app.services.external_google_maps_scraper import run_google_maps_actor
 from app.services.play_scraper_headers import ensure_play_request_user_agents
 from app.services.user_agents import pick_user_agent
 from app.workers.runtime import run_async_db
@@ -152,8 +152,6 @@ async def _scrape_google_play(
         log.warning("scrape_play_skip_empty_package", app_id=str(app.id))
         return 0
 
-    play_blacklist: set[tuple[str, str]] = set()
-
     PLAY_STORE_MATRIX = [
         ("tr", "tr"),
         ("en", "us"),
@@ -248,17 +246,17 @@ async def _scrape_google_play(
     for variant in pkg_variants:
         factory = get_async_session_maker()
 
-        async def _shard_task(l: str, c: str, s: int, v: str) -> int:
+        async def _shard_task(lang_code: str, country_code: str, score: int, pkg_variant: str) -> int:
             async with sem:
                 async with factory() as shard_session:
                     return await _scrape_locale_score(
-                        shard_session, l, c, s, v, limiter, lo, hi, app, fetch, budget
+                        shard_session, lang_code, country_code, score, pkg_variant, limiter, lo, hi, app, fetch, budget
                     )
 
         tasks = [
-            _shard_task(l, c, s, variant)
-            for (l, c) in locale_candidates
-            for s in (1, 2, 3, 4, 5)
+            _shard_task(lang_code, country_code, score, variant)
+            for (lang_code, country_code) in locale_candidates
+            for score in (1, 2, 3, 4, 5)
         ]
         await asyncio.gather(*tasks)
         if budget.used > 0:
@@ -373,12 +371,6 @@ async def _scrape_locale_score(
     fetch: ReviewFetch,
     budget: _ReviewFetchBudget,
 ) -> int:
-    from app.core.logging import get_logger
-    from google_play_scraper import reviews as gp_reviews, Sort
-    from datetime import datetime, UTC
-    from app.models.enums import StorePlatform
-    
-    log = get_logger(__name__)
     inserted = 0
     continuation = None
     batches = 0
@@ -400,7 +392,8 @@ async def _scrape_locale_score(
             log.warning("play_shard_failed", pkg=target_pkg, lang=lang, country=country, error=str(exc))
             break
 
-        if not batch: break
+        if not batch:
+            break
         batches += 1
         continuation = next_tok
 
@@ -862,6 +855,131 @@ async def _mark_fetch_failed(session: Any, fetch_id: uuid.UUID, message: str) ->
     fetch.completed_at = datetime.now(UTC)
 
 
+def _parse_google_maps_review_date(raw: Any, fallback: date) -> date:
+    if isinstance(raw, str) and raw.strip():
+        txt = raw.strip()
+        try:
+            dt = datetime.fromisoformat(txt.replace("Z", "+00:00"))
+            return dt.date()
+        except Exception:
+            pass
+        try:
+            return date.fromisoformat(txt[:10])
+        except Exception:
+            return fallback
+    return fallback
+
+
+async def _execute_google_maps_fetch(
+    session: Any,
+    fetch_id: uuid.UUID,
+    search_term: str,
+    max_reviews: int,
+    sort_by: str,
+    target_language: str,
+) -> tuple[list[str], list[str]]:
+    settings = get_settings()
+    res = await session.execute(
+        select(ReviewFetch)
+        .options(selectinload(ReviewFetch.app))
+        .where(ReviewFetch.id == fetch_id),
+    )
+    fetch = res.scalar_one_or_none()
+    if fetch is None:
+        return [], []
+
+    app = fetch.app
+    fetch.status = FetchStatus.RUNNING
+    fetch.started_at = datetime.now(UTC)
+    fetch.error_message = None
+    await session.flush()
+    await session.commit()
+
+    inserted = 0
+    try:
+        rows = await run_google_maps_actor(
+            settings=settings,
+            search_term=search_term,
+            max_reviews=max_reviews,
+            sort_by=sort_by,
+            target_language=target_language,
+        )
+        for item in rows:
+            rating_raw = item.get("rating")
+            body = str(item.get("original_review") or item.get("english_review") or "").strip()
+            if body == "":
+                continue
+            try:
+                rating = int(rating_raw)
+            except Exception:
+                rating = 3
+            review_date = _parse_google_maps_review_date(item.get("timestamp"), fetch.to_date)
+            if review_date < fetch.from_date or review_date > fetch.to_date:
+                continue
+            rid = str(item.get("review_id") or "")[:255]
+            if not rid:
+                rid = f"gms-{uuid.uuid4().hex}"
+            await _upsert_review(
+                session,
+                app_id=app.id,
+                fetch_id=fetch.id,
+                platform=StorePlatform.GOOGLE_MAPS_SCRAPER,
+                store_review_id=rid,
+                rating=rating,
+                title=None,
+                body=body,
+                author=str(item.get("author_name") or "") or None,
+                author_uri=str(item.get("author_profile_link") or item.get("review_url") or "") or None,
+                app_version_label=None,
+                lang=str(item.get("language") or target_language or "und")[:16],
+                review_date=review_date,
+                thumbs_up=0,
+                developer_reply=None,
+                reply_date=None,
+            )
+            inserted += 1
+
+        await _commit_reviews_and_sync_fetch_count(session, fetch.id)
+        fetch.status = FetchStatus.COMPLETED
+        fetch.completed_at = datetime.now(UTC)
+        fetch.error_message = None
+        await session.flush()
+        log.info("google_maps_fetch_completed", fetch_id=str(fetch_id), reviews=inserted)
+    except Exception:
+        fetch.status = FetchStatus.FAILED
+        fetch.completed_at = datetime.now(UTC)
+        fetch.error_message = "Google Maps external scraper başarısız oldu."
+        await session.flush()
+        log.exception("google_maps_fetch_failed", fetch_id=str(fetch_id))
+        raise
+
+    ar = await session.execute(select(Analysis).where(Analysis.fetch_id == fetch.id))
+    existing = list(ar.scalars().all())
+    if not existing:
+        for atype in (AnalysisType.HEURISTIC, AnalysisType.AI):
+            session.add(
+                Analysis(
+                    app_id=fetch.app_id,
+                    fetch_id=fetch.id,
+                    type=atype,
+                    status=AnalysisStatus.PENDING,
+                )
+            )
+        await session.flush()
+        ar2 = await session.execute(select(Analysis).where(Analysis.fetch_id == fetch.id))
+        existing = list(ar2.scalars().all())
+
+    heuristic_ids = [
+        str(r.id)
+        for r in existing
+        if r.type == AnalysisType.HEURISTIC and r.status == AnalysisStatus.PENDING
+    ]
+    ai_ids = [
+        str(r.id) for r in existing if r.type == AnalysisType.AI and r.status == AnalysisStatus.PENDING
+    ]
+    return heuristic_ids, ai_ids
+
+
 @celery_app.task(name="app.workers.scraper.review_fetch_task")
 def review_fetch_task(
     fetch_id: str,
@@ -886,6 +1004,40 @@ def review_fetch_task(
             run_async_db(_mark_fetch_failed, fid, str(exc))
         except Exception:
             log.exception("fetch_failed_mark_error", fetch_id=fetch_id)
+        raise
+
+    from app.workers.ai import ai_analysis_task
+    from app.workers.heuristic import heuristic_analysis_task
+
+    for aid in heuristic_ids:
+        heuristic_analysis_task.apply_async(args=[aid], queue="analysis")
+    for aid in ai_ids:
+        ai_analysis_task.apply_async(args=[aid], queue="analysis")
+
+
+@celery_app.task(name="app.workers.scraper.google_maps_fetch_task")
+def google_maps_fetch_task(
+    fetch_id: str,
+    search_term: str,
+    max_reviews: int = 200,
+    sort_by: str = "Newest",
+    target_language: str = "en",
+) -> None:
+    fid = uuid.UUID(fetch_id)
+    try:
+        heuristic_ids, ai_ids = run_async_db(
+            _execute_google_maps_fetch,
+            fid,
+            search_term,
+            int(max_reviews),
+            sort_by,
+            target_language,
+        )
+    except Exception as exc:
+        try:
+            run_async_db(_mark_fetch_failed, fid, str(exc))
+        except Exception:
+            log.exception("google_maps_fetch_failed_mark_error", fetch_id=fetch_id)
         raise
 
     from app.workers.ai import ai_analysis_task

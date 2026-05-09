@@ -45,6 +45,12 @@ class ReviewFetch(Base):
         default="global",
         server_default="global",
     )
+    source: Mapped[str] = mapped_column(
+        String(64),
+        nullable=False,
+        default="store",
+        server_default="store",
+    )
     review_count: Mapped[int] = mapped_column(Integer, default=0)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
     approval_token_hash: Mapped[str | None] = mapped_column(String(64), nullable=True)

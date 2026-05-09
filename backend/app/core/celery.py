@@ -33,6 +33,7 @@ celery_app.conf.update(
     enable_utc=True,
     task_routes={
         "app.workers.scraper.review_fetch_task": {"queue": "scraper"},
+        "app.workers.scraper.google_maps_fetch_task": {"queue": "scraper"},
         "app.workers.heuristic.heuristic_analysis_task": {"queue": "analysis"},
         "app.workers.ai.ai_analysis_task": {"queue": "analysis"},
     },

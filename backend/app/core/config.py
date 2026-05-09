@@ -112,6 +112,17 @@ class Settings(BaseSettings):
         validation_alias="PUBLIC_API_BASE_URL",
         description="Onay linki için API kökü (örn. https://api.vivindis.com), sondaki / olmadan.",
     )
+    external_scraper_apify_token: str = Field(default="", validation_alias="EXTERNAL_SCRAPER_APIFY_TOKEN")
+    external_scraper_google_maps_actor: str = Field(
+        default="dadhalfdev/google-maps-reviews-scraper",
+        validation_alias="EXTERNAL_SCRAPER_GOOGLE_MAPS_ACTOR",
+        description="Apify actor id (owner/name) for Google Maps external scraper.",
+    )
+    external_scraper_timeout_seconds: int = Field(
+        default=120,
+        validation_alias="EXTERNAL_SCRAPER_TIMEOUT_SECONDS",
+        description="External scraper HTTP timeout in seconds.",
+    )
 
     @field_validator("database_url", mode="before")
     @classmethod

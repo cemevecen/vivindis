@@ -22,6 +22,7 @@ class StorePlatform(StrEnum):
 
     GOOGLE_PLAY = "google_play"
     APP_STORE = "app_store"
+    GOOGLE_MAPS_SCRAPER = "google_maps_scraper"
 
 
 class FetchStatus(StrEnum):
