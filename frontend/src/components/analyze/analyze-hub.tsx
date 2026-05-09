@@ -1675,7 +1675,7 @@ function AnalyzeHubConnected() {
                         className="space-y-2"
                       >
                         <p className="text-xs text-muted-foreground">{t("storeCatalogRegisteredListHint")}</p>
-                        <div className="max-h-[22rem] overflow-y-auto rounded-xl border border-border p-2">
+                        <div className="max-h-[22rem] rounded-xl border border-border p-2 scrollbar-stable-visible">
                           <div
                             className="grid gap-2"
                             style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}
@@ -2961,7 +2961,7 @@ function AnalyzeHubConnected() {
                     className="space-y-2"
                   >
                     <p className="text-xs text-muted-foreground">{t("compareRegisteredListHint")}</p>
-                    <div className="max-h-[22rem] overflow-y-auto rounded-xl border border-border p-2">
+                    <div className="max-h-[22rem] rounded-xl border border-border p-2 scrollbar-stable-visible">
                       <div
                         className="grid gap-2"
                         style={{ gridTemplateColumns: "repeat(auto-fill, minmax(5.25rem, 1fr))" }}

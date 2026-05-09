@@ -8,6 +8,36 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  /**
+   * Persistent scrollbars for short grids (avoids macOS overlay scrollbars that hide until scroll).
+   */
+  .scrollbar-stable-visible {
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: oklch(0.45 0 0 / 0.38) oklch(0.9 0 0 / 0.22);
+  }
+  .dark .scrollbar-stable-visible {
+    scrollbar-color: oklch(0.72 0 0 / 0.42) oklch(0.22 0 0 / 0.4);
+  }
+  .scrollbar-stable-visible::-webkit-scrollbar {
+    width: 10px;
+  }
+  .scrollbar-stable-visible::-webkit-scrollbar-track {
+    background: oklch(0.9 0 0 / 0.22);
+    border-radius: 9999px;
+  }
+  .scrollbar-stable-visible::-webkit-scrollbar-thumb {
+    background: oklch(0.45 0 0 / 0.35);
+    border-radius: 9999px;
+  }
+  .dark .scrollbar-stable-visible::-webkit-scrollbar-track {
+    background: oklch(0.22 0 0 / 0.42);
+  }
+  .dark .scrollbar-stable-visible::-webkit-scrollbar-thumb {
+    background: oklch(0.72 0 0 / 0.38);
+  }
 }
 
 @layer base {
