@@ -135,11 +135,11 @@ function CompareAppSplitPane({
   };
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-4 overflow-y-auto border-border p-3 sm:p-4 md:border-e md:last:border-e-0">
-      <div>
+    <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-4 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:border-e md:last:border-e-0">
+      <div className="min-w-0">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
-        <h2 className="mt-1 text-lg font-semibold tracking-tight">{app.name}</h2>
-        <p className="mt-1 font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
+        <h2 className="mt-1 break-words text-lg font-semibold tracking-tight">{app.name}</h2>
+        <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
       </div>
 
       <StartFetchForm appId={app.id} />
@@ -179,10 +179,11 @@ function CompareAppSplitPane({
       )}
 
       {fetchRow ? (
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
           <Button
             type="button"
             size="sm"
+            className="w-full sm:w-auto"
             disabled={fetchRow.status !== "completed" || busy || analyzeMutation.isPending}
             onClick={() => analyzeMutation.mutate()}
           >
@@ -191,7 +192,7 @@ function CompareAppSplitPane({
           {fetchRow.status === "completed" ? (
             <Link
               href={`/apps/${app.id}/analysis?fetchId=${fetchRow.id}#deep-global-scan-panel`}
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center sm:w-auto")}
             >
               {ta("viewAnalytics")}
             </Link>
@@ -428,10 +429,10 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     fetchRow: ReviewFetchDto | undefined;
     hasHeuristic: boolean;
   }) => (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+    <div className="min-w-0 rounded-xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
-      <h2 className="mt-1 text-xl font-semibold tracking-tight">{app.name}</h2>
-      <p className="mt-1 font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
+      <h2 className="mt-1 break-words text-xl font-semibold tracking-tight">{app.name}</h2>
+      <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
       <dl className="mt-4 space-y-2 text-sm">
         {fetchRow &&
         (fetchRow.status === "waiting_approval" || fetchRow.status === "pending" || fetchRow.status === "running") ? null : (
@@ -526,7 +527,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       </div>
 
       {splitOn ? (
-        <div className="flex min-h-[min(90vh,960px)] min-w-0 flex-col rounded-xl border border-border bg-card/50 md:flex-row md:items-stretch">
+        <div className="flex min-h-[min(90vh,960px)] min-w-0 flex-col overflow-x-hidden rounded-xl border border-border bg-card/50 md:flex-row md:items-stretch">
           <CompareAppSplitPane
             title={t("slotA")}
             app={appA}

@@ -29,7 +29,7 @@ export function DualPillSwitch({
       role="group"
       aria-label={ariaLabel}
       className={cn(
-        "inline-flex w-full max-w-full gap-1 rounded-full border border-border/60 bg-muted/35 p-1 shadow-inner sm:max-w-[min(24rem,100%)]",
+        "inline-flex w-full min-w-0 max-w-full gap-1 rounded-full border border-border/60 bg-muted/35 p-1 shadow-inner sm:max-w-[min(24rem,100%)]",
         className,
       )}
     >
@@ -37,7 +37,7 @@ export function DualPillSwitch({
         type="button"
         onClick={() => onChange("left")}
         className={cn(
-          "min-h-[2.75rem] min-w-0 flex-1 rounded-full px-3 py-2 text-center text-sm font-semibold leading-snug outline-none transition-[color,background-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "min-h-[2.75rem] min-w-0 flex-1 rounded-full px-2 py-2 text-center text-xs font-semibold leading-snug outline-none transition-[color,background-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-3 sm:text-sm",
           value === "left"
             ? "bg-sky-100/90 text-sky-950 shadow-sm ring-1 ring-sky-200/60 dark:bg-sky-950/50 dark:text-sky-50 dark:ring-sky-800/40"
             : "text-muted-foreground hover:bg-background/55 active:scale-[0.99] dark:hover:bg-background/10",
@@ -49,7 +49,7 @@ export function DualPillSwitch({
         type="button"
         onClick={() => onChange("right")}
         className={cn(
-          "min-h-[2.75rem] min-w-0 flex-1 rounded-full px-3 py-2 text-center text-sm font-semibold leading-snug outline-none transition-[color,background-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+          "min-h-[2.75rem] min-w-0 flex-1 rounded-full px-2 py-2 text-center text-xs font-semibold leading-snug outline-none transition-[color,background-color,box-shadow,transform] duration-200 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:px-3 sm:text-sm",
           value === "right"
             ? "bg-violet-100/90 text-violet-950 shadow-sm ring-1 ring-violet-200/60 dark:bg-violet-950/50 dark:text-violet-50 dark:ring-violet-800/40"
             : "text-muted-foreground hover:bg-background/55 active:scale-[0.99] dark:hover:bg-background/10",
@@ -76,14 +76,14 @@ export function SegmentedTwo({
 }) {
   return (
     <div
-      className="flex rounded-2xl border border-border bg-muted p-1 shadow-inner"
+      className="flex w-full min-w-0 max-w-full rounded-2xl border border-border bg-muted p-1 shadow-inner"
       role="group"
       aria-label={ariaLabel}
     >
       <button
         type="button"
         className={cn(
-          "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+          "min-w-0 flex-1 rounded-xl px-2 py-2.5 text-center text-xs font-medium leading-snug transition-colors sm:px-3 sm:text-sm",
           value === "left"
             ? "border border-primary/30 bg-card text-foreground shadow-sm"
             : "text-muted-foreground hover:bg-card/70",
@@ -95,7 +95,7 @@ export function SegmentedTwo({
       <button
         type="button"
         className={cn(
-          "flex-1 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors",
+          "min-w-0 flex-1 rounded-xl px-2 py-2.5 text-center text-xs font-medium leading-snug transition-colors sm:px-3 sm:text-sm",
           value === "right"
             ? "border border-primary/30 bg-card text-foreground shadow-sm"
             : "text-muted-foreground hover:bg-card/70",
@@ -193,8 +193,8 @@ export function StoreResultCard({
 }) {
   const t = useTranslations("analyzeHub");
   return (
-    <li className="overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/25">
-      <div className="flex gap-3 p-4">
+    <li className="min-w-0 overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-colors hover:border-primary/25">
+      <div className="flex min-w-0 gap-3 p-4">
         {hit.icon ? (
           // eslint-disable-next-line @next/next/no-img-element -- harici mağaza CDN
           <img
@@ -226,7 +226,7 @@ export function StoreResultCard({
               href={hit.store_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs text-primary underline-offset-4 hover:underline"
+              className="inline-flex min-w-0 max-w-full items-center gap-1 break-all text-xs text-primary underline-offset-4 hover:underline"
             >
               {t("openStoreLink")}
               <ExternalLink className="size-3 shrink-0" aria-hidden />

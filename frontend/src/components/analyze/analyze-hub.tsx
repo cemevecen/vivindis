@@ -1366,15 +1366,15 @@ function AnalyzeHubConnected() {
   }, [selectedStoreHit, sessionApp, isPinningStore]);
 
   const shellBody = (
-    <div className="min-h-[60vh] space-y-6 bg-gradient-to-b from-muted/70 via-muted/35 to-background px-3 py-6 sm:px-6">
-      <div className="mx-auto max-w-[min(1240px,calc(100vw-1.5rem))] space-y-6 rounded-2xl border border-border/80 bg-card/95 p-5 shadow-sm sm:p-8">
+    <div className="min-h-[60vh] space-y-6 overflow-x-clip bg-gradient-to-b from-muted/70 via-muted/35 to-background px-3 py-6 sm:px-6">
+      <div className="mx-auto w-full min-w-0 max-w-[min(1240px,100%)] space-y-6 rounded-2xl border border-border/80 bg-card/95 p-4 shadow-sm sm:p-8">
         {mode === "store" ? (
           <section className="space-y-5" aria-labelledby="analyze-store-heading">
             <h2 id="analyze-store-heading" className="sr-only">
               {t("tabStore")}
             </h2>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <span className="text-sm font-medium text-foreground">{t("storeSourceLabel")}</span>
+            <div className="flex min-w-0 w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <span className="min-w-0 shrink-0 text-sm font-medium text-foreground">{t("storeSourceLabel")}</span>
               <DualPillSwitch
                 ariaLabel={t("storeSourceAria")}
                 left={t("storeSourceCatalog")}
@@ -1452,7 +1452,7 @@ function AnalyzeHubConnected() {
                     </Button>
                     <Button
                       type="button"
-                      className="h-10 rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
+                      className="h-10 w-full shrink-0 rounded-xl bg-primary px-4 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 sm:w-auto sm:px-5"
                       onClick={() => {
                         if (requireSignedIn()) {
                           setActiveQuery(draftQuery.trim());
@@ -1460,8 +1460,8 @@ function AnalyzeHubConnected() {
                       }}
                       disabled={!isLoaded || draftQuery.trim().length < 2}
                     >
-                      <Search className="mr-2 size-4" aria-hidden />
-                      {t("searchCatalogCta")}
+                      <Search className="mr-2 size-4 shrink-0" aria-hidden />
+                      <span className="text-center leading-tight">{t("searchCatalogCta")}</span>
                     </Button>
                   </div>
                 </div>
@@ -1471,7 +1471,7 @@ function AnalyzeHubConnected() {
                     <button
                       type="button"
                       id="store-catalog-registered-quick-pick-toggle"
-                      className="flex w-full items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
+                      className="flex w-full min-w-0 items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
                       onClick={() => setStoreCatalogQuickPickExpanded((open) => !open)}
                       aria-expanded={storeCatalogQuickPickExpanded}
                       aria-controls="store-catalog-registered-quick-pick-panel"
@@ -1481,7 +1481,9 @@ function AnalyzeHubConnected() {
                           : t("storeCatalogRegisteredQuickPickExpand")
                       }
                     >
-                      <span className="text-sm font-semibold text-foreground">{t("storeCatalogRegisteredListTitle")}</span>
+                      <span className="min-w-0 flex-1 break-words pr-1 text-sm font-semibold text-foreground">
+                        {t("storeCatalogRegisteredListTitle")}
+                      </span>
                       <ChevronDown
                         className={cn(
                           "size-4 shrink-0 opacity-70 transition-transform",
@@ -1527,9 +1529,9 @@ function AnalyzeHubConnected() {
                 ) : null}
               </>
             ) : (
-              <div className="space-y-4 rounded-2xl border border-teal-200/35 bg-teal-50/10 p-4 dark:border-teal-800/25 dark:bg-teal-950/12 sm:p-5">
-                <div>
-                  <p className="text-base font-semibold text-foreground">{t("marketplacePanelTitle")}</p>
+              <div className="min-w-0 space-y-4 rounded-2xl border border-teal-200/35 bg-teal-50/10 p-4 dark:border-teal-800/25 dark:bg-teal-950/12 sm:p-5">
+                <div className="min-w-0">
+                  <p className="break-words text-base font-semibold text-foreground">{t("marketplacePanelTitle")}</p>
                 </div>
                 {!externalScraperQuery.data?.enabled && !externalScraperQuery.isPending ? (
                   <p className="rounded-xl border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-xs text-amber-950/90 dark:border-amber-500/18 dark:bg-amber-500/8 dark:text-amber-100/90">
@@ -1815,10 +1817,10 @@ function AnalyzeHubConnected() {
                     </SelectNative>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <Label className="whitespace-nowrap text-sm font-medium text-foreground">
+                    <Label className="text-sm font-medium text-foreground sm:whitespace-nowrap">
                       {t("reviewScopeLabel")}
                     </Label>
-                    <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                    <div className="flex h-11 min-w-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 sm:px-4">
                       <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                         {t("reviewScopeLocal")}
                       </span>
@@ -2338,7 +2340,7 @@ function AnalyzeHubConnected() {
                   type="button"
                   size="sm"
                   variant="secondary"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:h-9 sm:w-auto"
                   onClick={() => {
                     if (requireSignedIn()) {
                       setActiveCompareA(compareDraftA.trim());
@@ -2346,7 +2348,7 @@ function AnalyzeHubConnected() {
                   }}
                   disabled={!isLoaded || compareDraftA.trim().length < 2}
                 >
-                  <Search className="mr-2 size-4" aria-hidden />
+                  <Search className="mr-2 size-4 shrink-0" aria-hidden />
                   {t("searchAction")}
                 </Button>
                 {compareRegistryAppA ? (
@@ -2380,8 +2382,8 @@ function AnalyzeHubConnected() {
                         <div className="size-12 shrink-0 rounded-xl border border-dashed border-border bg-muted/50" />
                       )}
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-foreground">{compareRegistryAppA.name}</p>
-                        <p className="truncate font-mono text-xs text-muted-foreground">
+                        <p className="break-words font-semibold text-foreground">{compareRegistryAppA.name}</p>
+                        <p className="break-all font-mono text-xs text-muted-foreground">
                           {compareRegistryAppA.platform === "app_store"
                             ? compareRegistryAppA.bundle_id || "—"
                             : compareRegistryAppA.package_name}
@@ -2544,7 +2546,7 @@ function AnalyzeHubConnected() {
                   type="button"
                   size="sm"
                   variant="secondary"
-                  className="bg-primary text-primary-foreground hover:bg-primary/90"
+                  className="h-10 w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:h-9 sm:w-auto"
                   onClick={() => {
                     if (requireSignedIn()) {
                       setActiveCompareB(compareDraftB.trim());
@@ -2552,7 +2554,7 @@ function AnalyzeHubConnected() {
                   }}
                   disabled={!isLoaded || compareDraftB.trim().length < 2}
                 >
-                  <Search className="mr-2 size-4" aria-hidden />
+                  <Search className="mr-2 size-4 shrink-0" aria-hidden />
                   {t("searchAction")}
                 </Button>
                 {compareRegistryAppB ? (
@@ -2586,8 +2588,8 @@ function AnalyzeHubConnected() {
                         <div className="size-12 shrink-0 rounded-xl border border-dashed border-border bg-muted/50" />
                       )}
                       <div className="min-w-0">
-                        <p className="truncate font-semibold text-foreground">{compareRegistryAppB.name}</p>
-                        <p className="truncate font-mono text-xs text-muted-foreground">
+                        <p className="break-words font-semibold text-foreground">{compareRegistryAppB.name}</p>
+                        <p className="break-all font-mono text-xs text-muted-foreground">
                           {compareRegistryAppB.platform === "app_store"
                             ? compareRegistryAppB.bundle_id || "—"
                             : compareRegistryAppB.package_name}
@@ -2651,7 +2653,7 @@ function AnalyzeHubConnected() {
                 <button
                   type="button"
                   id="compare-registered-quick-pick-toggle"
-                  className="flex w-full items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
+                  className="flex w-full min-w-0 items-center justify-between gap-2 rounded-xl py-1 text-left outline-none transition-colors hover:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring"
                   onClick={() => setCompareQuickPickExpanded((open) => !open)}
                   aria-expanded={compareQuickPickExpanded}
                   aria-controls="compare-registered-quick-pick-panel"
@@ -2661,7 +2663,9 @@ function AnalyzeHubConnected() {
                       : t("compareRegisteredQuickPickExpand")
                   }
                 >
-                  <span className="text-sm font-semibold text-foreground">{t("compareRegisteredListTitle")}</span>
+                  <span className="min-w-0 flex-1 break-words pr-1 text-sm font-semibold text-foreground">
+                    {t("compareRegisteredListTitle")}
+                  </span>
                   <ChevronDown
                     className={cn(
                       "size-4 shrink-0 opacity-70 transition-transform",
@@ -2741,10 +2745,10 @@ function AnalyzeHubConnected() {
                 </SelectNative>
               </div>
               <div className="flex flex-col gap-2">
-                <Label className="whitespace-nowrap text-sm font-medium text-foreground">
+                <Label className="text-sm font-medium text-foreground sm:whitespace-nowrap">
                   {t("reviewScopeLabel")}
                 </Label>
-                <div className="flex h-11 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4">
+                <div className="flex h-11 min-w-0 items-center justify-center rounded-full border border-emerald-500/30 bg-emerald-500/10 px-3 sm:px-4">
                   <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                     {t("reviewScopeLocal")}
                   </span>
@@ -2823,7 +2827,7 @@ function AnalyzeHubConnected() {
         ) : null}
 
         {mode !== "compare" ? (
-          <div className="sticky bottom-1 z-10 mt-6 space-y-4 rounded-2xl border border-orange-200/28 bg-gradient-to-b from-card via-card to-orange-50/12 p-4 shadow-md dark:border-orange-800/22 dark:from-card dark:to-orange-950/10 sm:p-6">
+          <div className="sticky bottom-1 z-10 mt-6 min-w-0 max-w-full space-y-4 rounded-2xl border border-orange-200/28 bg-gradient-to-b from-card via-card to-orange-50/12 p-4 shadow-md dark:border-orange-800/22 dark:from-card dark:to-orange-950/10 sm:p-6">
             <div className="flex flex-wrap items-end justify-between gap-3 border-b border-orange-200/30 dark:border-orange-800/20 pb-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("poolBadgeTitle")}</p>

@@ -51,8 +51,8 @@ function DashboardHeaderContent() {
 
   return (
     <header className="sticky top-0 z-30 shrink-0 border-b border-border bg-neutral-100/95 backdrop-blur supports-[backdrop-filter]:bg-neutral-100/80 dark:bg-zinc-900/95 dark:supports-[backdrop-filter]:bg-zinc-900/80">
-      <div className="flex min-h-16 flex-wrap items-center justify-between gap-x-4 gap-y-3 px-3 py-3 sm:px-4">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="flex min-h-16 min-w-0 w-full flex-wrap items-center justify-between gap-x-4 gap-y-3 px-3 py-3 sm:px-4">
+        <div className="flex min-w-0 shrink-0 items-center gap-3">
           <BrandHomeLink wordmarkClassName="text-lg" iconSize="md" />
         </div>
 
