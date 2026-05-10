@@ -966,60 +966,6 @@ function AnalyzeHubConnected() {
     return sessionApp?.id ?? "";
   }, [targetAppId, sessionApp?.id]);
 
-  const handlePullMarketplaceReviews = useCallback(() => {
-    if (!requireSignedIn()) {
-      return;
-    }
-    const appId = marketplaceAttachAppId.trim();
-    if (!appId) {
-      toast.error(t("marketplaceNeedAppToast"));
-      return;
-    }
-    const cls = classifyMarketplaceSellerUrl(marketplaceSellerUrl);
-    if (cls === "amazon") {
-      toast.error(t("marketplaceAmazonNotSupported"));
-      return;
-    }
-    if (cls !== "ok") {
-      toast.error(t("marketplaceUrlInvalid"));
-      return;
-    }
-    if (!marketplaceUrlMatchesSite(marketplaceSellerUrl, marketplaceSite)) {
-      toast.error(t("marketplaceUrlSiteMismatch"));
-      return;
-    }
-    if (!externalScraperQuery.data?.enabled) {
-      toast.error(t("marketplaceApifyDisabled"));
-      return;
-    }
-    resetFetchProgressTimeline();
-    addFetchProgressEvent({
-      key: `${appId}:marketplace-request-start`,
-      at: new Date().toISOString(),
-      label: t("fetchEventRequestSentLabel"),
-      reason: t("fetchEventRequestSentReason"),
-    });
-    setStoreFetchId(null);
-    setPoolLines([]);
-    setHydratedReviews([]);
-    setIsHydratingPool(false);
-    setHydratedPoolCount(0);
-    hydrateRunTokenRef.current += 1;
-    lastFetchHydratedToPoolRef.current = null;
-    storeFetchFailedToastRef.current = null;
-    storeFetchPollErrorToastRef.current = null;
-    marketplacePullMutation.mutate({ appId, sellerUrl: marketplaceSellerUrl.trim() });
-  }, [
-    addFetchProgressEvent,
-    externalScraperQuery.data?.enabled,
-    marketplaceAttachAppId,
-    marketplacePullMutation,
-    marketplaceSellerUrl,
-    marketplaceSite,
-    requireSignedIn,
-    resetFetchProgressTimeline,
-    t,
-  ]);
 
   const canRunUnifiedAnalysis = useMemo(() => {
     if (poolLines.length > 0) {
