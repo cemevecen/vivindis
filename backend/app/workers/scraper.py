@@ -1053,30 +1053,32 @@ async def _execute_marketplace_seller_fetch(
             dv = str(item.get("dataVersion") or "")
             if "run_summary" in dv.lower():
                 continue
-            if "review" not in dv.lower() and not item.get("reviewId"):
+            if "review" not in dv.lower() and not (item.get("reviewId") or item.get("id")):
                 continue
-            rid = str(item.get("reviewId") or "").strip()
+            # Support multiple actor output formats (old aggregator vs fatihtahta/abotapi)
+            rid = str(item.get("reviewId") or item.get("id") or "").strip()
             if not rid:
                 continue
-            rd = _parse_marketplace_review_date(item.get("reviewDate"), to_d)
+            raw_date = item.get("reviewDate") or item.get("createdAt") or item.get("date")
+            rd = _parse_marketplace_review_date(raw_date, to_d)
             if rd < from_d or rd > to_d:
                 continue
-            rating_raw = item.get("rating")
+            rating_raw = item.get("rating") or item.get("rate") or item.get("starCount")
             try:
                 rating_int = int(round(float(rating_raw)))
             except (TypeError, ValueError):
                 rating_int = 3
             rating_int = max(1, min(5, rating_int))
             title = str(item.get("title") or "").strip()[:1024] or None
-            body = str(item.get("body") or "").strip()
+            body = str(item.get("body") or item.get("comment") or item.get("text") or item.get("reviewText") or "").strip()
             if not body:
                 body = "(Yorum metni yok)"
             if len(body) > 12000:
                 body = body[:12000]
-            author = str(item.get("reviewerName") or "").strip()[:512] or None
-            purl = str(item.get("productUrl") or item.get("sourceUrl") or "").strip()
+            author = str(item.get("reviewerName") or item.get("userFullName") or item.get("author") or "").strip()[:512] or None
+            purl = str(item.get("productUrl") or item.get("sourceUrl") or item.get("url") or "").strip()
             mplat = str(item.get("platform") or "").strip()[:60] or None
-            hc = item.get("helpfulCount")
+            hc = item.get("helpfulCount") or item.get("helpfulVoteCount")
             try:
                 thumbs = int(hc) if hc is not None else 0
             except (TypeError, ValueError):

@@ -111,7 +111,7 @@ async def run_marketplace_review_aggregator(
     if not actor_raw:
         raise RuntimeError("EXTERNAL_SCRAPER_MARKETPLACE_REVIEWS_ACTOR eksik.")
     
-    is_abotapi = "abotapi/trendyol-scraper" in actor_raw
+    is_abotapi = "abotapi/trendyol-scraper" in actor_raw or "fatihtahta/trendyol-scraper" in actor_raw
     actor_enc = quote(actor_raw, safe="")
     timeout_val = max(180, int(settings.external_scraper_timeout_seconds or 300))
     cap = max(5, min(200, int(max_reviews_per_product)))
@@ -137,17 +137,16 @@ async def run_marketplace_review_aggregator(
             if not start_urls:
                 raise RuntimeError("Başlatılacak URL bulunamadı.")
 
-            log.info("marketplace_abotapi_run", start_urls=start_urls[:2])
+            log.info("marketplace_abotapi_run", actor=actor_raw, start_urls=start_urls[:2])
+            # fatihtahta/trendyol-scraper and abotapi/trendyol-scraper both accept startUrls
             payload = {
-                "startUrls": start_urls,
+                "startUrls": [{
+                    "url": u,
+                    "method": "GET"
+                } for u in start_urls],
+                "maxReviews": cap,
                 "getReviews": True,
-                "getQna": False,
-                "limit": cap,
-                "couponsOnly": False,
-                "newlyReleasedOnly": False,
-                "specialOffersOnly": False,
-                "influencerPreferredOnly": False,
-                "lowestPriceDays": [],
+                "proxyConfiguration": {"useApifyProxy": True},
             }
             run_url = (
                 f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items"
