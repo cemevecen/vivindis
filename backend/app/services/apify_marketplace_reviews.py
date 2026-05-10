@@ -8,6 +8,9 @@ from urllib.parse import quote
 import httpx
 
 from app.core.config import Settings
+from app.core.logging import get_logger
+
+log = get_logger(__name__)
 
 
 def _apify_actor_run_failed_retryable(status_code: int, body: str) -> bool:
