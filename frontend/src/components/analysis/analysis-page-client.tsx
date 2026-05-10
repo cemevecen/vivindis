@@ -753,6 +753,24 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     };
   }, [appId, clerkEnabled, fetchId, fetchQuery.data?.review_count, fetchQuery.data?.status, getToken]);
 
+  const fetch = fetchQuery.data;
+
+  const runningFetchHint = useMemo(() => {
+    if (!fetch || fetch.status !== "running") {
+      return "";
+    }
+    const site = inferMarketplaceSiteFromFetch(fetch);
+    if (site) {
+      return tAnalyzeHub("marketplaceFetchHintRunningNoCount", {
+        platform: tAnalyzeHub(MARKETPLACE_CHIP_LABEL[site]),
+      });
+    }
+    if (fetch.source === "marketplace_seller_tr") {
+      return tAnalyzeHub("marketplaceFetchHintRunningNoCountGeneric");
+    }
+    return tAnalyzeHub("fetchHintRunningNoCount");
+  }, [fetch, tAnalyzeHub]);
+
   if (!clerkEnabled) {
     return (
       <div className="rounded-lg border border-dashed border-border bg-muted/30 p-8 text-center text-sm text-muted-foreground">
@@ -797,24 +815,6 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
       </div>
     );
   }
-
-  const fetch = fetchQuery.data;
-
-  const runningFetchHint = useMemo(() => {
-    if (!fetch || fetch.status !== "running") {
-      return "";
-    }
-    const site = inferMarketplaceSiteFromFetch(fetch);
-    if (site) {
-      return tAnalyzeHub("marketplaceFetchHintRunningNoCount", {
-        platform: tAnalyzeHub(MARKETPLACE_CHIP_LABEL[site]),
-      });
-    }
-    if (fetch.source === "marketplace_seller_tr") {
-      return tAnalyzeHub("marketplaceFetchHintRunningNoCountGeneric");
-    }
-    return tAnalyzeHub("fetchHintRunningNoCount");
-  }, [fetch, tAnalyzeHub]);
 
   if (!fetch) {
     return null;
