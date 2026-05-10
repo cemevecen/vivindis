@@ -314,12 +314,6 @@ function AnalyzeHubConnected() {
     return registeredAppsDeduped[0]?.id ?? "";
   }, [sessionApp?.id, registeredAppsDeduped]);
 
-  const marketplaceAttachAppName = useMemo(() => {
-    if (sessionApp) {
-      return sessionApp.name;
-    }
-    return registeredAppsDeduped[0]?.name ?? "";
-  }, [sessionApp, registeredAppsDeduped]);
 
   const marketplaceUrlFieldPlaceholder = useMemo(() => {
     switch (marketplaceSite) {
