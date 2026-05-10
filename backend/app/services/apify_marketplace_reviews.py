@@ -11,15 +11,18 @@ from app.core.config import Settings
 
 
 def _apify_actor_run_failed_retryable(status_code: int, body: str) -> bool:
-    """Apify returns HTTP 400 with run-failed when the actor started but exited with status FAILED."""
+    """Apify returns HTTP 400 with run-failed when the actor started but exited with status FAILED or TIMEOUT."""
     if status_code != 400:
         return False
     low = body.lower()
+    # Check for various failure markers in Apify run results
     return (
         "run-failed" in low
         or "did not succeed" in low
         or "status: failed" in low
+        or "status: timeout" in low
         or '"status":"failed"' in low.replace(" ", "")
+        or '"status":"timeout"' in low.replace(" ", "")
     )
 
 
@@ -95,7 +98,7 @@ async def run_marketplace_review_aggregator(
     search_queries: list[str] | None = None,
     product_urls: list[str] | None = None,
 ) -> list[dict[str, Any]]:
-    """Runs `turkish-e-commerce-review-aggregator` with `productUrls` and/or `searchQuery` (mutually exclusive)."""
+    """Runs `turkish-e-commerce-review-aggregator` with robust retries and fallback."""
     token = (settings.external_scraper_apify_token or "").strip()
     if not token:
         raise RuntimeError("EXTERNAL_SCRAPER_APIFY_TOKEN eksik.")
@@ -105,10 +108,11 @@ async def run_marketplace_review_aggregator(
         raise RuntimeError("EXTERNAL_SCRAPER_MARKETPLACE_REVIEWS_ACTOR eksik.")
     actor_enc = quote(actor_raw, safe="")
 
-    # Extra memory: review actor can be heavy; sync endpoint allows memory query param.
+    # Match client timeout for sync run
+    timeout_val = max(180, int(settings.external_scraper_timeout_seconds or 300))
     url = (
         f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items"
-        f"?token={token}&format=json&clean=1&timeout=300&restartOnError=1&memory=4096"
+        f"?token={token}&format=json&clean=1&timeout={timeout_val}&restartOnError=1&memory=4096"
     )
 
     plats = [p.strip().lower() for p in platforms if p and str(p).strip()]
@@ -117,9 +121,8 @@ async def run_marketplace_review_aggregator(
 
     pu = [u.strip() for u in (product_urls or []) if isinstance(u, str) and u.strip()]
     sqs = [s.strip() for s in (search_queries or []) if isinstance(s, str) and len(s.strip()) >= 2]
-    if pu:
-        sqs = []
-    elif not sqs:
+    
+    if not pu and not sqs:
         raise RuntimeError("product_urls veya search_queries gerekli.")
 
     cap = max(5, min(200, int(max_reviews_per_product)))
@@ -143,12 +146,15 @@ async def run_marketplace_review_aggregator(
         ("no_proxy", {"useApifyProxy": False}),
     ]
 
-    timeout_seconds = max(360, int(settings.external_scraper_timeout_seconds or 180) * 2)
+    # Client timeout should be slightly more than Apify sync timeout
+    client_timeout = timeout_val + 60
 
-    async with httpx.AsyncClient(timeout=timeout_seconds) as client:
+    async with httpx.AsyncClient(timeout=client_timeout) as client:
+        last_detail = ""
+        
+        # 1. Try Product URLs if available
         if pu:
-            last_detail = ""
-            for idx, (_label, proxy_cfg) in enumerate(proxy_strategies):
+            for idx, (label, proxy_cfg) in enumerate(proxy_strategies):
                 payload: dict[str, Any] = {
                     "productUrls": pu[:50],
                     "platforms": plats[:3],
@@ -156,27 +162,40 @@ async def run_marketplace_review_aggregator(
                     "sortBy": "recent",
                     "proxyConfig": proxy_cfg,
                 }
-                resp = await client.post(url, json=payload)
-                if resp.status_code < 400:
-                    rows = _normalize_dataset_list(resp.json())
-                    if _review_like_row_count(rows) > 0:
-                        return rows
-                    continue
-                last_detail = (resp.text or "").strip()
-                if len(last_detail) > 800:
-                    last_detail = last_detail[:800] + "…"
-                retryable = _apify_actor_run_failed_retryable(resp.status_code, resp.text or "")
-                if retryable and idx + 1 < len(proxy_strategies):
-                    continue
+                try:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code < 400:
+                        rows = _normalize_dataset_list(resp.json())
+                        if _review_like_row_count(rows) > 0:
+                            return rows
+                        # No reviews found with this proxy, try next
+                        continue
+                    
+                    last_detail = (resp.text or "").strip()
+                    if len(last_detail) > 800:
+                        last_detail = last_detail[:800] + "…"
+                    
+                    retryable = _apify_actor_run_failed_retryable(resp.status_code, resp.text or "")
+                    if retryable and idx + 1 < len(proxy_strategies):
+                        continue
+                    # If we reach here, this proxy failed non-retryably
+                except Exception as e:
+                    last_detail = f"Request error ({label}): {str(e)}"
+                    if idx + 1 < len(proxy_strategies):
+                        continue
+            
+            # If we are here, Product URLs failed or returned nothing. 
+            # We don't raise error yet if we have search queries to fall back to.
+            if not sqs:
                 raise RuntimeError(
-                    f"Apify yorum aktörü (ürün URL) HTTP {resp.status_code}: {last_detail or 'gövde yok'}"
+                    f"Apify yorum aktörü (ürün URL) başarısız oldu. Son hata: {last_detail or 'Veri yok'}"
                 )
-            return []
 
-        last_http_error = ""
+        # 2. Try Search Queries
+        last_http_error = last_detail
         for q in sqs:
             q_clip = q[:500]
-            for idx, (_label, proxy_cfg) in enumerate(proxy_strategies):
+            for idx, (label, proxy_cfg) in enumerate(proxy_strategies):
                 payload = {
                     "searchQuery": q_clip,
                     "platforms": plats[:3],
@@ -184,22 +203,29 @@ async def run_marketplace_review_aggregator(
                     "sortBy": "recent",
                     "proxyConfig": proxy_cfg,
                 }
-                resp = await client.post(url, json=payload)
-                if resp.status_code < 400:
-                    last_http_error = ""
-                    rows = _normalize_dataset_list(resp.json())
-                    if _review_like_row_count(rows) > 0:
-                        return rows
-                    break
-                detail = (resp.text or "").strip()
-                if len(detail) > 800:
-                    detail = detail[:800] + "…"
-                last_http_error = detail or last_http_error
-                retryable = _apify_actor_run_failed_retryable(resp.status_code, resp.text or "")
-                if retryable and idx + 1 < len(proxy_strategies):
-                    continue
-                break
-
+                try:
+                    resp = await client.post(url, json=payload)
+                    if resp.status_code < 400:
+                        rows = _normalize_dataset_list(resp.json())
+                        if _review_like_row_count(rows) > 0:
+                            return rows
+                        # No reviews found for this query/proxy combo
+                        continue
+                    
+                    detail = (resp.text or "").strip()
+                    if len(detail) > 800:
+                        detail = detail[:800] + "…"
+                    last_http_error = detail
+                    
+                    retryable = _apify_actor_run_failed_retryable(resp.status_code, resp.text or "")
+                    if retryable and idx + 1 < len(proxy_strategies):
+                        continue
+                except Exception as e:
+                    last_http_error = f"Request error ({label}): {str(e)}"
+                    if idx + 1 < len(proxy_strategies):
+                        continue
+        
         if last_http_error:
-            raise RuntimeError(f"Apify yorum aktörü: {last_http_error}")
+            raise RuntimeError(f"Apify yorum aktörü tüm yöntemleri denedi ama başarısız oldu: {last_http_error}")
+        
         return []
