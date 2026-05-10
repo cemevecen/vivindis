@@ -1028,11 +1028,25 @@ async def _execute_marketplace_seller_fetch(
                 profiles.append(item)
 
         if not profiles:
-            raise RuntimeError("Apify satıcı profili döndürmedi; bağlantı veya aktör çıktısını kontrol edin.")
-
+            raise RuntimeError("Apify satıcı profili döndürmedi.")
         primary = profiles[0]
-        fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
-        await session.flush()
+    except Exception as exc:
+        log.warning("worker_marketplace_auto_detect_failed", error=str(exc))
+        # Fallback: URL'den türet
+        raw_u = seller_url.lower()
+        d_name = "Bilinmeyen Mağaza"
+        try:
+            if "magaza/" in raw_u:
+                d_name = raw_u.split("magaza/")[1].split("/")[0].split("-m-")[0].capitalize()
+            elif "satici/" in raw_u:
+                d_name = raw_u.split("satici/")[1].split("/")[0].split("-m-")[0].capitalize()
+        except:
+            pass
+        primary = {"sellerName": d_name, "sellerId": "derived"}
+        profiles = [primary]
+
+    fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
+    await session.flush()
 
         name_q = str(primary.get("sellerName") or "").strip()
         slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
