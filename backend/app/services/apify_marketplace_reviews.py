@@ -121,37 +121,59 @@ async def run_marketplace_review_aggregator(
         # --- SPECIAL BRANCH: abotapi/trendyol-scraper ---
         if is_abotapi:
             log.info("marketplace_abotapi_start", actor=actor_raw)
-            # Step 1: Discover products
             target_urls = product_urls or []
-            
-            # If we only have a seller_url, we MUST discover products first because abotapi reviews mode 
-            # only accepts product-specific URLs (-p- or /p/).
+
             if not target_urls and (seller_url or search_queries):
-                discovery_input = {
-                    "mode": "url" if seller_url else "search",
-                    "urls": [seller_url] if seller_url else search_queries[:3],
-                    "maxItems": 40, # Find up to 40 products in the shop
-                    "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": "TR"}
-                }
-                log.info("marketplace_abotapi_discovery_run", mode=discovery_input["mode"])
-                d_url = f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items?token={token}&format=json&timeout=150"
-                try:
-                    d_resp = await client.post(d_url, json=discovery_input)
-                    if d_resp.status_code < 400:
-                        d_items = d_resp.json()
-                        # Extract product URLs from items (abotapi output has 'url' or 'productUrl')
-                        found = []
-                        for item in d_items:
-                            u = item.get("url") or item.get("productUrl")
-                            if u and ("-p-" in u or "/p/" in u):
-                                found.append(u)
-                        target_urls = found[:40]
-                        log.info("marketplace_abotapi_discovery_success", count=len(target_urls))
-                except Exception as e:
-                    log.warning("marketplace_abotapi_discovery_failed", error=str(e))
+                # abotapi's 'url' mode needs product listing pages, not store pages.
+                # Extract merchantId from URL (e.g. shopist-m-357212 -> 357212)
+                # and build a Trendyol search URL filtered to that merchant.
+                discovery_urls = []
+                if seller_url:
+                    import re
+                    m = re.search(r"-m-(\d+)", seller_url)
+                    if m:
+                        merchant_id = m.group(1)
+                        discovery_urls = [
+                            f"https://www.trendyol.com/sr?q=&merchantId={merchant_id}&st=1"
+                        ]
+                        log.info("marketplace_abotapi_merchant_url", merchant_id=merchant_id)
+
+                # Fallback: use search queries as Trendyol search URLs
+                if not discovery_urls and search_queries:
+                    from urllib.parse import urlencode, quote as urlquote
+                    discovery_urls = [
+                        f"https://www.trendyol.com/sr?q={urlquote(sq)}"
+                        for sq in search_queries[:2]
+                    ]
+
+                if discovery_urls:
+                    discovery_input = {
+                        "mode": "url",
+                        "urls": discovery_urls,
+                        "maxItems": 40,
+                        "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": "TR"}
+                    }
+                    log.info("marketplace_abotapi_discovery_run", urls=discovery_urls[:1])
+                    d_url = f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items?token={token}&format=json&timeout=150"
+                    try:
+                        d_resp = await client.post(d_url, json=discovery_input)
+                        if d_resp.status_code < 400:
+                            d_items = d_resp.json()
+                            found = []
+                            for item in d_items:
+                                u = item.get("url") or item.get("productUrl")
+                                if u and ("-p-" in u or "/p/" in u):
+                                    found.append(u)
+                            target_urls = found[:40]
+                            log.info("marketplace_abotapi_discovery_success", count=len(target_urls))
+                    except Exception as e:
+                        log.warning("marketplace_abotapi_discovery_failed", error=str(e))
 
             if not target_urls:
-                raise RuntimeError("Başlangıç ürün linkleri mağazadan toplanamadı (abotapi discovery failed).")
+                raise RuntimeError(
+                    "Mağazadan ürün linkleri alınamadı. "
+                    "Abotapi aktörü bu mağaza URL'sine erişemedi."
+                )
 
             # Step 2: Extract reviews
             log.info("marketplace_abotapi_reviews_start", url_count=len(target_urls))
