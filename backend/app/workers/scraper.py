@@ -1007,88 +1007,41 @@ async def _execute_marketplace_seller_fetch(
     fetch.error_message = None
     fetch.seller_intelligence_json = None
     await session.flush()
-    await session.commit()
+    await session.commit()  # Commit RUNNING status immediately so timer starts in UI
 
     try:
-        rows = await run_marketplace_seller_intelligence(
-            settings=settings,
-            seller_urls=[seller_url],
-            max_sellers=max_sellers,
-        )
-        profiles: list[dict[str, Any]] = []
-        for item in rows:
-            if not isinstance(item, dict):
-                continue
-            if item.get("recordType") == "RUN_SUMMARY" or item.get("type") == "RUN_SUMMARY":
-                continue
-            dv = str(item.get("dataVersion") or "")
-            if "run_summary" in dv.lower():
-                continue
-            if item.get("sellerId") or dv.startswith("seller-profile"):
-                profiles.append(item)
-
-        if not profiles:
-            raise RuntimeError("Apify satıcı profili döndürmedi.")
-        primary = profiles[0]
-    except Exception as exc:
-        log.warning("worker_marketplace_auto_detect_failed", error=str(exc))
-        # Fallback: URL'den türet
+        # --- Derive seller name directly from URL (no Apify seller intelligence call needed) ---
         raw_u = seller_url.lower()
-        d_name = "Bilinmeyen Mağaza"
+        seller_name = "Bilinmeyen Mağaza"
         try:
             if "magaza/" in raw_u:
-                d_name = raw_u.split("magaza/")[1].split("/")[0].split("-m-")[0].capitalize()
+                seller_name = raw_u.split("magaza/")[1].split("/")[0].split("-m-")[0].capitalize()
             elif "satici/" in raw_u:
-                d_name = raw_u.split("satici/")[1].split("/")[0].split("-m-")[0].capitalize()
-        except:
+                seller_name = raw_u.split("satici/")[1].split("/")[0].split("-m-")[0].capitalize()
+        except Exception:
             pass
-        primary = {"sellerName": d_name, "sellerId": "derived"}
-        profiles = [primary]
 
-        fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
-        await session.flush()
-
-        name_q = str(primary.get("sellerName") or "").strip()
         slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
-        search_queries = _marketplace_search_variants(name_q, slug_q, seller_url)
+        search_queries = _marketplace_search_variants(seller_name, slug_q, seller_url)
         if not search_queries:
-            raise RuntimeError("Satıcı adı veya mağaza URL'sinden arama terimi üretilemedi.")
+            search_queries = [seller_name]
 
-        product_urls: list[str] = []
-        seen_product = set()
-        for prof in profiles:
-            for u in collect_marketplace_product_urls_from_profile(prof, max_urls=40):
-                if u not in seen_product:
-                    seen_product.add(u)
-                    product_urls.append(u)
-                if len(product_urls) >= 40:
-                    break
-            if len(product_urls) >= 40:
-                break
+        # Store minimal profile for context
+        primary = {"sellerName": seller_name, "sellerId": "derived"}
+        fetch.seller_intelligence_json = {"profile": primary, "profiles": [primary]}
+        await session.flush()
 
         plats = _marketplace_platforms_for_seller_url(seller_url)
         review_cap = int(settings.external_scraper_marketplace_review_max_per_product)
-        review_rows: list[dict[str, Any]] = []
-        if product_urls:
-            try:
-                review_rows = await run_marketplace_review_aggregator(
-                    settings=settings,
-                    platforms=plats,
-                    max_reviews_per_product=review_cap,
-                    product_urls=product_urls,
-                    seller_url=seller_url,
-                )
-            except RuntimeError:
-                review_rows = []
 
-        if not review_rows:
-            review_rows = await run_marketplace_review_aggregator(
-                settings=settings,
-                platforms=plats,
-                max_reviews_per_product=review_cap,
-                search_queries=search_queries,
-                seller_url=seller_url,
-            )
+        # --- Single Apify call: pass seller_url directly ---
+        review_rows = await run_marketplace_review_aggregator(
+            settings=settings,
+            platforms=plats,
+            max_reviews_per_product=review_cap,
+            search_queries=search_queries,
+            seller_url=seller_url,
+        )
 
         from_d = fetch.from_date
         to_d = fetch.to_date
@@ -1153,7 +1106,7 @@ async def _execute_marketplace_seller_fetch(
         if total_ins == 0:
             raise RuntimeError(
                 "Seçilen tarih aralığında pazaryeri ürün yorumu bulunamadı. "
-                "Tarih aralığını genişletin; arama sonuçları bu satıcıyla eşleşmeyebilir."
+                "Tarih aralığını genişletin veya başka bir mağaza URL'si deneyin."
             )
 
         fetch.status = FetchStatus.COMPLETED
@@ -1161,16 +1114,18 @@ async def _execute_marketplace_seller_fetch(
         fetch.error_message = None
         await session.flush()
         log.info("marketplace_seller_fetch_completed", fetch_id=str(fetch_id), reviews=total_ins)
+
     except Exception as exc:
         fetch.status = FetchStatus.FAILED
         fetch.completed_at = datetime.now(UTC)
         detail = str(exc).strip()
         fetch.error_message = (
-            detail[:8000] if detail else "Pazaryeri satıcı çekimi başarısız (Apify / bağlantı)."
+            detail[:8000] if detail else "Pazaryeri satıcı çekimi başarısız."
         )
         await session.flush()
         log.exception("marketplace_seller_fetch_failed", fetch_id=str(fetch_id))
         raise
+
 
     ar = await session.execute(select(Analysis).where(Analysis.fetch_id == fetch.id))
     existing = list(ar.scalars().all())
