@@ -1062,6 +1062,7 @@ async def _execute_marketplace_seller_fetch(
                     platforms=plats,
                     max_reviews_per_product=review_cap,
                     product_urls=product_urls,
+                    seller_url=seller_url,
                 )
             except RuntimeError:
                 review_rows = []
@@ -1072,6 +1073,7 @@ async def _execute_marketplace_seller_fetch(
                 platforms=plats,
                 max_reviews_per_product=review_cap,
                 search_queries=search_queries,
+                seller_url=seller_url,
             )
 
         from_d = fetch.from_date
