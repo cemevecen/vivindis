@@ -71,11 +71,23 @@ async def create_decoupled_marketplace_fetch(
         seller_name = str(primary.get("sellerName") or "Bilinmeyen Mağaza").strip()
     except Exception as exc:
         log.warning("marketplace_auto_detect_failed", error=str(exc))
-        # Fallback: URL'den bir isim türetmeye çalış veya hata ver
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Satıcı mağaza bilgileri doğrulanamadı: {str(exc)}"
-        )
+        # Fallback: URL'den bir isim türetmeye çalış
+        # Örn: https://www.trendyol.com/magaza/shopist-m-357212 -> Shopist
+        raw_url = body.seller_url.lower()
+        derived_name = "Bilinmeyen Mağaza"
+        try:
+            if "magaza/" in raw_url:
+                parts = raw_url.split("magaza/")[1].split("/")[0].split("-m-")[0].split("?")[0]
+                derived_name = parts.capitalize()
+            elif "satici/" in raw_url:
+                parts = raw_url.split("satici/")[1].split("/")[0].split("-m-")[0].split("?")[0]
+                derived_name = parts.capitalize()
+        except:
+            pass
+        
+        seller_name = derived_name
+        primary = {"sellerName": seller_name, "sellerId": "derived"}
+        log.info("marketplace_auto_detect_fallback", derived_name=seller_name)
 
     # 2. Bu isimle bir 'App' var mı kontrol et, yoksa oluştur
     # Not: platform=BOTH veya özel bir MARKETPLACE platformu eklenebilir. 
