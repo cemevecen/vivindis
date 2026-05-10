@@ -100,6 +100,7 @@ async def run_marketplace_review_aggregator(
     max_reviews_per_product: int,
     search_queries: list[str] | None = None,
     product_urls: list[str] | None = None,
+    seller_url: str | None = None,
 ) -> list[dict[str, Any]]:
     """Runs the marketplace review actor with support for abotapi/trendyol-scraper and fallback to old aggregator."""
     token = (settings.external_scraper_apify_token or "").strip()
@@ -120,11 +121,17 @@ async def run_marketplace_review_aggregator(
         # --- SPECIAL BRANCH: abotapi/trendyol-scraper ---
         if is_abotapi:
             log.info("marketplace_abotapi_start", actor=actor_raw)
-            # Step 1: Discover products from search/seller URLs if product_urls not provided
+            # Step 1: Discover products
             target_urls = product_urls or []
+            
+            # If no product URLs, but we have a seller_url, try to use it directly in 'url' mode or 'reviews' mode
+            # abotapi reviews mode can take a shop URL and it will try to find reviews
+            if not target_urls and seller_url:
+                log.info("marketplace_abotapi_using_seller_url", seller_url=seller_url)
+                target_urls = [seller_url]
+
             if not target_urls and search_queries:
                 log.info("marketplace_abotapi_discovery", queries=search_queries)
-                # For abotapi, we try to get some product URLs first using 'search' mode or 'url' mode
                 discovery_payload = {
                     "mode": "search",
                     "urls": search_queries[:3],
@@ -141,7 +148,7 @@ async def run_marketplace_review_aggregator(
                     log.warning("marketplace_abotapi_discovery_failed", error=str(e))
 
             if not target_urls:
-                raise RuntimeError("Başlangıç ürün URL'leri bulunamadı (abotapi).")
+                raise RuntimeError("Başlangıç ürün veya mağaza URL'leri bulunamadı (abotapi).")
 
             # Step 2: Extract reviews
             log.info("marketplace_abotapi_reviews_start", url_count=len(target_urls))
