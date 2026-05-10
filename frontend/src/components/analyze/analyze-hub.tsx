@@ -473,8 +473,8 @@ function AnalyzeHubConnected() {
   });
 
   const marketplacePullMutation = useMutation({
-    mutationFn: async (payload: { appId: string; sellerUrl: string }) => {
-      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${payload.appId}/fetch-marketplace-seller`, {
+    mutationFn: async (payload: { sellerUrl: string }) => {
+      return apiFetch<ReviewFetchDto>(`/api/v1/marketplace/fetch-seller`, {
         method: "POST",
         body: {
           from_date: dateRange.from,
@@ -1369,6 +1369,20 @@ function AnalyzeHubConnected() {
     searchQueryB.dataUpdatedAt,
   ]);
 
+  const handlePullMarketplaceReviews = async () => {
+    if (!requireSignedIn()) {
+      return;
+    }
+    if (!marketplacePullInputReady) {
+      toast.error(t("marketplaceUrlRequired"));
+      return;
+    }
+    setStoreFetchId("");
+    marketplacePullMutation.mutate({
+      sellerUrl: marketplaceSellerUrl.trim(),
+    });
+  };
+
   const handleCompareStart = async () => {
     if (!requireSignedIn()) {
       return;
@@ -1770,11 +1784,6 @@ function AnalyzeHubConnected() {
                     ))}
                   </div>
                 </div>
-                {marketplaceAttachAppId.trim() && marketplaceAttachAppName ? (
-                  <p className="text-sm text-muted-foreground">
-                    {t("marketplacePinnedAppBanner", { name: marketplaceAttachAppName })}
-                  </p>
-                ) : null}
                 <div className="space-y-2">
                   <Label htmlFor="marketplace-seller-url" className="text-foreground">
                     {t("marketplaceUrlLabel")}
@@ -1838,7 +1847,6 @@ function AnalyzeHubConnected() {
                       className="h-11 w-full rounded-xl bg-primary px-5 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 disabled:opacity-50"
                       onClick={() => void handlePullMarketplaceReviews()}
                       disabled={
-                        !marketplaceAttachAppId.trim() ||
                         !marketplacePullInputReady ||
                         !externalScraperQuery.data?.enabled ||
                         externalScraperQuery.isPending ||
