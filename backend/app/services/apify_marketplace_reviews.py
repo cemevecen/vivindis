@@ -124,31 +124,34 @@ async def run_marketplace_review_aggregator(
             # Step 1: Discover products
             target_urls = product_urls or []
             
-            # If no product URLs, but we have a seller_url, try to use it directly in 'url' mode or 'reviews' mode
-            # abotapi reviews mode can take a shop URL and it will try to find reviews
-            if not target_urls and seller_url:
-                log.info("marketplace_abotapi_using_seller_url", seller_url=seller_url)
-                target_urls = [seller_url]
-
-            if not target_urls and search_queries:
-                log.info("marketplace_abotapi_discovery", queries=search_queries)
-                discovery_payload = {
-                    "mode": "search",
-                    "urls": search_queries[:3],
-                    "maxItems": 20,
+            # If we only have a seller_url, we MUST discover products first because abotapi reviews mode 
+            # only accepts product-specific URLs (-p- or /p/).
+            if not target_urls and (seller_url or search_queries):
+                discovery_input = {
+                    "mode": "url" if seller_url else "search",
+                    "urls": [seller_url] if seller_url else search_queries[:3],
+                    "maxItems": 40, # Find up to 40 products in the shop
                     "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": "TR"}
                 }
-                d_url = f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items?token={token}&format=json&timeout=120"
+                log.info("marketplace_abotapi_discovery_run", mode=discovery_input["mode"])
+                d_url = f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items?token={token}&format=json&timeout=150"
                 try:
-                    d_resp = await client.post(d_url, json=discovery_payload)
+                    d_resp = await client.post(d_url, json=discovery_input)
                     if d_resp.status_code < 400:
                         d_items = d_resp.json()
-                        target_urls = [item["url"] for item in d_items if "url" in item][:20]
+                        # Extract product URLs from items (abotapi output has 'url' or 'productUrl')
+                        found = []
+                        for item in d_items:
+                            u = item.get("url") or item.get("productUrl")
+                            if u and ("-p-" in u or "/p/" in u):
+                                found.append(u)
+                        target_urls = found[:40]
+                        log.info("marketplace_abotapi_discovery_success", count=len(target_urls))
                 except Exception as e:
                     log.warning("marketplace_abotapi_discovery_failed", error=str(e))
 
             if not target_urls:
-                raise RuntimeError("Başlangıç ürün veya mağaza URL'leri bulunamadı (abotapi).")
+                raise RuntimeError("Başlangıç ürün linkleri mağazadan toplanamadı (abotapi discovery failed).")
 
             # Step 2: Extract reviews
             log.info("marketplace_abotapi_reviews_start", url_count=len(target_urls))
