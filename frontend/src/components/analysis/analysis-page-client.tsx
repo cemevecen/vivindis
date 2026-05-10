@@ -799,17 +799,9 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
   }
 
   const fetch = fetchQuery.data;
-  if (!fetch) {
-    return null;
-  }
 
-  const items = analysesForFetch(analysesQuery.data?.items ?? [], fetchId);
-  const busy = items.some((a) => a.status === "pending" || a.status === "running");
-
-  const heuristic = latestByType(items, "heuristic");
-  const ai = latestByType(items, "ai");
   const runningFetchHint = useMemo(() => {
-    if (fetch.status !== "running") {
+    if (!fetch || fetch.status !== "running") {
       return "";
     }
     const site = inferMarketplaceSiteFromFetch(fetch);
@@ -823,6 +815,16 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
     }
     return tAnalyzeHub("fetchHintRunningNoCount");
   }, [fetch, tAnalyzeHub]);
+
+  if (!fetch) {
+    return null;
+  }
+
+  const items = analysesForFetch(analysesQuery.data?.items ?? [], fetchId);
+  const busy = items.some((a) => a.status === "pending" || a.status === "running");
+
+  const heuristic = latestByType(items, "heuristic");
+  const ai = latestByType(items, "ai");
 
   const liveStatusHint =
     fetch.status === "waiting_approval"
