@@ -1045,109 +1045,109 @@ async def _execute_marketplace_seller_fetch(
         primary = {"sellerName": d_name, "sellerId": "derived"}
         profiles = [primary]
 
-    fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
-    await session.flush()
+        fetch.seller_intelligence_json = {"profile": primary, "profiles": profiles}
+        await session.flush()
 
-    name_q = str(primary.get("sellerName") or "").strip()
-    slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
-    search_queries = _marketplace_search_variants(name_q, slug_q, seller_url)
-    if not search_queries:
-        raise RuntimeError("Satıcı adı veya mağaza URL'sinden arama terimi üretilemedi.")
+        name_q = str(primary.get("sellerName") or "").strip()
+        slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
+        search_queries = _marketplace_search_variants(name_q, slug_q, seller_url)
+        if not search_queries:
+            raise RuntimeError("Satıcı adı veya mağaza URL'sinden arama terimi üretilemedi.")
 
-    product_urls: list[str] = []
-    seen_product = set()
-    for prof in profiles:
-        for u in collect_marketplace_product_urls_from_profile(prof, max_urls=40):
-            if u not in seen_product:
-                seen_product.add(u)
-                product_urls.append(u)
+        product_urls: list[str] = []
+        seen_product = set()
+        for prof in profiles:
+            for u in collect_marketplace_product_urls_from_profile(prof, max_urls=40):
+                if u not in seen_product:
+                    seen_product.add(u)
+                    product_urls.append(u)
+                if len(product_urls) >= 40:
+                    break
             if len(product_urls) >= 40:
                 break
-        if len(product_urls) >= 40:
-            break
 
-    plats = _marketplace_platforms_for_seller_url(seller_url)
-    review_cap = int(settings.external_scraper_marketplace_review_max_per_product)
-    review_rows: list[dict[str, Any]] = []
-    if product_urls:
-        try:
+        plats = _marketplace_platforms_for_seller_url(seller_url)
+        review_cap = int(settings.external_scraper_marketplace_review_max_per_product)
+        review_rows: list[dict[str, Any]] = []
+        if product_urls:
+            try:
+                review_rows = await run_marketplace_review_aggregator(
+                    settings=settings,
+                    platforms=plats,
+                    max_reviews_per_product=review_cap,
+                    product_urls=product_urls,
+                    seller_url=seller_url,
+                )
+            except RuntimeError:
+                review_rows = []
+
+        if not review_rows:
             review_rows = await run_marketplace_review_aggregator(
                 settings=settings,
                 platforms=plats,
                 max_reviews_per_product=review_cap,
-                product_urls=product_urls,
+                search_queries=search_queries,
                 seller_url=seller_url,
             )
-        except RuntimeError:
-            review_rows = []
 
-    if not review_rows:
-        review_rows = await run_marketplace_review_aggregator(
-            settings=settings,
-            platforms=plats,
-            max_reviews_per_product=review_cap,
-            search_queries=search_queries,
-            seller_url=seller_url,
-        )
+        from_d = fetch.from_date
+        to_d = fetch.to_date
+        for item in review_rows:
+            if not isinstance(item, dict):
+                continue
+            if item.get("recordType") == "RUN_SUMMARY" or item.get("type") == "RUN_SUMMARY":
+                continue
+            dv = str(item.get("dataVersion") or "")
+            if "run_summary" in dv.lower():
+                continue
+            if "review" not in dv.lower() and not item.get("reviewId"):
+                continue
+            rid = str(item.get("reviewId") or "").strip()
+            if not rid:
+                continue
+            rd = _parse_marketplace_review_date(item.get("reviewDate"), to_d)
+            if rd < from_d or rd > to_d:
+                continue
+            rating_raw = item.get("rating")
+            try:
+                rating_int = int(round(float(rating_raw)))
+            except (TypeError, ValueError):
+                rating_int = 3
+            rating_int = max(1, min(5, rating_int))
+            title = str(item.get("title") or "").strip()[:1024] or None
+            body = str(item.get("body") or "").strip()
+            if not body:
+                body = "(Yorum metni yok)"
+            if len(body) > 12000:
+                body = body[:12000]
+            author = str(item.get("reviewerName") or "").strip()[:512] or None
+            purl = str(item.get("productUrl") or item.get("sourceUrl") or "").strip()
+            mplat = str(item.get("platform") or "").strip()[:60] or None
+            hc = item.get("helpfulCount")
+            try:
+                thumbs = int(hc) if hc is not None else 0
+            except (TypeError, ValueError):
+                thumbs = 0
+            await _upsert_review(
+                session,
+                app_id=app.id,
+                fetch_id=fetch.id,
+                platform=StorePlatform.MARKETPLACE_SELLER_TR,
+                store_review_id=rid[:255],
+                rating=rating_int,
+                title=title,
+                body=body,
+                author=author,
+                author_uri=purl[:2048] if purl else None,
+                app_version_label=mplat,
+                lang="tr",
+                review_date=rd,
+                thumbs_up=max(0, thumbs),
+                developer_reply=None,
+                reply_date=None,
+            )
 
-    from_d = fetch.from_date
-    to_d = fetch.to_date
-    for item in review_rows:
-        if not isinstance(item, dict):
-            continue
-        if item.get("recordType") == "RUN_SUMMARY" or item.get("type") == "RUN_SUMMARY":
-            continue
-        dv = str(item.get("dataVersion") or "")
-        if "run_summary" in dv.lower():
-            continue
-        if "review" not in dv.lower() and not item.get("reviewId"):
-            continue
-        rid = str(item.get("reviewId") or "").strip()
-        if not rid:
-            continue
-        rd = _parse_marketplace_review_date(item.get("reviewDate"), to_d)
-        if rd < from_d or rd > to_d:
-            continue
-        rating_raw = item.get("rating")
-        try:
-            rating_int = int(round(float(rating_raw)))
-        except (TypeError, ValueError):
-            rating_int = 3
-        rating_int = max(1, min(5, rating_int))
-        title = str(item.get("title") or "").strip()[:1024] or None
-        body = str(item.get("body") or "").strip()
-        if not body:
-            body = "(Yorum metni yok)"
-        if len(body) > 12000:
-            body = body[:12000]
-        author = str(item.get("reviewerName") or "").strip()[:512] or None
-        purl = str(item.get("productUrl") or item.get("sourceUrl") or "").strip()
-        mplat = str(item.get("platform") or "").strip()[:60] or None
-        hc = item.get("helpfulCount")
-        try:
-            thumbs = int(hc) if hc is not None else 0
-        except (TypeError, ValueError):
-            thumbs = 0
-        await _upsert_review(
-            session,
-            app_id=app.id,
-            fetch_id=fetch.id,
-            platform=StorePlatform.MARKETPLACE_SELLER_TR,
-            store_review_id=rid[:255],
-            rating=rating_int,
-            title=title,
-            body=body,
-            author=author,
-            author_uri=purl[:2048] if purl else None,
-            app_version_label=mplat,
-            lang="tr",
-            review_date=rd,
-            thumbs_up=max(0, thumbs),
-            developer_reply=None,
-            reply_date=None,
-        )
-
-    await _commit_reviews_and_sync_fetch_count(session, fetch.id)
+        await _commit_reviews_and_sync_fetch_count(session, fetch.id)
         cnt_r = await session.execute(select(func.count()).select_from(Review).where(Review.fetch_id == fetch.id))
         total_ins = int(cnt_r.scalar_one())
         if total_ins == 0:
