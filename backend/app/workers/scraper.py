@@ -25,7 +25,10 @@ from app.models.review import Review
 from app.models.review_fetch import ReviewFetch
 from app.db.session import get_async_session_maker
 from app.services.async_rate_limiter import AsyncTokenBucketRateLimiter
-from app.services.apify_marketplace_reviews import run_marketplace_review_aggregator
+from app.services.apify_marketplace_reviews import (
+    collect_marketplace_product_urls_from_profile,
+    run_marketplace_review_aggregator,
+)
 from app.services.apify_marketplace_seller import run_marketplace_seller_intelligence
 from app.services.play_scraper_headers import ensure_play_request_user_agents
 from app.services.user_agents import pick_user_agent
@@ -940,6 +943,39 @@ def _marketplace_platforms_for_seller_url(seller_url: str) -> list[str]:
     return ["trendyol", "hepsiburada", "n11"]
 
 
+def _marketplace_search_variants(name_q: str, slug_q: str, seller_url: str) -> list[str]:
+    """Several search strings — marketplace search actor often fails on a single query."""
+    out: list[str] = []
+    n = name_q.strip()
+    s = slug_q.strip()
+    low = seller_url.lower()
+    host_hint = ""
+    if "hepsiburada.com" in low:
+        host_hint = "hepsiburada"
+    elif "n11.com" in low:
+        host_hint = "n11"
+    elif "trendyol.com" in low:
+        host_hint = "trendyol"
+    candidates = [
+        n,
+        s,
+        f"{n} {s}".strip(),
+        f"{s} {host_hint}".strip() if s and host_hint else "",
+        f"{n} {host_hint}".strip() if n and host_hint else "",
+    ]
+    for c in candidates:
+        c = c.strip()
+        if len(c) >= 2 and c not in out:
+            out.append(c[:500])
+    if out:
+        return out
+    if len(n) >= 2:
+        return [n[:500]]
+    if len(s) >= 2:
+        return [s[:500]]
+    return []
+
+
 def _parse_marketplace_review_date(raw: object, fallback: date) -> date:
     if not isinstance(raw, str) or not raw.strip():
         return fallback
@@ -1000,17 +1036,43 @@ async def _execute_marketplace_seller_fetch(
 
         name_q = str(primary.get("sellerName") or "").strip()
         slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
-        search_query = name_q if len(name_q) >= 2 else slug_q
-        if len(search_query) < 2:
+        search_queries = _marketplace_search_variants(name_q, slug_q, seller_url)
+        if not search_queries:
             raise RuntimeError("Satıcı adı veya mağaza URL'sinden arama terimi üretilemedi.")
 
+        product_urls: list[str] = []
+        seen_product = set()
+        for prof in profiles:
+            for u in collect_marketplace_product_urls_from_profile(prof, max_urls=40):
+                if u not in seen_product:
+                    seen_product.add(u)
+                    product_urls.append(u)
+                if len(product_urls) >= 40:
+                    break
+            if len(product_urls) >= 40:
+                break
+
+        plats = _marketplace_platforms_for_seller_url(seller_url)
         review_cap = int(settings.external_scraper_marketplace_review_max_per_product)
-        review_rows = await run_marketplace_review_aggregator(
-            settings=settings,
-            search_query=search_query,
-            platforms=_marketplace_platforms_for_seller_url(seller_url),
-            max_reviews_per_product=review_cap,
-        )
+        review_rows: list[dict[str, Any]] = []
+        if product_urls:
+            try:
+                review_rows = await run_marketplace_review_aggregator(
+                    settings=settings,
+                    platforms=plats,
+                    max_reviews_per_product=review_cap,
+                    product_urls=product_urls,
+                )
+            except RuntimeError:
+                review_rows = []
+
+        if not review_rows:
+            review_rows = await run_marketplace_review_aggregator(
+                settings=settings,
+                platforms=plats,
+                max_reviews_per_product=review_cap,
+                search_queries=search_queries,
+            )
 
         from_d = fetch.from_date
         to_d = fetch.to_date
