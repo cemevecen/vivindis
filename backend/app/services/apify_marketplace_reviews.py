@@ -121,97 +121,51 @@ async def run_marketplace_review_aggregator(
         # --- SPECIAL BRANCH: abotapi/trendyol-scraper ---
         if is_abotapi:
             log.info("marketplace_abotapi_start", actor=actor_raw)
-            target_urls = list(product_urls or [])
 
-            # If no product URLs, use Trendyol's own internal listing API to find products
-            # This is much faster and more reliable than using abotapi for discovery
-            if not target_urls and seller_url:
-                import re
-                m = re.search(r"-m-(\d+)", seller_url)
-                if m:
-                    merchant_id = m.group(1)
-                    log.info("marketplace_trendyol_api_discovery", merchant_id=merchant_id)
-                    # Trendyol's public product listing endpoint (no auth required)
-                    trendyol_api_url = (
-                        f"https://public.trendyol.com/discovery-web-searchgw-service/api/infinite-scroll"
-                        f"?merchantIds={merchant_id}&pi=0&isLegalRequirementConfirmed=false&channelId=1"
-                    )
-                    try:
-                        headers = {
-                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                            "Accept": "application/json",
-                            "Referer": "https://www.trendyol.com/",
-                        }
-                        api_resp = await client.get(trendyol_api_url, headers=headers, timeout=30)
-                        if api_resp.status_code < 400:
-                            api_data = api_resp.json()
-                            # Extract product URLs from the response
-                            products = (
-                                api_data.get("result", {}).get("products", [])
-                                or api_data.get("products", [])
-                                or api_data.get("data", {}).get("products", [])
-                                or []
-                            )
-                            for prod in products[:40]:
-                                url_field = prod.get("url") or prod.get("productUrl") or ""
-                                if url_field and not url_field.startswith("http"):
-                                    url_field = "https://www.trendyol.com" + url_field
-                                if url_field and "trendyol.com" in url_field:
-                                    # Ensure it has /yorumlar suffix for review scraping
-                                    base = url_field.split("?")[0].rstrip("/")
-                                    if not base.endswith("/yorumlar"):
-                                        base = base + "/yorumlar"
-                                    target_urls.append(base)
-                            log.info("marketplace_trendyol_api_success", count=len(target_urls))
-                    except Exception as e:
-                        log.warning("marketplace_trendyol_api_failed", error=str(e))
+            # Build startUrls: actor accepts store URLs, search URLs, and product URLs directly
+            start_urls: list[str] = []
+            if product_urls:
+                start_urls.extend(product_urls[:20])
+            if seller_url and seller_url not in start_urls:
+                start_urls.append(seller_url)
+            if not start_urls and search_queries:
+                # Use Trendyol search URLs as fallback
+                from urllib.parse import quote as urlquote
+                for sq in search_queries[:2]:
+                    start_urls.append(f"https://www.trendyol.com/sr?q={urlquote(sq)}")
 
-            # If still no URLs, try abotapi search mode as last resort
-            if not target_urls and search_queries:
-                log.info("marketplace_abotapi_search_fallback", queries=search_queries[:1])
-                search_payload = {
-                    "mode": "search",
-                    "urls": search_queries[:1],  # seller name as search term
-                    "maxItems": 20,
-                    "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": "TR"}
-                }
-                d_url = f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items?token={token}&format=json&timeout=120"
-                try:
-                    d_resp = await client.post(d_url, json=search_payload, timeout=130)
-                    if d_resp.status_code < 400:
-                        for item in d_resp.json():
-                            u = item.get("url") or item.get("productUrl") or ""
-                            if "trendyol.com" in u and "-p-" in u:
-                                base = u.split("?")[0].rstrip("/")
-                                if not base.endswith("/yorumlar"):
-                                    base = base + "/yorumlar"
-                                target_urls.append(base)
-                        target_urls = target_urls[:30]
-                        log.info("marketplace_abotapi_search_result", count=len(target_urls))
-                except Exception as e:
-                    log.warning("marketplace_abotapi_search_failed", error=str(e))
+            if not start_urls:
+                raise RuntimeError("Başlatılacak URL bulunamadı.")
 
-            if not target_urls:
-                raise RuntimeError(
-                    "Mağazadan ürün linkleri alınamadı. "
-                    "Trendyol API ve arama denemesi başarısız oldu."
-                )
-
-            # Step 2: Pass /yorumlar URLs to abotapi in url mode for review extraction
-            log.info("marketplace_abotapi_reviews_start", url_count=len(target_urls))
-            reviews_payload = {
-                "mode": "url",
-                "urls": target_urls[:20],
-                "maxItems": cap,
-                "proxyConfiguration": {"useApifyProxy": True, "apifyProxyCountry": "TR"}
+            log.info("marketplace_abotapi_run", start_urls=start_urls[:2])
+            payload = {
+                "startUrls": start_urls,
+                "getReviews": True,
+                "getQna": False,
+                "limit": cap,
+                "couponsOnly": False,
+                "newlyReleasedOnly": False,
+                "specialOffersOnly": False,
+                "influencerPreferredOnly": False,
+                "lowestPriceDays": [],
             }
-            r_url = f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items?token={token}&format=json&clean=1&timeout={timeout_val}"
-            resp = await client.post(r_url, json=reviews_payload)
+            run_url = (
+                f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items"
+                f"?token={token}&format=json&clean=1&timeout={timeout_val}"
+            )
+            resp = await client.post(run_url, json=payload)
             if resp.status_code < 400:
-                return _normalize_dataset_list(resp.json())
+                items = _normalize_dataset_list(resp.json())
+                # Filter to review items only
+                reviews = [
+                    item for item in items
+                    if item.get("type") == "review" or item.get("reviewId") or item.get("review_id")
+                ]
+                log.info("marketplace_abotapi_done", total=len(items), reviews=len(reviews))
+                return reviews if reviews else items  # fallback: return all if no typed reviews
 
             err_detail = resp.text[:500]
-            raise RuntimeError(f"Abotapi yorum çekimi başarısız: {err_detail}")
+            raise RuntimeError(f"Abotapi çekimi başarısız ({resp.status_code}): {err_detail}")
 
         # --- FALLBACK: Legacy Aggregator Logic ---
         url = (
