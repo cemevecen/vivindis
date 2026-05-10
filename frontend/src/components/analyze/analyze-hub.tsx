@@ -55,6 +55,11 @@ import { dedupeAppsForList } from "@/lib/app-dedupe";
 import { parseReviewFile } from "@/lib/parse-review-file";
 import { parseReviewLinesFromPaste } from "@/lib/review-import-parse";
 import { queryKeys } from "@/lib/query-keys";
+import {
+  MARKETPLACE_CHIP_LABEL,
+  MARKETPLACE_CHIP_SITES,
+  type MarketplaceSiteId,
+} from "@/lib/marketplace-site";
 import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto } from "@/types/analysis";
@@ -106,16 +111,6 @@ function classifyMarketplaceSellerUrl(url: string): "ok" | "amazon" | "invalid" 
   }
   return "invalid";
 }
-
-type MarketplaceSiteId = "trendyol" | "hepsiburada" | "n11";
-
-const MARKETPLACE_CHIP_SITES: MarketplaceSiteId[] = ["trendyol", "hepsiburada", "n11"];
-
-const MARKETPLACE_CHIP_LABEL: Record<MarketplaceSiteId, "marketplaceBrandTrendyol" | "marketplaceBrandHepsiburada" | "marketplaceBrandN11"> = {
-  trendyol: "marketplaceBrandTrendyol",
-  hepsiburada: "marketplaceBrandHepsiburada",
-  n11: "marketplaceBrandN11",
-};
 
 function marketplaceChipIconSrc(site: MarketplaceSiteId): string {
   return `/marketplace/${site}-app.jpg`;
@@ -900,13 +895,18 @@ function AnalyzeHubConnected() {
       return t("fetchHintPending");
     }
     if (row.status === "running") {
+      if (storeSourceMode === "marketplace") {
+        return t("marketplaceFetchHintRunningNoCount", {
+          platform: t(MARKETPLACE_CHIP_LABEL[marketplaceSite]),
+        });
+      }
       return t("fetchHintRunningNoCount");
     }
     if (row.status === "completed") {
       return t("fetchHintCompleted", { count: row.review_count ?? 0 });
     }
     return row.error_message ?? "";
-  }, [fetchRowQuery.data, storeFetchId, t]);
+  }, [fetchRowQuery.data, marketplaceSite, storeFetchId, storeSourceMode, t]);
 
   const fetchStageLabel = useMemo(() => {
     const row = fetchRowQuery.data;

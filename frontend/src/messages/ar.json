@@ -482,6 +482,8 @@
     "fetchHintPending": "في الطابور، بانتظار العامل…",
     "fetchHintRunningWithCount": "جارٍ جلب المراجعات… ({count} مُجمَّعة)",
     "fetchHintRunningNoCount": "جارٍ جلب مراجعات Google Play وApp Store…",
+    "marketplaceFetchHintRunningNoCount": "جارٍ جلب مراجعات سوق {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "جارٍ جلب مراجعات الأسواق التركية عبر الإنترنت…",
     "fetchHintCompleted": "اكتمل السحب ({count, plural, one {مراجعة واحدة} other {# مراجعات}}). يمكنك بدء التحليل.",
     "fetchHintWaitingApproval": "هذا السحب في قائمة انتظار الموافقة — لم يبدأ فحص المتجر بعد.",
     "fetchStageWaitingApproval": "بانتظار الموافقة (لا يوجد فحص للمتجر بعد)",

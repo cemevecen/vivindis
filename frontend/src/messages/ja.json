@@ -482,6 +482,8 @@
     "fetchHintPending": "キュー待ち、ワーカーを待っています…",
     "fetchHintRunningWithCount": "ストアからレビューを取得中…（{count} 件）",
     "fetchHintRunningNoCount": "Google Play と App Store のレビューを取得中…",
+    "marketplaceFetchHintRunningNoCount": "{platform} のマーケットプレイスレビューを取得中…",
+    "marketplaceFetchHintRunningNoCountGeneric": "トルコのマーケットプレイスレビューを取得中…",
     "fetchHintCompleted": "取得完了（{count, plural, other {# 件}}）。分析を開始できます。",
     "fetchHintWaitingApproval": "この取得は承認待ちのキューです — ストア走査はまだ開始していません。",
     "fetchStageWaitingApproval": "承認待ち（ストア走査なし）",

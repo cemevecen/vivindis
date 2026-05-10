@@ -482,6 +482,8 @@
     "fetchHintPending": "Foleni, inasubiri mfanyakazi…",
     "fetchHintRunningWithCount": "Inapakua hakiki… ({count} zimekusanywa)",
     "fetchHintRunningNoCount": "Inapakua hakiki za Google Play na App Store…",
+    "marketplaceFetchHintRunningNoCount": "Inapakua hakiki za soko la mtandaoni {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Inapakua hakiki za masoko ya mtandaoni ya Uturuki…",
     "fetchHintCompleted": "Upakuzi umekamilika ({count, plural, one {hakiki #} other {hakiki #}}). Unaweza kuanza uchambuzi.",
     "fetchHintWaitingApproval": "Uchukuzi huu uko kwenye foleni ya idhini — ukaguzi wa duka bado haujaanza.",
     "fetchStageWaitingApproval": "Inasubiri idhini (hakuna ukaguzi wa duka bado)",

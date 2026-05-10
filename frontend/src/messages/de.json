@@ -482,6 +482,8 @@
     "fetchHintPending": "In der Warteschlange, Worker wird erwartet…",
     "fetchHintRunningWithCount": "Bewertungen werden aus dem Store geladen… ({count} gesammelt)",
     "fetchHintRunningNoCount": "Google Play- und App Store-Bewertungen werden geladen…",
+    "marketplaceFetchHintRunningNoCount": "{platform}-Marktplatzbewertungen werden geladen…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Türkische Marktplatzbewertungen werden geladen…",
     "fetchHintCompleted": "Abruf abgeschlossen ({count, plural, one {# Bewertung} other {# Bewertungen}}). Sie können die Analyse starten.",
     "fetchHintWaitingApproval": "Dieser Abruf wartet auf Freigabe — der Store-Scan hat noch nicht begonnen.",
     "fetchStageWaitingApproval": "Freigabe ausstehend (kein Store-Scan)",

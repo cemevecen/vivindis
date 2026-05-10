@@ -24,6 +24,7 @@ import {
 import { ApiError, apiFetch, formatClientFetchError } from "@/lib/api";
 import { rangeFromPreset, type DatePresetId } from "@/lib/analyze-hub-utils";
 import { GLOBAL_SCAN_LANG_CODES, MAX_GLOBAL_FETCH_LANGS } from "@/lib/global-scan-langs";
+import { inferMarketplaceSiteFromFetch, MARKETPLACE_CHIP_LABEL } from "@/lib/marketplace-site";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto, InsightsDto } from "@/types/analysis";
@@ -807,13 +808,29 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
 
   const heuristic = latestByType(items, "heuristic");
   const ai = latestByType(items, "ai");
+  const runningFetchHint = useMemo(() => {
+    if (fetch.status !== "running") {
+      return "";
+    }
+    const site = inferMarketplaceSiteFromFetch(fetch);
+    if (site) {
+      return tAnalyzeHub("marketplaceFetchHintRunningNoCount", {
+        platform: tAnalyzeHub(MARKETPLACE_CHIP_LABEL[site]),
+      });
+    }
+    if (fetch.source === "marketplace_seller_tr") {
+      return tAnalyzeHub("marketplaceFetchHintRunningNoCountGeneric");
+    }
+    return tAnalyzeHub("fetchHintRunningNoCount");
+  }, [fetch, tAnalyzeHub]);
+
   const liveStatusHint =
     fetch.status === "waiting_approval"
       ? t("liveStatusWaitingApproval")
       : fetch.status === "pending"
         ? t("liveStatusPending")
         : fetch.status === "running"
-          ? tAnalyzeHub("fetchHintRunningNoCount")
+          ? runningFetchHint
           : busy
             ? t("liveStatusAnalyzing")
             : t("liveStatusReady");

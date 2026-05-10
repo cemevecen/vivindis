@@ -482,6 +482,8 @@
     "fetchHintPending": "排队中，等待工作进程…",
     "fetchHintRunningWithCount": "正在拉取评论…（已收集 {count} 条）",
     "fetchHintRunningNoCount": "正在拉取 Google Play 与 App Store 评论…",
+    "marketplaceFetchHintRunningNoCount": "正在拉取 {platform} 电商平台评论…",
+    "marketplaceFetchHintRunningNoCountGeneric": "正在拉取土耳其电商平台评论…",
     "fetchHintCompleted": "拉取完成（{count, plural, other {# 条评论}}）。可以开始分析。",
     "fetchHintWaitingApproval": "此次拉取已排队待审批 — 商店扫描尚未开始。",
     "fetchStageWaitingApproval": "待审批（尚未扫描商店）",

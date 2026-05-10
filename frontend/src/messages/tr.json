@@ -216,6 +216,8 @@
     "fetchHintPending": "Kuyruğa alındı, worker bekleniyor…",
     "fetchHintRunningWithCount": "Mağazadan yorumlar çekiliyor… ({count} toplandı)",
     "fetchHintRunningNoCount": "Google Play ve App Store yorumları çekiliyor…",
+    "marketplaceFetchHintRunningNoCount": "{platform} pazaryeri yorumları çekiliyor…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Türk pazaryeri yorumları çekiliyor…",
     "fetchHintCompleted": "Yorum çekimi tamamlandı ({count, plural, one {# yorum} other {# yorum}}). Analizi başlatabilirsiniz.",
     "fetchHintWaitingApproval": "Bu çekim sıraya alındı; mağaza taraması henüz başlamadı. Büyük limitlerde yönetici onayı gerekir.",
     "fetchStageWaitingApproval": "Onay sırasında (mağaza taraması yok)",

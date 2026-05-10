@@ -482,6 +482,8 @@
     "fetchHintPending": "В очереди, ожидание воркера…",
     "fetchHintRunningWithCount": "Загрузка отзывов… (собрано {count})",
     "fetchHintRunningNoCount": "Загрузка отзывов Google Play и App Store…",
+    "marketplaceFetchHintRunningNoCount": "Загрузка отзывов маркетплейса {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Загрузка отзывов турецких маркетплейсов…",
     "fetchHintCompleted": "Выгрузка завершена ({count, plural, one {# отзыв} few {# отзыва} many {# отзывов} other {# отзывов}}). Можно запускать анализ.",
     "fetchHintWaitingApproval": "Эта выгрузка в очереди на согласование — обход магазина ещё не начался.",
     "fetchStageWaitingApproval": "Ожидает согласования (обход магазина не идёт)",

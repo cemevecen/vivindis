@@ -482,6 +482,8 @@
     "fetchHintPending": "En cola, esperando worker…",
     "fetchHintRunningWithCount": "Descargando reseñas… ({count} recopiladas)",
     "fetchHintRunningNoCount": "Descargando reseñas de Google Play y App Store…",
+    "marketplaceFetchHintRunningNoCount": "Descargando reseñas del marketplace {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Descargando reseñas de marketplaces turcos…",
     "fetchHintCompleted": "Descarga lista ({count, plural, one {# reseña} other {# reseñas}}). Puedes iniciar el análisis.",
     "fetchHintWaitingApproval": "Esta extracción está en cola para aprobación: el escaneo de la tienda aún no ha comenzado.",
     "fetchStageWaitingApproval": "En cola para aprobación (sin escaneo aún)",

@@ -482,6 +482,8 @@
     "fetchHintPending": "En file, worker attendu…",
     "fetchHintRunningWithCount": "Récupération des avis… ({count} collectés)",
     "fetchHintRunningNoCount": "Récupération des avis Google Play et App Store…",
+    "marketplaceFetchHintRunningNoCount": "Récupération des avis marketplace {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Récupération des avis des marketplaces turcs…",
     "fetchHintCompleted": "Extraction terminée ({count, plural, one {# avis} other {# avis}}). Vous pouvez lancer l’analyse.",
     "fetchHintWaitingApproval": "Ce prélèvement est en file pour validation — le scan du store n’a pas encore commencé.",
     "fetchStageWaitingApproval": "En attente de validation (pas de scan store)",

@@ -216,6 +216,8 @@
     "fetchHintPending": "Queued, waiting for the worker…",
     "fetchHintRunningWithCount": "Pulling reviews from the store… ({count} collected)",
     "fetchHintRunningNoCount": "Pulling Google Play and App Store reviews…",
+    "marketplaceFetchHintRunningNoCount": "Pulling {platform} marketplace reviews…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Pulling Turkish marketplace reviews…",
     "fetchHintCompleted": "Pull finished ({count, plural, one {# review} other {# reviews}}). You can start analysis.",
     "fetchHintWaitingApproval": "This pull is queued for approval — the store scan has not started yet.",
     "fetchStageWaitingApproval": "Queued for approval (no store scan yet)",

@@ -482,6 +482,8 @@
     "fetchHintPending": "Na fila, aguardando worker…",
     "fetchHintRunningWithCount": "Baixando avaliações… ({count} coletadas)",
     "fetchHintRunningNoCount": "Baixando avaliações Google Play e App Store…",
+    "marketplaceFetchHintRunningNoCount": "Baixando avaliações do marketplace {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Baixando avaliações de marketplaces turcos…",
     "fetchHintCompleted": "Pull concluído ({count, plural, one {# avaliação} other {# avaliações}}). Você pode iniciar a análise.",
     "fetchHintWaitingApproval": "Esta extração está na fila para aprovação — a varredura da loja ainda não começou.",
     "fetchStageWaitingApproval": "Aguardando aprovação (sem varredura ainda)",

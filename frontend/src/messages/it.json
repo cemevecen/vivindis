@@ -482,6 +482,8 @@
     "fetchHintPending": "In coda, worker in attesa…",
     "fetchHintRunningWithCount": "Download recensioni dallo store… ({count} raccolte)",
     "fetchHintRunningNoCount": "Download recensioni Google Play e App Store…",
+    "marketplaceFetchHintRunningNoCount": "Download recensioni marketplace {platform}…",
+    "marketplaceFetchHintRunningNoCountGeneric": "Download recensioni marketplace turchi…",
     "fetchHintCompleted": "Pull completato ({count, plural, one {# recensione} other {# recensioni}}). Puoi avviare l’analisi.",
     "fetchHintWaitingApproval": "Questo prelievo è in coda per approvazione — la scansione dello store non è ancora iniziata.",
     "fetchStageWaitingApproval": "In attesa di approvazione (nessuna scansione store)",
