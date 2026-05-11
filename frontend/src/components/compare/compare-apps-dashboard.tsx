@@ -9,7 +9,6 @@ import { toast } from "sonner";
 import { ChevronDown, Globe } from "lucide-react";
 
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
-import { StartFetchForm } from "@/components/apps/start-fetch-form";
 import { CompareSplitReviewsSection } from "@/components/compare/compare-split-reviews-section";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -158,6 +157,8 @@ function CompareAppSplitPane({
     aiTitle: ta("ai"),
   };
 
+  const hasCompletedAnalysis = Boolean(heuristic || ai);
+
   return (
     <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-4 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:max-w-[50%] md:border-e md:last:border-e-0">
       <div className="min-w-0">
@@ -166,12 +167,10 @@ function CompareAppSplitPane({
         <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
       </div>
 
-      <StartFetchForm appId={app.id} />
-
-      {fetchRow ? (
-        <section className="rounded-lg border border-border bg-muted/20 p-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-xs font-medium text-foreground">{t("splitFetchStatusHeading")}</span>
+      <section className="rounded-lg border border-border bg-muted/20 p-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <span className="text-xs font-medium text-foreground">{t("splitFetchStatusHeading")}</span>
+          {fetchRow ? (
             <span
               className={cn(
                 "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
@@ -188,32 +187,40 @@ function CompareAppSplitPane({
                       ? tApps("statusCompleted")
                       : tApps("statusFailed")}
             </span>
-          </div>
-          {fetchRow.status === "waiting_approval" || fetchRow.status === "pending" || fetchRow.status === "running" ? null : (
-            <p className="mt-2 text-xs text-muted-foreground">
-              {tApps("reviews")}: {fetchRow.review_count}
-            </p>
+          ) : (
+            <span className="inline-flex animate-pulse rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+              {tApps("statusPending")}
+            </span>
           )}
-          {fetchRow.status === "failed" && fetchRow.error_message ? (
-            <p className="mt-2 text-xs text-destructive">{fetchRow.error_message}</p>
-          ) : null}
-        </section>
-      ) : (
-        <p className="text-xs text-muted-foreground">{t("splitNoFetchYet")}</p>
-      )}
+        </div>
+        {fetchRow && fetchRow.status !== "waiting_approval" && fetchRow.status !== "pending" && fetchRow.status !== "running" ? (
+          <p className="mt-2 text-xs text-muted-foreground">
+            {tApps("reviews")}: {fetchRow.review_count}
+          </p>
+        ) : null}
+        {fetchRow?.status === "failed" && fetchRow.error_message ? (
+          <p className="mt-2 text-xs text-destructive">{fetchRow.error_message}</p>
+        ) : null}
+        {busy ? (
+          <p className="mt-2 text-xs text-sky-600 dark:text-sky-400">{ta("analyzing")}</p>
+        ) : null}
+      </section>
 
-      {fetchRow ? (
+      {hasCompletedAnalysis || fetchRow?.status === "completed" ? (
         <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
-          <Button
-            type="button"
-            size="sm"
-            className="w-full sm:w-auto"
-            disabled={fetchRow.status !== "completed" || busy || analyzeMutation.isPending}
-            onClick={() => analyzeMutation.mutate()}
-          >
-            {analyzeMutation.isPending ? ta("runAnalysisBusy") : busy ? ta("analyzing") : ta("runAnalysis")}
-          </Button>
-          {fetchRow.status === "completed" ? (
+          {hasCompletedAnalysis ? (
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full sm:w-auto"
+              disabled={!fetchRow || fetchRow.status !== "completed" || busy || analyzeMutation.isPending}
+              onClick={() => analyzeMutation.mutate()}
+            >
+              {analyzeMutation.isPending ? ta("runAnalysisBusy") : ta("runAnalysis")}
+            </Button>
+          ) : null}
+          {fetchRow?.status === "completed" ? (
             <Link
               href={{
                 pathname: "/apps/[id]/analysis",
