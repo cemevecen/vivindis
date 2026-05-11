@@ -18,6 +18,10 @@ from app.models.enums import AppPlatform, FetchStatus
 from app.models.review_fetch import ReviewFetch
 from app.models.user import User
 from app.schemas.review_fetch import MarketplaceSellerFetchCreate, ReviewFetchResponse
+from app.services.apify_marketplace_reviews import (
+    extract_seller_name_from_url,
+    normalize_marketplace_url,
+)
 from app.services.apify_marketplace_seller import run_marketplace_seller_intelligence
 from app.workers.scraper import marketplace_seller_fetch_task
 
@@ -47,6 +51,9 @@ async def create_decoupled_marketplace_fetch(
             detail="Pazaryeri bağlayıcı yapılandırılmamış (EXTERNAL_SCRAPER_APIFY_TOKEN).",
         )
 
+    # 0. URL normalizasyonu
+    body.seller_url = normalize_marketplace_url(body.seller_url)
+
     # 1. Satıcı ismini tespit et (Apify sync call - profile fetch)
     log.info("marketplace_auto_detect_start", seller_url=body.seller_url)
     try:
@@ -71,21 +78,7 @@ async def create_decoupled_marketplace_fetch(
         seller_name = str(primary.get("sellerName") or "Bilinmeyen Mağaza").strip()
     except Exception as exc:
         log.warning("marketplace_auto_detect_failed", error=str(exc))
-        # Fallback: URL'den bir isim türetmeye çalış
-        # Örn: https://www.trendyol.com/magaza/shopist-m-357212 -> Shopist
-        raw_url = body.seller_url.lower()
-        derived_name = "Bilinmeyen Mağaza"
-        try:
-            if "magaza/" in raw_url:
-                parts = raw_url.split("magaza/")[1].split("/")[0].split("-m-")[0].split("?")[0]
-                derived_name = parts.capitalize()
-            elif "satici/" in raw_url:
-                parts = raw_url.split("satici/")[1].split("/")[0].split("-m-")[0].split("?")[0]
-                derived_name = parts.capitalize()
-        except:
-            pass
-        
-        seller_name = derived_name
+        seller_name = extract_seller_name_from_url(body.seller_url)
         primary = {"sellerName": seller_name, "sellerId": "derived"}
         log.info("marketplace_auto_detect_fallback", derived_name=seller_name)
 

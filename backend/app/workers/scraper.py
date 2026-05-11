@@ -27,6 +27,8 @@ from app.db.session import get_async_session_maker
 from app.services.async_rate_limiter import AsyncTokenBucketRateLimiter
 from app.services.apify_marketplace_reviews import (
     collect_marketplace_product_urls_from_profile,
+    extract_seller_name_from_url,
+    normalize_marketplace_url,
     run_marketplace_review_aggregator,
 )
 from app.services.apify_marketplace_seller import run_marketplace_seller_intelligence
@@ -919,7 +921,7 @@ def _profile_review_date(profile: dict[str, Any], fallback: date) -> date:
 
 
 def _marketplace_slug_seed_from_seller_url(seller_url: str) -> str:
-    u = seller_url.strip()
+    u = normalize_marketplace_url(seller_url)
     low = u.lower()
     idx = low.find("/magaza/")
     if idx < 0:
@@ -1011,15 +1013,8 @@ async def _execute_marketplace_seller_fetch(
 
     try:
         # --- Derive seller name directly from URL (no Apify seller intelligence call needed) ---
-        raw_u = seller_url.lower()
-        seller_name = "Bilinmeyen Mağaza"
-        try:
-            if "magaza/" in raw_u:
-                seller_name = raw_u.split("magaza/")[1].split("/")[0].split("-m-")[0].capitalize()
-            elif "satici/" in raw_u:
-                seller_name = raw_u.split("satici/")[1].split("/")[0].split("-m-")[0].capitalize()
-        except Exception:
-            pass
+        seller_url = normalize_marketplace_url(seller_url)
+        seller_name = extract_seller_name_from_url(seller_url)
 
         slug_q = _marketplace_slug_seed_from_seller_url(seller_url)
         search_queries = _marketplace_search_variants(seller_name, slug_q, seller_url)

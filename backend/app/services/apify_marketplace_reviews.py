@@ -13,6 +13,43 @@ from app.core.logging import get_logger
 log = get_logger(__name__)
 
 
+def normalize_marketplace_url(url: str) -> str:
+    """Removes 'profil/' subpaths and query params from Trendyol/marketplace URLs."""
+    if not isinstance(url, str):
+        return ""
+    u = url.strip()
+    # Remove query params
+    if "?" in u:
+        u = u.split("?")[0]
+    # Trendyol: magaza/profil/ -> magaza/
+    low = u.lower()
+    if "/magaza/profil/" in low:
+        # Preserve original case for the rest of the URL if possible, but replace the specific segment
+        idx = low.find("/magaza/profil/")
+        u = u[:idx] + "/magaza/" + u[idx + len("/magaza/profil/") :]
+    return u
+
+
+def extract_seller_name_from_url(url: str) -> str:
+    """Best-effort seller name extraction from URL (Shopist, etc)."""
+    u = normalize_marketplace_url(url).lower()
+    name = "Bilinmeyen Mağaza"
+    try:
+        if "/magaza/" in u:
+            part = u.split("/magaza/")[1].split("/")[0]
+            name = part.split("-m-")[0].split("-s-")[0]
+        elif "/satici/" in u:
+            part = u.split("/satici/")[1].split("/")[0]
+            name = part.split("-m-")[0].split("-s-")[0]
+        
+        if name:
+            # Replace dashes with spaces and capitalize
+            return name.replace("-", " ").strip().title()
+    except Exception:
+        pass
+    return name
+
+
 def _apify_actor_run_failed_retryable(status_code: int, body: str) -> bool:
     """Apify returns HTTP 400 with run-failed when the actor started but exited with status FAILED or TIMEOUT."""
     if status_code != 400:
@@ -103,6 +140,9 @@ async def run_marketplace_review_aggregator(
     seller_url: str | None = None,
 ) -> list[dict[str, Any]]:
     """Runs the marketplace review actor with support for abotapi/trendyol-scraper and fallback to old aggregator."""
+    if seller_url:
+        seller_url = normalize_marketplace_url(seller_url)
+
     token = (settings.external_scraper_apify_token or "").strip()
     if not token:
         raise RuntimeError("EXTERNAL_SCRAPER_APIFY_TOKEN eksik.")
