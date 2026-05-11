@@ -242,10 +242,6 @@ function CompareAppSplitPane({
         <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane compactCards={!wideCharts} />
       </section>
 
-      {fetchRow?.status === "completed" ? (
-        <CompareDeepResearchPanel appId={app.id} fetchRow={fetchRow} />
-      ) : null}
-
       <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
         <Link href={{ pathname: "/apps/[id]", params: { id: app.id } }} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
           {tApps("detailTitle")}
@@ -255,19 +251,30 @@ function CompareAppSplitPane({
   );
 }
 
-function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow: ReviewFetchDto }) {
+function CompareDeepResearchPanel({
+  appIdA,
+  appIdB,
+  fetchA,
+  fetchB,
+}: {
+  appIdA: string;
+  appIdB: string;
+  fetchA: ReviewFetchDto;
+  fetchB: ReviewFetchDto;
+}) {
   const ta = useTranslations("analysis");
   const tAnalyzeHub = useTranslations("analyzeHub");
   const tCommon = useTranslations("common");
   const locale = useLocale();
   const { getToken } = useAuth();
   const queryClient = useQueryClient();
-  const router = useRouter();
 
   const [open, setOpen] = useState(false);
   const [datePreset, setDatePreset] = useState<DeepResearchDatePreset>("custom");
-  const [deepFrom, setDeepFrom] = useState(fetchRow.from_date);
-  const [deepTo, setDeepTo] = useState(fetchRow.to_date);
+  const earlierFrom = fetchA.from_date < fetchB.from_date ? fetchA.from_date : fetchB.from_date;
+  const laterTo = fetchA.to_date > fetchB.to_date ? fetchA.to_date : fetchB.to_date;
+  const [deepFrom, setDeepFrom] = useState(earlierFrom);
+  const [deepTo, setDeepTo] = useState(laterTo);
   const [deepLangs, setDeepLangs] = useState<Set<string>>(
     () => new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)),
   );
@@ -333,28 +340,28 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
     mutationFn: async () => {
       const langs = Array.from(deepLangs).sort();
       if (langs.length < 1) throw new Error("lang");
-      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
-        method: "POST",
-        body: {
-          from_date: deepFrom,
-          to_date: deepTo,
-          review_scope: "global",
-          global_langs: langs,
-          review_limit: 5000,
-        },
-        getToken,
-      });
+      const body = {
+        from_date: deepFrom,
+        to_date: deepTo,
+        review_scope: "global" as const,
+        global_langs: langs,
+        review_limit: 5000,
+      };
+      for (const id of [appIdA, appIdB]) {
+        await apiFetch<ReviewFetchDto>(`/api/v1/apps/${id}/fetch`, {
+          method: "POST",
+          body,
+          getToken,
+        });
+      }
     },
-    onSuccess: async (created) => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdA) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdB) });
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appIdA) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appIdB) });
       toast.success(ta("deepResearchToastNewImportStarted"));
-      router.push({
-        pathname: "/apps/[id]/analysis",
-        params: { id: appId },
-        query: { fetchId: created.id, deep: "1" },
-      });
     },
     onError: (err) => {
       toast.error(err instanceof ApiError ? err.message : tCommon("error"));
@@ -376,7 +383,7 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
   return (
     <section
       className={cn(
-        "relative min-w-0 overflow-hidden rounded-xl border border-violet-500/35 bg-gradient-to-br from-violet-500/[0.09] via-primary/[0.05] to-amber-500/[0.07] p-3 shadow-sm ring-1 ring-violet-500/12",
+        "relative min-w-0 overflow-hidden rounded-xl border border-violet-500/35 bg-gradient-to-br from-violet-500/[0.09] via-primary/[0.05] to-amber-500/[0.07] p-4 shadow-sm ring-1 ring-violet-500/12",
         "dark:border-violet-400/28 dark:from-violet-500/[0.11] dark:via-primary/[0.07] dark:to-amber-500/[0.07] dark:ring-violet-400/14",
       )}
     >
@@ -384,19 +391,19 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
         className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-violet-500/12 blur-xl dark:bg-violet-400/10"
         aria-hidden
       />
-      <div className="relative flex gap-2.5">
+      <div className="relative flex gap-3">
         <div
-          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-primary text-white shadow-sm dark:from-violet-500 dark:to-primary"
+          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-primary text-white shadow-sm dark:from-violet-500 dark:to-primary"
           aria-hidden
         >
-          <Globe className="h-3.5 w-3.5" strokeWidth={2} />
+          <Globe className="h-4 w-4" strokeWidth={2} />
         </div>
         <div className="min-w-0 flex-1 space-y-2">
           <button
             type="button"
             className={cn(
               "flex w-full items-center justify-between gap-2 rounded-md px-0.5 py-0.5 text-left",
-              "text-xs font-semibold text-foreground outline-none transition-colors",
+              "text-sm font-semibold text-foreground outline-none transition-colors",
               "hover:bg-background/40 focus-visible:ring-2 focus-visible:ring-ring",
             )}
             aria-expanded={open}
@@ -405,7 +412,7 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
             <span className="min-w-0">{ta("deepResearchPrepTitle")}</span>
             <ChevronDown
               className={cn(
-                "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+                "size-4 shrink-0 text-muted-foreground transition-transform duration-200",
                 open && "rotate-180",
               )}
               aria-hidden
@@ -413,15 +420,15 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
           </button>
 
           {open ? (
-            <div className="space-y-2">
-              <div className="min-w-0 space-y-2 rounded-lg border border-white/35 bg-background/55 p-2 dark:border-white/10 dark:bg-background/35">
-                <div className="grid gap-2">
+            <div className="space-y-3">
+              <div className="min-w-0 space-y-3 rounded-lg border border-white/35 bg-background/55 p-3 dark:border-white/10 dark:bg-background/35">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div className="space-y-1">
-                    <Label className="text-[11px]" htmlFor={`deep-preset-${appId}`}>
+                    <Label className="text-xs" htmlFor="deep-preset-compare">
                       {tAnalyzeHub("dateRangeLabel")}
                     </Label>
                     <SelectNative
-                      id={`deep-preset-${appId}`}
+                      id="deep-preset-compare"
                       value={datePreset}
                       onChange={(e) => {
                         const v = e.target.value as DeepResearchDatePreset;
@@ -431,7 +438,7 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
                         setDeepFrom(r.from);
                         setDeepTo(r.to);
                       }}
-                      className="h-8 w-full rounded-lg text-xs"
+                      className="h-9 w-full rounded-lg text-sm"
                     >
                       <option value="7d">{tAnalyzeHub("datePresetLast7")}</option>
                       <option value="30d">{tAnalyzeHub("datePresetLast30")}</option>
@@ -444,64 +451,62 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
                       <option value="custom">{ta("deepResearchDatePresetCustom")}</option>
                     </SelectNative>
                   </div>
-                  <div className="flex gap-2">
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <Label className="text-[11px]" htmlFor={`deep-from-${appId}`}>
-                        {ta("deepResearchDateFromLabel")}
-                      </Label>
-                      <Input
-                        id={`deep-from-${appId}`}
-                        type="date"
-                        value={deepFrom}
-                        max={deepTo || undefined}
-                        onChange={(e) => {
-                          setDatePreset("custom");
-                          setDeepFrom(e.target.value);
-                        }}
-                        className="h-8 text-xs"
-                      />
-                    </div>
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <Label className="text-[11px]" htmlFor={`deep-to-${appId}`}>
-                        {ta("deepResearchDateToLabel")}
-                      </Label>
-                      <Input
-                        id={`deep-to-${appId}`}
-                        type="date"
-                        value={deepTo}
-                        min={deepFrom || undefined}
-                        onChange={(e) => {
-                          setDatePreset("custom");
-                          setDeepTo(e.target.value);
-                        }}
-                        className="h-8 text-xs"
-                      />
-                    </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs" htmlFor="deep-from-compare">
+                      {ta("deepResearchDateFromLabel")}
+                    </Label>
+                    <Input
+                      id="deep-from-compare"
+                      type="date"
+                      value={deepFrom}
+                      max={deepTo || undefined}
+                      onChange={(e) => {
+                        setDatePreset("custom");
+                        setDeepFrom(e.target.value);
+                      }}
+                      className="h-9"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs" htmlFor="deep-to-compare">
+                      {ta("deepResearchDateToLabel")}
+                    </Label>
+                    <Input
+                      id="deep-to-compare"
+                      type="date"
+                      value={deepTo}
+                      min={deepFrom || undefined}
+                      onChange={(e) => {
+                        setDatePreset("custom");
+                        setDeepTo(e.target.value);
+                      }}
+                      className="h-9"
+                    />
                   </div>
                 </div>
 
                 <div className="space-y-1.5 border-t border-border/50 pt-2">
                   <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-                    <Label className="text-[11px]">{ta("globalLangsLabel")}</Label>
-                    <span className="text-[10px] text-muted-foreground">
+                    <Label className="text-xs">{ta("globalLangsLabel")}</Label>
+                    <span className="text-xs text-muted-foreground">
                       {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-1">
-                    <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={selectFirst24}>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={selectFirst24}>
                       {ta("deepResearchSelectAll24")}
                     </Button>
-                    <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={clearLangs}>
+                    <Button type="button" variant="outline" size="sm" className="h-7 text-xs" onClick={clearLangs}>
                       {ta("deepResearchClearLangs")}
                     </Button>
                   </div>
-                  <div className="max-h-[min(10rem,30vh)] rounded border border-border bg-card/50 p-1 scrollbar-stable-visible">
-                    <div className="grid grid-cols-2 gap-x-1 gap-y-0">
-                      <label className="col-span-full flex cursor-pointer items-center gap-1.5 border-b border-border/50 pb-1 text-[11px] font-medium hover:bg-muted/40">
+                  <div className="max-h-[min(12rem,35vh)] overflow-y-auto rounded border border-border bg-card/50 p-1.5">
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-0 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+                      <label className="col-span-full flex cursor-pointer items-center gap-1.5 border-b border-border/50 pb-1 text-xs font-medium hover:bg-muted/40">
                         <input
                           ref={selectAllRef}
                           type="checkbox"
-                          className="size-3 shrink-0 rounded border-border"
+                          className="size-3.5 shrink-0 rounded border-border"
                           checked={allSelected}
                           onChange={() => {
                             if (isFirst24) {
@@ -516,11 +521,11 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
                       {langOptions.map(({ code, label }) => (
                         <label
                           key={code}
-                          className="flex min-w-0 cursor-pointer items-center gap-1 rounded px-0.5 py-0 text-[10px] hover:bg-muted/50"
+                          className="flex min-w-0 cursor-pointer items-center gap-1 rounded px-0.5 py-0.5 text-xs hover:bg-muted/50"
                         >
                           <input
                             type="checkbox"
-                            className="size-3 shrink-0 rounded border-border"
+                            className="size-3.5 shrink-0 rounded border-border"
                             checked={deepLangs.has(code)}
                             onChange={() => toggleDeepLang(code)}
                           />
@@ -536,7 +541,7 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
 
               <Button
                 type="button"
-                className="h-8 w-full rounded-lg text-xs font-semibold shadow-sm"
+                className="h-9 w-full rounded-lg text-sm font-semibold shadow-sm"
                 onClick={runDeep}
                 disabled={deepMutation.isPending}
               >
@@ -886,6 +891,10 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
           <Card title={t("slotB")} app={appB} fetchRow={fb} hasHeuristic={Boolean(hB)} />
         </div>
       )}
+
+      {fa?.status === "completed" && fb?.status === "completed" ? (
+        <CompareDeepResearchPanel appIdA={appIdA} appIdB={appIdB} fetchA={fa} fetchB={fb} />
+      ) : null}
 
       <div className="flex flex-wrap gap-2">
         <Link href="/analyze/store" className={cn(buttonVariants({ variant: "outline", size: "sm" }))}>
