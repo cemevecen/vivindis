@@ -264,27 +264,46 @@ async def run_marketplace_review_aggregator(
         else:
             log.warning("trendyol_merchant_id_not_found", seller_url=seller_url)
 
+    # Determine actor mode
+    # abotapi/trendyol-scraper supports store URLs natively (getReviews: true)
+    # shahidirfan/nifty.codes actors need per-product /yorumlar URLs
+    is_abotapi = "abotapi/trendyol-scraper" in actor_raw
+
     if not start_urls:
-        raise RuntimeError(
-            f"Mağaza için ürün URL'si bulunamadı. "
-            f"Lütfen doğrudan bir Trendyol mağaza sayfası URL'si girin "
-            f"(örn: https://www.trendyol.com/magaza/shopist-m-357212). "
-            f"seller_url={seller_url!r}"
-        )
+        if seller_url:
+            # Product discovery failed (likely IP block) — fall back to seller URL directly.
+            # abotapi supports this; others will try anyway.
+            log.warning("product_discovery_empty_using_seller_url", seller_url=seller_url)
+            start_urls = [seller_url]
+        else:
+            raise RuntimeError(
+                "Mağaza için URL bulunamadı. Lütfen Trendyol mağaza URL'si girin "
+                "(örn: https://www.trendyol.com/magaza/shopist-m-357212)."
+            )
 
     # --- Step 2: Call the Apify actor ---
-    payload: dict[str, Any] = {
-        "startUrls": [{"url": u} for u in start_urls],
-        "results_wanted": cap,
-        "max_pages": max(1, cap // 10),
-    }
+    if is_abotapi:
+        # abotapi input schema: startUrls + getReviews: true
+        payload: dict[str, Any] = {
+            "startUrls": [{"url": u, "method": "GET"} for u in start_urls],
+            "maxReviews": cap,
+            "getReviews": True,
+            "proxyConfiguration": {"useApifyProxy": True},
+        }
+    else:
+        # Default: url-list actors (shahidirfan, nifty.codes, etc.)
+        payload = {
+            "startUrls": [{"url": u} for u in start_urls],
+            "results_wanted": cap,
+            "max_pages": max(1, cap // 10),
+        }
 
     run_url = (
         f"https://api.apify.com/v2/acts/{actor_enc}/run-sync-get-dataset-items"
         f"?token={token}&format=json&clean=1&timeout={timeout_val}"
     )
 
-    log.info("marketplace_apify_call", actor=actor_raw, url_count=len(start_urls), cap=cap)
+    log.info("marketplace_apify_call", actor=actor_raw, url_count=len(start_urls), cap=cap, is_abotapi=is_abotapi)
 
     async with httpx.AsyncClient(timeout=timeout_val + 60) as client:
         resp = await client.post(run_url, json=payload)
