@@ -4,20 +4,28 @@ import { useAuth } from "@clerk/nextjs";
 import { useMutation, useQueries, useQueryClient } from "@tanstack/react-query";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { ChevronDown, Globe } from "lucide-react";
 
 import { AnalysisCharts } from "@/components/analysis/analysis-charts";
 import { StartFetchForm } from "@/components/apps/start-fetch-form";
 import { CompareSplitReviewsSection } from "@/components/compare/compare-split-reviews-section";
 import { Button, buttonVariants } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SelectNative } from "@/components/ui/select-native";
 import { Link, useRouter } from "@/i18n/routing";
 import { ApiError, apiFetch } from "@/lib/api";
+import { rangeFromPreset, type DatePresetId } from "@/lib/analyze-hub-utils";
+import { GLOBAL_SCAN_LANG_CODES, MAX_GLOBAL_FETCH_LANGS } from "@/lib/global-scan-langs";
 import { storeLocaleFromUiLocale } from "@/lib/store-locale";
 import { queryKeys } from "@/lib/query-keys";
 import { cn } from "@/lib/utils";
 import type { AnalysisDto, AnalysisListDto } from "@/types/analysis";
 import type { AppDto, FetchStatus, ReviewFetchDto } from "@/types/app";
+
+type DeepResearchDatePreset = DatePresetId | "custom";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -102,6 +110,7 @@ function CompareAppSplitPane({
   const busy = items.some((a) => a.status === "pending" || a.status === "running");
   const heuristic = latestByType(items, "heuristic");
   const ai = latestByType(items, "ai");
+  const autoAnalyzeRef = useRef<string>("");
 
   const analyzeMutation = useMutation({
     mutationFn: async () => {
@@ -122,6 +131,21 @@ function CompareAppSplitPane({
       toast.error(err instanceof ApiError ? err.message : ta("analysisError"));
     },
   });
+
+  useEffect(() => {
+    if (
+      !fetchId ||
+      fetchRow?.status !== "completed" ||
+      items.length > 0 ||
+      busy ||
+      analyzeMutation.isPending ||
+      autoAnalyzeRef.current === fetchId
+    ) {
+      return;
+    }
+    autoAnalyzeRef.current = fetchId;
+    analyzeMutation.mutate();
+  }, [fetchId, fetchRow?.status, items.length, busy, analyzeMutation]);
 
   const chartLabels = {
     sentiment: ta("chartSentiment"),
@@ -195,7 +219,6 @@ function CompareAppSplitPane({
                 pathname: "/apps/[id]/analysis",
                 params: { id: app.id },
                 query: { fetchId: fetchRow.id },
-                hash: "deep-global-scan-panel",
               }}
               className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center sm:w-auto")}
             >
@@ -212,12 +235,311 @@ function CompareAppSplitPane({
         <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane compactCards={!wideCharts} />
       </section>
 
+      {fetchRow?.status === "completed" ? (
+        <CompareDeepResearchPanel appId={app.id} fetchRow={fetchRow} />
+      ) : null}
+
       <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
         <Link href={{ pathname: "/apps/[id]", params: { id: app.id } }} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
           {tApps("detailTitle")}
         </Link>
       </div>
     </div>
+  );
+}
+
+function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow: ReviewFetchDto }) {
+  const ta = useTranslations("analysis");
+  const tAnalyzeHub = useTranslations("analyzeHub");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const { getToken } = useAuth();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const [open, setOpen] = useState(false);
+  const [datePreset, setDatePreset] = useState<DeepResearchDatePreset>("custom");
+  const [deepFrom, setDeepFrom] = useState(fetchRow.from_date);
+  const [deepTo, setDeepTo] = useState(fetchRow.to_date);
+  const [deepLangs, setDeepLangs] = useState<Set<string>>(
+    () => new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)),
+  );
+
+  const langOptions = useMemo(() => {
+    let dn: Intl.DisplayNames;
+    try {
+      dn = new Intl.DisplayNames([locale, "en"], { type: "language" });
+    } catch {
+      dn = new Intl.DisplayNames(["en"], { type: "language" });
+    }
+    return GLOBAL_SCAN_LANG_CODES.map((code) => ({
+      code,
+      label: dn.of(code) ?? code,
+    }));
+  }, [locale]);
+
+  const toggleDeepLang = useCallback(
+    (code: string) => {
+      setDeepLangs((prev) => {
+        const next = new Set(prev);
+        if (next.has(code)) {
+          next.delete(code);
+        } else {
+          if (next.size >= MAX_GLOBAL_FETCH_LANGS) {
+            toast.error(ta("deepResearchLangLimitToast"));
+            return prev;
+          }
+          next.add(code);
+        }
+        return next;
+      });
+    },
+    [ta],
+  );
+
+  const selectFirst24 = useCallback(() => {
+    setDeepLangs(new Set(GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS)));
+  }, []);
+
+  const clearLangs = useCallback(() => {
+    setDeepLangs(new Set());
+  }, []);
+
+  const isFirst24 = useMemo(() => {
+    if (deepLangs.size !== MAX_GLOBAL_FETCH_LANGS) return false;
+    return GLOBAL_SCAN_LANG_CODES.slice(0, MAX_GLOBAL_FETCH_LANGS).every((c) => deepLangs.has(c));
+  }, [deepLangs]);
+
+  const allSelected = useMemo(
+    () => GLOBAL_SCAN_LANG_CODES.every((c) => deepLangs.has(c)),
+    [deepLangs],
+  );
+
+  const selectAllRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const el = selectAllRef.current;
+    if (!el) return;
+    el.indeterminate = deepLangs.size > 0 && !allSelected;
+  }, [deepLangs, allSelected]);
+
+  const deepMutation = useMutation({
+    mutationFn: async () => {
+      const langs = Array.from(deepLangs).sort();
+      if (langs.length < 1) throw new Error("lang");
+      return apiFetch<ReviewFetchDto>(`/api/v1/apps/${appId}/fetch`, {
+        method: "POST",
+        body: {
+          from_date: deepFrom,
+          to_date: deepTo,
+          review_scope: "global",
+          global_langs: langs,
+          review_limit: 5000,
+        },
+        getToken,
+      });
+    },
+    onSuccess: async (created) => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appId) });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.apps.recentFetches });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.analyses.byApp(appId) });
+      toast.success(ta("deepResearchToastNewImportStarted"));
+      router.push({
+        pathname: "/apps/[id]/analysis",
+        params: { id: appId },
+        query: { fetchId: created.id, deep: "1" },
+      });
+    },
+    onError: (err) => {
+      toast.error(err instanceof ApiError ? err.message : tCommon("error"));
+    },
+  });
+
+  const runDeep = useCallback(() => {
+    if (deepLangs.size < 1) {
+      toast.error(ta("deepResearchNeedOneLang"));
+      return;
+    }
+    if (!deepFrom || !deepTo || deepFrom > deepTo) {
+      toast.error(ta("deepResearchInvalidRange"));
+      return;
+    }
+    deepMutation.mutate();
+  }, [deepFrom, deepTo, deepLangs, deepMutation, ta]);
+
+  return (
+    <section
+      className={cn(
+        "relative min-w-0 overflow-hidden rounded-xl border border-violet-500/35 bg-gradient-to-br from-violet-500/[0.09] via-primary/[0.05] to-amber-500/[0.07] p-3 shadow-sm ring-1 ring-violet-500/12",
+        "dark:border-violet-400/28 dark:from-violet-500/[0.11] dark:via-primary/[0.07] dark:to-amber-500/[0.07] dark:ring-violet-400/14",
+      )}
+    >
+      <div
+        className="pointer-events-none absolute -right-5 -top-5 h-14 w-14 rounded-full bg-violet-500/12 blur-xl dark:bg-violet-400/10"
+        aria-hidden
+      />
+      <div className="relative flex gap-2.5">
+        <div
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-600 to-primary text-white shadow-sm dark:from-violet-500 dark:to-primary"
+          aria-hidden
+        >
+          <Globe className="h-3.5 w-3.5" strokeWidth={2} />
+        </div>
+        <div className="min-w-0 flex-1 space-y-2">
+          <button
+            type="button"
+            className={cn(
+              "flex w-full items-center justify-between gap-2 rounded-md px-0.5 py-0.5 text-left",
+              "text-xs font-semibold text-foreground outline-none transition-colors",
+              "hover:bg-background/40 focus-visible:ring-2 focus-visible:ring-ring",
+            )}
+            aria-expanded={open}
+            onClick={() => setOpen((o) => !o)}
+          >
+            <span className="min-w-0">{ta("deepResearchPrepTitle")}</span>
+            <ChevronDown
+              className={cn(
+                "size-3.5 shrink-0 text-muted-foreground transition-transform duration-200",
+                open && "rotate-180",
+              )}
+              aria-hidden
+            />
+          </button>
+
+          {open ? (
+            <div className="space-y-2">
+              <div className="min-w-0 space-y-2 rounded-lg border border-white/35 bg-background/55 p-2 dark:border-white/10 dark:bg-background/35">
+                <div className="grid gap-2">
+                  <div className="space-y-1">
+                    <Label className="text-[11px]" htmlFor={`deep-preset-${appId}`}>
+                      {tAnalyzeHub("dateRangeLabel")}
+                    </Label>
+                    <SelectNative
+                      id={`deep-preset-${appId}`}
+                      value={datePreset}
+                      onChange={(e) => {
+                        const v = e.target.value as DeepResearchDatePreset;
+                        setDatePreset(v);
+                        if (v === "custom") return;
+                        const r = rangeFromPreset(v);
+                        setDeepFrom(r.from);
+                        setDeepTo(r.to);
+                      }}
+                      className="h-8 w-full rounded-lg text-xs"
+                    >
+                      <option value="7d">{tAnalyzeHub("datePresetLast7")}</option>
+                      <option value="30d">{tAnalyzeHub("datePresetLast30")}</option>
+                      <option value="90d">{tAnalyzeHub("datePresetLast90")}</option>
+                      <option value="180d">{tAnalyzeHub("datePresetLast180")}</option>
+                      <option value="365d">{tAnalyzeHub("datePresetLast365")}</option>
+                      <option value="2y">{tAnalyzeHub("datePresetLast2y")}</option>
+                      <option value="5y">{tAnalyzeHub("datePresetLast5y")}</option>
+                      <option value="all">{tAnalyzeHub("datePresetAll")}</option>
+                      <option value="custom">{ta("deepResearchDatePresetCustom")}</option>
+                    </SelectNative>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="space-y-1">
+                      <Label className="text-[11px]" htmlFor={`deep-from-${appId}`}>
+                        {ta("deepResearchDateFromLabel")}
+                      </Label>
+                      <Input
+                        id={`deep-from-${appId}`}
+                        type="date"
+                        value={deepFrom}
+                        max={deepTo || undefined}
+                        onChange={(e) => {
+                          setDatePreset("custom");
+                          setDeepFrom(e.target.value);
+                        }}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-[11px]" htmlFor={`deep-to-${appId}`}>
+                        {ta("deepResearchDateToLabel")}
+                      </Label>
+                      <Input
+                        id={`deep-to-${appId}`}
+                        type="date"
+                        value={deepTo}
+                        min={deepFrom || undefined}
+                        onChange={(e) => {
+                          setDatePreset("custom");
+                          setDeepTo(e.target.value);
+                        }}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5 border-t border-border/50 pt-2">
+                  <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                    <Label className="text-[11px]">{ta("globalLangsLabel")}</Label>
+                    <span className="text-[10px] text-muted-foreground">
+                      {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-1">
+                    <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={selectFirst24}>
+                      {ta("deepResearchSelectAll24")}
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" className="h-7 text-[11px]" onClick={clearLangs}>
+                      {ta("deepResearchClearLangs")}
+                    </Button>
+                  </div>
+                  <div className="max-h-[min(10rem,30vh)] rounded border border-border bg-card/50 p-1 scrollbar-stable-visible">
+                    <div className="grid grid-cols-2 gap-x-1 gap-y-0">
+                      <label className="col-span-full flex cursor-pointer items-center gap-1.5 border-b border-border/50 pb-1 text-[11px] font-medium hover:bg-muted/40">
+                        <input
+                          ref={selectAllRef}
+                          type="checkbox"
+                          className="size-3 shrink-0 rounded border-border"
+                          checked={allSelected}
+                          onChange={() => {
+                            if (isFirst24) {
+                              clearLangs();
+                            } else {
+                              selectFirst24();
+                            }
+                          }}
+                        />
+                        <span className="leading-tight">{ta("deepResearchLangCheckboxAll")}</span>
+                      </label>
+                      {langOptions.map(({ code, label }) => (
+                        <label
+                          key={code}
+                          className="flex min-w-0 cursor-pointer items-center gap-1 rounded px-0.5 py-0 text-[10px] hover:bg-muted/50"
+                        >
+                          <input
+                            type="checkbox"
+                            className="size-3 shrink-0 rounded border-border"
+                            checked={deepLangs.has(code)}
+                            onChange={() => toggleDeepLang(code)}
+                          />
+                          <span className="min-w-0 truncate" title={`${label} (${code})`}>
+                            {label} <span className="text-muted-foreground">({code})</span>
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                type="button"
+                className="h-8 w-full rounded-lg text-xs font-semibold shadow-sm"
+                onClick={runDeep}
+                disabled={deepMutation.isPending}
+              >
+                {deepMutation.isPending ? tCommon("loading") : ta("deepResearchCta")}
+              </Button>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -232,21 +554,20 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const searchParams = useSearchParams();
   const router = useRouter();
 
+  const splitParam = searchParams.get("split");
   const splitOn =
-    searchParams.get("split") === "1" ||
-    searchParams.get("split") === "true" ||
-    searchParams.get("layout") === "split";
+    splitParam === "0" || splitParam === "false"
+      ? false
+      : true;
 
   const chartsWide = searchParams.get("charts") === "wide";
 
   const setSplit = (on: boolean) => {
     const p = new URLSearchParams(searchParams.toString());
     if (on) {
-      p.set("split", "1");
-      p.delete("layout");
-    } else {
       p.delete("split");
-      p.delete("layout");
+    } else {
+      p.set("split", "0");
     }
     const query = Object.fromEntries(p);
     router.push(Object.keys(query).length > 0 ? { pathname: "/compare", query } : "/compare");
@@ -356,7 +677,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const fb = latestFetch(fetchBq.data);
 
   useEffect(() => {
-    if (!splitOn || queries.some((q) => q.isPending) || queries.some((q) => q.isError)) {
+    if (queries.some((q) => q.isPending) || queries.some((q) => q.isError)) {
       return;
     }
     const missingIds: string[] = [];
@@ -384,7 +705,6 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
     bootstrapFetchKeyRef.current = reqKey;
     bootstrapFetchMutation.mutate({ appIds: missingIds, fromDate, toDate });
   }, [
-    splitOn,
     queries,
     fetchAq.data,
     fetchBq.data,
