@@ -1073,8 +1073,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                 className="space-y-2"
               >
                 <div className="min-w-0 space-y-2 rounded-lg border border-white/35 bg-background/55 p-2.5 dark:border-white/10 dark:bg-background/35">
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <div className="space-y-1 sm:col-span-2">
+                  <div className="grid gap-2">
+                    <div className="space-y-1">
                       <Label className="text-xs" htmlFor="deep-date-preset">
                         {tAnalyzeHub("dateRangeLabel")}
                       </Label>
@@ -1104,37 +1104,39 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                         <option value="custom">{t("deepResearchDatePresetCustom")}</option>
                       </SelectNative>
                     </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs" htmlFor="deep-from">
-                        {t("deepResearchDateFromLabel")}
-                      </Label>
-                      <Input
-                        id="deep-from"
-                        type="date"
-                        value={deepFrom}
-                        max={deepTo || undefined}
-                        onChange={(e) => {
-                          setDeepDatePreset("custom");
-                          setDeepFrom(e.target.value);
-                        }}
-                        className="h-9"
-                      />
-                    </div>
-                    <div className="space-y-1">
-                      <Label className="text-xs" htmlFor="deep-to">
-                        {t("deepResearchDateToLabel")}
-                      </Label>
-                      <Input
-                        id="deep-to"
-                        type="date"
-                        value={deepTo}
-                        min={deepFrom || undefined}
-                        onChange={(e) => {
-                          setDeepDatePreset("custom");
-                          setDeepTo(e.target.value);
-                        }}
-                        className="h-9"
-                      />
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs" htmlFor="deep-from">
+                          {t("deepResearchDateFromLabel")}
+                        </Label>
+                        <Input
+                          id="deep-from"
+                          type="date"
+                          value={deepFrom}
+                          max={deepTo || undefined}
+                          onChange={(e) => {
+                            setDeepDatePreset("custom");
+                            setDeepFrom(e.target.value);
+                          }}
+                          className="h-9"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs" htmlFor="deep-to">
+                          {t("deepResearchDateToLabel")}
+                        </Label>
+                        <Input
+                          id="deep-to"
+                          type="date"
+                          value={deepTo}
+                          min={deepFrom || undefined}
+                          onChange={(e) => {
+                            setDeepDatePreset("custom");
+                            setDeepTo(e.target.value);
+                          }}
+                          className="h-9"
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className="space-y-1.5 border-t border-border/50 pt-2">
@@ -1144,7 +1146,6 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                         {deepLangs.size}/{MAX_GLOBAL_FETCH_LANGS}
                       </span>
                     </div>
-                    <p className="text-[11px] leading-snug text-amber-800 dark:text-amber-200">{t("deepResearchLangCapHint")}</p>
                     <div className="flex flex-wrap items-center gap-1.5">
                       <Button type="button" variant="outline" size="sm" className="h-8 text-xs" onClick={selectFirst24DeepLangs}>
                         {t("deepResearchSelectAll24")}

@@ -203,7 +203,7 @@
     "deepResearchInvalidRange": "日期范围无效：结束日期不能早于开始日期。",
     "deepResearchSelectAll24": "建议的 24 种语言",
     "deepResearchClearLangs": "全部清除",
-    "deepResearchLangCheckboxAll": "推荐 24 种 · 再点此清空",
+    "deepResearchLangCheckboxAll": "推荐 24 种",
     "deepResearchPlannedParams": "本次扫描",
     "deepResearchParamRange": "日期范围：{from} → {to}",
     "deepResearchParamLangs": "{count} 种语言：{list}",

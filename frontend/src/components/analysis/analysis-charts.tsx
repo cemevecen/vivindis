@@ -53,6 +53,8 @@ type BlockProps = {
   compact?: boolean;
   /** Analiz sayfası: her grafik ayrı geniş kart. */
   featured?: boolean;
+  /** Force single-column chart grid even when not compact. */
+  singleColumn?: boolean;
 };
 
 function SentimentCard({
@@ -184,7 +186,7 @@ function TopicsCard({
   );
 }
 
-function ChartBlock({ title, analysis, labels, compact = false, featured = false }: BlockProps) {
+function ChartBlock({ title, analysis, labels, compact = false, featured = false, singleColumn = false }: BlockProps) {
   if (!analysis) {
     return (
       <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
@@ -220,7 +222,7 @@ function ChartBlock({ title, analysis, labels, compact = false, featured = false
   const ratings = ratingsFromResult(result);
   const topics = topicsFromResult(result, 8);
   const score = overallScoreFromResult(result);
-  const chartH = compact ? 200 : 200;
+  const chartH = compact ? 200 : 260;
   const pieR = compact ? 44 : 70;
   const useFeatured = featured && !compact;
 
@@ -252,14 +254,14 @@ function ChartBlock({ title, analysis, labels, compact = false, featured = false
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:p-5">
       {header}
-      <div className={compact ? "grid grid-cols-1 gap-4" : "grid gap-6 lg:grid-cols-3"}>
-        <div className={compact ? "min-h-[220px]" : "min-h-[220px]"}>
+      <div className={compact || singleColumn ? "grid grid-cols-1 gap-4" : "grid gap-6 lg:grid-cols-3"}>
+        <div className="min-h-[220px]">
           <SentimentCard sentiment={sentiment} labels={labels} chartH={chartH} pieR={pieR} featured={false} />
         </div>
-        <div className={compact ? "min-h-[220px]" : "min-h-[220px] lg:col-span-1"}>
+        <div className="min-h-[220px]">
           <RatingsDistCard ratings={ratings} labels={labels} chartH={chartH} featured={false} />
         </div>
-        <div className={compact ? "min-h-[220px]" : "min-h-[220px] lg:col-span-1"}>
+        <div className="min-h-[220px]">
           <TopicsCard topics={topics} labels={labels} chartH={chartH} featured={false} />
         </div>
       </div>
@@ -279,6 +281,11 @@ type Props = {
    * Karşılaştırma (splitPane) ile birlikte kullanılmaz.
    */
   stackAiBelow?: boolean;
+  /**
+   * Override card compactness independently from splitPane layout.
+   * When undefined, defaults to the splitPane value.
+   */
+  compactCards?: boolean;
 };
 
 export function AnalysisCharts({
@@ -288,9 +295,11 @@ export function AnalysisCharts({
   splitPane = false,
   chartLayout = "compact",
   stackAiBelow = false,
+  compactCards,
 }: Props) {
   const { heuristicTitle, aiTitle, ...labels } = chartLabels;
   const featured = chartLayout === "featured" && !splitPane;
+  const useCompact = compactCards ?? splitPane;
 
   if (stackAiBelow && !splitPane) {
     return (
@@ -313,10 +322,11 @@ export function AnalysisCharts({
         title={heuristicTitle}
         analysis={heuristic}
         labels={labels}
-        compact={splitPane}
+        compact={useCompact}
         featured={featured}
+        singleColumn={splitPane}
       />
-      <ChartBlock title={aiTitle} analysis={ai} labels={labels} compact={splitPane} featured={featured} />
+      <ChartBlock title={aiTitle} analysis={ai} labels={labels} compact={useCompact} featured={featured} singleColumn={splitPane} />
     </div>
   );
 }

@@ -135,7 +135,7 @@ function CompareAppSplitPane({
   };
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-4 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:border-e md:last:border-e-0">
+    <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-4 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:max-w-[50%] md:border-e md:last:border-e-0">
       <div className="min-w-0">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
         <h2 className="mt-1 break-words text-lg font-semibold tracking-tight">{app.name}</h2>
@@ -209,7 +209,7 @@ function CompareAppSplitPane({
 
       <section className="space-y-2">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("splitChartsHeading")}</h3>
-        <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane={!wideCharts} />
+        <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane compactCards={!wideCharts} />
       </section>
 
       <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
@@ -537,7 +537,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       </div>
 
       {splitOn ? (
-        <div className="flex min-h-[min(90vh,960px)] min-w-0 flex-col overflow-x-hidden rounded-xl border border-border bg-card/50 md:flex-row md:items-stretch">
+        <div className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card/50 md:flex-row md:items-stretch">
           <CompareAppSplitPane
             title={t("slotA")}
             app={appA}

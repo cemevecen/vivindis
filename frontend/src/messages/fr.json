@@ -203,7 +203,7 @@
     "deepResearchInvalidRange": "Plage invalide : la date de fin doit être après ou égale au début.",
     "deepResearchSelectAll24": "24 langues suggérées",
     "deepResearchClearLangs": "Tout effacer",
-    "deepResearchLangCheckboxAll": "24 suggérées · recliquer pour effacer",
+    "deepResearchLangCheckboxAll": "24 suggérées",
     "deepResearchPlannedParams": "Ce scan",
     "deepResearchParamRange": "Plage de dates : {from} → {to}",
     "deepResearchParamLangs": "{count} langues : {list}",

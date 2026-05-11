@@ -203,7 +203,7 @@
     "deepResearchInvalidRange": "Неверный диапазон: конечная дата не раньше начальной.",
     "deepResearchSelectAll24": "Рекомендуемые 24 языка",
     "deepResearchClearLangs": "Очистить все",
-    "deepResearchLangCheckboxAll": "24 рекоменд. · повторный клик — очистить",
+    "deepResearchLangCheckboxAll": "24 рекоменд.",
     "deepResearchPlannedParams": "Это сканирование",
     "deepResearchParamRange": "Диапазон дат: {from} → {to}",
     "deepResearchParamLangs": "{count} языков: {list}",
