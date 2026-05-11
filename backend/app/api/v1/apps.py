@@ -265,8 +265,9 @@ async def create_fetch(
     await session.flush()
     log.info("review_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
     await session.commit()
-    background_tasks.add_task(
-        _enqueue_review_fetch,
+    # Celery kuyruğunu yanıttan önce senkron tetikle (onay akışıyla aynı); BackgroundTasks
+    # yalnızca yanıt sonrası çalıştığı için ikinci çekimde görevin hiç düşmemesi riskini azaltır.
+    _enqueue_review_fetch(
         str(fetch.id),
         body.review_scope,
         body.lang,
@@ -285,7 +286,6 @@ async def create_marketplace_seller_fetch(
     body: MarketplaceSellerFetchCreate,
     app: Annotated[App, Depends(require_app_owned)],
     session: Annotated[AsyncSession, Depends(get_async_session)],
-    background_tasks: BackgroundTasks,
 ) -> ReviewFetch:
     settings = get_settings()
     if not settings.external_scraper_apify_token.strip():
@@ -307,12 +307,7 @@ async def create_marketplace_seller_fetch(
     await session.flush()
     log.info("marketplace_seller_fetch_created", fetch_id=str(fetch.id), app_id=str(app.id))
     await session.commit()
-    background_tasks.add_task(
-        _enqueue_marketplace_seller_fetch,
-        str(fetch.id),
-        body.seller_url,
-        body.max_sellers,
-    )
+    _enqueue_marketplace_seller_fetch(str(fetch.id), body.seller_url, body.max_sellers)
     return fetch
 
 

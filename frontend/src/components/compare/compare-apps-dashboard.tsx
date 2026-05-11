@@ -320,22 +320,22 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
   const bootstrapFetchMutation = useMutation({
     mutationFn: async (args: { appIds: string[]; fromDate: string; toDate: string }) => {
       const { lang, country } = storeLocaleFromUiLocale(locale);
-      await Promise.all(
-        args.appIds.map((id) =>
-          apiFetch<ReviewFetchDto>(`/api/v1/apps/${id}/fetch`, {
-            method: "POST",
-            body: {
-              from_date: args.fromDate,
-              to_date: args.toDate,
-              review_scope: "local" as const,
-              lang,
-              country,
-              review_limit: 1000,
-            },
-            getToken,
-          }),
-        ),
-      );
+      const body = {
+        from_date: args.fromDate,
+        to_date: args.toDate,
+        review_scope: "local" as const,
+        lang,
+        country,
+        review_limit: 1000,
+      };
+      // Sırayla: aynı anda iki POST + kuyruk tetikleri yarışmasın (backend artık senkron enqueue).
+      for (const id of args.appIds) {
+        await apiFetch<ReviewFetchDto>(`/api/v1/apps/${id}/fetch`, {
+          method: "POST",
+          body,
+          getToken,
+        });
+      }
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.apps.fetches(appIdA) });
