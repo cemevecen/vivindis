@@ -127,9 +127,9 @@ class Settings(BaseSettings):
         description="Apify actor id for TR marketplace seller intelligence.",
     )
     external_scraper_marketplace_reviews_actor: str = Field(
-        default="seralifatih/turkish-e-commerce-review-aggregator",
+        default="shahidirfan/trendyol-reviews-scraper",
         validation_alias="EXTERNAL_SCRAPER_MARKETPLACE_REVIEWS_ACTOR",
-        description="Apify actor id for TR marketplace product reviews (searchQuery flow).",
+        description="Apify actor id for TR marketplace product reviews. Default: shahidirfan/trendyol-reviews-scraper",
     )
     external_scraper_marketplace_review_max_per_product: int = Field(
         default=80,

@@ -29,6 +29,7 @@ from app.services.apify_marketplace_reviews import (
     collect_marketplace_product_urls_from_profile,
     extract_seller_name_from_url,
     normalize_marketplace_url,
+    normalize_review_row,
     run_marketplace_review_aggregator,
 )
 from app.services.apify_marketplace_seller import run_marketplace_seller_intelligence
@@ -1040,40 +1041,36 @@ async def _execute_marketplace_seller_fetch(
 
         from_d = fetch.from_date
         to_d = fetch.to_date
-        for item in review_rows:
-            if not isinstance(item, dict):
+        for raw_item in review_rows:
+            if not isinstance(raw_item, dict):
                 continue
+            # Normalize through canonical mapping first
+            item = normalize_review_row(raw_item)
             if item.get("recordType") == "RUN_SUMMARY" or item.get("type") == "RUN_SUMMARY":
                 continue
-            dv = str(item.get("dataVersion") or "")
-            if "run_summary" in dv.lower():
-                continue
-            if "review" not in dv.lower() and not (item.get("reviewId") or item.get("id")):
-                continue
-            # Support multiple actor output formats (old aggregator vs fatihtahta/abotapi)
-            rid = str(item.get("reviewId") or item.get("id") or "").strip()
+            rid = str(item.get("reviewId") or "").strip()
             if not rid:
                 continue
-            raw_date = item.get("reviewDate") or item.get("createdAt") or item.get("date")
+            raw_date = item.get("reviewDate")
             rd = _parse_marketplace_review_date(raw_date, to_d)
             if rd < from_d or rd > to_d:
                 continue
-            rating_raw = item.get("rating") or item.get("rate") or item.get("starCount")
+            rating_raw = item.get("rating")
             try:
                 rating_int = int(round(float(rating_raw)))
             except (TypeError, ValueError):
                 rating_int = 3
             rating_int = max(1, min(5, rating_int))
             title = str(item.get("title") or "").strip()[:1024] or None
-            body = str(item.get("body") or item.get("comment") or item.get("text") or item.get("reviewText") or "").strip()
+            body = str(item.get("body") or "").strip()
             if not body:
                 body = "(Yorum metni yok)"
             if len(body) > 12000:
                 body = body[:12000]
-            author = str(item.get("reviewerName") or item.get("userFullName") or item.get("author") or "").strip()[:512] or None
-            purl = str(item.get("productUrl") or item.get("sourceUrl") or item.get("url") or "").strip()
+            author = str(item.get("reviewerName") or "").strip()[:512] or None
+            purl = str(item.get("productUrl") or "").strip()
             mplat = str(item.get("platform") or "").strip()[:60] or None
-            hc = item.get("helpfulCount") or item.get("helpfulVoteCount")
+            hc = item.get("helpfulCount")
             try:
                 thumbs = int(hc) if hc is not None else 0
             except (TypeError, ValueError):
