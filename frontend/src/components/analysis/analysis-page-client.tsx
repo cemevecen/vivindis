@@ -1104,8 +1104,8 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                         <option value="custom">{t("deepResearchDatePresetCustom")}</option>
                       </SelectNative>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      <div className="space-y-1">
+                    <div className="flex gap-2">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <Label className="text-xs" htmlFor="deep-from">
                           {t("deepResearchDateFromLabel")}
                         </Label>
@@ -1121,7 +1121,7 @@ export function AnalysisPageClient({ appId, fetchId, clerkEnabled }: Props) {
                           className="h-9"
                         />
                       </div>
-                      <div className="space-y-1">
+                      <div className="min-w-0 flex-1 space-y-1">
                         <Label className="text-xs" htmlFor="deep-to">
                           {t("deepResearchDateToLabel")}
                         </Label>

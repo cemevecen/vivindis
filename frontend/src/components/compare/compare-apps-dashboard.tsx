@@ -444,8 +444,8 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
                       <option value="custom">{ta("deepResearchDatePresetCustom")}</option>
                     </SelectNative>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="space-y-1">
+                  <div className="flex gap-2">
+                    <div className="min-w-0 flex-1 space-y-1">
                       <Label className="text-[11px]" htmlFor={`deep-from-${appId}`}>
                         {ta("deepResearchDateFromLabel")}
                       </Label>
@@ -461,7 +461,7 @@ function CompareDeepResearchPanel({ appId, fetchRow }: { appId: string; fetchRow
                         className="h-8 text-xs"
                       />
                     </div>
-                    <div className="space-y-1">
+                    <div className="min-w-0 flex-1 space-y-1">
                       <Label className="text-[11px]" htmlFor={`deep-to-${appId}`}>
                         {ta("deepResearchDateToLabel")}
                       </Label>
