@@ -178,8 +178,8 @@ function AnalyzeHubConnected() {
   const [compareHitB, setCompareHitB] = useState<StoreSearchResultItem | null>(null);
   const [comparePlatformA, setComparePlatformA] = useState<SearchPlatform>("google_play");
   const [comparePlatformB, setComparePlatformB] = useState<SearchPlatform>("google_play");
-  const [compareReviewScopeA, setCompareReviewScopeA] = useState<ReviewScope>("local");
-  const [compareReviewScopeB, setCompareReviewScopeB] = useState<ReviewScope>("local");
+  const compareReviewScopeA: ReviewScope = "local";
+  const compareReviewScopeB: ReviewScope = "local";
   const [compareRegistryAppA, setCompareRegistryAppA] = useState<AppDto | null>(null);
   const [compareRegistryAppB, setCompareRegistryAppB] = useState<AppDto | null>(null);
   const [compareQuickPickExpanded, setCompareQuickPickExpanded] = useState(true);
@@ -2570,16 +2570,6 @@ function AnalyzeHubConnected() {
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                  <SegmentedTwo
-                    ariaLabel={t("reviewScopeLabel")}
-                    left={t("reviewScopeLocal")}
-                    right={t("reviewScopeGlobal")}
-                    value={compareReviewScopeA === "local" ? "left" : "right"}
-                    onChange={(v) => setCompareReviewScopeA(v === "left" ? "local" : "global")}
-                  />
-                </div>
                 <Input
                   value={compareDraftA}
                   onChange={(e) => setCompareDraftA(e.target.value)}
@@ -2778,16 +2768,6 @@ function AnalyzeHubConnected() {
                       {t("compareColumnReset")}
                     </Button>
                   </div>
-                </div>
-                <div className="space-y-2">
-                  <span className="block text-sm font-medium text-foreground">{t("reviewScopeLabel")}</span>
-                  <SegmentedTwo
-                    ariaLabel={t("reviewScopeLabel")}
-                    left={t("reviewScopeLocal")}
-                    right={t("reviewScopeGlobal")}
-                    value={compareReviewScopeB === "local" ? "left" : "right"}
-                    onChange={(v) => setCompareReviewScopeB(v === "left" ? "local" : "global")}
-                  />
                 </div>
                 <Input
                   value={compareDraftB}
