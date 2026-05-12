@@ -13,11 +13,9 @@ from functools import lru_cache
 from typing import Annotated, Any
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 
-from app.api.deps import get_current_user
 from app.core.logging import get_logger
-from app.models.user import User
 from app.schemas.store_search import StoreSearchResponse, StoreSearchResultItem
 from app.services import app_store_catalog
 
@@ -200,7 +198,6 @@ async def _app_store_search_async(
 
 @router.get("/search", response_model=StoreSearchResponse)
 async def search_stores(
-    current_user: Annotated[User, Depends(get_current_user)],
     q: Annotated[str, Query(min_length=2, max_length=200)],
     platform: Annotated[str, Query(pattern="^(google_play|app_store|both)$")],
     lang: Annotated[str, Query(min_length=2, max_length=8)] = "tr",
@@ -208,8 +205,7 @@ async def search_stores(
     num: Annotated[int, Query(ge=1, le=50)] = 20,
     offset: Annotated[int, Query(ge=0, le=500)] = 0,
 ) -> StoreSearchResponse:
-    """Google Play, App Store veya her ikisinde uygulama arar."""
-    _ = current_user
+    """Google Play, App Store veya her ikisinde uygulama arar (oturum gerekmez)."""
     query = q.strip()
     if len(query) < 2:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Query too short.")

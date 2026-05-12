@@ -271,12 +271,19 @@ async def _scrape_google_play(
 
     # Safety net: if shard model yields 0 (often due transient Play throttling),
     # fallback to low-pressure baseline scraping without score filter.
+    # IMPORTANT: honour global_langs so we don't pull unwanted languages (e.g. Turkish
+    # when only German+Arabic were requested).
     if budget.used == 0:
-        fallback_locales = (
-            [(req_lang or "tr", req_country or "tr")]
-            if review_scope == "local"
-            else [(req_lang or "tr", req_country or "tr"), ("tr", "tr"), ("en", "us")]
-        )
+        if review_scope == "local":
+            fallback_locales = [(req_lang or "tr", req_country or "tr")]
+        else:
+            requested = {x.strip().lower() for x in (global_langs or []) if x and x.strip()}
+            if requested:
+                fallback_locales = [
+                    pair for pair in PLAY_STORE_MATRIX if pair[0] in requested
+                ][:6]
+            else:
+                fallback_locales = [(req_lang or "tr", req_country or "tr"), ("tr", "tr"), ("en", "us")]
         unique_locales = list(dict.fromkeys(fallback_locales))
         for variant in pkg_variants:
             await _scrape_google_play_baseline(

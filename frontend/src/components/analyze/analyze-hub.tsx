@@ -271,9 +271,9 @@ function AnalyzeHubConnected() {
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
         `/api/v1/store/search?q=${encodeURIComponent(activeQuery)}&platform=${platform}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=${catalogFetchNum}&offset=${catalogBackendOffset}`,
-        { getToken },
+        isSignedIn ? { getToken } : {},
       ),
-    enabled: activeQuery.length >= 2 && Boolean(isSignedIn),
+    enabled: activeQuery.length >= 2,
   });
 
   const searchQueryA = useQuery({
@@ -281,9 +281,9 @@ function AnalyzeHubConnected() {
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
         `/api/v1/store/search?q=${encodeURIComponent(activeCompareA)}&platform=${comparePlatformA}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12&offset=0`,
-        { getToken },
+        isSignedIn ? { getToken } : {},
       ),
-    enabled: activeCompareA.length >= 2 && Boolean(isSignedIn),
+    enabled: activeCompareA.length >= 2,
   });
 
   const searchQueryB = useQuery({
@@ -291,9 +291,9 @@ function AnalyzeHubConnected() {
     queryFn: () =>
       apiFetch<StoreSearchResponse>(
         `/api/v1/store/search?q=${encodeURIComponent(activeCompareB)}&platform=${comparePlatformB}&lang=${encodeURIComponent(searchLang)}&country=${encodeURIComponent(searchCountry)}&num=12&offset=0`,
-        { getToken },
+        isSignedIn ? { getToken } : {},
       ),
-    enabled: activeCompareB.length >= 2 && Boolean(isSignedIn),
+    enabled: activeCompareB.length >= 2,
   });
 
   const appsQuery = useQuery({
