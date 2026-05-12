@@ -91,13 +91,11 @@ function CompareAppSplitPane({
   app,
   fetchRow,
   analysisItems,
-  wideCharts,
 }: {
   title: string;
   app: AppDto;
   fetchRow: ReviewFetchDto | undefined;
   analysisItems: AnalysisDto[];
-  wideCharts: boolean;
 }) {
   const t = useTranslations("compare");
   const ta = useTranslations("analysis");
@@ -160,7 +158,7 @@ function CompareAppSplitPane({
   const hasCompletedAnalysis = Boolean(heuristic || ai);
 
   return (
-    <div className="flex min-h-0 min-w-0 flex-1 basis-0 flex-col gap-4 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:max-w-[50%] md:border-e md:last:border-e-0">
+    <div className="flex min-w-0 flex-1 basis-0 flex-col gap-3 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:max-w-[50%] md:border-e md:last:border-e-0">
       <div className="min-w-0">
         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
         <h2 className="mt-1 break-words text-lg font-semibold tracking-tight">{app.name}</h2>
@@ -237,9 +235,9 @@ function CompareAppSplitPane({
 
       {fetchRow ? <CompareSplitReviewsSection appId={app.id} fetchRow={fetchRow} /> : null}
 
-      <section className="space-y-2">
+      <section className="space-y-3">
         <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("splitChartsHeading")}</h3>
-        <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane compactCards={!wideCharts} />
+        <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane compactCards />
       </section>
 
       <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
@@ -572,25 +570,12 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       ? false
       : true;
 
-  const chartsWide = searchParams.get("charts") === "wide";
-
   const setSplit = (on: boolean) => {
     const p = new URLSearchParams(searchParams.toString());
     if (on) {
       p.delete("split");
     } else {
       p.set("split", "0");
-    }
-    const query = Object.fromEntries(p);
-    router.push(Object.keys(query).length > 0 ? { pathname: "/compare", query } : "/compare");
-  };
-
-  const setChartsWide = (wide: boolean) => {
-    const p = new URLSearchParams(searchParams.toString());
-    if (wide) {
-      p.set("charts", "wide");
-    } else {
-      p.delete("charts");
     }
     const query = Object.fromEntries(p);
     router.push(Object.keys(query).length > 0 ? { pathname: "/compare", query } : "/compare");
@@ -842,47 +827,21 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
           </div>
           <p className="text-xs text-muted-foreground sm:max-w-xl">{t("splitViewHint")}</p>
         </div>
-        {splitOn ? (
-          <div className="flex flex-col gap-2 rounded-lg border border-border bg-muted/30 p-3 sm:flex-row sm:flex-wrap sm:items-center">
-            <span className="text-xs font-medium text-foreground">{t("chartsLayoutLabel")}</span>
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                size="sm"
-                variant={!chartsWide ? "default" : "outline"}
-                onClick={() => setChartsWide(false)}
-              >
-                {t("chartsLayoutCompact")}
-              </Button>
-              <Button
-                type="button"
-                size="sm"
-                variant={chartsWide ? "default" : "outline"}
-                onClick={() => setChartsWide(true)}
-              >
-                {t("chartsLayoutWide")}
-              </Button>
-            </div>
-            <p className="text-xs text-muted-foreground sm:ml-2 sm:max-w-md">{t("chartsLayoutHint")}</p>
-          </div>
-        ) : null}
       </div>
 
       {splitOn ? (
-        <div className="flex min-w-0 flex-col overflow-hidden rounded-xl border border-border bg-card/50 md:flex-row md:items-stretch">
+        <div className="flex min-w-0 flex-col rounded-xl border border-border bg-card/50 md:flex-row md:items-start">
           <CompareAppSplitPane
             title={t("slotA")}
             app={appA}
             fetchRow={fa}
             analysisItems={anaAq.data?.items ?? []}
-            wideCharts={chartsWide}
           />
           <CompareAppSplitPane
             title={t("slotB")}
             app={appB}
             fetchRow={fb}
             analysisItems={anaBq.data?.items ?? []}
-            wideCharts={chartsWide}
           />
         </div>
       ) : (

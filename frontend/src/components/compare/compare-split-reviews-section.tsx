@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { ChevronDown } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
@@ -34,6 +35,7 @@ export function CompareSplitReviewsSection({ appId, fetchRow }: Props) {
   const tApps = useTranslations("apps");
   const tCommon = useTranslations("common");
   const { getToken } = useAuth();
+  const [open, setOpen] = useState(false);
   const [reviewFilter, setReviewFilter] = useState<"all" | "positive" | "neutral" | "negative">("all");
   const [reviewSort, setReviewSort] = useState<"newest" | "oldest" | "rating_desc" | "rating_asc">("newest");
 
@@ -94,102 +96,104 @@ export function CompareSplitReviewsSection({ appId, fetchRow }: Props) {
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card p-3 shadow-sm">
-      <div className="mb-2 flex flex-wrap items-start justify-between gap-2">
-        <div>
+    <section className="rounded-lg border border-border bg-card shadow-sm">
+      <button
+        type="button"
+        className="flex w-full items-center justify-between gap-2 p-3 text-left hover:bg-muted/30"
+        onClick={() => setOpen((o) => !o)}
+      >
+        <div className="min-w-0">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("splitReviewsHeading")}</h3>
           <p className="text-xs text-muted-foreground">
-            {ta("reviewsLoadedMeta", {
-              loaded: flat.length,
-              total,
-              visible: visible.length,
-            })}
+            {ta("reviewsLoadedMeta", { loaded: flat.length, total, visible: visible.length })}
           </p>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">{t("splitReviewsFilterHint")}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <select
-            value={reviewFilter}
-            onChange={(e) => setReviewFilter(e.target.value as typeof reviewFilter)}
-            className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-            aria-label={ta("reviewsFilterAria")}
-          >
-            <option value="all">{ta("filterAll")}</option>
-            <option value="positive">{ta("filterPositive")}</option>
-            <option value="neutral">{ta("filterNeutral")}</option>
-            <option value="negative">{ta("filterNegative")}</option>
-          </select>
-          <select
-            value={reviewSort}
-            onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
-            className="rounded-md border border-border bg-background px-2 py-1 text-xs"
-            aria-label={ta("reviewsSortAria")}
-          >
-            <option value="newest">{ta("sortNewest")}</option>
-            <option value="oldest">{ta("sortOldest")}</option>
-            <option value="rating_desc">{ta("sortRatingDesc")}</option>
-            <option value="rating_asc">{ta("sortRatingAsc")}</option>
-          </select>
-        </div>
-      </div>
+        <ChevronDown className={cn("size-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180")} />
+      </button>
 
-      {q.isPending && flat.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{tCommon("loading")}</p>
-      ) : visible.length === 0 && !q.isFetching ? (
-        <p className="text-xs text-muted-foreground">
-          {fetchRow.status === "completed" && total === 0 ? ta("noReviewsForFetch") : t("splitReviewsEmpty")}
-        </p>
-      ) : (
-        <div className="max-h-[min(320px,45vh)] space-y-2 overflow-y-auto pr-1">
-          {visible.map((row, idx) => (
-            <article key={row.id} className="rounded-md border border-border bg-muted/20 p-2.5">
-              <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
-                <p className="inline-flex items-center gap-1.5">
-                  <span className="tabular-nums text-muted-foreground/80">#{idx + 1}</span>
-                  <span
-                    className={cn(
-                      "inline-flex size-1.5 shrink-0 rounded-full",
-                      reviewTone(row.rating) === "positive"
-                        ? "bg-emerald-500"
-                        : reviewTone(row.rating) === "negative"
-                          ? "bg-red-500"
-                          : "bg-muted-foreground/45",
-                    )}
-                    aria-hidden
-                  />
-                  <span>{ta("reviewCardRating", { rating: row.rating })}</span>
-                </p>
-                <p className="shrink-0">{row.review_date}</p>
-              </div>
-              <p className="mt-0.5 text-[10px] text-muted-foreground">
-                {row.author
-                  ? ta("reviewCardReviewer", { name: row.author })
-                  : ta("reviewCardReviewerUnset")}
-              </p>
-              <p className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground/80">
-                {row.platform === "google_play" ? tApps("platformGooglePlay") : tApps("platformAppStore")}
-              </p>
-              {row.title ? <p className="mt-1 line-clamp-2 text-xs font-medium">{row.title}</p> : null}
-              <p className="mt-1 line-clamp-4 whitespace-pre-wrap text-xs leading-snug">{row.body}</p>
-            </article>
-          ))}
-        </div>
-      )}
+      {open ? (
+        <div className="space-y-2 border-t border-border px-3 pb-3 pt-2">
+          <p className="text-[11px] text-muted-foreground">{t("splitReviewsFilterHint")}</p>
+          <div className="flex flex-wrap gap-2">
+            <select
+              value={reviewFilter}
+              onChange={(e) => setReviewFilter(e.target.value as typeof reviewFilter)}
+              className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+              aria-label={ta("reviewsFilterAria")}
+            >
+              <option value="all">{ta("filterAll")}</option>
+              <option value="positive">{ta("filterPositive")}</option>
+              <option value="neutral">{ta("filterNeutral")}</option>
+              <option value="negative">{ta("filterNegative")}</option>
+            </select>
+            <select
+              value={reviewSort}
+              onChange={(e) => setReviewSort(e.target.value as typeof reviewSort)}
+              className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+              aria-label={ta("reviewsSortAria")}
+            >
+              <option value="newest">{ta("sortNewest")}</option>
+              <option value="oldest">{ta("sortOldest")}</option>
+              <option value="rating_desc">{ta("sortRatingDesc")}</option>
+              <option value="rating_asc">{ta("sortRatingAsc")}</option>
+            </select>
+          </div>
 
-      {flat.length > 0 && q.hasNextPage ? (
-        <div className="mt-2">
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            className="w-full sm:w-auto"
-            disabled={q.isFetchingNextPage}
-            onClick={() => void q.fetchNextPage()}
-          >
-            {q.isFetchingNextPage
-              ? tCommon("loading")
-              : ta("expandShowMore", { count: Math.min(PAGE_SIZE, total - flat.length) })}
-          </Button>
+          {q.isPending && flat.length === 0 ? (
+            <p className="text-xs text-muted-foreground">{tCommon("loading")}</p>
+          ) : visible.length === 0 && !q.isFetching ? (
+            <p className="text-xs text-muted-foreground">
+              {fetchRow.status === "completed" && total === 0 ? ta("noReviewsForFetch") : t("splitReviewsEmpty")}
+            </p>
+          ) : (
+            <div className="max-h-[min(240px,35vh)] space-y-2 overflow-y-auto pr-1">
+              {visible.map((row, idx) => (
+                <article key={row.id} className="rounded-md border border-border bg-muted/20 p-2.5">
+                  <div className="flex items-center justify-between gap-2 text-[11px] text-muted-foreground">
+                    <p className="inline-flex items-center gap-1.5">
+                      <span className="tabular-nums text-muted-foreground/80">#{idx + 1}</span>
+                      <span
+                        className={cn(
+                          "inline-flex size-1.5 shrink-0 rounded-full",
+                          reviewTone(row.rating) === "positive"
+                            ? "bg-emerald-500"
+                            : reviewTone(row.rating) === "negative"
+                              ? "bg-red-500"
+                              : "bg-muted-foreground/45",
+                        )}
+                        aria-hidden
+                      />
+                      <span>{ta("reviewCardRating", { rating: row.rating })}</span>
+                    </p>
+                    <p className="shrink-0">{row.review_date}</p>
+                  </div>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    {row.author ? ta("reviewCardReviewer", { name: row.author }) : ta("reviewCardReviewerUnset")}
+                  </p>
+                  <p className="mt-0.5 text-[10px] uppercase tracking-wide text-muted-foreground/80">
+                    {row.platform === "google_play" ? tApps("platformGooglePlay") : tApps("platformAppStore")}
+                  </p>
+                  {row.title ? <p className="mt-1 line-clamp-2 text-xs font-medium">{row.title}</p> : null}
+                  <p className="mt-1 line-clamp-3 whitespace-pre-wrap text-xs leading-snug">{row.body}</p>
+                </article>
+              ))}
+            </div>
+          )}
+
+          {flat.length > 0 && q.hasNextPage ? (
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="w-full sm:w-auto"
+              disabled={q.isFetchingNextPage}
+              onClick={() => void q.fetchNextPage()}
+            >
+              {q.isFetchingNextPage
+                ? tCommon("loading")
+                : ta("expandShowMore", { count: Math.min(PAGE_SIZE, total - flat.length) })}
+            </Button>
+          ) : null}
         </div>
       ) : null}
     </section>

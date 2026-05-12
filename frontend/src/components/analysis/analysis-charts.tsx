@@ -222,8 +222,8 @@ function ChartBlock({ title, analysis, labels, compact = false, featured = false
   const ratings = ratingsFromResult(result);
   const topics = topicsFromResult(result, 8);
   const score = overallScoreFromResult(result);
-  const chartH = compact ? 200 : 260;
-  const pieR = compact ? 44 : 70;
+  const chartH = compact ? 240 : 260;
+  const pieR = compact ? 56 : 70;
   const useFeatured = featured && !compact;
 
   const header = (
@@ -254,16 +254,10 @@ function ChartBlock({ title, analysis, labels, compact = false, featured = false
   return (
     <section className="space-y-4 rounded-2xl border border-border bg-card/50 p-4 shadow-sm md:p-5">
       {header}
-      <div className={compact || singleColumn ? "grid grid-cols-1 gap-4" : "grid gap-6 lg:grid-cols-3"}>
-        <div className="min-h-[220px]">
-          <SentimentCard sentiment={sentiment} labels={labels} chartH={chartH} pieR={pieR} featured={false} />
-        </div>
-        <div className="min-h-[220px]">
-          <RatingsDistCard ratings={ratings} labels={labels} chartH={chartH} featured={false} />
-        </div>
-        <div className="min-h-[220px]">
-          <TopicsCard topics={topics} labels={labels} chartH={chartH} featured={false} />
-        </div>
+      <div className={compact || singleColumn ? "grid grid-cols-1 gap-3" : "grid gap-6 lg:grid-cols-3"}>
+        <SentimentCard sentiment={sentiment} labels={labels} chartH={chartH} pieR={pieR} featured={false} />
+        <RatingsDistCard ratings={ratings} labels={labels} chartH={chartH} featured={false} />
+        <TopicsCard topics={topics} labels={labels} chartH={chartH} featured={false} />
       </div>
     </section>
   );
