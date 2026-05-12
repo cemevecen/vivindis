@@ -157,93 +157,77 @@ function CompareAppSplitPane({
 
   const hasCompletedAnalysis = Boolean(heuristic || ai);
 
+  const statusLabel = fetchRow
+    ? fetchRow.status === "waiting_approval"
+      ? tApps("statusWaitingApproval")
+      : fetchRow.status === "pending"
+        ? tApps("statusPending")
+        : fetchRow.status === "running"
+          ? tApps("statusRunning")
+          : fetchRow.status === "completed"
+            ? tApps("statusCompleted")
+            : tApps("statusFailed")
+    : tApps("statusPending");
+
   return (
-    <div className="flex min-w-0 flex-1 basis-0 flex-col gap-3 overflow-y-auto overflow-x-hidden border-border p-3 sm:p-4 md:max-w-[50%] md:border-e md:last:border-e-0">
-      <div className="min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
-        <h2 className="mt-1 break-words text-lg font-semibold tracking-tight">{app.name}</h2>
-        <p className="mt-1 break-all font-mono text-xs text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
+    <div className="flex min-w-0 flex-1 basis-0 flex-col overflow-y-auto overflow-x-hidden border-border md:max-w-[50%] md:border-e md:last:border-e-0">
+      {/* ── Header: app name + status badge ── */}
+      <div className="flex items-start justify-between gap-3 border-b border-border bg-muted/30 p-3 sm:p-4">
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{title}</p>
+          <h2 className="mt-0.5 break-words text-base font-semibold leading-snug tracking-tight">{app.name}</h2>
+          <p className="mt-0.5 break-all font-mono text-[11px] text-muted-foreground">{app.package_name || app.bundle_id || "—"}</p>
+        </div>
+        <div className="shrink-0 text-right">
+          <span className={cn("inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium", fetchRow ? statusClass(fetchRow.status) : "bg-muted text-muted-foreground")}>
+            {statusLabel}
+          </span>
+          {fetchRow && fetchRow.status !== "waiting_approval" && fetchRow.status !== "pending" && fetchRow.status !== "running" ? (
+            <p className="mt-1 text-[11px] tabular-nums text-muted-foreground">{fetchRow.review_count} {tApps("reviews").toLowerCase()}</p>
+          ) : null}
+          {busy ? <p className="mt-1 text-[11px] text-sky-600 dark:text-sky-400">{ta("analyzing")}</p> : null}
+        </div>
       </div>
 
-      <section className="rounded-lg border border-border bg-muted/20 p-3">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <span className="text-xs font-medium text-foreground">{t("splitFetchStatusHeading")}</span>
-          {fetchRow ? (
-            <span
-              className={cn(
-                "inline-flex rounded-full px-2 py-0.5 text-xs font-medium",
-                statusClass(fetchRow.status),
-              )}
-            >
-              {fetchRow.status === "waiting_approval"
-                ? tApps("statusWaitingApproval")
-                : fetchRow.status === "pending"
-                  ? tApps("statusPending")
-                  : fetchRow.status === "running"
-                    ? tApps("statusRunning")
-                    : fetchRow.status === "completed"
-                      ? tApps("statusCompleted")
-                      : tApps("statusFailed")}
-            </span>
-          ) : (
-            <span className="inline-flex animate-pulse rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-              {tApps("statusPending")}
-            </span>
-          )}
-        </div>
-        {fetchRow && fetchRow.status !== "waiting_approval" && fetchRow.status !== "pending" && fetchRow.status !== "running" ? (
-          <p className="mt-2 text-xs text-muted-foreground">
-            {tApps("reviews")}: {fetchRow.review_count}
-          </p>
-        ) : null}
-        {fetchRow?.status === "failed" && fetchRow.error_message ? (
-          <p className="mt-2 text-xs text-destructive">{fetchRow.error_message}</p>
-        ) : null}
-        {busy ? (
-          <p className="mt-2 text-xs text-sky-600 dark:text-sky-400">{ta("analyzing")}</p>
-        ) : null}
-      </section>
-
+      {/* ── Action buttons ── */}
       {hasCompletedAnalysis || fetchRow?.status === "completed" ? (
-        <div className="flex w-full min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap">
+        <div className="flex flex-wrap gap-2 border-b border-border px-3 py-2 sm:px-4">
           {hasCompletedAnalysis ? (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="w-full sm:w-auto"
+              className="h-7 text-xs"
               disabled={!fetchRow || fetchRow.status !== "completed" || busy || analyzeMutation.isPending}
               onClick={() => analyzeMutation.mutate()}
             >
               {analyzeMutation.isPending ? ta("runAnalysisBusy") : ta("runAnalysis")}
             </Button>
           ) : null}
-          {fetchRow?.status === "completed" ? (
-            <Link
-              href={{
-                pathname: "/apps/[id]/analysis",
-                params: { id: app.id },
-                query: { fetchId: fetchRow.id },
-              }}
-              className={cn(buttonVariants({ variant: "outline", size: "sm" }), "w-full justify-center sm:w-auto")}
-            >
-              {ta("viewAnalytics")}
-            </Link>
-          ) : null}
+          <Link
+            href={{ pathname: "/apps/[id]/analysis", params: { id: app.id }, query: fetchRow ? { fetchId: fetchRow.id } : {} }}
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-7 text-xs")}
+          >
+            {ta("viewAnalytics")}
+          </Link>
+          <Link
+            href={{ pathname: "/apps/[id]", params: { id: app.id } }}
+            className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-7 text-xs")}
+          >
+            {tApps("detailTitle")}
+          </Link>
         </div>
       ) : null}
 
-      {fetchRow ? <CompareSplitReviewsSection appId={app.id} fetchRow={fetchRow} /> : null}
+      {/* ── Main content: charts first, reviews below ── */}
+      <div className="flex-1 space-y-4 p-3 sm:p-4">
+        {fetchRow?.status === "failed" && fetchRow.error_message ? (
+          <p className="rounded-md border border-destructive/30 bg-destructive/5 p-2 text-xs text-destructive">{fetchRow.error_message}</p>
+        ) : null}
 
-      <section className="space-y-3">
-        <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t("splitChartsHeading")}</h3>
         <AnalysisCharts heuristic={heuristic} ai={ai} chartLabels={chartLabels} splitPane compactCards />
-      </section>
 
-      <div className="mt-auto flex flex-wrap gap-2 border-t border-border pt-4">
-        <Link href={{ pathname: "/apps/[id]", params: { id: app.id } }} className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}>
-          {tApps("detailTitle")}
-        </Link>
+        {fetchRow ? <CompareSplitReviewsSection appId={app.id} fetchRow={fetchRow} /> : null}
       </div>
     </div>
   );
@@ -830,7 +814,7 @@ function CompareAppsDashboardAuthed({ appIdA, appIdB }: { appIdA: string; appIdB
       </div>
 
       {splitOn ? (
-        <div className="flex min-w-0 flex-col rounded-xl border border-border bg-card/50 md:flex-row md:items-start">
+        <div className="flex min-w-0 flex-col rounded-xl border border-border bg-card/50 md:min-h-[600px] md:flex-row md:items-stretch">
           <CompareAppSplitPane
             title={t("slotA")}
             app={appA}
